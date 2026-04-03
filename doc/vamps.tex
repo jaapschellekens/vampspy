@@ -15,8 +15,8 @@
 
 \sloppy 
 % Vamps version and status
-\newcommand{\vampsversion}{{\tt 0.99c}}
-\newcommand{\vampsstatus}{{\tt Alpha}}
+\newcommand{\vampsversion}{{\tt 1.0}}
+\newcommand{\vampsstatus}{{\tt Stable}}
 
 % New page style definitions
 %\pagestyle{fancyplain}
@@ -76,8 +76,9 @@
 \newcommand{\dirname}[1]{{\tt #1}\index{#1}}
 
 \title{\vamps, a Vegetation-AtMosphere-Plant-Soil water model}
-\author{J. Schellekens\\ {\tt schj@geo.vu.nl}\\ 
-For version: \vampsversion\ \vampsstatus{}}
+\author{J. Schellekens}
+
+\date{Version \vampsversion\ (\vampsstatus{}) --- April 2026}
 
 
 
@@ -85,6 +86,22 @@ For version: \vampsversion\ \vampsstatus{}}
 \begin{document}
 \bibliographystyle{dcu}
 \maketitle
+
+\section*{Note on version 1.0}
+
+Since version~1.0 the S-Lang scripting engine has been replaced by embedded
+CPython.  User scripts are now plain Python~3 files hooked in via
+\texttt{[vamps] xtrapy = myscript.py}.  The S-Lang intrinsics described
+in the remainder of this manual are no longer available.
+
+A Python package \texttt{vampspy} is provided for driving \vamps{} entirely
+from Python --- no subprocess invocation, no temporary files.  It supports
+single-column runs (via \texttt{Model.run()} or \texttt{Model.run\_stepwise()})
+and parallel multi-column / 2-D grid runs (\texttt{Model.run\_grid()}).
+See \texttt{docs/vampspy\_interface.md} in the source tree for the full API
+reference and \texttt{notebooks/} for worked examples.
+
+Source and issue tracker: \url{https://github.com/jaapschellekens/vampspy}
 {\small
 \begin{verbatim}
 /* Copyright   (C)   1996 Jaap Schellekens.     This   program is free

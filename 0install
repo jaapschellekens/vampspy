@@ -1,81 +1,83 @@
-QUICK installation instructions for VAMPS
+Quick installation instructions for VAMPS
+==========================================
 
-NOTE!---------------------------------------------------------------------
-If you have the plot, slang or agl lib nstalled in a non standard dir set the
-environment variable LDFLAGS to the dir so configure can find them. (ex:
-setenv LDFLAGS -L/home/user/bob/lib.sun) By default vamps is installed in
-/usr/local if your uid < 10 and in ~/ if not.  If an old version of vamps is
-found the directory just below that will be used as basedir. If you want
-something else use the --prefix=/some/prefix option when running configure.
+Requirements
+------------
+  - ANSI C compiler (gcc >= 4 or Apple clang)
+  - GNU make
+  - Python >= 3.9 with development headers (python3-config must be on PATH)
+  - NumPy (pip install numpy)
+  - termcap or ncurses (for interactive binary mode; optional for vampspy use)
 
-If you trust the optimizations your compiler makes set the
-environment variable CFLAGS to include them as it can speed up
-Vamps quite a lot.
+On macOS (Homebrew):
+  brew install python
 
-(ex: setenv CFLAGS "-O3 -m486 -funroll-loops") <- works fine on my
-						  linux box
---------------------------------------------------------------------------
-
+On Debian/Ubuntu:
+  apt install gcc make python3-dev
 
 
-Source distribution
--------------------------------------------------------------------------
-Requirements:
-	GNU make
-	ANSI C compiler
+Source build
+------------
 
-1)Run the configure script. It is experimental at present but will replace
-make.in eventually to comply with GNU standards You may want to edit
-vconfig.h and sllib/site.sl
+1. Run configure to detect your platform and generate vconfig.h:
 
-2)If you don't have S-Lang installed on your system, you should build
-this first. It is located in the slang.99 dir. Just run configure and
-build it.  Optionally install the AGL the gnu plotutils library and
-programs and/or gnuplot. This way Vamps can display graphics. It will
-work fine without.
+     cd src
+     ./configure
 
-3)Do a 'make lib' followed by a 'make all'
+   Optional: set CFLAGS for optimisation before configure:
+     export CFLAGS="-O3 -ffast-math"    # typical flags; adjust for your compiler
 
-4)If this works a 'make install' should be enough to have vamps installed on
-your system.
+2. Build the static libraries and binaries:
 
-5)The manual pages can be installed by doing a make 'man-install' in the
-doc/ directory. The complete manual is in this directory in LaTeX and
-PostScript format. 6)Test vamps by running one of the examples. running
-'vamps example1.inp' in the examples/1/ directory should do the trick.
+     make all
+
+   This builds five libraries (libdef.a, libnru.a, libmaq.a, libts.a, libmet.a)
+   into libDarwin_arm64/ (or the OS-appropriate sibling directory) and then
+   compiles the two executables in src/:
+
+     vamps  — main simulation binary
+     vsel   — time-series extraction utility
+
+3. Install system-wide (optional; requires write access to /usr/local):
+
+     make install
+
+   Or set PATH to include src/ for local use.
+
+4. Set VAMPSLIB to point to the Python library files:
+
+     export VAMPSLIB=/path/to/vamps/share
+     # or, from the source tree:
+     export VAMPSLIB=$(pwd)/share
+
+5. Install the vampspy Python package (builds the _vampscore C extension):
+
+     pip install -e .
+
+   This compiles the entire C source tree with -DVAMPS_EXT_BUILD (which
+   suppresses the standalone main() and dotail()) and links it into a
+   Python extension module vampspy/_vampscore.so.
 
 
+Quick test
+----------
 
-Bin distribution
---------------------------------------------------------------------------
-UNIX
+   cd examples/fiji
+   vamps fiji.inp                  # binary test
+   python fiji.py                  # vampspy Python test
 
-1)Copy the files in the 'your_unix_system' directory to a directory in your
-path (or leave them where they are and adjust the path).
 
-2)if you copy the files in share to the dir used when building the
-binaries, vamps can run without the VAMPSLIB environment variable,
-otherwise you will have to set VAMPSLIB to the directory in which the
-files are installed (e.g.  /usr/local/lib/vamps/)
+Man pages
+---------
 
-3)The manual pages can be installed by doing a 'make man-install' in
-the doc/ directory. The complete manual can be found in this directory
-in LaTeX and PostScript format.
+   make man-install    (run from doc/)
 
-4)Take vamps for a quick testrun by running vamps on the example1.inp file
-in the examples/1 directory
+   Or copy doc/man/vamps.1 and doc/man/vamps.5 to your man path manually.
 
-MS-DOS (poorly supported at present)
 
-1)Copy the files from the msdos directory to a directory in your path (or
-leave them were they are and adjust the path).
+Clean
+-----
 
-2)If you copy the files in sllib to c:\vamps vamps can run without the
-VAMPSLIB environment variable, otherwise you will have to set VAMPSLIB to
-the directory in which the files are installed (e.g. d:\vamps\lib)
+   make -C src clean          # remove object files
+   make -C src distclean      # remove object files, libraries and vconfig.h
 
-3)Preformatted manual pages are present in the doc directory as well as
-complete documentation in LaTeX and PostScript format.
-
-4)Take vamps for a quick testrun by running vamps on the example1.inp file
-in the examples\1 directory 

@@ -1,104 +1,90 @@
            vamps - a Vegetation-AtMosPhere-Soil water model
 
-                         Version 0.99i (beta)
-			
-			    J. Schellekens
+                         Version 1.0
 
-			   Vrije Universiteit
-			Amsterdam, The Netherlands
-			
-		International Institute for Tropical Forestry 
-			Rio Piedras, Puerto Rico
+                            J. Schellekens
 
 
+WHAT IS VAMPS
+~~~~~~~~~~~~~
 
-WHAT IS VAMPS 
-~~~~~~~~~~~~~ 
+Vamps is a one-dimensional model for the flow of water through a forested
+or agricultural ecosystem.  The core of vamps is a Richards-equation solver
+for unsaturated flow through the soil, derived from the SWAP94 model.  It
+supports arbitrarily sized and variable timesteps — for example one year of
+daily steps with selected days at 15-minute resolution.
 
-Vamps is a one dimensional model for describing the flow of water
-through a forested ecosystem.  The main part of vamps is the module that
-calculates the unsaturated flow of water through the soil by solving
-Richard's equation.  This part is derived from the swap94 model. vamps
-can handle time-steps of arbitrary size and they can change in a run. You
-could run one year using daily time-steps but have one day of that year
-(in which you might have detailed measurements) using smaller steps, 15
-minutes steps for example. Because vamps includes the S-Lang stack-based
-interpreted language as a language for extension it can be customized to
-most applications. Users can change functions for ones that better suite
-a specific situation without recompiling the program. Also vamps can be
-run in an interactive mode in which variables can be studied at almost
-each step in the modeling.  A running program can be stopped and forced
-into interactive mode and then started again.  A start has been made with
-the addition of an optimizing routine to the model. This routine uses
-marquardt non-linear regression.  Parts of Vamps are derived from slash
-(S-Lang Application Shell). Slash was written by Raymond Venneker with
-some parts written by Jaap Schellekens.
+The canopy water balance (interception, transpiration, soil evaporation) is
+handled by the topsys module.  Several canopy modes are available, ranging
+from bare-soil to full Penman-Monteith with Gash interception.
+
+Since version 1.0 the scripting engine is Python (CPython embedded in the
+binary).  Users can hook custom functions into a run via [vamps] xtrapy in
+the configuration file.  S-Lang, used in versions prior to 1.0, has been
+removed.
+
+
+PYTHON API — vampspy
+~~~~~~~~~~~~~~~~~~~~~
+
+The vampspy package lets you drive VAMPS entirely from Python with no
+subprocess or temporary files.  It provides:
+
+  Model.from_file(path)         — load a .inp config file
+  Model(config, forcing)        — build a model from Python dicts and arrays
+  model.run()                   — whole-run (C drives the timestep loop)
+  model.run_stepwise()          — Python drives the outer timestep loop;
+                                  inspect or modify state between steps
+  model.run_grid(forcing_grid)  — parallel multi-column / 2-D grid run;
+                                  accepts (ncols, steps) or (ny, nx, steps)
+                                  forcing arrays, uses shared-memory IPC
+
+Build and install:
+
+  cd src && ./configure
+  pip install -e .
+  export VAMPSLIB=/path/to/vamps/share
+
+See docs/vampspy_interface.md for the full API and
+notebooks/ for worked examples including a 1000-cell grid run.
 
 
 DISTRIBUTION
 ~~~~~~~~~~~~
 
-Vamps is distributed with full source code it has been tested  (and
-should compile) on systems running SunOS 5.5.*, FreeBSD 2.2.5 and
-RedHat-Linux 4.0--5.1. Other unix systems are untested but should work
-as well.
+Vamps is distributed with full source code.  It has been tested on:
 
-Because of the limited testing that has been done with vamps vamps will
-remain in beta for a while. It is fully functional but probably not
-completely bug free and some features still lack. However, the
-biggest problem is the documentation ;-)
+  macOS (arm64, x86_64) with Apple clang
+  Linux (x86_64, arm64) with gcc
 
+Source: https://github.com/jaapschellekens/vampspy
 
 
 SYSTEM REQUIREMENTS
 ~~~~~~~~~~~~~~~~~~~
 
-If you are not in a hurry a 386sx MS-DOS based computer is the minimum you
-need for running vamps. As most calculations are done with floating point
-numbers, a 387 co-processors will speed up thing a lot. djgpp compiled
-programs (a MS-DOS port of gcc) should run with 512 Kb of memory, although
-1Mb should be considered a minimum. You need some disk space as well.  The
-vamps binary does not use a lot of it, but your input (and certainly output)
-data will probably by the biggest users of disk space. You also need
-the S-lang library installed if you want to recompile the program.  (The
-S-Lang library can be found at ftp://space.mit.edu/pub/davis/slang).
+  C compiler: gcc or clang (C99)
+  GNU make
+  Python 3.9 or later (with development headers; python3-config on PATH)
+  NumPy (for vampspy)
 
-Vamps has some graphics abilities if you have one or several of the following
-programs/libraries installed. Low level S-Lang functions are library dependent
-but some library independent functions can be found in plot.sl (type '?plot'
-from the vamps prompt. The show_plotsys commands show the graphics
-possibilities of your version of vamps). The following list give the options in
-order of preference:
+termcap or ncurses is required only for the interactive binary mode.
 
-	1 gnuplot (preferably 3.7 or  3.6 beta). 
-	  a special character in interactive
-	  mode will allow you to use gnuplot commands from within vamps. Type
-	  '?plt' or '?#' from the vamps prompt to get extra information)
-	  This is somewhere between octave's and fudgit's gnuplot interface
-	  (if you happen to know these programs).
 
-	2 AGL - a free cross-platform graphics library available via ftp at:
-	         sisifo.arcetri.astro.it:pub/agl
-	  If it is found by configure a S-Lang interface to the library will
-	  be compiled and linked.
+QUICK START
+~~~~~~~~~~~
 
-	3 GNU plotutils library - S-Lang intrinsics
+  cd src
+  ./configure
+  make all
+  export VAMPSLIB=/path/to/vamps/share
+  cd ../examples/fiji
+  vamps fiji.inp
 
-	4 GNU plotutils library - external plot-* programs
 
 FEEDBACK
 ~~~~~~~~
 
-Bug reports or general comments on vamps and its workings are appreciated.
-You can send them to:
+Bug reports and comments are welcome via the GitHub issue tracker:
 
-J. Schellekens
-Faculteit der Aardwetenschappen
-Vrije Universiteit
-de Boelenlaan 1085
-1081 HV Amsterdam
-The Netherlands
-tel: +31 20 4447364
-e-mail: schj@geo.vu.nl or schj@xs4all.nl
-
-Also check http://flow.geo.vu.nl for additional information and updates.
+  https://github.com/jaapschellekens/vampspy/issues

@@ -7,7 +7,9 @@ from Python:
 | Interface | How it works | When to use |
 |-----------|-------------|-------------|
 | `vampspy._vampscore.run()` | C extension, **in-process**, no files | Fast repeated runs, parameter studies |
-| `vampspy.Model` | High-level class; uses C extension when available, subprocess otherwise | General use, portability |
+| `vampspy.Model.run()` | High-level class; uses C extension when available, subprocess otherwise | General use, portability |
+| `vampspy.Model.run_stepwise()` | Python drives the outer timestep loop | Inspect or modify state between steps |
+| `vampspy.Model.run_grid()` | Parallel multi-column / 2-D grid run | Spatial grids, batch parameter sweeps |
 
 ---
 
@@ -245,9 +247,141 @@ print(f"Final volact: {result['volact'][-1]:.3f} cm")
 print(f"Theta shape:  {result['theta'].shape}")
 ```
 
+### `Model.run_stepwise()`
+
+```python
+result = model.run_stepwise(firststep=1.0)
+```
+
+Python owns the outer timestep loop.  For each step the method calls
+`_vampscore.soil_step(i)` (C canopy + Richards solver) then collects state
+via `_vampscore.soil_state_current()`.  The result dict is identical in
+structure to `run()`.
+
+Use this when you need to inspect or modify simulation state between external
+timesteps — e.g. to implement lateral redistribution between soil columns or
+to feed model output back into the forcing of the next step.
+
+Requires the `_vampscore` C extension.
+
+### `Model.run_grid()`
+
+```python
+result = model.run_grid(
+    forcing_grid,           # dict[str, ndarray] — values shape (ncols, steps)
+                            #   or (ny, nx, steps) for a 2-D geographic grid
+    nworkers=None,          # int — worker processes (default: os.cpu_count())
+    chunk_size=None,        # int — columns per task (default: ncols//(nworkers*4))
+    firststep=1.0,
+)
+```
+
+Runs the 1-D solver for many independent soil columns in parallel using
+`multiprocessing` with POSIX shared memory.  All columns share the same
+soil profile configuration (`self.config`); each receives its own forcing
+time series.
+
+**Data flow:**
+
+1. Forcing is packed once into a shared-memory block `(nvars, ncols, steps)`.
+   Workers read column slices as numpy views — no IPC copying.
+2. Result blocks (scalars, profiles) are pre-allocated in shared memory.
+   Workers write directly into them.
+3. After all workers finish the parent copies results to ordinary numpy arrays
+   and closes/unlinks the shared-memory blocks.
+
+**Return value** — same keys as `run()`, with spatial dimensions prepended:
+
+| Key | Shape (2-D grid example) |
+|-----|--------------------------|
+| Scalars (`volact`, `SMD`, …) | `(ny, nx, steps)` |
+| Profiles (`theta`, `k`, `h`, …) | `(ny, nx, steps, nlayers)` |
+| `q`, `inq` | `(ny, nx, steps, nlayers+1)` |
+| `gwl` | `(ny, nx, steps, 2)` |
+| `_steps`, `_nlayers` | `int` |
+
+```python
+import numpy as np
+from vampspy.model import Model
+
+m = Model.from_file('examples/fiji/fiji.inp', vampslib='share')
+
+NY, NX = 25, 40   # 1000-cell grid
+forcing_grid = {k: np.tile(v, (NY, NX, 1)) for k, v in m.forcing.items()}
+
+result = m.run_grid(forcing_grid, nworkers=4)
+print(result['volact'].shape)   # (25, 40, 61)
+print(result['theta'].shape)    # (25, 40, 61, 77)
+```
+
+See `notebooks/grid_1000_cells.ipynb` for a full worked example with spatially
+varied precipitation, spatial maps, time-series comparisons, and scaling
+benchmarks.
+
 ---
 
-## 3. Forcing variables
+## 3. Low-level stepwise API — `_vampscore`
+
+These functions are used internally by `Model.run_stepwise()` but can also be
+called directly for maximum control.
+
+```python
+from vampspy import _vampscore
+
+# Initialise once
+_vampscore.soil_init(ini_text, forcing, firststep)
+nlayers = _vampscore.soil_nlayers()
+
+# Python timestep loop
+for i in range(steps):
+    _vampscore.soil_step(i)           # C canopy + Richards solver
+    s = _vampscore.soil_state_current()  # → dict of scalars + profiles
+    # s keys: t, volact, SMD, qtop, qbot, avgtheta,
+    #         cumprec, cumtra, cumeva, cumintc, masbal,
+    #         precipitation, interception, transpiration, soilevaporation,
+    #         theta, k, h, q, inq, qrot, howsat, gwl, _nlayers
+```
+
+### `soil_step_direct(pre, intc=0.0, ptra=0.0, peva=0.0, rdp=0.0)`
+
+Like `soil_step(i)` but accepts per-step forcing scalars directly instead of
+reading from the registered forcing arrays.  **Bypasses the C canopy
+(`tstep_top`) — the caller is responsible for any canopy calculation.**
+
+```python
+_vampscore.soil_step_direct(
+    pre=0.5,    # net precipitation at soil surface [cm/day]
+    intc=0.0,   # interception [cm/day]
+    ptra=0.3,   # potential transpiration [cm/day]
+    peva=0.05,  # potential soil evaporation [cm/day]
+    rdp=120.0,  # root depth [cm]
+)
+s = _vampscore.soil_state_current()
+```
+
+### `soil_state_current()`
+
+Returns the state after the most recently completed `soil_step()` or
+`soil_step_direct()` call.  No step index is required.
+
+### `soil_get_profiles()`  (via `soil_state_current`)
+
+Profile arrays are included in the `soil_state_current()` return dict:
+
+| Key | Shape | Description |
+|-----|-------|-------------|
+| `theta` | `(nlayers,)` | Volumetric water content |
+| `k` | `(nlayers,)` | Hydraulic conductivity |
+| `h` | `(nlayers,)` | Pressure head |
+| `qrot` | `(nlayers,)` | Root water uptake |
+| `howsat` | `(nlayers,)` | Degree of saturation |
+| `q` | `(nlayers+1,)` | Inter-layer flux |
+| `inq` | `(nlayers+1,)` | Cumulative inter-layer flux |
+| `gwl` | `(2,)` | Groundwater table levels |
+
+---
+
+## 5. Forcing variables
 
 The following variable names are standard in VAMPS.  Not all need to be
 supplied — only those referenced in the `.inp` configuration:
@@ -270,7 +404,7 @@ supplied — only those referenced in the `.inp` configuration:
 
 ---
 
-## 4. Configuration (`config` dict / `.inp` file)
+## 6. Configuration (`config` dict / `.inp` file)
 
 The configuration file uses an INI-style format with section headers
 `[section_name]` and `key = value` pairs.  Arrays are written as
@@ -294,7 +428,7 @@ Key sections:
 
 ---
 
-## 5. Building from source
+## 7. Building from source
 
 ```bash
 cd /path/to/vamps/src
@@ -315,7 +449,7 @@ The `setup.py` compiles the entire VAMPS C source tree (≈ 60 files) with
 
 ---
 
-## 6. Thread safety
+## 8. Thread safety
 
 `vampspy._vampscore.run()` is **not thread-safe**.  VAMPS uses process-wide C
 globals.  If you need parallelism, use `multiprocessing` (separate processes

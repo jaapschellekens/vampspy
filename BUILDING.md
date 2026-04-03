@@ -4,10 +4,11 @@
 
 ### Required
 
-- C compiler: `gcc` (or compatible)
+- C compiler: `gcc` or `clang` (C99)
 - `make`
-- Python 3.8 or later with development headers (`python3-config` must be on `PATH`)
-- `termcap` or compatible library (`-ltermcap`)
+- Python 3.9 or later with development headers (`python3-config` must be on `PATH`)
+- NumPy (`pip install numpy`) — required for the `vampspy` Python package
+- `termcap` or compatible library (`-ltermcap`) — required only for interactive binary mode
 
 On macOS with Homebrew:
 
@@ -120,22 +121,58 @@ def at_end():
 
 ---
 
+## Building and installing the vampspy Python package
+
+`vampspy` is the Python API for VAMPS.  It compiles the full C source tree
+into a Python extension module (`_vampscore.so`) with `-DVAMPS_EXT_BUILD`,
+which suppresses the standalone `main()` and `dotail()` functions.
+
+```sh
+# From the repo root (after ./configure in src/)
+pip install -e .
+```
+
+This produces `vampspy/_vampscore.cpython-*.so` in place.
+
+### Using vampspy
+
+```python
+from vampspy.model import Model
+
+m = Model.from_file('examples/fiji/fiji.inp', vampslib='share')
+
+# Whole-run (C drives the loop)
+result = m.run()
+
+# Python drives the outer timestep loop
+result = m.run_stepwise()
+
+# Parallel 2-D grid run — accepts (ny, nx, steps) forcing arrays
+import numpy as np
+forcing_grid = {k: np.tile(v, (25, 40, 1)) for k, v in m.forcing.items()}
+result = m.run_grid(forcing_grid, nworkers=4)
+# result['volact'].shape → (25, 40, 61)
+# result['theta'].shape  → (25, 40, 61, nlayers)
+```
+
+See `docs/vampspy_interface.md` for the full API reference and `notebooks/`
+for worked examples including a 1000-cell grid run.
+
+---
+
 ## Running the examples
 
 ```sh
 export VAMPSLIB=/path/to/vamps/share
 
-cd examples/1
-vamps example1.inp
+# Binary
+cd examples/fiji && vamps fiji.inp
 
-cd examples/fiji
-vamps fiji.inp
+# Python
+cd examples/fiji && python fiji.py
 
-cd examples/speed
-vamps speed.inp
-
-cd examples/lys
-vamps lys.inp
+# Notebook
+cd notebooks && jupyter notebook grid_1000_cells.ipynb
 ```
 
 ---

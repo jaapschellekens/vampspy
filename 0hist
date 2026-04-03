@@ -265,3 +265,40 @@ Wed Nov 16 08:46:41 MET 2001
 	- version 0.99i, vampsfit additions
 	- updated address and version information since i
 	no longer work at the VU Amsterdam
+
+This is version 1.0
+-------------------
+Mar 2017
+        - Tagged as 1.0 after long period of stability
+
+Mar-Apr 2026  (vampspy Python layer)
+        - Removed S-Lang scripting engine; replaced with embedded CPython
+          (init_py.c, vamps_ext.c).  [vamps] xtrapy = myscript.py hooks
+          at_start / each_step / at_end Python functions into runs.
+
+        - Phase 2: built vampspy Python package with _vampscore C extension
+          for in-process (no subprocess, no temp files) VAMPS runs:
+            _vampscore.run(ini_text, forcing, firststep)
+            _vampscore.soil_init / soil_step / soil_state / soil_nlayers
+            _vampscore.soil_step_direct / soil_state_current
+            _vampscore.soil_get_profiles
+
+        - soil_api.c: per-step C API (vamps_init_stepwise_str,
+          vamps_do_step, vamps_get_state, vamps_get_profiles,
+          vamps_do_step_direct, vamps_get_state_current)
+
+        - vampspy.Model: high-level Python class
+            Model.from_file() parses .inp and loads all forcing time series
+            Model.run()          — whole-run, C-driven loop
+            Model.run_stepwise() — Python-driven outer loop
+            Model.run_grid()     — parallel multi-column / 2-D grid run
+                                   using multiprocessing + POSIX shared memory;
+                                   accepts (ncols, steps) or (ny, nx, steps)
+                                   forcing arrays; results reshaped to match
+
+        - vampspy._grid: shared-memory parallel worker pool
+          Forcing packed once into shared memory (zero IPC copy); worker
+          processes attach by name and write results back into shared blocks.
+          Tested: 1000-cell 25x40 grid, 61 steps, 77 layers — ~10s on 4 cores.
+
+        - Repo moved to https://github.com/jaapschellekens/vampspy

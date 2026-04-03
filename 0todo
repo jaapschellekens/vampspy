@@ -1,50 +1,38 @@
-Whislist/todolist      V A M P S
+Wishlist / todo  —  VAMPS 1.0+
 --------------------------------
 
-Very soon (Before 0.99Beta):
- 
- - change sat example so that is actually works without S-Lang. The
-   filename,1,2 notation is ignored, giving bogus results
+Near term
+---------
+- Move C solver globals into a per-column context struct (vamps_col_t) so
+  that multiple independent columns can run in the same process without
+  multiprocessing overhead.  This is the main blocker for a vectorised
+  Python loop over grid cells.
 
- - rename command line options so that _all_ first chars of long and short
-   options match.
+- Expose vamps_do_step_direct canopy divergence: investigate whether
+  capturing tstep_top outputs and replaying via soil_step_direct
+  is sufficient for full canopy bypass, or whether tstep_top internal
+  state (canopy storage) also needs to be saved/restored.
 
- - streamline logging stuff. S-Lang functions should
-   also use this system
+- Add soil_init / soil_step / soil_state to Model.run_stepwise docstring
+  with a note about which state persists between steps.
 
- - check malloc bugs in maq.lib
+- Silence the C progress table by default when called from Python;
+  add a verbose=True parameter to run(), run_stepwise(), run_grid().
 
- - add priestly Taylor to libmet
- 
- - change Makefile for each lib dir. they should _not_ copy
-   the lib, this should be done in the root makefile
-
- - check en correct bottom boundaries
- 	Only 1, 6, 4 and 5 tested.
-
- - Finish topsys
-
- - decouple water balance calculations from soil module!
-
- - Update utilities and finish manual pages
-
- - calcgwl seems to be shit!? Is it used at all? solved??
-
- - check setup pot evap when canopy is not used! fractions etc
+- Test suite: add pytest-based regression tests for all three execution paths.
 
 
-Longer term (1.0Beta)
+Longer term
+-----------
+- Working macro-pore setup (MPORE stubs in soil/)
 
- - working macro-pore setup
+- Litter interception layer above canopy
 
- - add litter interception (see waterloo programs)
+- Multi-layer canopy (canopy.c scaffolding exists but is incomplete)
 
- - Finish canopy stuff, multilayer
- 
- - refine soil functions to generate _SMOOTH_ and _SOUND_ curves.
-   i.e. no zero's in row that break ts_slopes etc.
+- Priestly-Taylor evapotranspiration option in met.lib
 
+- Lateral flow between grid cells (currently each column is independent)
 
-Very long term (1.0)
+- NetCDF / Zarr output for grid runs
 
- - Graphical shell using Java, wxwin, V or tcl/tk

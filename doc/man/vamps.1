@@ -1,4 +1,4 @@
-.TH vamps 1 "Version VERSION"
+.TH vamps 1 "Version 1.0 (April 2026)"
 .ds -- \-\^\-
 .ds b[ \fR[\|\fP
 .ds b] \fR\|]\fP
@@ -32,43 +32,43 @@ is a one-dimensional model for describing the flow of water through a
 forested ecosystem.
 .B vamps
 has been designed to be flexible and fast. Flexibility allows users to
-adapt the program either by changing parameters in the input file, or
-change S-Lang based functions. Alternatively you can change the source
-code and recompile the program. It is designed to be as fast as I
-could make it without sacrificing reliability because scientist tend
-to solve tomorrows problems with yesterdays hardware. Because I used
-.B vamps
-at the same time as the
-.B TOPOG
-model (a physically based distributed catchment model) 
-.B vamps
-is able to share some of it's input files with
-.BR TOPOG ,
-notable soil tables (see vamps(5) for a description).
+adapt the program by changing parameters in the input file or by hooking
+Python scripts into the run via the
+.B [vamps] xtrapy
+configuration key.
+Alternatively you can change the source code and recompile the program.
+
+.B Note (version 1.0):
+The S-Lang scripting engine present in earlier versions has been replaced by
+embedded CPython.  S-Lang intrinsics and the interactive S-Lang interface
+described later in this page are no longer available.  User scripting is now
+done in Python 3 (see the
+.B PYTHON SCRIPTING
+section below).
+
+A Python package
+.B vampspy
+is provided for driving vamps entirely from Python with no subprocess
+invocation.  It supports single-column runs and parallel 2-D grid runs.
+See
+.I docs/vampspy_interface.md
+in the source tree for the API reference.
 
 As
 .B vamps
 is a complicated model, it needs rather complicated input files.  The
 layout of these files is described in
 .BR vamps (5)
-and in the full manual. Also 
-.B vamps
-contains a S-Lang interpreter and an interface to 
-.B vamps
-specific variables which allows to user to redefine certain functions
-and generally change 
-.B vamps
-behaviour. The S-Lang library and documentation can be found at:
-ftp://space.mit.edu/pub/davis/slang
+and in the full manual.
 
-This manual page describes the 
+This manual page describes the
 .B vamps
-command line options and -- shortly -- the
-.B vamps
-interactive interface. A full manual including a description of the
+command line options.  A full manual including a description of the
 principles behind the
 .B vamps
-model is available in LaTeX and postscript format.
+model is available in LaTeX format in the
+.I doc/
+directory of the source tree.
 
 Input is read from either 
 .IR filename ,
@@ -3064,6 +3064,57 @@ cooperation by :
 .RE
 .PP
 
+.SH PYTHON SCRIPTING
+Since version 1.0,
+.B vamps
+embeds CPython.  A Python script can be hooked into a run by setting
+.B xtrapy
+in the
+.B [vamps]
+section of the input file:
+
+.RS
+.nf
+[vamps]
+xtrapy = myscript.py
+.fi
+.RE
+
+The script is resolved relative to the input file.  It may define any
+combination of the following functions:
+
+.TP
+.B at_start()
+Called once before the first external timestep.
+
+.TP
+.B each_step()
+Called after every external timestep.
+
+.TP
+.B at_end()
+Called after the last timestep.
+
+Import
+.B vamps
+inside the script to access simulation state:
+
+.RS
+.nf
+import vamps
+
+def at_end():
+    vamps.printsum()
+    print(f"CPU: {vamps.cpu():.3f}s")
+.fi
+.RE
+
+For programmatic use from Python (no subprocess), use the
+.B vampspy
+package.  See
+.I docs/vampspy_interface.md
+in the source tree.
+
 .SH SEE ALSO
 .BR vamps (5),
 .BR vsel (1),
@@ -3073,13 +3124,9 @@ cooperation by :
 .SH AUTHOR
 J. Schellekens
 .br
-schj@geo.vu.nl
-.br
-schj@xs4all.nl
-
+https://github.com/jaapschellekens/vampspy
 
 .SH BUGS
-There are quite a lot I suspect. Please report them to me if you
-encounter one. Some bugs might be 'features' as
-.B vamps
-will not always behave very logical ;-).
+Please report bugs via the GitHub issue tracker:
+.br
+https://github.com/jaapschellekens/vampspy/issues

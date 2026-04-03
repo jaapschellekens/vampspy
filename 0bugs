@@ -1,40 +1,32 @@
-List of known BUGS/missing features
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+List of known BUGS / missing features
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-"Calculation" Bugs
-------------------
+Solver
+------
+- Rutter interception not working correctly; use Gash (method=0) for daily steps
 
-- Rutter interception is not working properly
+- Macro-pore flow not implemented (MPORE ifdefs are stubs)
 
-- Gash should only be used for daily input 
+- calcgwl may give incorrect results in some configurations; groundwater
+  table output should be verified against independent estimates
 
 
+Python / vampspy
+----------------
+- vamps_do_step_direct() bypasses the canopy (tstep_top); when replaying
+  captured post-canopy fluxes the results may diverge slightly from
+  vamps_do_step() due to internal canopy state not being reproduced exactly
 
-General Bugs
-------------
+- _vampscore functions are not thread-safe (C globals); use multiprocessing,
+  not threading, for parallel runs (Model.run_grid does this correctly)
 
-- more than one space after a filename in the input file is _not_
-  stripped!
+- soil_state_current() after run_grid probe run consumes one extra soil_init
+  call in the parent process; this is a known minor inefficiency
 
-- the help pager does not work in the msdos version. This means
-  you might have trouble reading help screens longer than 25 lines.
+General
+-------
+- More than one space after a filename in the [ts] section is not stripped
+  (the C parser is strict about whitespace)
 
-- SL-keyboard stuff sometimes failes when switching mode. Use
-  SLang_init_tty; to fix in interactive mode.
-
-- smoothing does not work with tables. Broken completely in >99b
-
-- a sigfpe is generated in the msdos version if the input file
-  cannot be opened.
-
-- Crash if no determine variable is set
-
-- popen never returns NULL and does not set errno
-  fixed by intercepting SIGPIPE and restarting the program. Only
-  tested on UNIX systems.
-
-- the maq stuff can crash very easely (just call maqend with a nonsense
-  argument...)
-
-- warning messages and logging a bit of a mess at the moment  
+- Crash if no [determine] variable is set in the config
 

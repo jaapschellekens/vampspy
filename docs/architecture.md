@@ -15,18 +15,19 @@ block-beta
   columns 1
 
   block:user["User / scripts / notebooks"]
-    A["Model.from_file('run.inp')\nModel(config, forcing)\nresult = model.run_stepwise()"]
+    A["Model.from_file('run.inp')\nModel(config, forcing)\nresult = model.run() / run_stepwise() / run_grid()"]
   end
 
   block:pyapi["vampspy  —  Python API layer"]
     B["model.py\nModel class"]
     C["forcing.py\nload_ts_spec / read_ts"]
     D["_io.py\nparse_inp / write_inp / read_out"]
+    G["_grid.py\nrun_grid() — shared-memory parallel runner"]
   end
 
   block:ext["_vampscore.so  —  Python C extension"]
     E["run()\n(whole-run, backward compat)"]
-    F["soil_init / soil_step / soil_state\n(stepwise API)"]
+    F["soil_init / soil_step / soil_state / soil_nlayers\nsoil_step_direct / soil_state_current\nsoil_get_profiles\n(stepwise API)"]
   end
 
   block:clayer["C core — soil physics"]
@@ -96,6 +97,17 @@ flowchart LR
 
     choice -- yes / run_stepwise --> P3
     choice -- yes / run          --> P2
+    choice -- yes / run_grid     --> P4
+
+    subgraph P4["Path 4 — run_grid()  (parallel columns)"]
+        direction TB
+        p4a["flatten spatial dims → (ncols, steps)"]
+        p4b["pack forcing into shared memory\n(nvars, ncols, steps) float64 block"]
+        p4c["Pool(nworkers, initializer=attach_shm)"]
+        p4d["map(run_chunk, col_ranges)\nper chunk: soil_init → step loop → write shm"]
+        p4e["copy results from shared memory\nreshape back to (*spatial, steps, ...)"]
+        p4a --> p4b --> p4c --> p4d --> p4e
+    end
 ```
 
 ---
@@ -259,14 +271,16 @@ flowchart TD
 graph TD
     init["vampspy/__init__.py\nexports: Model, forcing"]
 
-    init --> model["vampspy/model.py\nModel\n  .from_file()\n  .run()\n  .run_stepwise()\n  ._run_core()\n  ._run_subprocess()"]
+    init --> model["vampspy/model.py\nModel\n  .from_file()\n  .run()\n  .run_stepwise()\n  .run_grid()\n  ._run_core()\n  ._run_subprocess()"]
 
     init --> forcing["vampspy/forcing.py\nread_ts()\nread_ts_timed()\nload_ts_spec()\nload_forcing_dir()"]
 
     model --> io["vampspy/_io.py\nparse_inp()\nparse_out()\nwrite_inp()\nwrite_ts()\nread_out()"]
 
     model --> forcing
-    model --> core["vampspy/_vampscore.so\nrun()\nsoil_init()\nsoil_step()\nsoil_state()\nsoil_nlayers()"]
+    model --> grid["vampspy/_grid.py\nrun_grid()\n_worker_init()\n_worker_chunk()\n(shared-memory parallel runner)"]
+    model --> core["vampspy/_vampscore.so\nrun()\nsoil_init() / soil_step() / soil_state()\nsoil_step_direct() / soil_state_current()\nsoil_get_profiles() / soil_nlayers()"]
+    grid --> core
 
     core --> capi["src/main/soil_api.c\nvamps_init_stepwise()\nvamps_do_step()\nvamps_get_state()\nvamps_get_theta()\nvamps_get_profiles()\nvamps_nlayers()"]
 
@@ -355,3 +369,68 @@ flowchart LR
     M1 --> LUT["Look-up tables\n(mktable=1 in [soil])\nfilltab.c pre-computes\nθ(h), K(h), dθ/dh\nfor speed"]
     M0 --> LUT
 ```
+
+---
+
+## 11. Parallel grid runner (_grid.py)
+
+`Model.run_grid()` runs the 1-D solver for many independent soil columns in
+parallel.  Each column shares the same soil profile configuration but receives
+its own forcing time series.  The outer spatial dimension can be 1-D (batch)
+or 2-D (geographic grid).
+
+```mermaid
+sequenceDiagram
+    participant Py   as Python<br/>Model.run_grid()
+    participant SHM  as Shared Memory<br/>(POSIX shm_open)
+    participant Pool as multiprocessing.Pool<br/>N worker processes
+    participant W    as Worker Process<br/>_worker_chunk()
+    participant Core as _vampscore.so<br/>(per-process copy)
+
+    Py  ->> Py   : probe run (col 0) → nlayers, profile sizes
+    Py  ->> SHM  : allocate forcing block   (nvars × ncols × steps) float64
+    Py  ->> SHM  : allocate result blocks   scalars, theta, k, h, q, inq, qrot, howsat, gwl
+    Py  ->> SHM  : pack forcing arrays (zero copy after this)
+
+    Py  ->> Pool : Pool(nworkers, initializer=_worker_init, initargs=(cfg,))
+    Note over Pool: each worker attaches to SHM blocks by name<br/>stores numpy views — no further copying
+
+    Py  ->> Pool : pool.map(_worker_chunk, [(0,250),(250,500),...])
+
+    loop Per chunk assigned to this worker
+        Pool ->> W : (col_start, col_end)
+        loop Per column in chunk
+            W   ->> SHM  : read forcing[:,col,:] as view
+            W   ->> Core : soil_init(ini_text, forcing_col, firststep)
+            loop Per timestep
+                W ->> Core : soil_step(i)
+                W ->> Core : soil_state_current() → scalars + profiles
+                W ->> SHM  : write scalars_arr[col,i,:] and profile_arr[col,i,:]
+            end
+        end
+    end
+
+    Pool -->> Py : (all chunks done)
+    Py  ->> SHM  : copy results to ordinary numpy arrays
+    Py  ->> SHM  : close + unlink all shared-memory blocks
+    Py  -->> Py  : reshape (*spatial, steps, ...) and return dict
+```
+
+### Memory layout
+
+| Block | Shape | Size (1000 cols, 61 steps, 77 layers, 6 vars) |
+|-------|-------|------|
+| Forcing | `(nvars, ncols, steps)` | 6 × 1000 × 61 × 8 B ≈ **18 MB** |
+| Scalars | `(ncols, steps, 15)` | 1000 × 61 × 15 × 8 B ≈ **7 MB** |
+| theta / k / h / qrot / howsat | `(ncols, steps, nlayers)` each | 1000 × 61 × 77 × 8 B ≈ **36 MB** each |
+| q / inq | `(ncols, steps, nlayers+1)` each | ≈ **37 MB** each |
+| gwl | `(ncols, steps, 2)` | ≈ **1 MB** |
+
+Total shared memory for a 1000-cell / 77-layer run: **≈ 310 MB**.
+
+### Thread safety
+
+`_vampscore.so` uses process-wide C globals — it is not thread-safe.
+`run_grid` uses `multiprocessing` (separate processes each with their own
+address space and their own copy of the C globals), which is safe.
+Do not use Python `threading` with `_vampscore`.
