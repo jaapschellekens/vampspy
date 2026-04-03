@@ -31,7 +31,7 @@ soilparmt *sp = NULL;		/* array of soil structs */
 node_t *node = NULL;		/* array of soil nodes */
 int initprof = 0;		/* swinco in swatr see intial() */
 int speed = 3;			/* ranges from 1 to 5*/
-int mktab = 0;			/* make look-up table or not */
+int mktab = 1;			/* make look-up table or not */
 
 /* See src91/headcalc.f for source */
 /* These are alle the new gloabal vars needed */

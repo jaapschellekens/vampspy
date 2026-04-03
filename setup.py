@@ -23,11 +23,15 @@ except ImportError:
 ROOT = os.path.dirname(os.path.abspath(__file__))
 SRC  = os.path.join(ROOT, "src")
 
+def _src(*parts):
+    """Return a path relative to setup.py (required by setuptools ≥ 72)."""
+    return os.path.relpath(os.path.join(ROOT, *parts))
+
 # ---------------------------------------------------------------------------
 # Source files — everything the solver needs, minus main() (guarded by
 # VAMPS_EXT_BUILD) and minus init_py.c (Python embedding not needed here).
 # ---------------------------------------------------------------------------
-UTIL  = [os.path.join(SRC, "util", f) for f in [
+UTIL  = [_src("src", "util", f) for f in [
     "dataset.c", "mktable.c", "output.c", "progress.c", "memory.c",
     "resamp.c", "perror.c", "pro_mesg.c",
     "utout.c",   # print* helpers (printfl, printint, printar …) used by
@@ -36,36 +40,36 @@ UTIL  = [os.path.join(SRC, "util", f) for f in [
     #          are guarded with #ifndef VAMPS_EXT_BUILD in vamps.c),
     #          smoothar.c (no call sites in codebase)
 ]]
-MAIN  = [os.path.join(SRC, "main", f) for f in [
+MAIN  = [_src("src", "main", f) for f in [
     "vamps.c", "vamps_ext.c", "soil_api.c",
     # removed: plot.c (gnuplot, CLI only), sigs.c (signal handling, CLI only)
 ]]
-TOPSYS = [os.path.join(SRC, "topsys", f) for f in [
+TOPSYS = [_src("src", "topsys", f) for f in [
     "intopsys.c", "notree.c", "topout.c", "pre_can.c", "canopy.c",
 ]]
-SOIL  = [os.path.join(SRC, "soil", f) for f in [
+SOIL  = [_src("src", "soil", f) for f in [
     "swatsoil.c", "soilut.c", "array.c", "getparm.c", "alloc.c",
     "smooth.c", "misc_p.c", "filltab.c", "reduceva.c", "det_hatm.c",
     "rootex.c", "setzero.c", "fluxes.c", "calcgwl.c", "band.c",
     "soilboun.c", "headcalc.c", "timestep.c", "integral.c", "soilout.c",
 ]]
-TS_LIB = [os.path.join(SRC, "ts.lib", f) for f in [
+TS_LIB = [_src("src", "ts.lib", f) for f in [
     "ts_com.c", "ts_input.c", "ts_mem.c", "ts_readf.c", "ts_spl.c",
     "ts_time.c",
 ]]
-DEF_LIB = [os.path.join(SRC, "deffile.lib", f) for f in [
+DEF_LIB = [_src("src", "deffile.lib", f) for f in [
     "deffile.c", "fgets.c", "index.c", "memlist.c", "strcmp.c",
 ]]
-MET_LIB = [os.path.join(SRC, "met.lib", f) for f in [
+MET_LIB = [_src("src", "met.lib", f) for f in [
     "e0.c", "eaes.c", "earo.c", "gamma.c", "int.c", "lambda.c",
     "makkink.c", "penmon.c", "ra.c", "rn_open.c", "vslope.c",
 ]]
 MAQ_LIB = []  # marquard.c only used for method=3 which raises Perror; removed from ext build
-NRU_LIB = [os.path.join(SRC, "nr_ut.lib", f) for f in [
+NRU_LIB = [_src("src", "nr_ut.lib", f) for f in [
     "log.c", "nr_free.c", "nr_mat.c", "nr_rw.c", "nr_stat.c",
     "nr_ut.c", "nr_vec.c", "nrutil.c",
 ]]
-EXT_SRC = [os.path.join(ROOT, "vampspy", "_vampscore.c")]
+EXT_SRC = [_src("vampspy", "_vampscore.c")]
 
 sources = (EXT_SRC + MAIN + UTIL + TOPSYS + SOIL +
            TS_LIB + DEF_LIB + MET_LIB + MAQ_LIB + NRU_LIB)
@@ -75,8 +79,8 @@ sources = (EXT_SRC + MAIN + UTIL + TOPSYS + SOIL +
 # ---------------------------------------------------------------------------
 inc_dirs = [
     numpy_inc,
-    os.path.join(SRC, "include"),
-    SRC,
+    _src("src", "include"),
+    _src("src"),
 ]
 
 macros = [
@@ -91,7 +95,7 @@ ext = Extension(
     sources=sources,
     include_dirs=inc_dirs,
     define_macros=macros,
-    extra_compile_args=["-g", "-O2", "-w"],  # -w silences old-code warnings
+    extra_compile_args=["-g", "-O2", "-ffast-math", "-march=native", "-w"],  # -w silences old-code warnings
     extra_link_args=["-lm"],
 )
 

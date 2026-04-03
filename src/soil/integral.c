@@ -57,10 +57,11 @@ integral(int ii)
   for (i=0;i<layers; i++){
 	  rootextract+=qrot[i]*dt;
 	  rootts+=qrot[i]*dt;
-	  if (dodrain){
-		  for (j = 0; j < 3; j++)
+  }
+  if (dodrain){
+	  for (j = 0; j < 3; j++)
+		  for (i=0;i<layers; i++)
 			  cqdra += qdra[j][i];
-	  }
   }
 
   revats = reva *dt;

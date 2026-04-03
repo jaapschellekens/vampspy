@@ -22,7 +22,7 @@ OBJDIR 		= ./objsDarwin_arm64
 VAMPSLIBDIR	= ${prefix}/share/vamps1.0
 mandir		= ${prefix}/share/man
 
-CFLAGS 	= -g -O2
+CFLAGS 	= -g -O2 -ffast-math -march=native
 CC 	= gcc
 OS	= Darwin_arm64
 RM	= rm -f
@@ -32,8 +32,8 @@ LDFLAGS	=  -L${BUILDLIBDIR}
 RANLIB	= ranlib
 INSTALL	= /usr/bin/install -c
 INSTALL_PROGRAM	= $(INSTALL) -c
-PYLIBS	= -L/opt/homebrew/opt/python@3.14/Frameworks/Python.framework/Versions/3.14/lib -Wl,-rpath,/opt/homebrew/opt/python@3.14/Frameworks/Python.framework/Versions/3.14/lib -L/opt/homebrew/opt/python@3.14/Frameworks/Python.framework/Versions/3.14/lib/python3.14/config-3.14-darwin -lpython3.14 -ldl -framework CoreFoundation
-LIBS	= -lmaq -lmet -lts -ldef  -lnru -ltermcap $(PYLIBS) -L/opt/homebrew/opt/python@3.14/Frameworks/Python.framework/Versions/3.14/lib -Wl,-rpath,/opt/homebrew/opt/python@3.14/Frameworks/Python.framework/Versions/3.14/lib -L/opt/homebrew/opt/python@3.14/Frameworks/Python.framework/Versions/3.14/lib/python3.14/config-3.14-darwin -lpython3.14 -ldl -framework CoreFoundation  -lm
+PYLIBS	= -L/Users/jaap/miniforge3/lib -Wl,-rpath,/Users/jaap/miniforge3/lib -L/Users/jaap/miniforge3/lib/python3.13/config-3.13-darwin -lpython3.13 -ldl -framework CoreFoundation
+LIBS	= -lmaq -lmet -lts -ldef  -lnru -ltermcap $(PYLIBS) -L/Users/jaap/miniforge3/lib -Wl,-rpath,/Users/jaap/miniforge3/lib -L/Users/jaap/miniforge3/lib/python3.13/config-3.13-darwin -lpython3.13 -ldl -framework CoreFoundation  -lm
 
 SUBDIR = util main soil topsys 
 #THELIBS = ts.lib/libts.a deffile.lib/libdef.a maq.lib/libmaq.a\

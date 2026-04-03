@@ -85,7 +85,7 @@ rootex (int pt,double drz)
 	  break;
 	case 2:		/* (Prasad) */
 	  a = ptra * 2.0 / fabs (drz);
-	  b = ptra * 2.0 / pow (fabs (drz), 2.0);
+	  b = ptra * 2.0 / (drz * drz);
 	  break;
 	case 3:         /* JS method, no reduction */
 	  break;
