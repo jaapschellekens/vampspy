@@ -27,8 +27,7 @@
  * De Boelelaan 1085                    |       Rio Piedras
  * 1081 HV Amsterdam                    |       Puerto Rico, USA
  * The Netherlands                      |
- * E-mail: schj@geo.vu.nl               |
- * schj@xs4all.nl                       |
+ * E-mail: jaap@ws-fitzcarraldo.nl               |
  * ---------------------------------------------------------------------
  * Parts of this program derived from swap.  The following is taken from
  * the swap fortran code:

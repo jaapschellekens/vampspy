@@ -49,7 +49,7 @@
 #endif
 
 #ifndef EMAIL
-#define EMAIL "schj@xs4all.nl"
+#define EMAIL "jaap@ws-fitzcarraldo.nl"
 #endif
 
 #ifndef ADDRESS
@@ -58,7 +58,7 @@
 \n\tTh. de Bockstr 29 hs\
 \n\t1058 TW Amsterdam\
 \n\tThe Netherlands\
-\n\tE-mail: schj@xs4all.nl"
+\n\tE-mail: jaap@ws-fitzcarraldo.nl"
 #endif
 
 #define CPR " \
@@ -87,6 +87,6 @@ ITF and FUA (see the 0readne file) and the author."
  \t(C) Jaap Schellekens\
  \n\tAmsterdam\
  \n\tThe Netherlands\
- \n\tE-mail: schj@xs4all.nl"
+ \n\tE-mail: jaap@ws-fitzcarraldo.nl"
 
 #endif /* VERSION_H_ */ 
