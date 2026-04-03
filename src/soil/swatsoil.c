@@ -11,7 +11,6 @@ static char RCSid[] =
 #include "vamps.h"
 #include "deffile.h"
 #include "swatsoil.h"
-#include "marquard.h"
 #include "soils.h"
 #include "nrutil.h"
 #ifdef HAVE_LIBPYTHON

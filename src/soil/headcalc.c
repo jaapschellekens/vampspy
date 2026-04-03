@@ -14,7 +14,6 @@ static char RCSid[] =
 #endif
 
 #include "swatsoil.h"
-#include "marquard.h"
 #include "nrutil.h"
 #include <math.h>
 #include <stdlib.h>

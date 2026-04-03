@@ -13,7 +13,6 @@ static char RCSid[] =
 #include "vamps.h"
 #include "deffile.h"
 #include "swatsoil.h"
-#include "marquard.h"
 #include "soils.h"
 extern double estdmc;
 extern double tm_mult;

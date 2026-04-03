@@ -14,7 +14,6 @@
 #include "swatsoil.h"
 #include "vamps.h"
 #include "nrutil.h"
-#include "marquard.h"
 
 
 static double dumm;

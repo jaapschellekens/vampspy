@@ -12,7 +12,6 @@ static  char RCSid[] =
 
 #include "swatsoil.h"
 #include "nrutil.h"
-#include "marquard.h"
 
 
 /*Callocall

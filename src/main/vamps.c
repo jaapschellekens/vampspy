@@ -63,9 +63,6 @@ static char RCSid[] =
 #include "deffile.h"	/* input/output ini-file library */
 #include "vamps.h"
 #define VAMPS
-#ifndef NOMAQ
-#include "marquard.h"
-#endif
 #ifdef TRY_TOPSYS
 #include "../topsys/topsys.h"
 #endif 
