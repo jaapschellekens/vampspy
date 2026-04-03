@@ -1,0 +1,604 @@
+head	1.4;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.4
+date	97.09.09.08.30.36;	author schj;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	97.01.16.14.57.29;	author schj;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	96.11.01.11.00.17;	author schj;	state Alpha;
+branches;
+next	1.1;
+
+1.1
+date	96.10.22.17.45.51;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@vamps main for marquardt fitting
+@
+
+
+1.4
+log
+@Final version should not be needed anymore. see SLang fitting in maq.lib
+@
+text
+@/* $Header: /home/schj/src/vamps_0.99c/src/main/RCS/fit.c,v 1.3 1997/01/16 14:57:29 schj Exp $ */
+/* $RCSfile: fit.c,v $
+*  $Author: schj $
+*  $Date: 1997/01/16 14:57:29 $
+*/
+
+/*
+list of sets that can be fitted:
+qbot
+volact
+avgtheta
+*/
+
+
+#define MAXPAR 10
+/* See soils.h for explanation */
+#define N 1      
+#define ALPHA 2
+#define KSAT 3
+#define B 4
+#define PSISAT 5
+#define L 6
+#define RESIDUAL_WATER 7
+#define THETAS 8
+int fitpar[MAXPAR];
+
+static  char RCSid[] =
+"$Id: fit.c,v 1.3 1997/01/16 14:57:29 schj Exp $";
+
+
+
+#include "vamps.h"
+#include "swatsoil.h"
+#include "soils.h"
+#include "marquard.h"
+#include "deffile.h"
+
+int fitverb=1;
+extern int fitset;
+int fittoset;
+int start;
+int fit = FALSE;
+int nrparm =0; /* number of parameters */
+int fitlay = 0; /* Physical soil layer for fitting parameter,-1 = all */
+char fitsetname[1024], fittosetname[1024];
+int fitpoints; /* Size of the fitting array + miss values */
+
+void getfitparams();
+void update_rv();
+void setparams(double par[]);
+void updateparams(double par[]);
+
+int ttttt=0;
+int
+mainfit(double par[],int mmm, int nnn)
+{
+	int i=0;
+	extern double masbal_old;
+
+	if (Dcanop) 
+		precanop ();
+
+	if (Dsoil)
+		presoil ();
+	
+	cumtop=0.0;
+	cumbot=0.0;
+	cumprec=0.0;
+	cumintc=0.0;
+	cumeva=0.0;
+	cumtra=0.0;
+	masbal =0.0;
+	masbal_old =0.0;
+	runots =0.0;
+	cqdra=0.0;
+	cumdra=0.0;
+	surface_runoff = 0.0;
+	rootextract = 0.0;  
+	/* get length of first timestep (initial to first record )
+		by default this is set to the interval between step 0
+	 and 1*/
+thiststep = getdefdoub ("time", "firststep",data[id.pre].xy[1].x- data[id.pre].xy[0].x, infilename, FALSE);
+
+t = data[id.pre].xy[0].x - thiststep;
+starttime = t;
+endtime = data[id.pre].xy[startpos + steps - 1].x;
+if (ttttt == 0){
+/*  getfitparams(par);*/
+setparams(par);
+	ttttt++;
+}else{
+	updateparams(par);
+}
+
+
+i = 0;
+while (t >= starttime && t < endtime)
+{
+  if (i){
+    thiststep = data[id.pre].xy[i].x - data[id.pre].xy[i - 1].x;
+    if (thiststep <=0.0)
+      Perror(progname,1,RCSid,"Timestep <=0","Check P input data");
+  }
+  utout (&i);
+  if (Dcanop)
+    tstep_ocanop (&i);
+  if (Dsoil)
+	  tstep_soil (i,data[id.pre].xy[i].x,data[id.pre].xy[i].y,data[id.inr].xy[i].y,
+			  data[id.ptr].xy[i].y,data[id.pev].xy[i].y);
+  if (doxtraout)
+    xtraout (i);
+#ifdef HAVE_LIBSLANG
+  if(!noslang)
+    (void)each_step_f(); /* Call the s-lang each_step function */
+#endif
+  /* save the rest */
+  i++;
+  if (!Dsoil) /* we have to increase time*/
+    t+=thiststep;
+}
+update_rv();
+return 0.0;
+}
+
+
+
+
+
+void
+dofit(void)
+{
+int i,check=0;
+/* we need this ine her as-wel  */
+if (Dsoil)
+presoil ();
+
+getfitparams();  
+fitpoints = data[fittoset].points > steps ? steps :data[fittoset].points;
+
+for (start =0; data[id.pre].xy[0].x > data[fittoset].xy[start].x &&
+	start < data[fittoset].points; start++);
+
+for (i = 0; i < steps && check < fitpoints; i++){
+  if (data[id.pre].xy[i].x == data[fittoset].xy[start+check].x){
+      check++;
+  }
+}
+fitpoints = check;
+(void)fprintf(stderr,"Total fitpoints: %d\n",fitpoints);
+
+if (maqinit(&fitpoints,&nrparm))
+	Perror(progname,1,RCSid,"To few points for fitting",""); 
+allfunc = mainfit;
+maqverb = 2;
+prhead();
+Marquardt((long)fitpoints, (long)nrparm,par,rv, jjinv, inp, out);
+prtail();
+maqend(&fitpoints);
+}
+
+void
+getfitparams(void)
+{
+   char s[1024];
+   int i;
+
+   strcpy(fitsetname,getdefstr("fit","fit","NOT FOUND",infilename,TRUE));
+   strcpy(fittosetname,getdefstr("fit","fitto","NOT FOUND",infilename,TRUE));
+   fitlay = getdefint("fit","layer",0,infilename,FALSE);
+   if ((fitset = getsetbyname(fitsetname)) <0 ){
+      Perror(progname,1,RCSid,"Fitset not found:",fitsetname);
+   }
+   /*
+    * Check for fittoset. In the new setup a precipitation
+    */
+   if ((fittoset = getsetbyname ("fittoset")) < 0)
+     {
+	strcpy (s, getdefstr ("ts", fittosetname, "nothing", infilename, FALSE));
+	if (strcmp (s, "nothing") == 0)
+	  Perror (progname, 1, RCSid, "Need fittoset data", "");
+	get_data (s, "fittoset",steps);
+	if (data[0].xy == NULL)
+	  exit(1);
+	fittoset = getsetbyname ("fittoset");
+     }
+   /* No check which parameter we will fit */
+   for (i=0;i<MAXPAR;i++){
+      sprintf(s,"%d",i);
+      fitpar[i]=getdefint("fit",s,-1,infilename,FALSE);
+      if (fitpar[i] >= 0)
+         nrparm++;
+   }
+}
+
+void
+update_rv()
+{
+   int i,check=0;
+
+      for (i = 0; i < steps && check < fitpoints; i++){
+      if (data[id.pre].xy[i].x == data[fittoset].xy[check+start].x){
+	 rv[check] = data[fitset].xy[i].y - data[fittoset].xy[check+start].y;
+	 check++;
+      }
+   }
+   if (check != fitpoints){
+      (void)fprintf(stderr,"Check != fitpoints (%d != %d)\n",check,fitpoints);
+      exit(1);
+   }
+}
+
+
+void
+setparams(double par[])
+{
+   int i;
+   
+   for (i=1; i<=nrparm; i++){
+      switch (fitpar[i-1]){
+       case KSAT:
+	 par[i] = node[fitlay].sp->ksat;
+	 break;
+       case B:
+	 par[i] = node[fitlay].sp->b;
+	 break;
+       case PSISAT:
+	 par[i] = node[fitlay].sp->psisat;
+	 break;
+       case L:
+	 par[i] = node[fitlay].sp->l;
+	 break;	 
+       case RESIDUAL_WATER:
+	 par[i] = node[fitlay].sp->residual_water;
+	 break;
+       case THETAS:
+	 par[i] = node[fitlay].sp->thetas;
+	 break;
+       case N:
+	 par[i] = node[fitlay].sp->n;
+	 break;
+       case ALPHA:
+	 par[i] = node[fitlay].sp->alpha;
+       default:
+	 break;
+      }
+   }
+}
+
+void
+updateparams(double par[])
+{
+  int i,j;
+  double change;
+
+   if(fitverb)
+     (void)fprintf(stderr,"Trying:");
+   
+   for (i=1; i<=nrparm; i++){
+      switch (fitpar[i-1]){
+    case KSAT:
+      node[fitlay].sp->ksat = par[i];
+      break;
+    case B:
+      node[fitlay].sp->b = par[i];
+      break;	 
+    case PSISAT:
+      node[fitlay].sp->psisat = par[i];
+      break;	 
+    case L:
+      node[fitlay].sp->l = par[i];
+      break;	 
+    case RESIDUAL_WATER:
+      node[fitlay].sp->residual_water = par[i];
+      break;	 
+    case THETAS:
+      node[fitlay].sp->thetas = par[i];
+      break;	 
+    case N:
+      change = node[fitlay].sp->n/par[i];
+      node[fitlay].sp->n = par[i];
+      break;
+    case ALPHA:
+      change = node[fitlay].sp->alpha/par[i];
+      node[fitlay].sp->alpha = par[i];
+      break;
+    default:
+      break;
+    }
+     
+     if (fitverb)
+       (void)fprintf(stderr,"\t%f",par[i]);
+	
+    for (j=0;j<layers; j++){
+      if (node[j].rlay == node[fitlay].rlay && j != fitlay)
+	switch (fitpar[i-1]){
+	case KSAT:
+	  node[j].sp->ksat = node[fitlay].sp->ksat;
+	  break;
+	case N:
+	  node[j].sp->n = node[fitlay].sp->n;
+	  break;
+	case ALPHA:
+	  node[j].sp->alpha = node[fitlay].sp->alpha;
+	  break;
+	case B:
+	  node[j].sp->b = node[fitlay].sp->b;
+	  break;	   
+	case PSISAT:
+	  node[j].sp->psisat = node[fitlay].sp->psisat;
+	  break;	   
+	case L:
+	  node[j].sp->l = node[fitlay].sp->l;
+	  break;	   
+	case RESIDUAL_WATER:
+	    node[j].sp->residual_water = node[fitlay].sp->residual_water;
+	  break;	   
+	case THETAS:
+	  node[j].sp->thetas = node[fitlay].sp->thetas;
+	  break;	   
+	default:
+	  break;
+	}
+    }
+   }
+   
+   if(fitverb)
+     (void)fprintf(stderr,"\n");
+}
+
+@
+
+
+1.3
+log
+@changed to new soil setup.
+Broken at the moment!
+@
+text
+@d1 1
+a1 1
+/* $Header: /homes/schj/src/vamps_0.99/src/main/RCS/fit.c,v 1.2 1996/11/01 11:00:17 schj Alpha $ */
+d4 1
+a4 1
+*  $Date: 1996/11/01 11:00:17 $
+d28 1
+a28 1
+"$Id: fit.c,v 1.2 1996/11/01 11:00:17 schj Alpha $";
+d82 1
+a82 1
+thiststep = getdefdoub ("time", "firststep",data[preset].xy[1].x- data[preset].xy[0].x, infilename, FALSE);
+d84 1
+a84 1
+t = data[preset].xy[0].x - thiststep;
+d86 1
+a86 1
+endtime = data[preset].xy[startpos + steps - 1].x;
+d100 1
+a100 1
+    thiststep = data[preset].xy[i].x - data[preset].xy[i - 1].x;
+d106 1
+a106 1
+    tstep_canop (&i);
+d108 2
+a109 1
+    tstep_soil (&i);
+d112 1
+a112 1
+#ifndef NOSLANG
+a133 2
+if (showgraph)
+     showgraph = FALSE; /* NOT during fitting !*/
+d140 1
+a140 1
+for (start =0; data[preset].xy[0].x > data[fittoset].xy[start].x &&
+d144 1
+a144 1
+  if (data[preset].xy[i].x == data[fittoset].xy[start+check].x){
+d181 1
+a181 1
+	get_data (s, "fittoset");
+d201 1
+a201 1
+      if (data[preset].xy[i].x == data[fittoset].xy[check+start].x){
+@
+
+
+1.2
+log
+@Set to Alpha version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/main/RCS/fit.c,v 1.1 1996/10/22 17:45:51 schj Exp $ */
+d4 1
+a4 1
+*  $Date: 1996/10/22 17:45:51 $
+d28 1
+a28 1
+"$Id: fit.c,v 1.1 1996/10/22 17:45:51 schj Exp $";
+d54 2
+a55 2
+double
+mainfit(double par[])
+d57 2
+a58 2
+int i=0;
+extern double masbal_old;
+d60 2
+a61 2
+if (Dsoil)
+presoil ();
+d63 19
+a81 16
+cumtop=0.0;
+cumbot=0.0;
+cumprec=0.0;
+cumintc=0.0;
+cumeva=0.0;
+cumtra=0.0;
+masbal =0.0;
+masbal_old =0.0;
+runots =0.0;
+cqdra=0.0;
+cumdra=0.0;
+surface_runoff = 0.0;
+rootextract = 0.0;  
+/* get length of first timestep (initial to first record )
+ by default this is set to the interval between step 0
+ and 1*/
+d106 1
+a106 1
+    daycanop (&i);
+d108 1
+a108 1
+    daysoil (&i);
+d152 1
+a152 1
+if (maqinit(fitpoints,nrparm))
+d159 1
+a159 1
+maqend(fitpoints);
+d222 1
+a222 1
+	 par[i] = soilparm[fitlay].ksat;
+d225 1
+a225 1
+	 par[i] = soilparm[fitlay].b;
+d228 1
+a228 1
+	 par[i] = soilparm[fitlay].psisat;
+d231 1
+a231 1
+	 par[i] = soilparm[fitlay].l;
+d234 1
+a234 1
+	 par[i] = soilparm[fitlay].residual_water;
+d237 1
+a237 1
+	 par[i] = soilparm[fitlay].thetas;
+d240 1
+a240 1
+	 par[i] = soilparm[fitlay].n;
+d243 1
+a243 1
+	 par[i] = soilparm[fitlay].alpha;
+d262 1
+a262 1
+      soilparm[fitlay].ksat = par[i];
+d265 1
+a265 1
+      soilparm[fitlay].b = par[i];
+d268 1
+a268 1
+      soilparm[fitlay].psisat = par[i];
+d271 1
+a271 1
+      soilparm[fitlay].l = par[i];
+d274 1
+a274 1
+      soilparm[fitlay].residual_water = par[i];
+d277 1
+a277 1
+      soilparm[fitlay].thetas = par[i];
+d280 2
+a281 2
+      change = soilparm[fitlay].n/par[i];
+      soilparm[fitlay].n = par[i];
+d284 2
+a285 2
+      change = soilparm[fitlay].alpha/par[i];
+      soilparm[fitlay].alpha = par[i];
+d295 1
+a295 1
+      if (soilparm[j].rlay == soilparm[fitlay].rlay && j != fitlay)
+d298 1
+a298 1
+	  soilparm[j].ksat = soilparm[fitlay].ksat;
+d301 1
+a301 1
+	  soilparm[j].n = soilparm[fitlay].n;
+d304 1
+a304 1
+	  soilparm[j].alpha = soilparm[fitlay].alpha;
+d307 1
+a307 1
+	  soilparm[j].b = soilparm[fitlay].b;
+d310 1
+a310 1
+	  soilparm[j].psisat = soilparm[fitlay].psisat;
+d313 1
+a313 1
+	  soilparm[j].l = soilparm[fitlay].l;
+d316 1
+a316 1
+	  soilparm[j].residual_water = soilparm[fitlay].residual_water;
+d319 1
+a319 1
+	  soilparm[j].thetas = soilparm[fitlay].thetas;
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 2
+a2 2
+/* $Header: /homes/schj/src/vamps_0.98/src/soil/RCS/integral.c,v 1.16 1996/04/09 12:08:16 schj Exp $ */
+/* $RCSfile: integral.c,v $
+d4 1
+a4 29
+*  $Date: 1996/04/09 12:08:16 $
+*  $Log: integral.c,v $
+*  Revision 1.16  1996/04/09 12:08:16  schj
+*  minor
+*
+*  Revision 1.15  1996/03/24 11:36:06  schj
+*  changed calculation od mass-balance error -- seems to work now
+*
+* Revision 1.14  1996/02/08  08:16:25  schj
+* minor changes
+*
+* Revision 1.13  1996/01/25  15:06:53  schj
+* added surface runoff to mass-bal
+*
+*  Revision 1.12  1995/12/05 03:01:04  schj
+*  checked for ldrainage flow
+*
+*  Revision 1.11  1995/11/14 20:29:16  schj
+*  changed include
+*
+* Revision 1.9  1995/10/19  13:05:57  schj
+* minor changes, this thing needs completion!
+*
+* Revision 1.8  1995/09/23  20:46:22  schj
+* added ifdef DDEBUG
+*
+* Revision 1.7  1995/09/04  11:40:29  schj
+* added log in RCS header
+*
+d28 1
+a28 1
+"$Id: integral.c,v 1.16 1996/04/09 12:08:16 schj Exp $";
+@

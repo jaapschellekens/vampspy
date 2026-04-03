@@ -1,0 +1,395 @@
+head	1.1;
+access;
+symbols;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	97.09.09.08.40.34;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@initial version
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/* $Header: /home/schj/src/vamps_0.99c/src/topsys/RCS/notree.c,v 1.1 1997/04/07 19:43:25 schj Exp $ */
+
+/* $RCSfile: notree.c,v $
+ * $Author: schj $
+ * $Date: 1997/04/07 19:43:25 $ */
+
+/*F:fullcan.c
+ * Canopy module with transpiration and wet canopy evaporation calculated with
+ * the penman-montheith formula. Interception is calculated using rutter.
+ */ 	
+
+#include "topsys.h"
+#include "vamps.h"
+#include "met.h"
+#include "deffile.h"
+
+typedef struct {
+	double storage_initial;
+	double thickness;
+	double rnet;
+	double E_dry;
+	double E_wet;
+	double ra;
+	double rs;
+	double es;
+	double ea;
+	double slope;
+	double gamma;
+	double L;
+	double Cp;
+	double rho;
+	double throughfall;
+	double interception;
+	double transpiration;
+	double stemflow;
+        double actstorage;
+} canopytp;
+
+canopytp	*canop;
+double storage; /* canopy storage */
+double	Rnet_absorb;
+double canopy_layers;
+
+void
+tstep_top_fullcan(int tstep, double *precipitation, double *interception,
+		double *transpiration, double *soilevaporation)
+{
+	*precipitation = data[id.pre].xy[tstep].y;
+	*interception = 0.0;
+	*transpiration = 0.0;
+	*soilevaporation = 0.0;
+}
+
+
+void
+pre_top_fullcan()
+{
+	int pts,i;
+	char s[1024];
+
+	canopy_layers = getdefint ("canopy", "layers", canopy_layers,
+			infilename, TRUE);
+	canop = (canopytp *) ts_memory ((void *) NULL, canopy_layers *
+			sizeof (canopytp), progname);
+	/* set some stuff to zero */
+	for (i=0; i< canopy_layers; i++)
+		canop[i].actstorage = 0.0;
+
+	drytime = getdefdoub ("canopy", "drytime", drytime, infilename, FALSE);
+	showit ("canopy",MESG,"Using fixed canopy drying time",1,verbose);
+	if (Dsoil){
+		(void)add_set (NULL, "spe", "spe", steps, 0, 0);
+		id.spe = getsetbyname("spe");
+	}
+	(void)add_set (NULL, "inr", "inr", steps, 0, 0);
+	(void)add_set (NULL, "sca", "sca", steps, 0, 0);
+	(void)add_set (NULL, "ptr", "ptr", steps, 0, 0);
+	(void)add_set (NULL, "pev", "pev", steps, 0, 0);
+	id.pev = getsetbyname("pev");
+	id.ptr = getsetbyname("ptr");
+	id.inr = getsetbyname("inr");
+	id.sca =getsetbyname("sca");
+
+	if ((ra = getdefdoub ("canopy", "ra", 0.0, infilename, FALSE)) > 0.0)
+		calcra = FALSE;
+
+	intmethod = getdefint ("interception", "method", 0, infilename, TRUE);
+	switch (intmethod){ /* in full canopy only adjusted gash and rutter allowed */
+	 case 0: /*gash*/
+		getgash_param();
+	 case 1: /* rutter */
+		getrutter_param();
+	default:
+		break;
+	}
+}
+
+void
+post_top_fullcan()
+{
+	free (canop);
+}
+
+/*
+void getcalder_param(void)
+{
+		mgamma = getdefdoub ("interception", "gamma", mgamma, infilename, TRUE);
+	delta = getdefdoub ("interception", "delta", delta, infilename, TRUE);
+}
+
+*/
+
+void getrutter_param()
+{
+	showit ("canopy",WARN,"Rutter not tested yet",0,0);
+	p_tr = getdefdoub ("interception", "p_tr", 0.0, infilename, TRUE);
+	p_f = getdefdoub ("interception", "p_f", 0.0, infilename, TRUE);
+	S = getdefdoub ("interception", "S", 0.1, infilename, TRUE);
+	break;
+}
+
+void getgash_param()
+{
+	/* first check singe value lai , interception
+	 * and canopy then, check for lai time serie */
+	if ((lai = getdefdoub ("interception", "lai", MISSVAL, infilename, FALSE)) == MISSVAL){
+		if ((lai = getdefdoub ("canopy", "lai", MISSVAL, infilename,
+				FALSE)) == MISSVAL)
+			if (getsetbyname ("lai") < 0){
+				if(getdefstr ("ts", "lai", NULL,infilename,
+						FALSE))
+					(void)get_data(getdefstr ("ts", "lai", "lai", infilename, TRUE), "lai",steps);
+			}
+	}
+	/* construct lai time serie from fixed value */
+	t_lai = (XY *) ts_memory (NULL, steps * sizeof (XY), progname);
+	for (i = 0; i < steps; i++){
+		t_lai[i].x = (double) i;
+		t_lai[i].y = lai;
+	}
+	(void)add_set (t_lai, "lai", "lai", steps, 0, 0);
+	id.lai = getsetbyname ("lai");	/* set the laiset */
+
+	thefrac = getdefdoub ("interception", "E_avg/R", 0.0, infilename, TRUE);
+	gashm = getdefint("interception","gashm",gashm,infilename,FALSE);
+	if (thiststep > 1.0 && gashm != 1)
+		showit ("canopy",WARN,"using unadapted gash with timestep < 1 day",1,verbose);
+	if (thefrac != 0.0)
+		showit ("canopy",MESG,"using predefined E_avg/R",1,verbose);
+
+	p_tr = getdefdoub ("interception", "p_tr", 0.0, infilename, TRUE);
+	p_f = getdefdoub ("interception", "p_f", 0.0, infilename, TRUE);
+	S = getdefdoub ("interception", "S", 0.1, infilename, TRUE);
+}
+
+#define TOCM 60*60*24*0.1
+
+
+  /* How will dry canopy transpiration be determined */
+  transmethod = getdefint ("canopy", "transpiration", 0, infilename, TRUE);
+  switch (transmethod){
+	  case 2:
+		  /* penman monteith */
+		  Z = getdefdoub ("canopy", "z", 0.0, infilename, TRUE);
+		  z_0 = getdefdoub ("canopy", "z_0", 0.0, infilename, TRUE);
+		  d = getdefdoub ("canopy", "d", 0.0, infilename, TRUE);
+		  rs = getdefdoub ("canopy", "rs", 0.0, infilename, FALSE);
+		  if (rs == 0.0){
+			  calcrs = TRUE;
+			  showit("canopy",WARN,"no rs given, using regression equation estrs()",1,verbose);
+		  }
+		  break;
+		  /* Check the datasets we need */
+		  if (getsetbyname ("nra") < 0){	/* We need radiation data */
+			  strcpy(s,getdefstr ("ts", "nra", "NONE", infilename, FALSE));
+			  if (strcmp(s,"NONE") != 0){
+				  (void)get_data (s, "nra",steps);
+			  }else{
+				  (void)get_data (getdefstr ("ts", "inr", "NONE", infilename, TRUE), "inr",steps);
+				  t_netrad = (XY *) ts_memory (NULL, steps * sizeof (XY), progname);
+				  id.inr = getsetbyname("inr");
+				  for (i = 0; i < steps; i++){
+					  t_netrad[i].x = data[id.pre].xy[i].x;
+					  t_netrad[i].y = Rs_to_Rn(data[id.inr].xy[i].y);
+				  }
+				  (void)add_set (t_netrad, "nra", "nra", steps, 0, 0);
+			  }
+		  }
+		  id.nra = getsetbyname ("nra");
+		  if (getsetbyname ("tem") < 0)	/* We need temperature data oC */
+			  (void)get_data (getdefstr ("ts", "tem", "tem", infilename, TRUE), "tem",steps);
+		  id.tem = getsetbyname ("tem");
+		  if (getsetbyname ("rlh") < 0)	/* We need rel humid % */
+			  (void)get_data (getdefstr ("ts", "rlh", "rlh", infilename, TRUE), "rlh",steps);
+		  id.rlh = getsetbyname ("rlh");
+		  if (getsetbyname ("pre") < 0){	/* We need precipitation % */
+			  (void)get_data (getdefstr ("ts", "pre", "pre", infilename, TRUE), "pre",steps);
+			  Perror(progname,1,RCSid,"Added second pset!!!","");
+		  }
+		  id.pre = getsetbyname ("pre");
+		  if (getsetbyname ("win") < 0)	/* windspeed (m/s) */
+			  (void)get_data (getdefstr ("ts", "win", "win", infilename, TRUE), "win",steps);
+		  id.win = getsetbyname ("win");
+
+	  case 3: /* read from file */
+		del_set(getsetbyname("ptr"));
+		get_data(getdefstr ("ts", "ptr", "NONE", infilename, TRUE),"ptr",steps);
+		id.ptr = getsetbyname("ptr");
+		del_set(getsetbyname("pev"));
+		get_data(getdefstr ("ts", "pev", "NONE", infilename, TRUE),"pev",steps);
+		id.pev = getsetbyname("pev");
+		break;
+	  default:
+			  Perror (progname, 1, RCSid, "transpiration method not known", "");
+  }
+
+  if (canopy_layers > 1){/*We need an LAI profile for this (see Roberts'93) */
+	  lai = getdefdoub ("canopy", "lai", 0.0, infilename, TRUE);
+	  laiprof = getdefar ("canopy", "laiprof", NULL, infilename, &pts, TRUE);
+	  if (pts != canopy_layers)
+		  Perror (progname, 1, RCSid, "Laiprof points not equal to canopy layers", "");
+	  kk = getdefdoub ("canopy", "k", 0.0, infilename, TRUE);
+  }else{
+	  if ((Rnet_absorb =
+			  getdefdoub ("canopy", "Rnet_absorb", 0.0, infilename, FALSE)) > 0.0){
+		  ;	/*empty */
+	  }else{			/* calculate via Roberts and lai */
+		  Perror (progname, 1, RCSid, "Lai not finished", "");
+		  lai = getdefdoub ("canopy", "lai", 0.0, infilename, TRUE);
+		  kk = getdefdoub ("canopy", "k", 0.0, infilename, TRUE);
+	  }
+  }
+}
+
+/*C:tstep_canop
+ *@@ void tstep_canop(int *day)
+ *
+ *	Calculates canopy mass balances using penman-montheith for a day
+ */
+void
+tstep_canop (int *day)
+{
+	double Cp , mgamma , slope, L, rho, wetE, dryE;
+	extern envout (int tstep);
+	static int lastwet = 0;
+	static int wetsteps = 0;
+
+  Cp = mgamma = slope= L= rho =0.0;
+      /* Calculate air density */
+  rho = 1.201 * (290.0 * (998.0 - 0.378 * ea)) / ((data[id.tem].xy[*day].y + 273.15) * 1000.0);
+  if (Rnet_absorb > 0.0){/* We have one layer ! Calculate rnet via simple eq */
+      canop[0].rnet = data[id.nra].xy[*day].y * Rnet_absorb;
+      CalcDeltaGamma (data[id.tem].xy[*day].y, data[id.rlh].xy[*day].y,
+		      &ea, &es, &mgamma, &slope, &L, &Cp);
+
+      /* Calculate airodynamic resistance if not given */
+      if (calcra)
+	ra = R_A (Z, z_0, d, data[id.win].xy[*day].y);
+      if (calcrs) /* we have to estimate it using S-Lang function */
+      	rs = estrs();
+      
+      canop[0].ra = ra;
+      canop[0].ea = ea;
+      canop[0].es = es;
+      canop[0].rs = rs;
+      canop[0].rho = rho;
+      canop[0].slope = slope;
+      canop[0].gamma = mgamma;
+      canop[0].L = L;
+      canop[0].Cp = Cp;
+
+      /* Canopy wet or dry ? */
+
+      if (data[id.pre].xy[*day].y > 0.0){
+	      lastwet = *day;
+	      wetsteps++;
+      }
+
+      if ((data[id.pre].xy[*day].y == 0.0 /*&& storage == 0.0*/ && drytime < 0.0) || 
+		      ((drytime > 0.0 && data[id.pre].xy[*day].x -
+		       data[id.pre].xy[lastwet].x > drytime) || !wetsteps)){
+	  printint("wet",0);
+	  canop[0].E_dry = ET (canop[0].rnet*Rnet_absorb, slope, mgamma, rho, Cp, es, ea, ra, rs)/L* TOCM; /* convert to cm */
+	  canop[0].transpiration = canop[0].E_dry;
+	  /* do interception as wel */
+	  switch (intmethod){
+	    case 0:
+		/* for gash always use wetE */
+		    if (wetevap >0.0)
+			    wetE = wetevap;
+		    else
+			    wetE = canop[0].E_dry;
+	      gash (gashm,p_f, p_tr, S,wetE , data[id.pre].xy[*day].y,
+		    thiststep,thefrac,&canop[0].throughfall,
+		    &canop[0].stemflow, &canop[0].interception,&storage,data[id.lai].xy[*day].y);
+	      break;
+	    case 1:
+	      canop[0].actstorage = 
+		rutter (p_f,p_tr,data[id.pre].xy[*day].y,
+			/*ET (canop[0].rnet*Rnet_absorb, slope, mgamma, 
+			    rho, Cp, es, ea, ra, 0.0)/L* TOCM*/data[id.pev].xy[*day].y,
+			S,storage,&canop[0].throughfall,&canop[0].stemflow,
+			&canop[0].E_wet,&canop[0].interception,thiststep);
+	      storage = canop[0].actstorage;
+	      break;
+	    default:
+	      break;
+	    }	  /*canop[0].interception = canop[0].E_wet = 0.0;*/
+	  canop[0].E_wet = canop[0].interception;
+	  canop[0].throughfall = 0.0;
+	  canop[0].actstorage = storage;
+	}else{			
+          if (gashm == 0)
+		  storage = data[id.pre].xy[*day].y < S ? data[id.pre].xy[*day].y : S;
+	  printint("wet",1);
+
+	  dryE = ET (canop[0].rnet*Rnet_absorb, slope, mgamma, rho, Cp, es, ea, ra, rs)/L* TOCM; /* convert to cm */
+	  if (wetevap > 0.0)
+		  wetE = wetevap;
+	  else
+		  wetE = ET (canop[0].rnet*Rnet_absorb, slope, mgamma, rho, Cp, es, ea, ra, 0.0)/L* TOCM; /* convert to cm */
+	/* reduce transpiration for canopy period */
+	  canop[0].transpiration = canop[0].E_dry;
+	  /* Interception via gash */
+	  switch (intmethod){
+	    case 0:		/* gash */
+	      gash (gashm,p_f, p_tr, S, wetE, data[id.pre].xy[*day].y,
+		    thiststep, thefrac,
+		    &canop[0].throughfall, &canop[0].stemflow, 
+		    &canop[0].interception,&storage,data[id.lai].xy[*day].y);
+	      canop[0].actstorage = storage;
+	      break;
+	    case 1:
+	      canop[0].actstorage = 
+		rutter (p_f,p_tr,data[id.pre].xy[*day].y,
+		data[id.pev].xy[*day].y/*wetE*/, S,storage,&canop[0].throughfall,&canop[0].stemflow,
+		      &canop[0].E_wet,&canop[0].interception,thiststep);
+	      storage = canop[0].actstorage;
+	      break;
+	    case 2:
+	      Perror (progname, 1, RCSid, "Interception method not done", "calder");
+	      break;
+	    case 3:
+	      lai_int (data[id.pre].xy[*day].y, data[id.lai].xy[*day].y, laifrac,
+			 &canop[0].throughfall, &canop[0].stemflow, &canop[0].interception);
+	      break;
+	    default:
+	      break;
+	    }
+	  /*dryE *= 1.0 - (storage/S) > 0.0 ?  1.0 - (storage/S) > 0.0: 0.0;*/
+	  dryE = 0.0;
+	  canop[0].E_wet = canop[0].interception;
+	  canop[0].E_dry = canop[0].transpiration = dryE;
+	}
+    } else{
+      Perror (progname, 1, RCSid, "Not yet done", "Multi layer canopy");
+    }
+  data[id.sca].xy[*day].y = canop[0].actstorage;
+  data[id.sca].xy[*day].x = data[id.pre].xy[*day].x;
+  data[id.ptr].xy[*day].y = canop[0].transpiration;
+  data[id.ptr].xy[*day].x = data[id.pre].xy[*day].x;
+  data[id.inr].xy[*day].y= canop[0].interception;
+  data[id.inr].xy[*day].x=data[id.pre].xy[*day].x;
+  data[id.pev].xy[*day].y= ET (canop[0].rnet * (1 - Rnet_absorb), slope, mgamma, rho, Cp, es, ea, ra, 0.0)/L* TOCM;
+  data[id.pev].xy[*day].x = data[id.pre].xy[*day].x;
+  if (Dsoil){
+    data[id.spe].xy[*day].y = SET(canop[0].rnet*(1-Rnet_absorb), slope, mgamma)/L* TOCM;
+    data[id.spe].xy[*day].x = data[id.pre].xy[*day].x;
+  }
+  envout (*day);
+}
+@

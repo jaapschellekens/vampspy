@@ -1,0 +1,25 @@
+Naming conventions of vamps S-Lang functions and variables
+-------------------------------------------------------------
+
+_*_	- read only status variable
+
+v_*	- Vamps variable or function only available (or making sense) 
+	  during a run
+
+m_*	- Matrix operations
+
+v_i_*	- Vamps interactive scripts
+
+f_* 	- Output/input file variable manipulation 
+
+g_* 	- Low level graphics
+	  (should be independent on graphics library used
+
+*_plot	- Simple high level plotting routines
+	  (should be independent on graphics library used
+
+pl_*	- GNU lib-plot interface routines
+
+ag_*	- agl graphics library routines
+
+*	- the rest

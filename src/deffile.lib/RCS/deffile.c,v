@@ -1,0 +1,5249 @@
+head	1.36;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.36
+date	99.01.06.12.13.01;	author schj;	state Alpha;
+branches;
+next	1.35;
+
+1.35
+date	99.01.06.12.07.49;	author schj;	state Alpha;
+branches;
+next	1.34;
+
+1.34
+date	97.09.09.08.43.02;	author schj;	state Exp;
+branches;
+next	1.33;
+
+1.33
+date	97.05.09.09.26.35;	author schj;	state Exp;
+branches;
+next	1.32;
+
+1.32
+date	97.05.07.11.05.44;	author schj;	state Sta;
+branches;
+next	1.31;
+
+1.31
+date	97.05.07.11.00.29;	author schj;	state Exp;
+branches;
+next	1.30;
+
+1.30
+date	97.04.10.09.32.11;	author schj;	state Sta;
+branches;
+next	1.29;
+
+1.29
+date	96.11.05.15.06.48;	author schj;	state Alpha;
+branches;
+next	1.28;
+
+1.28
+date	96.10.22.19.15.54;	author schj;	state Exp;
+branches;
+next	1.27;
+
+1.27
+date	96.10.22.18.40.01;	author schj;	state Exp;
+branches;
+next	1.26;
+
+1.26
+date	96.10.22.17.58.23;	author schj;	state Exp;
+branches;
+next	1.25;
+
+1.25
+date	96.09.06.12.24.18;	author schj;	state Exp;
+branches;
+next	1.24;
+
+1.24
+date	96.03.24.11.43.03;	author schj;	state Exp;
+branches;
+next	1.23;
+
+1.23
+date	96.03.18.09.24.50;	author schj;	state Exp;
+branches;
+next	1.22;
+
+1.22
+date	96.02.08.08.21.03;	author schj;	state Exp;
+branches;
+next	1.21;
+
+1.21
+date	95.12.17.21.57.50;	author schj;	state Exp;
+branches;
+next	1.20;
+
+1.20
+date	95.11.14.20.24.46;	author schj;	state Exp;
+branches;
+next	1.19;
+
+1.19
+date	95.10.30.13.54.33;	author schj;	state Exp;
+branches;
+next	1.18;
+
+1.18
+date	95.10.23.07.46.13;	author schj;	state Exp;
+branches;
+next	1.17;
+
+1.17
+date	95.10.01.21.00.38;	author schj;	state Exp;
+branches;
+next	1.16;
+
+1.16
+date	95.09.30.18.00.46;	author schj;	state Exp;
+branches;
+next	1.15;
+
+1.15
+date	95.09.26.21.54.50;	author schj;	state Exp;
+branches;
+next	1.14;
+
+1.14
+date	95.09.26.21.20.22;	author schj;	state Exp;
+branches;
+next	1.13;
+
+1.13
+date	95.09.25.12.54.26;	author schj;	state Exp;
+branches;
+next	1.12;
+
+1.12
+date	95.09.22.15.43.24;	author schj;	state Beta;
+branches;
+next	1.11;
+
+1.11
+date	95.09.19.13.42.39;	author schj;	state Exp;
+branches;
+next	1.10;
+
+1.10
+date	95.09.04.17.04.18;	author schj;	state Exp;
+branches;
+next	1.9;
+
+1.9
+date	95.09.04.11.37.20;	author schj;	state Exp;
+branches;
+next	1.8;
+
+1.8
+date	95.09.01.11.43.50;	author schj;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	95.09.01.06.09.11;	author schj;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	95.08.31.12.24.27;	author schj;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	95.08.24.20.53.01;	author schj;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	95.08.24.14.14.24;	author schj;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	95.08.24.12.47.38;	author schj;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	95.08.24.12.25.38;	author schj;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	95.08.23.13.22.08;	author schj;	state Beta;
+branches;
+next	;
+
+
+desc
+@read and write .ini style files
+@
+
+
+1.36
+log
+@Version: 0.99g
+@
+text
+@/* $Header: /home/schj/src/vamps_0.99g/src/deffile.lib/RCS/deffile.c,v 1.35 1999/01/06 12:07:49 schj Alpha $ */
+
+/*  $RCSfile: deffile.c,v $
+ *  $Author: schj $
+ *  $Date: 1999/01/06 12:07:49 $ */
+
+static char RCSid[] =
+"$Id: deffile.c,v 1.35 1999/01/06 12:07:49 schj Alpha $";
+
+#include <stdio.h>
+#include <ctype.h>
+#include <string.h>
+#include <math.h>
+#include <stdlib.h>
+#include <sys/types.h>
+
+#include "deffile.h"
+
+#define DEF_OK  0
+#define DEF_CONV_WARN 1 /* conversion in getdef* failed, non fatal */
+#define DEF_CONV_ERR 2 /* conversion in getdef* failed, non fatal */
+#define DEF_NOTFOUND 3 /* var not found that was needed */
+#define DEF_INVALID 4 /* variable not in valid var list */
+
+char    valid_fn[512] = "valvar.ini"; /* filename of file with valid
+					 section and variable
+					 names. This file should be
+					 read into memory before
+					 processing the other requests */
+int     ckvalid = 0; /* check valid list if set to non zero */
+int     def_error = DEF_OK; /* deffile lib error var */
+char    commchar[512] = "#%"; /* valid comment characters, "#%" is default */
+int     defverb = 0;
+int     chk_only_mem = 0; /* Check only mem list if this is true */
+char    defprog[] = "libdef";
+
+
+
+
+void *defmem (void *ptr, size_t size, char *prog);
+char *pro_getdefault (const char *section,const char *name,const char *fname);
+
+
+static void ini_exit (const char *section,const char *name,const char *fname);
+
+/*C:ini_exit
+ *@@static void ini_exit(const char *section,const char *name,
+ *@@			const char *fname)
+ *
+ * exit with error 3 if not found
+ *
+ * Returns: nothing
+ */
+static void
+ini_exit (const char *section,const char *name,const char *fname)
+{
+  fprintf (stderr, "%s: Fatal:\tcould not find\t->%s<-\n", defprog, name);
+  fprintf (stderr, "\tin section\t\t->%s<-\n", section);
+  fprintf (stderr, "\tin file\t\t\t->%s<-\n", fname);
+  def_error = DEF_NOTFOUND;
+  deferror (defprog, 3, RCSid, "Var not found or invalid type,", "see above.");
+}
+
+/*C:pro_getdefault
+ *@@ char *pro_getdefault(const char section,const char *name,const char *fname)
+ *
+ * gets a string from file with fname, used internally. Actually this
+ * is the core of this library
+ *
+ * Returns: pointer to static buffer if found, otherwise NULL */
+
+static long int lastpos = 0;
+/* Save last position in file. This speeds op sequential
+   reading of large files. This only works if you use
+   opendef() and closedef() */
+
+static FILE *deffp = NULL;
+
+/* File pointer used by opendef and closedef.
+   This is usefull for sequential reading of 
+   large files.  */
+
+static char    buf[LBUFF];
+static char    tmp[LBUFF];
+
+
+char   
+*pro_getdefault (const char *section,const char *name,const char *fname)
+{
+	char *cp, *rp,*def;
+	FILE *thef;
+	long int linesread = 0;
+	int restart = 0;
+	long int ttpos;
+
+
+	/* first check the defmem override list */
+	/* This stuff should GO!!!  Is only used in the -S command
+	 * line option of vamps */
+	sprintf (buf, "%s  %s", section, name);
+	if ((cp = getvar (buf)) != NULL){
+		if (defverb > 1){
+			sprintf (tmp, "ini: (Override) section=%s, name=%s, value=%s", section, name, cp);
+			prit (tmp);
+		}
+		return cp;
+	}
+
+	/* First check the override list for global overrides */
+	if ((cp = getvarval (DEF_OVR,section, name)) != NULL)
+		return cp; /* overrride */
+
+	/* set a value for global defaults if they exist */
+	def = getvarval (DEF_DEF,section, name); /* default */
+
+	/* then check the defmem list */
+	if ((cp = getvarval (fname,section, name)) != NULL){
+		if (defverb > 1){
+			sprintf (tmp, "ini: (Memory) file=%s section=%s, name=%s, value=%s", fname, section, name, cp);
+			prit (tmp);
+		}
+		return cp;
+	}
+
+	if (!deffp){
+		if (strcmp (fname, "-") == 0)
+			thef = stdin;
+		else if ((thef = fopen (fname, "r")) == NULL)
+			return NULL;
+	}else
+	thef = deffp;
+
+	if (chk_only_mem == 1){
+		if (thef != deffp && thef != stdin)
+			(void) fclose (thef);
+		if (def) /* return the default */
+			return def;
+		else
+			return NULL; /* oops nothing found */
+	}
+
+	/* get stuff from section list to speed up the searching in large
+	 * files */
+	if (nrsectionlist && usesecptr){
+		ttpos=getsecpos(section);
+		if (ttpos != -1){
+			fseek (thef, ttpos, SEEK_SET);
+			lastpos = ttpos;
+		}
+	}
+
+	while (restart <= 1){
+	while ((cp = fgetl (thef)) != (char *) NULL){/* get a line from file..*/
+		linesread++;
+		while (isspace (*cp))
+			cp++;
+		if (*cp && !strchr(commchar,*cp)){
+		if (*cp == '[' && (rp = strchr (cp, ']')) != (char *) NULL){
+			*rp = '\0';
+			cp++;
+			if (Strcasecmp (section, cp) == 0){	
+				/* found the section we need */
+			if ((thef == deffp || thef == stdin))
+				/*
+				 * We have to account for ^M 
+				 */
+#if defined(msdos) || defined(__GO32__) || defined(os2) || defined(__MSDOS__) || defined(__FAT__)
+			lastpos = ftell (thef) - strlen (cp) - 4;
+#else
+			lastpos = ftell (thef) - strlen (cp) - 3;
+#endif
+			while((cp = fgetl (thef)) != (char *) NULL){
+			linesread++;
+			/* cp[strlen (cp) - 1] = '\0'; */
+			while (isspace (*cp))
+				cp++;
+			if (*cp == '[') /* next section, abort */
+				break;
+
+			if (*cp && !strchr(commchar,*cp)){
+				/* go to = sign */
+				for (rp = cp; *rp && *rp != '='; rp++)
+					;
+				/* Skip trailing non space */
+				while (isspace (*rp) || *rp == '=') rp--;
+				rp++;		
+				if (*rp)
+					*rp++ = '\0';
+				if (Strcasecmp (name, cp) == 0){
+					/* YES! var found */
+					rp--;
+					*rp = ' ';
+					cp = rp;
+					while (*cp != '=' && *cp != '\0')/*find =*/
+						cp++;
+					if (*cp != '\0')
+						cp++;
+					else
+						cp = rp;
+					while (isspace (*cp))	/* skip whitespace */
+						cp++;
+					for (rp = cp; *rp == '\n'; rp++);/*go to end of line  */
+					for (rp--; !isspace (*rp); rp--);/*go back to last text*/
+					if (*rp)
+						*rp++ = '\0';
+					if (thef != deffp)
+						(void) fclose (thef);
+					else   fseek (thef, lastpos, SEEK_SET);
+					if (defverb > 1)
+					{
+						sprintf (tmp, "ini: (File) section=%s, name=%s, value=%s", section, name, cp);
+						prit (tmp);
+					}
+					return cp;
+				}
+			}
+			}
+			}
+		}
+		}
+	}
+	if (thef == deffp || thef == stdin){
+		rewind (thef);
+		restart++;
+	}
+	else{
+		restart = 2;
+	}
+	}
+
+	if (thef != deffp && thef != stdin)
+		(void) fclose (thef);
+	else  fseek (thef, lastpos, SEEK_SET);
+
+	if (defverb > 2){
+		sprintf (tmp, "ini: not found: section=%s, name=%s, value=%s", section, name, cp);
+		prit (tmp);
+	}
+	if (def) /* return default is not found */
+		return def;
+	else
+		return NULL;
+}
+
+/*C:opendef
+ *@@int opendef (char *fname)
+ *
+ * open a file for processing, close with @@closedef()@@
+ *
+ * Returns: 0 on error, otherwise 1
+ *
+ * Remarks: Opendef is used to speed up processing of files that are
+ * used in a _sequential_ way. If files must be accessed randomely
+ * @@rinimem@@ or @@readindex@@ should be used */
+int
+opendef (char *fname)
+{
+	if (deffp) /* is already open, close first */
+		(void) closedef();
+
+	if (fname){
+		if (strcmp (fname, "-") == 0){
+			deffp = stdin;
+			return 1;
+		}
+		if ((deffp = fopen (fname, "r")) == NULL)
+			return 0;
+	}else
+	return 0;
+
+  return 1;
+}
+
+/*C:closedef
+ *@@int closedef ()
+ *
+ * Description: closes a file previously opened with opendef
+ * Returns: fclose's result
+ */
+int
+closedef (void)
+{
+	int ret = 0;
+
+	if (deffp == stdin)
+		return 0;
+
+	if (deffp)
+		ret = fclose (deffp);
+
+	deffp = NULL;
+
+	return ret;
+}
+
+/*C:getdefstr
+ *@@char *getdefstr(const char *section,const char *name,char *def,
+ *@@                char *fname, int exitonerror)
+ *
+ * Description: Gets the variable name from section section in file
+ * fname. Gets the variable name from section section in file fname
+ *
+ * Returns: def if nothing appropiate is found. It returns a pointer
+ * to static memory overwritten at each call */
+char   *
+getdefstr (const char *section,const char *name,char *def, char *fname, int exitonerror)
+{
+	char   *thestr;
+
+	thestr = pro_getdefault (section, name, fname);
+
+	if (thestr != NULL)
+		return thestr;
+	else{
+		if (exitonerror)
+			ini_exit (section, name, fname);
+		return def;
+	}
+}
+
+/*C:isdefitem
+ *@@int *isdefitem(const char *section,const char *name, char *fname)
+ *
+ * Determines if the variable @@name@@ in section @@section@@ in file
+ * @@fname@@ is present. The @@def_error@@ variable is set to
+ * @@DEF_INVALID@@ if the asked variable is not in the list otherwise
+ * it is set to @@DEF_OK@@.
+ *
+ * Return 1 if present and 0 if not */
+int
+isdefitem (const char *section,const char *name, const char *fname)
+{
+	if (pro_getdefault (section, name, fname)){
+		def_error = DEF_INVALID;
+		return 1;
+	}else{
+		def_error = DEF_OK;
+		return 0;
+	}
+}
+
+/*C:getdefint
+ *@@int *getdefint(const char *section,const char *name, int
+ *@@		*def, char *fname, int exitonerror)
+ *
+ * Description: Gets the variable name from section section in file
+ * fname. Supports FALSE and TRUE and NO and YES strings (translated
+ * to 0 and 1)
+ *
+ * Returns: def if nothing appropiate is found */
+int
+getdefint (const char *section,const char *name, int def, char *fname, int exitonerror)
+{
+	char   *thestr;
+	char   *endptr;
+	int     ttt;
+
+	thestr = pro_getdefault (section, name, fname);
+
+	if (thestr == NULL){
+		if (exitonerror)
+			ini_exit (section, name, fname);
+		return def;
+	} else {
+		ttt = (int) strtol (thestr, &endptr, 10);
+		if (Strcasecmp (thestr, "TRUE") == 0)
+			return 1;
+		else if (Strcasecmp (thestr, "YES") == 0)
+			return 1;
+		else if (Strcasecmp (thestr, "FALSE") == 0)
+			return 0;
+		else if (Strcasecmp (thestr, "NO") == 0)
+			return 0;
+		if (endptr == thestr){
+			if (exitonerror){
+				deferror (defprog, 0, RCSid, "Integer conversion failed:", thestr);
+				ini_exit (section, name, fname);
+			} else {
+				deferror (defprog, 0, RCSid, "Integer conversion failed(non-fatal):", thestr);
+				deferror (defprog, 0, RCSid, section, name);
+				return def;
+			}
+		}
+		return ttt;
+	}
+}
+
+/*C:getdefar
+ *@@double *getdefar(const char *section,const char *name,
+ *@@		double *def, char *fname,*int pts, exitonerror)
+  *
+  * Description: Gets the variable name (array of doubles) from section
+  * section in file fname. The variable @@pts@@ will hold the number of items
+  * in the array
+  *
+  * Returns: @@def@@ if nothing appropiate is found or a pointer to malloced mem
+  * 
+  * Remarks:Return value may be passed to @@free()@@ */
+double *
+getdefar (const char *section,const char *name, double *def, char *fname,
+		int *pts, int exitonerror)
+{
+	char   *tt;
+	char   *ept;
+	double *thear;
+	int     i = 0,j;
+
+	*pts = 0;
+	tt = pro_getdefault (section, name, fname);
+	ept = tt;
+
+	if (tt == NULL){
+		if (exitonerror)
+			ini_exit (section, name, fname);
+		return def;
+	}else{
+		j = strlen(tt) - 1;
+		while (isspace(tt[j--]))
+				tt[j] = '\0';
+		thear = (double *) defmem ((double *) def, 1024 * sizeof (double), defprog);
+		do{
+			i++;
+			if (i >= 1024)
+				deferror (defprog, 1, RCSid, "Array to large", "getdefar()");
+			tt = ept;
+			thear[i - 1] = strtod (tt, &ept);
+		}while (ept != tt);
+
+		i--;
+		thear = defmem((double *)thear, i * sizeof(double),defprog);
+		*pts = i;
+		return thear;
+	}
+}
+
+
+/*Cgetdefdoub
+ * @@double *getdefdoub(const char *section,const char *name,
+ * @@		double *def, char *fname, exitonrerror)
+ *
+ * Description: Gets the variable @@name@@ from section @@section@@ in
+ * file @@fname@@
+ *
+ * Returns: @@def@@ if nothing appropiate is found. Otherwise a double
+ * is returned */
+double
+getdefdoub (const char *section,const char *name, double def, char *fname, int exitonerror)
+{
+	char   *tt;
+	double  ttt;
+	char   *endptr;
+
+	tt = pro_getdefault (section, name, fname);
+
+	if (tt == NULL){
+		if (exitonerror)
+			ini_exit (section, name, fname);
+		return def;
+	}else{
+		ttt = strtod (tt, &endptr);
+		if (endptr == tt){
+			if (exitonerror){
+				deferror (defprog, 0, RCSid, "Double conversion failed:", tt);
+				ini_exit (section, name, fname);
+			} else {
+				deferror (defprog, 0, RCSid, "Double conversion failed(non-fatal):", tt);
+				return def;
+			}
+		}
+		return ttt;
+	}
+	/* NOTREACHED */
+}
+
+
+/*C:issection
+ *@@int issection(char *section, char *fname)
+ *
+ * Description: Checks for the existance of a section in file fname
+ *
+ * Returns:  TRUE if found, FALSE if not
+ *
+ * Remarks: It first checks the override and memory lists */
+int
+issection (char *section, char *fname)
+{
+	FILE *thef;
+	char *cp,*rp;
+
+	if (getnspos(section,getnfpos(fname,0),0) != -1)
+		return TRUE;
+
+	/* check the file */
+	if (!deffp) {
+		if (strcmp (fname, "-") == 0) {
+			thef = stdin;
+		} else {
+			if ((thef = fopen (fname, "r")) == NULL){
+				return FALSE;
+			}
+		}
+	} else {
+		if (deffp)
+			thef = deffp;
+		else
+			return 0;
+	}
+
+	while ((cp = fgetl (thef)) != (char *) NULL){
+		while (isspace (*cp))
+			cp++;
+		if (*cp && !strchr(commchar,*cp)) {
+			if (*cp == '[' && (rp = strchr (cp, ']')) != 
+					(char *) NULL) {
+				*rp = '\0';
+				cp++;
+				if (Strcasecmp (cp, section) == 0) {
+					(void) fclose (thef);
+					return TRUE;
+				}
+			}
+		}
+	}
+
+	(void) fclose (thef);
+	return FALSE;
+}
+
+
+/*C:defmem
+ *@@void *defmem(void *ptr, size_t size, char *defprog)
+ *
+ * Description: Allocates @@size@@ bytes of @@defmem@@ if @@ptr == NULL@@,
+ * else reallocates @@size@@ bytes from @@ptr@@ (@@ANSI realloc()@@). On
+ * defmem error, print diagnostic with @@defprog@@ and exit with status
+ * 1
+ * Returns: pointer to allocated defmem, deallocate with @@free(3)@@*/
+
+void *
+defmem (void *ptr, size_t size, char *prog)
+{
+	void   *rp;
+
+	if (ptr)
+		rp = (void *) realloc (ptr, size);
+	else
+		rp = (void *) malloc (size);
+	if (rp)
+		return (rp);
+
+	(void) fprintf (stderr, "(%s)%s: Memory allocation failed\n", prog, RCSid);
+	exit (1);
+	/* NOTREACHED */
+}
+
+
+
+/*C:deferror
+ *@@void deferror(char *defprog,int exitval, char *from,char
+ *@@		*descr,char *xtr)
+ *
+ *Description: Prints an error message on stderr and exits with level
+ *exitval if this value is > 0. Normally called with something like:
+ *deferror(defprog,1,RCSid,"A fatal error","devision by zero");
+ *
+ *Returns: nothing
+*/
+void 
+deferror (char *prog, int exitval, char *from, const char *descr,const char *xtr)
+{
+	if (!exitval){
+		(void) fprintf (stderr, "%s:\terror message:\n", prog);
+		(void) fprintf (stderr, "\tfrom: %s\n", from);
+		(void) fprintf (stderr, "\tdescription: %s %s\n", descr, xtr);
+	}else  {
+		(void) fprintf (stderr, "%s:\terror message:\n", prog);
+		(void) fprintf (stderr, "\tfrom: %s\n", from);
+		(void) fprintf (stderr, "\tdescription: %s %s\n", descr, xtr);
+
+		exit (exitval);
+	}
+}
+@
+
+
+1.35
+log
+@Version: 0.99g
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99e/src/deffile.lib/RCS/deffile.c,v 1.34 1997/09/09 08:43:02 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1997/09/09 08:43:02 $ */
+d8 1
+a8 1
+"$Id: deffile.c,v 1.34 1997/09/09 08:43:02 schj Exp $";
+@
+
+
+1.34
+log
+@0.99e version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99c/src/deffile.lib/RCS/deffile.c,v 1.33 1997/05/09 09:26:35 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1997/05/09 09:26:35 $ */
+d8 1
+a8 1
+"$Id: deffile.c,v 1.33 1997/05/09 09:26:35 schj Exp $";
+d19 14
+a32 1
+char     commchar[512] = "#%"; /* valid comment characters, '#' is default */
+d37 3
+d41 1
+a41 1
+char   *pro_getdefault (const char *section,const char *name,const char *fname);
+a45 1
+
+d60 2
+a61 1
+  deferror (defprog, 3, RCSid, "Var not found or invalid,", "see above.");
+d90 1
+a90 1
+	char *cp, *rp;
+d98 2
+d109 7
+d136 4
+a139 1
+		return NULL;
+d142 2
+a143 1
+	/* get stuff from section list */
+d153 1
+a153 2
+	/* while ((cp = Fgets (buf, LBUFF, thef)) != (char *) NULL){ */
+	while ((cp = fgetl (thef)) != (char *) NULL){
+a171 1
+			/* while((cp = Fgets (buf, LBUFF, thef)) != (char *) NULL){ */
+d239 4
+a242 1
+	return NULL;
+d283 1
+a283 1
+	int ret;
+d288 3
+a290 1
+	ret = fclose (deffp);
+d321 2
+a322 3
+/*C:getdefchar
+ *@@int *getdefchar(const char *section,const char *name, int
+ *@@		*def, char *fname,int exitonerror)
+d324 4
+a327 1
+ * Description: Gets the variable name from section section in file fname
+d329 1
+a329 1
+ * Returns: @@def@@ if nothing appropiate is found */
+d331 1
+a331 1
+getdefchar (const char *section,const char *name, int def, char *fname, int exitonerror)
+d333 7
+a339 10
+	char   *thestr;
+
+	thestr = pro_getdefault (section, name, fname);
+
+	if (thestr == NULL){
+		if (exitonerror)
+			ini_exit (section, name, fname);
+		return def;
+	}else
+	return thestr[0];
+d368 1
+a368 1
+		if (Strcasecmp (thestr, "YES") == 0)
+d370 1
+a370 2
+
+		if (Strcasecmp (thestr, "FALSE") == 0)
+d372 1
+a372 1
+		if (Strcasecmp (thestr, "NO") == 0)
+d509 1
+a509 1
+	while ((cp = fgets (buf, LBUFF, thef)) != (char *) NULL) {
+@
+
+
+1.33
+log
+@Updated to use fgetl in stean of Fgets. No more buffer needed.
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99c/src/deffile.lib/RCS/deffile.c,v 1.32 1997/05/07 11:05:44 schj Sta $ */
+d5 1
+a5 1
+ *  $Date: 1997/05/07 11:05:44 $ */
+d8 1
+a8 1
+"$Id: deffile.c,v 1.32 1997/05/07 11:05:44 schj Sta $";
+a15 1
+#include <malloc.h>
+d19 1
+a19 1
+char     commchar[] = "#%"; /* valid comment characters, '#' is default */
+d22 1
+a22 1
+char    defprog[] = "deffile.c";
+d51 2
+a52 2
+ *gets a string from file with fname, used internally. Actually this
+ *is the core of this library
+d139 2
+a140 2
+#if defined(msdos) || defined(os2) || defined(__MSDOS__) || defined(__FAT__)
+				lastpos = ftell (thef) - strlen (cp) - 4;
+d217 8
+a224 9
+
+open a file for processing, close with @@closedef()@@
+
+Returns: 0 on error, otherwise 1
+
+Remarks: Opendef is used to speed up processing of files that are used
+in a _sequential_ way. If files must be accessed randomely @@rinimem@@
+or @@readindex@@ should be used
+*/
+d228 3
+d246 1
+d253 2
+d258 1
+d260 2
+a261 1
+	return fclose (deffp);
+d265 8
+a272 7
+ *@@char *getdefstr(const char *section,const char *name,char *def, char *fname, int exitonerror)
+
+Description: Gets the variable name from section section in file
+fname. Gets the variable name from section section in file fname
+
+Returns: def if nothing appropiate is found. It returns a pointer to
+static defmem overwritten at each call if something is found */
+d292 4
+a295 5
+
+Description: Gets the variable name from section section in file fname
+
+Returns: @@def@@ if nothing appropiate is found
+*/
+d314 6
+a319 8
+
+Description: Gets the variable name from section section in file
+fname. Supports FALSE and TRUE and NO and YES strings (translated to 0
+and 1)
+
+Returns: def if nothing appropiate is found
+*/
+
+d408 8
+a415 7
+@@double *getdefdoub(const char *section,const char *name,
+@@		double *def, char *fname, exitonrerror)
+
+Description: Gets the variable @@name@@ from section @@section@@ in file @@fname@@
+
+Returns: @@def@@ if nothing appropiate is found. Otherwise a double is
+returned */
+d448 6
+a453 7
+
+Description: Checks for the existance of a section in file fname
+
+Returns:  TRUE if found, FALSE if not
+
+Remarks: It first checks the override en memory lists
+*/
+d502 6
+a507 7
+
+Description: Allocates @@size@@ bytes of @@defmem@@ if @@ptr == NULL@@, else
+reallocates @@size@@ bytes from @@ptr@@ (@@ANSI realloc()@@). On defmem error,
+print diagnostic with @@defprog@@ and exit with status 1
+
+Returns: pointer to allocated defmem, deallocate with @@free(3)@@
+ +*/
+a552 2
+
+
+@
+
+
+1.32
+log
+@Stable version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99c/src/deffile.lib/RCS/deffile.c,v 1.31 1997/05/07 11:00:29 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1997/05/07 11:00:29 $ */
+d8 1
+a8 1
+"$Id: deffile.c,v 1.31 1997/05/07 11:00:29 schj Exp $";
+d125 2
+a126 1
+	while ((cp = Fgets (buf, LBUFF, thef)) != (char *) NULL){
+d145 2
+a146 1
+			while((cp = Fgets (buf, LBUFF, thef)) != (char *) NULL){
+d148 1
+a148 1
+			cp[strlen (cp) - 1] = '\0';
+@
+
+
+1.31
+log
+@Updated to reflect changes in memlist.c
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99c/src/deffile/RCS/deffile.c,v 1.30 1997/04/10 09:32:11 schj Sta $ */
+d5 1
+a5 1
+ *  $Date: 1997/04/10 09:32:11 $ */
+d8 1
+a8 1
+"$Id: deffile.c,v 1.30 1997/04/10 09:32:11 schj Sta $";
+@
+
+
+1.30
+log
+@changed layout + doc
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/deffile/RCS/deffile.c,v 1.29 1996/11/05 15:06:48 schj Alpha $ */
+d5 1
+a5 2
+ *  $Date: 1996/11/05 15:06:48 $ */
+
+d8 1
+a8 1
+"$Id: deffile.c,v 1.29 1996/11/05 15:06:48 schj Alpha $";
+d20 1
+a20 1
+int     commchar = '#';
+d50 1
+a50 2
+ * 
+ * @@char *pro_getdefault(const char section,const char *name,const char *fname)
+d91 1
+d93 1
+a93 1
+	if ((cp = getvalue (section, name)) != NULL){
+d95 1
+a95 1
+			sprintf (tmp, "ini: (Memory) section=%s, name=%s, value=%s", section, name, cp);
+d129 1
+a129 1
+		if (*cp && *cp != commchar){
+d152 1
+a152 1
+			if (*cp && *cp != commchar){
+d156 1
+a156 1
+				/* Skip trailing whitespace */
+d215 1
+a215 1
+@@int opendef (char *fname)
+d257 1
+a257 1
+@@char *getdefstr(const char *section,const char *name,char *def, char *fname, int exitonerror)
+d281 2
+a282 3
+
+@@int *getdefchar(const char *section,const char *name, int
+@@		*def, char *fname,int exitonerror)
+d304 2
+a305 2
+@@int *getdefint(const char *section,const char *name, int
+@@		*def, char *fname, int exitonerror)
+d353 10
+a362 11
+@@double *getdefar(const char *section,const char *name,
+@@		double *def, char *fname,*int pts, exitonerror)
+
+Description: Gets the variable name (array of doubles) from section
+section in file fname. The variable @@pts@@ will hold the number of items
+in the array
+
+Returns: @@def@@ if nothing appropiate is found or a pointer to malloced mem
+
+Remarks:Return value may be passed to @@free()@@
+*/
+d364 2
+a365 1
+getdefar (const char *section,const char *name, double *def, char *fname, int *pts, int exitonerror)
+d370 1
+a370 1
+	int     i = 0;
+d381 3
+d440 1
+a440 1
+@@int issection( char *section, char *fname)
+d451 2
+a452 10
+	int     i;
+	char   *cp, *rp;
+	char    buf[LBUFF];
+	FILE   *thef;
+
+	/* override list */
+	for (i = 0; i < nrvars; i++){
+		if (Strcasecmp (vars[i].section, section) == 0)
+			return TRUE;
+	}
+d454 2
+a455 6
+	/* defmem list */
+	for (i = 0; i <= nrlist; i++) {
+		if (Strcasecmp (list[i].section, section) == 0) {
+			return TRUE;
+		}
+	}
+d476 1
+a476 1
+		if (*cp && *cp != commchar) {
+d495 1
+a495 1
+@@void *defmem(void *ptr, size_t size, char *defprog)
+d524 8
+a531 8
+@@void deferror(char *defprog,int exitval, char *from,char
+@@		*descr,char *xtr)
+
+Description: Prints an error message on stderr and exits with level
+exitval if this value is > 0. Normally called with something like:
+deferror(defprog,1,RCSid,"A fatal error","devision by zero");
+
+Returns: nothing
+@
+
+
+1.29
+log
+@Updated to Alpha version
+@
+text
+@d1 3
+a3 5
+/*
+ * $Header: /homes/schj/src/vamps_0.99/src/deffile/RCS/deffile.c,v 1.28 1996/10/22 19:15:54 schj Exp $ 
+ */
+/* 
+ *  $RCSfile: deffile.c,v $
+d5 1
+a5 2
+ *  $Date: 1996/10/22 19:15:54 $
+ */
+d9 1
+a9 1
+"$Id: deffile.c,v 1.28 1996/10/22 19:15:54 schj Exp $";
+d16 3
+d23 1
+d33 5
+a37 3
+
+/*-
+ * static void ini_exit(const char *section,const char *name,const char *fname)
+d39 1
+a39 1
+ * exit with error if not found
+d50 6
+a55 2
+/*-
+ * void pro_getdefault(const char section,const char *name,const char *fname)
+d57 2
+a58 3
+ *  gets a string from file with fname, used internally. Actually this
+ *  is the core of this library.
+ */
+d61 8
+a68 3
+ * reading of large files. This only works if you use
+ * opendef() and closedef()
+ */
+a69 6
+static FILE *deffp;
+/*
+ * File pointer used by opendef and closedef.
+ * This is usefull for sequential reading of 
+ * large files.
+ */
+d77 63
+a139 67
+  char *cp, *rp;
+  FILE *thef;
+  long int linesread = 0;
+  int restart = 0;
+  long int ttpos;
+
+
+  /* first check the defmem override list */
+  sprintf (buf, "%s  %s", section, name);
+  if ((cp = getvar (buf)) != NULL)
+    {
+      if (defverb > 1)
+	{
+	  sprintf (tmp, "ini: (Override) section=%s, name=%s, value=%s", section, name, cp);
+	  prit (tmp);
+	}
+      return cp;
+    }
+  /* then check the defmem list */
+  if ((cp = getvalue (section, name)) != NULL)
+    {
+      if (defverb > 1)
+	{
+	  sprintf (tmp, "ini: (Memory) section=%s, name=%s, value=%s", section, name, cp);
+	  prit (tmp);
+	}
+      return cp;
+    }
+
+  if (!deffp)
+    {
+      if (strcmp (fname, "-") == 0)
+	thef = stdin;
+      else if ((thef = fopen (fname, "r")) == NULL)
+	return NULL;
+    }
+  else
+     thef = deffp;
+
+  /* get stuff from section list */
+  if (nrsectionlist && usesecptr){
+    ttpos=getsecpos(section);
+    if (ttpos != -1){
+      fseek (thef, ttpos, SEEK_SET);
+      lastpos = ttpos;
+    }
+  }
+
+  while (restart <= 1)
+    {
+      while ((cp = Fgets (buf, LBUFF, thef)) != (char *) NULL)
+	{
+	  linesread++;
+	  while (isspace (*cp))
+	    cp++;
+	  if (*cp && *cp != commchar)
+	    {
+	      if (*cp == '[' && (rp = strchr (cp, ']')) != (char *) NULL)
+		{
+		  *rp = '\0';
+		  cp++;
+		  if (Strcasecmp (section, cp) == 0)
+		    {	/* found the section we need */
+		    if ((thef == deffp || thef == stdin))
+/*
+ * We have to account for ^M 
+ */
+d141 1
+a141 1
+		      lastpos = ftell (thef) - strlen (cp) - 4;
+d143 1
+a143 1
+		      lastpos = ftell (thef) - strlen (cp) - 3;
+d145 14
+a158 16
+		      while ((cp = Fgets (buf, LBUFF, thef)) != (char *) NULL)
+			{
+			  linesread++;
+			  cp[strlen (cp) - 1] = '\0';
+			  while (isspace (*cp))
+			    cp++;
+			  if (*cp == '[') /* next section, abort */
+			      break;
+			  
+			  if (*cp && *cp != commchar)
+			    {
+			      /* go to = sign */
+			      for (rp = cp; *rp && *rp != '='; rp++)
+				;
+			      /* Skip trailing whitespace */
+			      while (isspace (*rp) || *rp == '=') rp--;
+d160 28
+a187 28
+			      if (*rp)
+				*rp++ = '\0';
+			      if (Strcasecmp (name, cp) == 0)
+				{/* YES! var found */
+				  rp--;
+				  *rp = ' ';
+				  cp = rp;
+				  while (*cp != '=' && *cp != '\0')/*find =*/
+				    cp++;
+				  if (*cp != '\0')
+				    cp++;
+				  else
+				    cp = rp;
+				  while (isspace (*cp))	/* skip whitespace */
+				    cp++;
+				  for (rp = cp; *rp == '\n'; rp++);/*go to end of line  */
+				  for (rp--; !isspace (*rp); rp--);/*go back to last text*/
+				  if (*rp)
+				    *rp++ = '\0';
+				  if (thef != deffp)
+				    (void) fclose (thef);
+				  else   fseek (thef, lastpos, SEEK_SET);
+				  if (defverb > 1)
+				    {
+				      sprintf (tmp, "ini: (File) section=%s, name=%s, value=%s", section, name, cp);
+				      prit (tmp);
+				    }
+				  return cp;
+a188 1
+			    }
+d190 3
+a192 1
+		    }
+a193 1
+	    }
+d195 18
+a212 20
+      if (thef == deffp || thef == stdin)
+	{
+	  rewind (thef);
+	  restart++;
+	}
+      else{
+	restart = 2;
+      }
+    }
+
+  if (thef != deffp && thef != stdin)
+    (void) fclose (thef);
+  else  fseek (thef, lastpos, SEEK_SET);
+
+  if (defverb > 2)
+    {
+      sprintf (tmp, "ini: not found: section=%s, name=%s, value=%s", section, name, cp);
+      prit (tmp);
+    }
+  return NULL;
+d215 11
+a225 6
+/*-
+ * int opendef (char *fname)
+ * 
+ * open a file for processing, close with closedef() 
+ * Returns 0 on error
+ */
+d229 8
+a236 8
+  if (fname)
+    {
+      if (strcmp (fname, "-") == 0)
+	{
+	  deffp = stdin;
+	  return 1;
+	}
+      if ((deffp = fopen (fname, "r")) == NULL)
+a237 3
+    }
+  else
+    return 0;
+d242 4
+a245 4
+/*-
+ * int closedef ()
+ * 
+ * closes as file opened with opendef
+d250 2
+a251 2
+  if (deffp == stdin)
+    return 0;
+d253 2
+a254 1
+  return fclose (deffp);
+d257 8
+a264 9
+/*-
+ * char *getdefstr(const char *section,const char *name,char *def, char *fname,
+ *
+ *	int exitonerror)
+ * getdefstr - Gets the variable name from section section in file fname.
+ * Gets the variable name from section section in file fname.
+ * Returns def if nothing appropiate is found. It returns a pointer
+ * to static defmem overwritten at each call.
+ */
+d268 1
+a268 1
+  char   *thestr;
+d270 1
+a270 1
+  thestr = pro_getdefault (section, name, fname);
+d272 7
+a278 8
+  if (thestr != NULL)
+    return thestr;
+  else
+    {
+      if (exitonerror)
+	ini_exit (section, name, fname);
+      return def;
+    }
+d281 9
+a289 7
+/*-
+ * int *getdefchar(const char *section,const char *name, int *def, char *fname,int exitonerror)
+ *
+ * getdefchar - Gets the variable name from section section in file fname.
+ * Gets the variable name from section section in file fname.
+ * Returns def if nothing appropiate is found.
+ */
+d293 15
+a307 1
+  char   *thestr;
+d309 3
+a311 1
+  thestr = pro_getdefault (section, name, fname);
+d313 2
+a314 17
+  if (thestr == NULL)
+    {
+      if (exitonerror)
+	ini_exit (section, name, fname);
+      return def;
+    }
+  else
+      return thestr[0];
+}
+
+/*-
+ * int *getdefint(const char *section,const char *name, int *def, char *fname, int exitonerror)
+ * getdefint - Gets the variable name from section section in file fname.
+ * Gets the variable name from section section in file fname.
+ * Supports FALSE and TRUE and NO and YES strings (0 and 1)
+ * Returns def if nothing appropiate is found.
+ */
+d319 42
+a360 19
+  char   *thestr;
+  char   *endptr;
+  int     ttt;
+
+  thestr = pro_getdefault (section, name, fname);
+
+  if (thestr == NULL)
+    {
+      if (exitonerror)
+	ini_exit (section, name, fname);
+      return def;
+    }
+  else
+    {
+      ttt = (int) strtol (thestr, &endptr, 10);
+      if (Strcasecmp (thestr, "TRUE") == 0)
+	return 1;
+      if (Strcasecmp (thestr, "YES") == 0)
+	return 1;
+d362 5
+a366 34
+      if (Strcasecmp (thestr, "FALSE") == 0)
+	return 0;
+      if (Strcasecmp (thestr, "NO") == 0)
+	return 0;
+      if (endptr == thestr)
+	{
+	  if (exitonerror)
+	    {
+	      deferror (defprog, 0, RCSid, "Integer conversion failed:", thestr);
+	      ini_exit (section, name, fname);
+	    }
+	  else
+	    {
+	      deferror (defprog, 0, RCSid, "Integer conversion failed(non-fatal):", thestr);
+	      deferror (defprog, 0, RCSid, section, name);
+	      return def;
+	    }
+	}
+      return ttt;
+    }
+}
+
+/*-
+ * double *getdefar(const char *section,const char *name, double *def, 
+ *		char *fname,*int pts, exitonerror)
+ *
+ * getdefar - Gets the variable name (array of doubles) 
+ * from section section in file fname.
+ * Gets the array name from section section in file fname.
+ * Returns def if nothing appropiate is found.
+ * Return value can be passed to free()
+ */
+double
+       *
+d369 28
+a396 30
+  char   *tt;
+  char   *ept;
+  double *thear;
+  int     i = 0;
+
+  tt = pro_getdefault (section, name, fname);
+  ept = tt;
+
+  if (tt == NULL)
+    {
+      if (exitonerror)
+	ini_exit (section, name, fname);
+      return def;
+    }
+  else
+    {
+      thear = (double *) defmem ((double *) def, 1024 * sizeof (double), defprog);
+      do
+	{
+	  i++;
+	  if (i >= 1024)
+	    deferror (defprog, 1, RCSid, "Array to large", "getdefar()");
+	  tt = ept;
+	  thear[i - 1] = strtod (tt, &ept);
+	}
+      while (ept != tt);
+      i--;
+      *pts = i;
+      return thear;
+    }
+d400 8
+a407 8
+/*-
+ * double *getdefdoub(const char *section,const char *name, double *def,
+ *                     char *fname, exitonrerror)
+ *
+ * getdefdoub - Gets the variable name from section section in file fname.
+ * Gets the variable name from section section in file fname.
+ * Returns def if nothing appropiate is found.
+ */
+d411 22
+a432 27
+  char   *tt;
+  double  ttt;
+  char   *endptr;
+
+  tt = pro_getdefault (section, name, fname);
+
+  if (tt == NULL)
+    {
+      if (exitonerror)
+	ini_exit (section, name, fname);
+      return def;
+    }
+  else
+    {
+      ttt = strtod (tt, &endptr);
+      if (endptr == tt)
+	{
+	  if (exitonerror)
+	    {
+	      deferror (defprog, 0, RCSid, "Double conversion failed:", tt);
+	      ini_exit (section, name, fname);
+	    }
+	  else
+	    {
+	      deferror (defprog, 0, RCSid, "Double conversion failed(non-fatal):", tt);
+	      return def;
+	    }
+d434 1
+a434 2
+      return ttt;
+    }
+d438 9
+a446 5
+/*-
+ * int issection( char *section, char *fname)
+ * 
+ * Check for the existance of a section in file fname
+ */
+d450 17
+a466 49
+  int     i;
+  char   *cp, *rp;
+  char    buf[LBUFF];
+  FILE   *thef;
+
+  /*
+   * override list 
+   */
+  for (i = 0; i < nrvars; i++)
+    {
+      if (Strcasecmp (vars[i].section, section) == 0)
+	return TRUE;
+    }
+
+  /*
+   * defmem list 
+   */
+  for (i = 0; i <= nrlist; i++)
+    {
+      if (Strcasecmp (list[i].section, section) == 0)
+	{
+	  return TRUE;
+	}
+    }
+
+  /*
+   * check the file 
+   */
+  if (!deffp)
+    {
+      if (strcmp (fname, "-") == 0)
+	{
+	  thef = stdin;
+	}
+      else
+	{
+	  if ((thef = fopen (fname, "r")) == NULL)
+	    {
+	      return FALSE;
+	    }
+	}
+    }
+  else
+    {
+      if (deffp)
+	thef = deffp;
+      else
+	return 0;
+    }
+d468 31
+a498 18
+  while ((cp = fgets (buf, LBUFF, thef)) != (char *) NULL)
+    {
+      while (isspace (*cp))
+	cp++;
+      if (*cp && *cp != commchar)
+	{
+	  if (*cp == '[' && (rp = strchr (cp, ']')) != (char *) NULL)
+	    {
+	      *rp = '\0';
+	      cp++;
+	      if (Strcasecmp (cp, section) == 0)
+		{
+		  (void) fclose (thef);
+		  return TRUE;
+		}
+	    }
+	}
+    }
+d500 2
+a501 2
+  (void) fclose (thef);
+  return FALSE;
+d505 9
+a513 12
+/*-
+ * void *defmem(void *ptr, size_t size, char *defprog)
+ *
+ *		Allocates size bytes of defmem if ptr == NULL, else
+ *		reallocates size bytes from ptr (ANSI realloc()). On
+ *		defmem error, print diagnostic with defprog and exit
+ *		with status 1.
+ *	Ret:	pointer to allocated defmem, deallocate with free(3).
+ */
+#include <sys/types.h>
+#include <stdio.h>
+#include <malloc.h>
+d518 1
+a518 1
+  void   *rp;
+d520 6
+a525 6
+  if (ptr)
+    rp = (void *) realloc (ptr, size);
+  else
+    rp = (void *) malloc (size);
+  if (rp)
+    return (rp);
+d527 3
+a529 5
+  (void) fprintf (stderr, "%s: Memory allocation failed\n", prog);
+  exit (1);
+  /*
+   * NOTREACHED 
+   */
+d534 10
+a543 8
+/*-
+ * static void deferror(char *defprog,int exitval, char *from,char *descr,char *xtr)
+ *
+ *	Prints an error message on stderr and exits with level
+ *	exitval if this value is > 0	
+ *	Normally called with something like:
+ *	deferror(defprog,1,RCSid,"A fatal error","devision by zero");
+ */
+d547 8
+a554 11
+  if (!exitval)
+    {
+      (void) fprintf (stderr, "%s:\terror message:\n", prog);
+      (void) fprintf (stderr, "\tfrom: %s\n", from);
+      (void) fprintf (stderr, "\tdescription: %s %s\n", descr, xtr);
+    }
+  else
+    {
+      (void) fprintf (stderr, "%s:\terror message:\n", prog);
+      (void) fprintf (stderr, "\tfrom: %s\n", from);
+      (void) fprintf (stderr, "\tdescription: %s %s\n", descr, xtr);
+d556 2
+a557 2
+      exit (exitval);
+    }
+@
+
+
+1.28
+log
+@added support for spaces in variable name (hope it works!)
+@
+text
+@d2 1
+a2 1
+ * $Header: /home/schj/src/vamps_0.99/src/deffile/RCS/deffile.c,v 1.27 1996/10/22 18:40:01 schj Exp $ 
+d7 1
+a7 1
+ *  $Date: 1996/10/22 18:40:01 $
+d12 1
+a12 1
+"$Id: deffile.c,v 1.27 1996/10/22 18:40:01 schj Exp $";
+d25 1
+a25 3
+static void *memory (void *ptr, size_t size, char *prog);
+static char *getvalue (const char *section,const char *name);
+static int getvalueid (char *section, char *name);
+a27 24
+typedef struct
+  {				/*
+				 * used for storing ini file values 
+				 */
+    char   *section;
+    char   *name;
+    char   *value;
+  }
+listt;
+
+typedef struct
+  {				/*
+				 * used for storing ini override values 
+				 */
+    char   *section;
+    char   *name;
+    char   *value;
+  }
+varst;
+
+varst  *vars = (varst *) NULL;
+listt  *list = (listt *) NULL;
+int     nrvars = -1;
+int     nrlist = -1;
+a31 206
+/*-
+ * static void setvalue(char *section, char *name, char *value)
+ *
+ * setvar is used to maintain a mem copy of the input file. This
+ * list is fist checked by pro_getdefault after the override list (setvar)
+ *
+ * setvalue - add a value, section name to the mem copy of input file
+ *	See also: static getvalue(char *sectionchar *name,char *value)
+ */
+
+void
+setvalue (char *section, char *name, char *value, int check)
+{
+  int     listid;
+
+  if (!check || (listid = getvalueid (section, name)) == -1)	/*
+								 * add a new entry 
+								 */
+    {				/*
+				 * don't allow for double entries 
+				 */
+      nrlist++;
+      list = (listt *) memory ((void *) list, (nrlist+1) * sizeof (listt), defprog);
+      list[nrlist].section = (char *) memory ((void *) NULL, strlen (section) * sizeof (int), defprog);
+
+      strcpy (list[nrlist].section, section);
+      list[nrlist].name = (char *) memory ((void *) NULL, strlen (name) * sizeof (int), defprog);
+      list[nrlist].value = (char *) memory ((void *) NULL, strlen (value) * sizeof (int), defprog);
+
+      strcpy (list[nrlist].name, name);
+      strcpy (list[nrlist].value, value);
+    }
+  else
+    {				/*
+				 * set entry to new value 
+				 */
+      list[listid].value = (char *) memory ((void *) list[listid].value, strlen (value) *sizeof(int), defprog);
+      strcpy (list[listid].value, value);
+    }
+}
+
+/*-
+ * static int getvalueid(char *section,char *name)
+ *
+ * getvalueid - return list nr  section name
+ *	Ret: item number, or -1 if not found
+ *	See also: setvalue()
+ */
+int     getvaluehint = 0;
+static int
+getvalueid (char *section, char *name)
+{
+  int     i;
+
+getrestart:
+  for (i = getvaluehint; i <= nrlist; i++)
+    {
+      if ((Strcasecmp (list[i].section, section) == 0) && (Strcasecmp (list[i].name, name) == 0))
+	{
+	  getvaluehint = i <= 1 ? i : i - 2;
+	  return i;
+	}
+    }
+
+  if (getvaluehint)
+    {
+      getvaluehint = 0;
+      goto getrestart;
+    }
+
+  return -1;
+}
+
+/*-
+ * static char *getvalue(const char *section, const char *name)
+ *
+ * getvalue - return value of section name
+ *
+ *	Ret: pointer to value, or NULL if not found
+ *	See also: setvalue()
+ *
+ */
+static char
+*getvalue (const char *section,const char *name)
+{
+  int     i;
+
+getrestart:
+  for (i = getvaluehint; i <= nrlist; i++)
+    {
+      if ((Strcasecmp (list[i].section, section) == 0) && (Strcasecmp (list[i].name, name) == 0))
+	{
+	  getvaluehint = i <= 1 ? i : i - 2;
+	  return list[i].value;
+	}
+    }
+
+  if (getvaluehint)
+    {
+      getvaluehint = 0;
+      goto getrestart;
+    }
+
+  return (char *) NULL;
+}
+
+/*- 
+ * delmemlist ()
+ *
+ * Deletes the regular memory list (read with rinmem)
+ *
+ */
+void 
+delmemlist (void)
+{
+  int     i;
+
+  for (i = 0; i <= nrlist; i++)
+    {
+      if (list[i].section)
+	{
+	  free (list[i].section);
+	  list[i].section = (char *) NULL;
+	}
+      if (list[i].name)
+	{
+	  free (list[i].name);
+	  list[i].name = (char *) NULL;
+	}
+      if (list[i].value)
+	{
+	  free (list[i].value);
+	  list[i].value = (char *) NULL;
+	}
+    }
+
+  nrlist = -1;
+  free (list);
+  list = (listt *) NULL;
+}
+
+/*-
+ * int setvar(char *s)
+ *
+ * setvar - add a value, section name to the mem copy of input file
+ * setvar is used to maintain an override list of the input file. This
+ * list is fist checked by pro_getdefault. "s" should have the form:
+ *	section name value
+ *
+ *	See also: getvar(char *s)
+ *
+ */
+void
+setvar (char *s)
+{
+  char    name[NAMEL];
+  char    section[SECL];
+  char    value[VALL];
+
+  if (!(getvar (s)))
+    {				/*
+				 * don't allow for double entries 
+				 */
+      nrvars++;
+      sscanf (s, "%s %s %s", section, name, value);
+      vars = (varst *) memory ((void *) vars, (1 + nrvars) * sizeof (varst), defprog);
+      vars[nrvars].section = (char *) memory ((void *) NULL, 1 + strlen (section), defprog);
+      vars[nrvars].name = (char *) memory ((void *) NULL, 1 + strlen (name), defprog);
+      vars[nrvars].value = (char *) memory ((void *) NULL, 1 + strlen (value), defprog);
+      strcpy (vars[nrvars].section, section);
+      strcpy (vars[nrvars].name, name);
+      strcpy (vars[nrvars].value, value);
+    }
+}
+
+
+/*-
+ * char *getvar(char *s)
+ *
+ * getvar - return value of section name
+ *	s should be: section name
+ *	Ret: pointer to value, or NULL if not found
+ *	See also: setvar(char *s)
+ */
+
+char
+       *
+getvar (char *s)
+{
+  char    name[NAMEL];
+  char    section[SECL];
+  int     i;
+
+  sscanf (s, "%s %s", section, name);
+
+
+  for (i = 0; i <= nrvars; i++)
+    {
+      if ((Strcasecmp (vars[i].section, section) == 0) && (Strcasecmp (vars[i].name, name) == 0))
+	{
+	  return vars[i].value;
+	}
+    }
+
+  return (char *) NULL;
+}
+d79 1
+a79 1
+  /* first check the memory override list */
+d90 1
+a90 1
+  /* then check the memory list */
+d101 1
+a101 1
+  if (fname)
+d109 1
+a109 9
+    {
+      if (deffp)
+	thef = deffp;
+      else
+	return NULL;
+      /*
+       * assume already opened defaults 
+       */
+    }
+d139 1
+a139 1
+#if defined(__FAT__)
+a155 1
+			      /*for (rp = cp; *rp && !isspace (*rp) && *rp != '='; rp++)*/
+d264 1
+a264 1
+ * to static memory overwritten at each call.
+d311 1
+a311 1
+ * Supports FALSE and TRUE strings (0 and 1)
+d335 2
+d340 2
+d390 1
+a390 1
+      thear = (double *) memory ((double *) def, 1024 * sizeof (double), defprog);
+a449 289
+/*-
+ * int rinmem(char *fname)
+ *
+ * reads an intire defaults file into mem (the vars list)
+ * options are:
+ *	1: dump file to stdout (removed)
+ *	2: dump file to stdout, strip comments (removed)
+ *	3: read into the override memory list
+ *	4: read into the normal memory list
+ *
+ *	return = 0 is error, 1= ok
+ */
+int     opt = 4;
+int check = 0;
+
+int 
+rinmem (char *fname)
+{
+  char   *cp, *rp;
+  static char    buf[LBUFF];
+  FILE   *thef;
+  char    section[SECL];
+  static char    name[NAMEL];
+  static char    value[VALL];
+  static char    outp[LBUFF];
+
+  if (fname)
+    {
+      if (strcmp (fname, "-") == 0)
+	{
+	  thef = stdin;
+	}
+      else
+	{
+	  if ((thef = fopen (fname, "r")) == NULL)
+	    {
+	      return 0;
+	    }
+	}
+    }
+  else
+    return 0;			/*
+				 * assume already opened defaults 
+				 */
+
+  while ((cp = fgets (buf, LBUFF, thef)) != (char *) NULL)
+    {
+      while (isspace (*cp))
+	cp++;
+      if (*cp && *cp != commchar)
+	{
+	nsec:			/*
+				 * this is a bit of a kludge, but it works 
+				 */
+	  if (*cp == '[' && (rp = strchr (cp, ']')) != (char *) NULL)
+	    {
+	      *rp = '\0';
+	      cp++;
+	      strcpy (section, cp);	/*
+					 * found a section header 
+					 */
+	      while ((cp = Fgets (buf, LBUFF, thef)) != (char *) NULL)
+		{
+		  cp[strlen (cp) - 1] = '\0';
+		  while (isspace (*cp))
+		    cp++;
+		  if (*cp == '[')/* Bail out -- we are at new section */
+		    goto nsec;
+                    
+                  if (*cp && *cp != commchar)
+		    {
+		      /*for (rp = cp; *rp && !isspace (*rp) && *rp != '='; rp++)
+			;*/
+		     for (rp = cp; *rp && *rp != '='; rp++)
+				;
+		      /* Skip trailing whitespace */
+		      while (isspace (*rp) || *rp == '=') rp--;
+				rp++;		
+		      if (*rp)
+			*rp++ = '\0';
+		      strcpy (name, cp);	/*
+						 * YES! a var was found 
+						 */
+		      if (opt == 1)
+			fprintf (stdout, "%s = ", name);
+		      rp--;
+		      *rp = ' ';
+		      cp = rp;
+		      while (*cp != '=' && *cp != '\0')		/*
+								 * find = 
+								 */
+			cp++;
+		      if (*cp != '\0')
+			cp++;
+		      else
+			cp = rp;
+		      while (isspace (*cp))	/*
+						 * skip whitespace 
+						 */
+			cp++;
+		      for (rp = cp; *rp == '\n' || *rp == '\r'; rp++);	/*
+									 * go to end of line  or commentchar 
+									 */
+		      for (rp--; !isspace (*rp); rp--);		/*
+								 * go back to last text 
+								 */
+		      if (*rp)
+			*rp++ = '\0';
+		      strcpy (value, cp);
+		      if (opt == 3)
+			{
+			  sprintf (outp, "%s %s %s", section, name, value);
+			  setvar (outp);
+			}
+		      else if (opt == 4)
+			{
+			  setvalue (section, name, value, check);
+			}
+		    }
+		}
+	    }
+	}
+    }
+
+  if (thef != stdin)
+    (void) fclose (thef);
+
+  return 1;
+}
+
+/*-
+ * int writememini (char *fname, int *format,FILE stream)
+ *
+ *	write the mem list to an ini file
+ * 	format =0 is ini, 1 is set (tcl), 2 is as comment
+ *	3 = latex2e
+ *	it would be easyer to sort the list with repect to section,
+ *	but his works more or less.
+ */
+int
+writememini (char *fname, int *format, FILE * stream)
+{
+  FILE   *out;
+  int     i, j;
+  int    *doneit;		/*
+				 * these have been written 
+				 */
+
+  if (stream)			/*
+				 * Dump to stream if given 
+				 */
+    out = stream;
+  else
+    {
+      if (strcmp (fname, "-") != 0)
+	{
+	  if ((out = fopen (fname, "w")) == NULL)
+	    {
+	      deferror (defprog, 3, RCSid, "Cannot open for writing", fname);
+	    }
+	}
+      else
+	out = stdout;
+    }
+
+  doneit = (int *) memory ((void *) NULL, (nrlist +1) * sizeof (int), defprog);
+
+  /*
+   * First print a header 
+   */
+  switch (*format)
+    {
+    case 0:
+      (void) fprintf (out, "%c Generated by writememini: %s\n",commchar, RCSid);
+      break;
+    case 1:
+      (void) fprintf (out, "%c Generated by writememini: %s\n",commchar, RCSid);
+      break;
+    case 2:
+      (void) fprintf (out, "%c Generated by writememini: %s\n",commchar, RCSid);
+      break;
+    case 3:
+      (void) fprintf (out, "\\documentclass{article}\n");
+      (void) fprintf (out, "\\begin{document}\n");
+      break;
+    }
+
+  for (i = 0; i <= nrlist; i++)
+    {
+      doneit[i] = 0;
+    }
+
+  for (i = 0; i <= nrlist; i++)
+    {
+      if (doneit[i] == 0)
+	{
+	  doneit[i] = 1;
+	  switch (*format)
+	    {
+	    case 0:		/*
+				 * as ini file 
+				 */
+	      {
+		(void) fprintf (out, "\n\n[%s]\n%s = %s\n", list[i].section, list[i].name, list[i].value);
+		break;
+	      }
+	    case 2:		/*
+				 * As a comment 
+				 */
+	      {
+		(void) fprintf (out, "\n\n%c[%s]\n%c%s = %s\n", commchar, list[i].section, commchar, list[i].name, list[i].value);
+		break;
+	      }
+	    case 1:		/*
+				 * as tcl set 
+				 */
+	      {
+		(void) fprintf (out, "set %s(%s) {%s}\n", list[i].section, list[i].name, list[i].value);
+		break;
+	      }
+	    case 3:		/*
+				 * as latex2e set 
+				 */
+	      {
+		(void) fprintf (out, "\\section{%s}\n \\begin{verbatim}%s = %s\\end{verbatim}\n", list[i].section, list[i].name, list[i].value);
+		break;
+	      }
+	    default:
+	      break;
+	    }
+	  for (j = i + 1; j <= nrlist; j++)
+	    {
+	      if (Strcasecmp (list[i].section, list[j].section) == 0)
+		{
+		  switch (*format)
+		    {
+		    case 0:
+		      {
+			(void) fprintf (out, "%s = %s\n", list[j].name, list[j].value);
+			break;
+		      }
+		    case 2:
+		      {
+			(void) fprintf (out, "%c %s = %s\n", commchar, list[j].name, list[j].value);
+			break;
+		      }
+		    case 1:
+		      {
+			(void) fprintf (out, "set %s(%s) {%s}\n", list[j].section, list[j].name, list[j].value);
+			break;
+		      }
+		    case 3:	/*
+				 * as latex2e set 
+				 */
+		      {
+			(void) fprintf (out, "\\begin{verbatim} %s = %s\\end{verbatim}\n", list[j].name, list[j].value);
+			break;
+		      }
+		    default:
+		      break;
+		    }
+		  doneit[j] = 1;
+		}
+	    }
+	}
+    }
+
+  /*
+   * Last print a trailer 
+   */
+  switch (*format)
+    {
+    case 0:
+      break;
+    case 1:
+      break;
+    case 2:
+      break;
+    case 3:
+      (void) fprintf (out, "\\end{document}\n");
+      break;
+    }
+  if (!stream)
+    fclose (out);
+
+  free (doneit);
+
+  return 1;
+}
+d474 1
+a474 1
+   * memory list 
+d487 1
+a487 1
+  if (fname)
+d534 1
+a534 1
+ * void *memory(void *ptr, size_t size, char *defprog)
+d536 1
+a536 1
+ *		Allocates size bytes of memory if ptr == NULL, else
+d538 1
+a538 1
+ *		memory error, print diagnostic with defprog and exit
+d540 1
+a540 1
+ *	Ret:	pointer to allocated memory, deallocate with free(3).
+d546 2
+a547 2
+static void *
+memory (void *ptr, size_t size, char *prog)
+@
+
+
+1.27
+log
+@fixed commentchar stuff (was not implemented)
+@
+text
+@d2 1
+a2 1
+ * $Header: /home/schj/src/vamps_0.99/src/deffile/RCS/deffile.c,v 1.26 1996/10/22 17:58:23 schj Exp $ 
+d7 1
+a7 1
+ *  $Date: 1996/10/22 17:58:23 $
+d12 1
+a12 1
+"$Id: deffile.c,v 1.26 1996/10/22 17:58:23 schj Exp $";
+d395 3
+a397 1
+			      for (rp = cp; *rp && !isspace (*rp) && *rp != '='; rp++)
+d399 3
+d758 7
+a764 2
+		      for (rp = cp; *rp && !isspace (*rp) && *rp != '='; rp++)
+			;
+@
+
+
+1.26
+log
+@removed log in fileremoved log in file
+indentation
+lots of undocmented studd
+@
+text
+@d2 1
+a2 1
+ * $Header: /homes/schj/src/vamps_0.99/src/deffile/RCS/deffile.c,v 1.25 1996/09/06 12:24:18 schj Exp $ 
+d7 1
+a7 1
+ *  $Date: 1996/09/06 12:24:18 $
+d12 1
+a12 1
+"$Id: deffile.c,v 1.25 1996/09/06 12:24:18 schj Exp $";
+d367 1
+a367 1
+	  if (*cp && *cp != '#')
+d393 1
+a393 1
+			  if (*cp && *cp != '#')
+d731 1
+a731 1
+      if (*cp && *cp != '#')
+d751 1
+a751 1
+                  if (*cp && *cp != '#')
+d850 1
+a850 1
+      (void) fprintf (out, "# Generated by writememini: %s\n", RCSid);
+d853 1
+a853 1
+      (void) fprintf (out, "# Generated by writememini: %s\n", RCSid);
+d856 1
+a856 1
+      (void) fprintf (out, "# Generated by writememini: %s\n", RCSid);
+d1029 1
+a1029 1
+      if (*cp && *cp != '#')
+@
+
+
+1.25
+log
+@Changed some for use with slang, most is layout
+@
+text
+@d2 1
+a2 1
+ * $Header: /home/schj/src/vamps_0.98/src/deffile/RCS/deffile.c,v 1.24 1996/03/24 11:43:03 schj Exp $ 
+d7 1
+a7 52
+ *  $Date: 1996/03/24 11:43:03 $
+ *  $Log: deffile.c,v $
+ *  Revision 1.24  1996/03/24 11:43:03  schj
+ *  mostly cosmetic -- some bugs solved
+ *
+ *  Revision 1.23  1996/03/18 09:24:50  schj
+ *  test
+ *
+ * Revision 1.22  1996/02/08  08:21:03  schj
+ * changed position of lastpos to start of last section
+ *
+ *  Revision 1.21  1995/12/17 21:57:50  schj
+ *  increased buffer sizes
+ *  no exit id string to large, a warning is printed after clipping the string
+ *
+ *  Revision 1.20  1995/11/14 20:24:46  schj
+ *  cleaned up a bit, the wrini needs some work!
+ *
+ * Revision 1.19  1995/10/30  13:54:33  schj
+ * added deffile.h
+ *
+ * Revision 1.18  1995/10/23  07:46:13  schj
+ * Added some defverb stuff and comments
+ *
+ * Revision 1.17  1995/10/01  21:00:38  schj
+ * not much
+ *
+ * Revision 1.16  1995/09/30  18:00:46  schj
+ * added '-' for stdin in functions
+ *
+ * Revision 1.15  1995/09/26  21:54:50  schj
+ * fixed lastpos and return of issection
+ *
+ * Revision 1.14  1995/09/26  21:20:22  schj
+ * updated issection
+ *
+ * Revision 1.13  1995/09/25  12:54:26  schj
+ * added global file, for speeding up sequential reads
+ * added opendef(char *fname) and closedef()
+ *
+ * Revision 1.11  1995/09/19  13:42:39  schj
+ * updated exitonerror
+ *
+ * Revision 1.10  1995/09/04  17:04:18  schj
+ * added latex format to writememini (NOT FINISHED)
+ *
+ * Revision 1.9  1995/09/04  11:37:20  schj
+ * increased buffer size, added check in Fgets()
+ *
+ * Revision 1.8  1995/09/01  11:43:50  schj
+ * updated header
+ *
+d12 1
+a12 1
+"$Id: deffile.c,v 1.24 1996/03/24 11:43:03 schj Exp $";
+a20 25
+#ifndef TRUE
+#define TRUE 1
+#endif
+#ifndef FALSE
+#define FALSE 0
+#endif
+
+#ifndef SEEK_SET		/*
+				 * This was defined on linux and gcc but not in SunOS 
+				 */
+#define SEEK_SET 0
+#endif
+
+#ifndef __MSDOS__
+#include <sys/param.h>
+#else
+#define MAXPATHLEN 78
+#endif
+
+#define NAMEL 1024
+#define SECL 1024
+#define VALL 9128
+#define LBUFF VALL
+#define prit(A) fprintf(stderr,"deffile: %s\n",A);
+
+d94 1
+a94 1
+      list[listid].value = (char *) memory ((void *) list[listid].value, strlen (value), defprog);
+d138 1
+d208 1
+d266 1
+a266 1
+ *  static void ini_exit(const char *section,const char *name,const char *fname)
+d268 1
+a268 1
+ *  exit with error if not found
+d283 13
+a295 1
+ * is the core of this library.
+d297 6
+a302 12
+  static long int lastpos = 0;
+  /* Save last position in file. This speeds op sequential
+   * reading of large files. This only works if you use
+   * opendef() and closedef()
+   */
+static FILE *deffp;	/*
+			 * File pointer used by opendef and closedef.
+			 * This is usefull for sequential reading of 
+			 * large files.
+			 */
+char   *
+pro_getdefault (const char *section,const char *name,const char *fname)
+d304 2
+a305 4
+  char   *cp, *rp;
+  char    buf[LBUFF];
+  char    tmp[LBUFF];
+  FILE   *thef;
+d307 2
+a308 1
+  int     restart = 0;
+d310 2
+a311 3
+  /*
+   * first check the memory override list 
+   */
+d322 1
+a322 3
+  /*
+   * then check the memory list 
+   */
+d345 12
+a356 3
+	return NULL;		/*
+				 * assume already opened defaults 
+				 */
+d358 1
+d374 2
+a375 4
+		    {		/*
+				 * found the section we need 
+				 */
+		      if (thef == deffp || thef == stdin)
+d379 2
+a380 2
+#if defined(msdos) || defined(os2)
+			lastpos = ftell (thef) - strlen (cp) - 4;
+d382 1
+a382 1
+			lastpos = ftell (thef) - strlen (cp) - 3;
+d390 1
+a390 4
+			  if (*cp == '[')
+			    {	/*
+				 * next section, abort 
+				 */
+d392 1
+a392 1
+			    }
+d400 1
+a400 3
+				{	/*
+					 * YES! var found 
+					 */
+d404 1
+a404 3
+				  while (*cp != '=' && *cp != '\0')	/*
+									 * find = 
+									 */
+d410 1
+a410 3
+				  while (isspace (*cp))		/*
+								 * skip whitespace 
+								 */
+d412 2
+a413 6
+				  for (rp = cp; *rp == '\n'; rp++);	/*
+									 * go to end of line 
+									 */
+				  for (rp--; !isspace (*rp); rp--);	/*
+									 * go back to last text 
+									 */
+d418 1
+a418 2
+				  else
+				    fseek (thef, lastpos, SEEK_SET);
+d437 1
+a437 1
+      else
+d439 1
+d444 1
+a444 2
+  else
+    fseek (thef, lastpos, SEEK_SET);
+d494 1
+a494 1
+ * char *getdefstr(const char *section,const char *name,const char *def, char *fname,
+d499 2
+a500 1
+ * Returns def if nothing appropiate is found.
+d503 1
+a503 1
+getdefstr (const char *section,const char *name,const char *def, char *fname, int exitonerror)
+a539 1
+    {
+a540 1
+    }
+d544 1
+a544 3
+ * int *getdefint(const char *section,const char *name, int *def, char *fname,
+ *
+ *                int exitonerror)
+a587 1
+
+d600 1
+a677 1
+
+d695 1
+d701 1
+a701 1
+  char    buf[LBUFF];
+d704 3
+a706 3
+  char    name[NAMEL];
+  char    value[VALL];
+  char    outp[LBUFF];
+d793 1
+a793 1
+			  setvalue (section, name, value, 0);
+d808 1
+a808 1
+ *  int writememini (char *fname, int *format,FILE stream)
+d842 1
+a842 1
+  doneit = (int *) memory ((void *) NULL, (nrlist) * sizeof (int), defprog);
+d1109 1
+@
+
+
+1.24
+log
+@mostly cosmetic -- some bugs solved
+@
+text
+@d2 1
+a2 1
+ * $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.975/src/deffile/RCS/deffile.c,v 1.23 1996/03/18 09:24:50 schj Exp $ 
+d4 1
+a4 1
+/*-
+d7 1
+a7 1
+ *  $Date: 1996/03/18 09:24:50 $
+d9 3
+d63 1
+a63 1
+"$Id: deffile.c,v 1.23 1996/03/18 09:24:50 schj Exp $";
+d101 2
+a102 2
+static void *memory (void *ptr, size_t size, char *defprog);
+static char *getvalue (char *section, char *name);
+d104 1
+d131 1
+a131 1
+static void ini_exit (char *section, char *name, char *fname);
+d135 1
+a135 1
+ * setvalue - add a value, section name to the mem copy of input file
+a136 1
+ * static void setvalue(char *section, char *name, char *value)
+d140 1
+a175 2
+ * getvalueid - return list nr  section name
+ *
+d178 1
+d208 2
+a211 2
+ * static char *getvalue(char *section,char *name)
+ *
+d216 1
+a216 2
+       *
+getvalue (char *section, char *name)
+d246 1
+a246 1
+delmemlist ()
+d275 2
+a277 2
+ *
+ * int setvar(char *s)
+a308 2
+ * getvar - return value of section name
+ *
+d311 1
+d340 2
+a341 1
+ *  stratic void ini_exit(char *section, char *name, char *fname)
+d345 1
+a345 1
+ini_exit (char *section, char *name, char *fname)
+d354 1
+a354 1
+ * void pro_getdefault(char section, char *name, char *fname)
+d359 10
+a368 12
+long int lastpos = 0;		/*
+
+				 * Save last posotion in file. This speeds op sequential
+				 * * reading of large files. This only works if you use
+				 * * opendef() and closedef()
+				 */
+static FILE *deffp;		/*
+
+				 * File pointer used by opendef and closedef.
+				 * * This is usefull for sequential reading of 
+				 * * large files.
+				 */
+d370 1
+a370 1
+pro_getdefault (char *section, char *name, char *fname)
+d444 1
+a444 1
+			lastpos = ftell (thef) - strlen (cp) - 6;
+d486 1
+a486 1
+									 * go to end of line  or comment char 
+d560 1
+d563 1
+a563 1
+closedef ()
+d572 1
+a572 1
+ * getdefstr - Gets the variable name from section section in file fname.
+a573 1
+ * char *getdefstr(char *section, char *name, char *def, char *fname,
+d575 1
+d580 1
+a580 1
+getdefstr (char *section, char *name, char *def, char *fname, int exitonerror)
+d597 2
+a599 2
+ *
+ * int *getdefchar(char *section, char *name, int *def, char *fname,int exitonerror)
+a602 1
+
+d604 1
+a604 1
+getdefchar (char *section, char *name, int def, char *fname, int exitonerror)
+d623 3
+a626 2
+ *
+ * int *getdefint(char *section, char *name, int *def, char *fname, int exitonerror)
+d633 1
+a633 1
+getdefint (char *section, char *name, int def, char *fname, int exitonerror)
+d675 2
+a676 1
+ * getdefar - Gets the variable name from section section in file fname.
+d678 2
+a679 2
+ * double *getdefar(char *section, char *name, double *def, 
+ *		char *fname,*int pts, exitonerror)
+d685 1
+a685 1
+getdefar (char *section, char *name, double *def, char *fname, int *pts, int exitonerror)
+a703 1
+
+d721 3
+a724 2
+ *
+ * double *getdefdoub(char *section, char *name, double *def, char *fname, exitonrerror)
+d729 1
+a729 1
+getdefdoub (char *section, char *name, double def, char *fname, int exitonerror)
+d829 4
+a832 6
+		  if (*cp == '[')
+		    goto nsec;	/*
+				 * my first GOTO!! 
+				 */
+
+		  if (*cp && *cp != '#')
+d889 2
+a890 1
+ *  int writememini (char *fname, int format,FILE stream)
+d898 1
+a898 1
+writememini (char *fname, int format, FILE * stream)
+a902 1
+
+d928 1
+a928 1
+  switch (format)
+d955 1
+a955 1
+	  switch (format)
+d992 1
+a992 1
+		  switch (format)
+d1028 1
+a1028 1
+  switch (format)
+d1051 1
+d1131 2
+a1132 1
+ *	void *memory(void *ptr, size_t size, char *defprog)
+d1144 1
+a1144 1
+memory (void *ptr, size_t size, char *defprog)
+d1155 1
+a1155 1
+  (void) fprintf (stderr, "%s: Memory allocation failed\n", defprog);
+d1166 1
+d1173 1
+a1173 1
+deferror (char *defprog, int exitval, char *from, char *descr, char *xtr)
+d1177 1
+a1177 1
+      (void) fprintf (stderr, "%s:\terror message:\n", defprog);
+d1183 1
+a1183 1
+      (void) fprintf (stderr, "%s:\terror message:\n", defprog);
+d1190 1
+@
+
+
+1.23
+log
+@test
+@
+text
+@d1 3
+a3 2
+/* deffile.c */
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.97/src/deffile/RCS/deffile.c,v 1.22 1996/02/08 08:21:03 schj Exp $ */
+d7 1
+a7 1
+ *  $Date: 1996/02/08 08:21:03 $
+d9 3
+d60 1
+a60 1
+"$Id: deffile.c,v 1.22 1996/02/08 08:21:03 schj Exp $";
+d76 3
+a78 1
+#ifndef SEEK_SET /* This was defined on linux and gcc but not in SunOS */
+d94 3
+a96 3
+int commchar ='#';
+int defverb=0;
+char defprog[]="deffile.c";
+d98 1
+a98 2
+static void *memory (void *ptr,size_t size,char *defprog);
+void deferror (char *defprog,int exitval, char *from,char *descr,char *xtr);
+d100 1
+d103 6
+a108 4
+  {				/* used for storing ini file values */
+    char *section;
+    char *name;
+    char *value;
+d113 6
+a118 4
+  {				/* used for storing ini override values */
+    char *section;
+    char *name;
+    char *value;
+d122 4
+a125 4
+varst *vars = (varst *) NULL;
+listt *list = (listt *) NULL;
+int nrvars = -1;
+int nrlist = -1;
+d127 1
+a127 1
+void ini_exit (char *section, char *name, char *fname);
+d141 1
+a141 1
+setvalue (char *section, char *name, char *value,int check)
+d143 1
+a143 1
+  int i;
+d145 6
+a150 2
+  if (!check || (getvalue (section, name)) == NULL)	/* add a new entry */
+    {				/* don't allow for double entries */
+d152 4
+a155 3
+      list = (listt *) memory ((void *) list, (1 + nrlist) * sizeof (listt), defprog);
+	 list[nrlist].section = (char *) memory ((void *) NULL, strlen (section) * sizeof (int), defprog);
+	  strcpy (list[nrlist].section, section);
+d163 26
+a188 2
+    {				/* set entry to new value */
+      for (i = 0; i < nrlist; i++)
+d190 2
+a191 5
+	  if (Strcasecmp (section, list[i].section) == 0 && Strcasecmp (name, list[i].name) == 0)
+	    {
+              list[i].value = (char *) memory ((void *) list[i].value, strlen (value), defprog);
+	      strcpy (list[i].value, value);
+	    }
+d194 8
+a211 1
+int getvaluehint = 0;
+d213 2
+a214 1
+*getvalue (char *section, char *name)
+d216 1
+a216 1
+  int i;
+d219 1
+a219 1
+  for (i = getvaluehint; i < nrlist; i++)
+d243 2
+a244 1
+void delmemlist()
+d246 20
+a265 1
+int i;
+d267 3
+a269 7
+for (i=nrlist; i>=0; i--){
+	if (list[i].section)
+		free(list[i].section);
+	if (list[i].name)
+		free(list[i].name);
+	if (list[i].value)
+		free(list[i].value);
+a271 4
+nrlist=-1;
+free (list);
+list = (listt *) NULL;
+}
+d285 3
+a287 3
+  char name[NAMEL];
+  char section[SECL];
+  char value[VALL];
+d290 3
+a292 1
+    {				/* don't allow for double entries */
+d317 2
+a318 1
+*getvar (char *s)
+d320 3
+a322 3
+  char name[NAMEL];
+  char section[SECL];
+  int i;
+d339 1
+a339 1
+ *  void ini_exit(char *section, char *name, char *fname)
+d342 2
+a343 2
+void
+ini_exit (char *section,char *name,char *fname)
+d348 1
+a348 1
+  deferror (defprog,3, RCSid, "Var not found or invalid,", "see above.");
+d357 14
+a370 10
+long int lastpos = 0; /* Save last posotion in file. This speeds op sequential
+		       * reading of large files. This only works if you use
+		       * opendef() and closedef()
+		       */
+static FILE *deffp;   /* File pointer used by opendef and closedef.
+		       * This is usefull for sequential reading of 
+		       * large files.
+		       */
+char *
+pro_getdefault (char *section,char  *name,char  *fname)
+d372 4
+a375 4
+  char *cp, *rp;
+  char buf[LBUFF];
+  char tmp[LBUFF];
+  FILE *thef;
+d377 1
+a377 1
+  int restart = 0;
+d379 3
+a381 1
+  /* first check the memory override list */
+d392 3
+a394 1
+  /* then check the memory list */
+d407 3
+a409 4
+      if (strcmp(fname,"-")==0)
+      	thef=stdin;
+      else
+      if ((thef = fopen (fname, "r")) == NULL)
+a411 3
+  else{
+   if (deffp)
+    thef = deffp;
+d413 8
+a420 2
+    return NULL;		/* assume already opened defaults */
+  }
+d436 7
+a442 3
+		    {		/* found the section we need */
+	      if (thef == deffp || thef == stdin)
+/* We have to account for ^M */		      	
+d444 4
+a447 4
+		     lastpos = ftell (thef) - strlen(cp) -4;
+#else		      
+		     lastpos = ftell (thef) - strlen(cp) -3;
+#endif		      
+d455 3
+a457 1
+			    {	/* next section, abort */
+d467 3
+a469 1
+				{	/* YES! var found */
+d473 3
+a475 1
+				  while (*cp != '=' && *cp != '\0')	/* find = */
+d481 3
+a483 1
+				  while (isspace (*cp))		/* skip whitespace */
+d485 6
+a490 2
+				  for (rp = cp; *rp == '\n'; rp++);	/* go to end of line  or comment char */
+				  for (rp--; !isspace (*rp); rp--);	/* go back to last text */
+d519 1
+a519 1
+  if (thef != deffp && thef !=stdin)
+d524 5
+a528 5
+      if (defverb > 2)
+	{
+	  sprintf (tmp, "ini: not found: section=%s, name=%s, value=%s", section, name, cp);
+	  prit (tmp);
+	}
+d543 4
+a546 3
+      if (strcmp(fname,"-")==0){
+      	deffp=stdin;
+	return 1;
+d565 1
+a565 1
+  	return 0;
+d578 2
+a579 2
+char *
+getdefstr (char *section,char  *name,char  *def,char *fname,int exitonerror)
+d581 1
+a581 1
+  char *thestr;
+d604 1
+a604 1
+getdefchar (char *section,char *name,int def,char *fname,int exitonerror)
+d606 1
+a606 1
+  char *thestr;
+d632 1
+a632 1
+getdefint (char *section,char *name,int def,char *fname,int exitonerror)
+d634 3
+a636 3
+  char *thestr;
+  char *endptr;
+  int ttt;
+d658 1
+a658 1
+	      deferror (defprog,0, RCSid, "Integer conversion failed:", thestr);
+d661 5
+a665 4
+	  else{
+	    deferror (defprog,0, RCSid, "Integer conversion failed(non-fatal):", thestr);
+	    deferror (defprog,0, RCSid, section, name);
+	    return def;
+d682 2
+a683 2
+ *
+getdefar (char *section,char *name,double *def,char *fname,int *pts,int exitonerror)
+d685 2
+a686 2
+  char *tt;
+  char *ept;
+d688 1
+a688 1
+  int i = 0;
+d707 1
+a707 1
+	    deferror (defprog,1, RCSid, "Array to large", "getdefar()");
+d712 1
+a712 1
+      	i--;
+d727 1
+a727 1
+getdefdoub (char *section,char *name,double def,char *fname,int exitonerror)
+d729 3
+a731 3
+  char *tt;
+  double ttt;
+  char *endptr;
+d748 1
+a748 1
+	      deferror (defprog,0, RCSid, "Double conversion failed:", tt);
+d751 4
+a754 3
+	  else{
+	    deferror (defprog,0, RCSid, "Double conversion failed(non-fatal):", tt);
+	    return def;
+d774 1
+a774 1
+int	opt=4;
+d776 2
+a777 1
+int rinmem (char *fname)
+d779 7
+a785 7
+  char *cp, *rp;
+  char buf[LBUFF];
+  FILE *thef;
+  char section[SECL];
+  char name[NAMEL];
+  char value[VALL];
+  char outp[LBUFF];
+d802 3
+a804 1
+    return 0;			/* assume already opened defaults */
+d812 3
+a814 1
+	nsec:			/* this is a bit of a kludge, but it works */
+d819 3
+a821 1
+	      strcpy (section, cp);	/* found a section header */
+d828 3
+a830 1
+		    goto nsec;	/* my first GOTO!! */
+d838 3
+a840 1
+		      strcpy (name, cp);	/* YES! a var was found */
+d846 3
+a848 1
+		      while (*cp != '=' && *cp != '\0')		/* find = */
+d854 3
+a856 1
+		      while (isspace (*cp))	/* skip whitespace */
+d858 6
+a863 2
+		      for (rp = cp; *rp == '\n' || *rp=='\r'; rp++);		/* go to end of line  or commentchar */
+		      for (rp--; !isspace (*rp); rp--);		/* go back to last text */
+d883 1
+a883 1
+  	(void) fclose (thef);
+d897 1
+a897 1
+writememini (char *fname,int format,FILE *stream)
+d899 10
+a908 5
+  FILE *out;
+  int i, j;
+  int *doneit;			/* these have been written */
+
+  if (stream)			/* Dump to stream if given */
+d916 1
+a916 1
+	      deferror (defprog,3, RCSid, "Cannot open for writing", fname);
+a923 13
+  /* First print a header */
+  switch (format) {
+  	case 0:
+		break;
+	case 1:
+		break;
+	case 2:
+		break;
+	case 3:
+		(void)fprintf (out,"\\documentclass{article}\n");
+		(void)fprintf (out,"\\begin{document}\n");
+		break;
+  }
+d925 21
+a945 1
+  for (i = 0; i < nrlist; i++)
+d950 1
+a950 1
+  for (i = 0; i < nrlist; i++)
+d957 3
+a959 1
+	    case 0:		/* as ini file */
+d964 3
+a966 1
+	    case 2:		/* As a comment */
+d971 3
+a973 1
+	    case 1:		/* as tcl set */
+d978 3
+a980 1
+	    case 3:		/* as latex2e set */
+d988 1
+a988 1
+	  for (j = i + 1; j < nrlist; j++)
+d1009 3
+a1011 1
+		    case 3:	/* as latex2e set */
+d1025 14
+a1038 11
+  /* Last print a trailer */
+  switch (format) {
+  	case 0:
+		break;
+	case 1:
+		break;
+	case 2:
+		break;
+	case 3:
+		(void)fprintf (out,"\\end{document}\n");
+		break;
+d1053 1
+a1053 1
+issection (char *section,char  *fname)
+d1055 8
+a1062 6
+  int i;
+  char *cp, *rp;
+  char buf[LBUFF];
+  FILE *thef;
+
+  /* override list */
+d1069 4
+a1072 2
+  /* memory list */
+  for (i = 0; i < nrlist; i++)
+d1080 3
+a1082 1
+  /* check the file */
+d1097 7
+a1103 6
+  else{
+    if (deffp)
+      thef = deffp;
+    else
+      return 0;
+   }
+d1142 1
+a1142 1
+memory(void *ptr, size_t size,char  *defprog)
+d1144 1
+a1144 1
+	void	*rp;
+d1146 12
+a1157 10
+	if(ptr)
+		rp = (void *)realloc(ptr, size);
+	else
+		rp = (void *)malloc(size);
+	if(rp)
+		return(rp);
+
+	(void)fprintf(stderr, "%s: Memory allocation failed\n", defprog);
+	exit(1);
+	/* NOTREACHED */
+d1163 1
+a1163 1
+ * void deferror(char *defprog,int exitval, char *from,char *descr,char *xtr)
+d1169 2
+a1170 1
+void deferror (char *defprog,int exitval,char *from,char *descr,char *xtr)
+@
+
+
+1.22
+log
+@changed position of lastpos to start of last section
+@
+text
+@d2 1
+a2 1
+/* $Header: /home/schj/src/vamps_0.96/src/deffile/RCS/deffile.c,v 1.21 1995/12/17 21:57:50 schj Exp $ */
+d6 1
+a6 1
+ *  $Date: 1995/12/17 21:57:50 $
+d8 3
+a19 1
+ * ,
+a39 3
+ * Revision 1.12  1995/09/22  15:43:24  schj
+ * *** empty log message ***
+ *
+d56 1
+a56 1
+"$Id: deffile.c,v 1.21 1995/12/17 21:57:50 schj Exp $";
+d90 1
+a90 1
+static char defprog[]="deffile.c";
+d92 3
+a94 3
+static void *memory __P((void *ptr,size_t size,char *defprog));
+static void deferror __P((char *defprog,int exitval, char *from,char *descr,char *xtr));
+static char *getvalue __P((char *section, char *name));
+a101 1
+
+a109 1
+
+d114 2
+a115 18
+int nrvars = 0;
+int nrlist = 0;
+
+void ini_exit __P ((char *section, char *name, char *fname));
+
+/*-
+ *	char *Fgets(char *s,int size,FILE *inf)
+ *	My fgets, reads past newlines if escaped with \
+ *	It also dumps cr '\r' characters.
+ */
+
+char *
+Fgets (s, size, inf)
+     char *s;
+     int size;
+     FILE *inf;
+{
+  int c, i;
+d117 1
+a117 1
+  i = c = 0;
+a118 29
+newl:
+  while (--size > 0 && (c = fgetc (inf)) != EOF && c != '\n')
+    {
+      if (c!='\r')
+      	s[i++] = c;
+    }
+
+  if (size <= 1){
+    deferror (defprog,0, RCSid, "Warning Input string to large", "Fgets()");
+    return s;
+  }
+
+  if (c == '\n' && (s[i - 1] == '\\'))
+    {
+      /*i--;*/
+      s [i-1]=' ';
+      goto newl;
+    }
+
+  if (c == '\n')
+    s[i++] = c;
+
+  s[i] = '\0';
+
+  if (i < 1)
+    return (char *) NULL;
+  else
+    return s;
+}
+d131 1
+a131 5
+setvalue (section, name, value, check)
+     char *section;
+     char *name;
+     char *value;
+     int check;
+d137 1
+d139 1
+a139 8
+      /* save some mem */
+      if (nrlist >= 1 && strcmp (section, list[nrlist - 1].section) == 0)
+	{
+	  list[nrlist].section = list[nrlist - 1].section;
+	}
+      else
+	{
+	  list[nrlist].section = (char *) memory ((void *) NULL, strlen (section) * sizeof (int), defprog);
+a140 1
+	}
+a145 1
+      nrlist++;
+d151 1
+a151 1
+	  if (strcasecmp (section, list[i].section) == 0 && strcasecmp (name, list[i].name) == 0)
+d170 1
+a170 3
+*getvalue (section, name)
+     char *section;
+     char *name;
+d177 1
+a177 1
+      if ((strcasecmp (list[i].section, section) == 0) && (strcasecmp (list[i].name, name) == 0))
+d193 18
+d212 4
+d227 1
+a227 2
+setvar (s)
+     char *s;
+d235 1
+a243 1
+      nrvars++;
+d259 1
+a259 2
+*getvar (s)
+     char *s;
+d268 1
+a268 1
+  for (i = 0; i < nrvars; i++)
+d270 1
+a270 1
+      if ((strcasecmp (vars[i].section, section) == 0) && (strcasecmp (vars[i].name, name) == 0))
+d284 1
+a284 4
+ini_exit (section, name, fname)
+     char *section;
+     char *name;
+     char *fname;
+d295 2
+a296 1
+ *  gets a string from file with fname, used internally
+d298 8
+a305 2
+long int lastpos = 0;
+static FILE *deffp;
+d307 1
+a307 4
+pro_getdefault (section, name, fname)
+     char *section;
+     char *name;
+     char *fname;
+d366 1
+a366 1
+		  if (strcasecmp (section, cp) == 0)
+d369 4
+d374 1
+d391 1
+a391 1
+			      if (strcasecmp (name, cp) == 0)
+d454 1
+a454 2
+opendef (fname)
+     char *fname;
+d493 1
+a493 6
+getdefstr (section, name, def, fname, exitonerror)
+     char *section;
+     char *name;
+     char *def;
+     char *fname;
+     int exitonerror;
+d518 1
+a518 6
+getdefchar (section, name, def, fname, exitonerror)
+     char *section;
+     char *name;
+     int def;
+     char *fname;
+     int exitonerror;
+d546 1
+a546 6
+getdefint (section, name, def, fname, exitonerror)
+     char *section;
+     char *name;
+     int def;
+     char *fname;
+     int exitonerror;
+d563 1
+a563 1
+      if (strcasecmp (thestr, "TRUE") == 0)
+d566 1
+a566 1
+      if (strcasecmp (thestr, "FALSE") == 0)
+d596 1
+a596 7
+getdefar (section, name, def, fname, pts, exitonerror)
+     char *section;
+     char *name;
+     double *def;
+     char *fname;
+     int *pts;
+     int exitonerror;
+d640 1
+a640 6
+getdefdoub (section, name, def, fname, exitonerror)
+     char *section;
+     char *name;
+     double def;
+     char *fname;
+     int exitonerror;
+d679 2
+a680 2
+ *	1: dump file to stdout
+ *	2: dump file to stdout, strip comments
+d687 2
+a688 3
+int
+rinmem (fname)
+     char *fname;
+a726 2
+	      if (opt == 1)
+		fprintf (stdout, "[%s]\n", section);
+d760 1
+a760 3
+		      if (opt == 1)
+			fprintf (stdout, "%s\n", value);
+		      else if (opt == 3)
+a772 2
+      else if (opt == 1)
+	fprintf (stdout, "%s", cp);
+d790 1
+a790 4
+writememini (fname, format, stream)
+     char *fname;
+     int format;
+     FILE *stream;
+d863 1
+a863 1
+	      if (strcasecmp (list[i].section, list[j].section) == 0)
+d921 1
+a921 3
+issection (section, fname)
+     char *section;
+     char *fname;
+d931 1
+a931 1
+      if (strcasecmp (vars[i].section, section) == 0)
+d938 1
+a938 1
+      if (strcasecmp (list[i].section, section) == 0)
+d976 1
+a976 1
+	      if (strcasecmp (cp, section) == 0)
+d1003 1
+a1003 4
+memory(ptr, size, defprog)
+void	*ptr;
+size_t	size;
+char	*defprog;
+d1028 1
+a1028 7
+static void
+deferror (defprog,exitval, from, descr, xtr)
+     char *defprog;
+     int exitval;
+     char *from;
+     char *descr;
+     char *xtr;
+@
+
+
+1.21
+log
+@increased buffer sizes
+no exit id string to large, a warning is printed after clipping the string
+@
+text
+@d2 1
+a2 1
+/* $Header: /home/schj/src/vamps_0.91/deffile/RCS/deffile.c,v 1.20 1995/11/14 20:24:46 schj Exp $ */
+d6 1
+a6 1
+ *  $Date: 1995/11/14 20:24:46 $
+d8 4
+d57 1
+a57 1
+"$Id: deffile.c,v 1.20 1995/11/14 20:24:46 schj Exp $";
+a402 6
+	      if (thef == deffp || thef == stdin)
+		{
+		  lastpos = ftell (thef) - 1;
+		  if (lastpos < 0)
+		    deferror (defprog,1, RCSid, "Error in file processing", "FATAL");
+		}
+d409 2
+@
+
+
+1.20
+log
+@cleaned up a bit, the wrini needs some work!
+@
+text
+@d2 1
+a2 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.91/RCS/deffile.c,v 1.19 1995/10/30 13:54:33 schj Exp $ */
+d6 1
+a6 1
+ *  $Date: 1995/10/30 13:54:33 $
+d8 3
+d53 1
+a53 1
+"$Id: deffile.c,v 1.19 1995/10/30 13:54:33 schj Exp $";
+d81 1
+a81 1
+#define VALL 2048
+d86 1
+a86 1
+static int defverb=0;
+d141 4
+a144 2
+  if (size <= 1)
+    deferror (defprog,1, RCSid, "Input string to large", "Fgets()");
+d357 1
+a357 1
+      if (defverb > 2)
+d367 1
+a367 1
+      if (defverb > 2)
+@
+
+
+1.19
+log
+@added deffile.h
+,
+@
+text
+@d2 1
+a2 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.9/util/RCS/deffile.c,v 1.18 1995/10/23 07:46:13 schj Exp $ */
+d6 1
+a6 1
+ *  $Date: 1995/10/23 07:46:13 $
+d8 4
+d50 1
+a50 1
+"$Id: deffile.c,v 1.18 1995/10/23 07:46:13 schj Exp $";
+d57 1
+a57 1
+#include "../include/deffile.h"
+d88 1
+d162 1
+a162 1
+ * int setvalue(char *section, char *name, char *value)
+d166 1
+a166 1
+ *	See also: getvalue(char *sectionchar *name,char *value)
+d214 1
+a214 1
+ * char *getvalue(char *section,char *name)
+d220 2
+a221 3
+char
+ *
+getvalue (section, name)
+d251 2
+a252 2
+ * setvar is used to maintain a mem copy of the input file. This
+ * list is fist checked by pro_getdefault. s should have the form:
+d291 1
+a291 2
+ *
+getvar (s)
+d637 1
+a637 1
+ *		char *fname, exitonerror)
+d733 1
+a733 1
+ * int rinmem(char *fname, int opt)
+d744 1
+d746 1
+a746 1
+rinmem (fname, opt)
+a747 1
+     int opt;
+d880 13
+d923 1
+a923 1
+		(void) fprintf (out, "\\section{%s}\n {\\verb %s}={\\verb %s}\\\\\n", list[i].section, list[i].name, list[i].value);
+d952 1
+a952 1
+			(void) fprintf (out, "{\\verb %s}={\\verb%s}\\\\\n", list[j].name, list[j].value);
+d964 12
+@
+
+
+1.18
+log
+@Added some verbose stuff and comments
+@
+text
+@d2 1
+a2 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/util/RCS/deffile.c,v 1.17 1995/10/01 21:00:38 schj Exp $ */
+d6 1
+a6 1
+ *  $Date: 1995/10/01 21:00:38 $
+d8 3
+d46 1
+a46 1
+"$Id: deffile.c,v 1.17 1995/10/01 21:00:38 schj Exp $";
+d53 8
+a60 1
+#include "../include/vamps.h"
+d76 8
+d113 1
+d129 2
+a130 1
+      s[i++] = c;
+d134 1
+a134 1
+    Perror (progname,1, RCSid, "Input string to large", "Fgets()");
+d175 1
+a175 1
+      list = (listt *) ts_memory ((void *) list, (1 + nrlist) * sizeof (listt), progname);
+d183 1
+a183 1
+	  list[nrlist].section = (char *) ts_memory ((void *) NULL, strlen (section) * sizeof (int), progname);
+d186 2
+a187 2
+      list[nrlist].name = (char *) ts_memory ((void *) NULL, strlen (name) * sizeof (int), progname);
+      list[nrlist].value = (char *) ts_memory ((void *) NULL, strlen (value) * sizeof (int), progname);
+d199 1
+a199 1
+              list[i].value = (char *) ts_memory ((void *) list[i].value, strlen (value), progname);
+d264 4
+a267 4
+      vars = (varst *) ts_memory ((void *) vars, (1 + nrvars) * sizeof (varst), progname);
+      vars[nrvars].section = (char *) ts_memory ((void *) NULL, 1 + strlen (section), progname);
+      vars[nrvars].name = (char *) ts_memory ((void *) NULL, 1 + strlen (name), progname);
+      vars[nrvars].value = (char *) ts_memory ((void *) NULL, 1 + strlen (value), progname);
+d319 1
+a319 1
+  fprintf (stderr, "%s: Fatal:\tcould not find\t->%s<-\n", progname, name);
+d322 1
+a322 1
+  Perror (progname,3, RCSid, "Var not found or invalid,", "see above.");
+d349 1
+a349 1
+      if (verbose > 2)
+d352 1
+a352 1
+	  showit (tmp);
+d359 1
+a359 1
+      if (verbose > 2)
+d362 1
+a362 1
+	  showit (tmp);
+d395 1
+a395 1
+		    Perror (progname,1, RCSid, "Error in file processing", "FATAL");
+d440 1
+a440 1
+				  if (verbose > 1)
+d443 1
+a443 1
+				      showit (tmp);
+d467 1
+a467 1
+      if (verbose > 2)
+d469 2
+a470 2
+	  sprintf (tmp, "ini: Requested: section=%s, name=%s, value=%s", section, name, cp);
+	  showit (tmp);
+d529 1
+a529 1
+  char *tt;
+d531 1
+a531 1
+  tt = pro_getdefault (section, name, fname);
+d533 2
+a534 2
+  if (tt != NULL)
+    return tt;
+d559 1
+a559 1
+  char *tt;
+d561 1
+a561 1
+  tt = pro_getdefault (section, name, fname);
+d563 1
+a563 1
+  if (tt == NULL)
+d571 1
+a571 1
+      return tt[0];
+d580 1
+a580 1
+ * Supportd FALSE and TRUE strings (0 and 1)
+d592 1
+a592 1
+  char *tt;
+d596 1
+a596 1
+  tt = pro_getdefault (section, name, fname);
+d598 1
+a598 1
+  if (tt == NULL)
+d606 2
+a607 2
+      ttt = (int) strtol (tt, &endptr, 10);
+      if (strcasecmp (tt, "TRUE") == 0)
+d610 1
+a610 1
+      if (strcasecmp (tt, "FALSE") == 0)
+d612 1
+a612 1
+      if (endptr == tt)
+d616 1
+a616 1
+	      Perror (progname,0, RCSid, "Integer conversion failed", "");
+d619 3
+a621 1
+	  else
+d623 1
+d633 2
+a634 1
+ * double *getdefar(char *section, char *name, double *def, char *fname, exitonerror)
+d664 1
+a664 1
+      thear = (double *) ts_memory ((double *) def, 1024 * sizeof (double), progname);
+d670 1
+a670 1
+	    Perror (progname,1, RCSid, "Array to large", "getdefar()");
+d675 1
+a675 1
+      i--;
+d716 1
+a716 1
+	      Perror (progname,0, RCSid, "Double conversion failed", "");
+d719 2
+a720 1
+	  else
+d722 1
+d813 1
+a813 1
+		      for (rp = cp; *rp == '\n'; rp++);		/* go to end of line  or commentchar */
+d869 1
+a869 1
+	      Perror (progname,3, RCSid, "Cannot open for writing", fname);
+d876 1
+a876 1
+  doneit = (int *) ts_memory ((void *) NULL, (nrlist) * sizeof (int), progname);
+d956 4
+a959 1
+
+d1029 66
+@
+
+
+1.17
+log
+@not much
+@
+text
+@d2 3
+a4 2
+/* $Header: /home/schj/src/prosper/vamps_0.9/util/RCS/deffile.c,v 1.16 1995/09/30 18:00:46 schj Exp $ */
+/*- $RCSfile: deffile.c,v $
+d6 1
+a6 1
+ *  $Date: 1995/09/30 18:00:46 $
+d8 3
+d43 1
+a43 1
+"$Id: deffile.c,v 1.16 1995/09/30 18:00:46 schj Exp $";
+d114 1
+a114 1
+    Perror (1, RCSid, "Input string to large", "Fgets()");
+d118 2
+a119 1
+      i--;
+d289 2
+a290 1
+/*- void ini_exit(char *section, char *name, char *fname)
+d299 4
+a302 4
+  fprintf (stderr, "%s: Fatal:\tcould not find ->%s<-\n", progname, name);
+  fprintf (stderr, "\tin section ->%s<-\n", section);
+  fprintf (stderr, "\tin file ->%s<-\n", fname);
+  Perror (3, RCSid, "Var not found", "see above");
+d305 2
+a306 1
+/*- void pro_getdefault(char section, char *name, char *fname)
+d308 1
+a308 1
+ *  gets a srting from file with fname, used internally
+d329 1
+a329 1
+      if (verbose > 1)
+d339 1
+a339 1
+      if (verbose > 1)
+d375 1
+a375 1
+		    Perror (1, RCSid, "Error in file processing", "FATAL");
+d447 5
+d455 6
+d480 4
+d496 2
+a497 1
+ * char *getdefstr(char *section, char *name, char *def, char *fname,int exitonerror)
+d596 1
+a596 1
+	      Perror (0, RCSid, "Integer conversion failed", "");
+d646 1
+a646 1
+	    Perror (1, RCSid, "Array to large", "getdefar()");
+d692 1
+a692 1
+	      Perror (0, RCSid, "Double conversion failed", "");
+a699 1
+      return atof (tt);
+d843 1
+a843 1
+	      Perror (3, RCSid, "Cannot open for writing", fname);
+d991 1
+a992 1
+		  (void) fclose (thef);
+@
+
+
+1.16
+log
+@added '-' for stdin in functions
+@
+text
+@d2 1
+a2 1
+/* $Header: /home/schj/src/prosper/vamps_0.9/util/RCS/deffile.c,v 1.15 1995/09/26 21:54:50 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1995/09/26 21:54:50 $
+d7 3
+d39 1
+a39 1
+"$Id: deffile.c,v 1.15 1995/09/26 21:54:50 schj Exp $";
+d48 1
+a48 1
+#ifndef SEEK_SET
+@
+
+
+1.15
+log
+@fixed lastpos and return of issection
+@
+text
+@d2 1
+a2 1
+/* $Header: /home/schj/src/prosper/vamps_0.9/util/RCS/deffile.c,v 1.14 1995/09/26 21:20:22 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1995/09/26 21:20:22 $
+d7 3
+d36 1
+a36 1
+"$Id: deffile.c,v 1.14 1995/09/26 21:20:22 schj Exp $";
+d45 4
+d339 3
+d345 2
+a346 1
+  else if (deffp)
+d350 1
+d361 1
+a361 1
+	      if (thef == deffp)
+d423 1
+a423 1
+      if (thef == deffp)
+d432 1
+a432 1
+  if (thef != deffp)
+d446 4
+d462 3
+d786 2
+a787 1
+  (void) fclose (thef);
+@
+
+
+1.14
+log
+@updated issection
+@
+text
+@d2 1
+a2 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/util/RCS/deffile.c,v 1.13 1995/09/25 12:54:26 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1995/09/25 12:54:26 $
+d7 3
+d33 1
+a33 1
+"$Id: deffile.c,v 1.13 1995/09/25 12:54:26 schj Exp $";
+d351 2
+a352 2
+		  lastpos = ftell (thef) - 64;
+		  if (lastpos < 1)
+d931 1
+a931 1
+      return NULL;
+@
+
+
+1.13
+log
+@added global file, for speeding up sequential reads
+added opendef(char *fname) and closedef()
+@
+text
+@d2 1
+a2 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/util/RCS/deffile.c,v 1.12 1995/09/22 15:43:24 schj Beta $ */
+d5 1
+a5 1
+ *  $Date: 1995/09/22 15:43:24 $
+d7 4
+d30 1
+a30 1
+"$Id: deffile.c,v 1.12 1995/09/22 15:43:24 schj Beta $";
+d52 3
+a54 3
+    char   *section;
+    char   *name;
+    char   *value;
+d61 3
+a63 3
+    char   *section;
+    char   *name;
+    char   *value;
+d68 4
+a71 4
+varst  *vars = (varst *) NULL;
+listt  *list = (listt *) NULL;
+int     nrvars = 0;
+int     nrlist = 0;
+d80 1
+a80 1
+char   *
+d82 3
+a84 3
+char   *s;
+int     size;
+FILE   *inf;
+d86 1
+a86 1
+  int     c, i;
+d128 4
+a131 4
+char   *section;
+char   *name;
+char   *value;
+int     check;
+d133 1
+a133 1
+  int     i;
+d138 10
+a147 1
+      list[nrlist].section = (char *) ts_memory ((void *) NULL, strlen (section) * sizeof (int), progname);
+a150 1
+      strcpy (list[nrlist].section, section);
+d161 1
+a161 1
+	      list[i].value = (char *) ts_memory ((void *) list[i].value, strlen (value), progname);
+d176 1
+a176 1
+int     getvaluehint = 0;
+d178 1
+a178 1
+       *
+d180 2
+a181 2
+char   *section;
+char   *name;
+d183 1
+a183 1
+  int     i;
+d217 1
+a217 1
+char   *s;
+d219 3
+a221 3
+  char    name[NAMEL];
+  char    section[SECL];
+  char    value[VALL];
+d249 1
+a249 1
+       *
+d251 1
+a251 1
+char   *s;
+d253 3
+a255 3
+  char    name[NAMEL];
+  char    section[SECL];
+  int     i;
+d276 3
+a278 3
+char   *section;
+char   *name;
+char   *fname;
+d292 1
+a292 1
+char   *
+d294 8
+a301 8
+char   *section;
+char   *name;
+char   *fname;
+{
+  char   *cp, *rp;
+  char    buf[LBUFF];
+  char    tmp[LBUFF];
+  FILE   *thef;
+d303 1
+a303 1
+  int     restart = 0;
+d346 6
+a351 3
+	      lastpos = ftell (thef) - 64;
+	      if (lastpos < 1)
+		Perror (1, RCSid, "Error in file processing", "FATAL");
+d385 1
+a385 1
+				  while (isspace (*cp))	/* skip whitespace */
+d408 1
+a408 1
+      if (thef != deffp)
+d413 2
+d425 1
+a425 1
+int 
+d427 1
+a427 1
+char   *fname;
+d440 1
+a440 1
+int 
+d453 1
+a453 1
+char   *
+d455 5
+a459 5
+char   *section;
+char   *name;
+char   *def;
+char   *fname;
+int     exitonerror;
+d461 1
+a461 1
+  char   *tt;
+d485 5
+a489 5
+char   *section;
+char   *name;
+int     def;
+char   *fname;
+int     exitonerror;
+d491 1
+a491 1
+  char   *tt;
+d518 9
+a526 9
+char   *section;
+char   *name;
+int     def;
+char   *fname;
+int     exitonerror;
+{
+  char   *tt;
+  char   *endptr;
+  int     ttt;
+d567 1
+a567 1
+       *
+d569 6
+a574 6
+char   *section;
+char   *name;
+double *def;
+char   *fname;
+int    *pts;
+int     exitonerror;
+d576 2
+a577 2
+  char   *tt;
+  char   *ept;
+d579 1
+a579 1
+  int     i = 0;
+d619 9
+a627 9
+char   *section;
+char   *name;
+double  def;
+char   *fname;
+int     exitonerror;
+{
+  char   *tt;
+  double  ttt;
+  char   *endptr;
+d670 2
+a671 2
+char   *fname;
+int     opt;
+d673 7
+a679 7
+  char   *cp, *rp;
+  char    buf[LBUFF];
+  FILE   *thef;
+  char    section[SECL];
+  char    name[NAMEL];
+  char    value[VALL];
+  char    outp[LBUFF];
+d732 1
+a732 1
+		      while (*cp != '=' && *cp != '\0')	/* find = */
+d740 2
+a741 2
+		      for (rp = cp; *rp == '\n'; rp++);	/* go to end of line  or commentchar */
+		      for (rp--; !isspace (*rp); rp--);	/* go back to last text */
+d779 7
+a785 7
+char   *fname;
+int     format;
+FILE   *stream;
+{
+  FILE   *out;
+  int     i, j;
+  int    *doneit;		/* these have been written */
+d885 2
+a886 2
+char   *section;
+char   *fname;
+d888 4
+a891 4
+  int     i;
+  char   *cp, *rp;
+  char    buf[LBUFF];
+  FILE   *thef;
+d924 6
+a929 2
+  else
+    return FALSE;
+@
+
+
+1.12
+log
+@*** empty log message ***
+@
+text
+@d2 1
+a2 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/util/RCS/deffile.c,v 1.11 1995/09/19 13:42:39 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1995/09/19 13:42:39 $
+d7 3
+d26 1
+a26 1
+"$Id: deffile.c,v 1.11 1995/09/19 13:42:39 schj Exp $";
+d48 3
+a50 3
+    char *section;
+    char *name;
+    char *value;
+d57 3
+a59 3
+    char *section;
+    char *name;
+    char *value;
+d64 4
+a67 4
+varst *vars = (varst *) NULL;
+listt *list = (listt *) NULL;
+int nrvars = 0;
+int nrlist = 0;
+d76 1
+a76 1
+char *
+d78 3
+a80 3
+     char *s;
+     int size;
+     FILE *inf;
+d82 1
+a82 1
+  int c, i;
+d124 4
+a127 4
+     char *section;
+     char *name;
+     char *value;
+     int check;
+d129 1
+a129 1
+  int i;
+d137 1
+d164 1
+a164 1
+int getvaluehint = 0;
+d166 1
+a166 1
+ *
+d168 2
+a169 2
+     char *section;
+     char *name;
+d171 1
+a171 1
+  int i;
+a202 1
+
+d205 1
+a205 1
+     char *s;
+d207 3
+a209 3
+  char name[NAMEL];
+  char section[SECL];
+  char value[VALL];
+d237 1
+a237 1
+ *
+d239 1
+a239 1
+     char *s;
+d241 3
+a243 3
+  char name[NAMEL];
+  char section[SECL];
+  int i;
+d264 3
+a266 3
+     char *section;
+     char *name;
+     char *fname;
+d278 3
+a280 1
+char *
+d282 10
+a291 8
+     char *section;
+     char *name;
+     char *fname;
+{
+  char *cp, *rp;
+  char buf[LBUFF];
+  char tmp[LBUFF];
+  FILE *thef;
+d320 2
+d325 1
+a325 1
+  while ((cp = Fgets (buf, LBUFF, thef)) != (char *) NULL)
+d327 1
+a327 3
+      while (isspace (*cp))
+	cp++;
+      if (*cp && *cp != '#')
+d329 15
+a343 16
+	  if (*cp == '[' && (rp = strchr (cp, ']')) != (char *) NULL)
+	    {
+	      *rp = '\0';
+	      cp++;
+	      if (strcasecmp (section, cp) == 0)
+		{		/* found the section we need */
+		  while ((cp = Fgets (buf, LBUFF, thef)) != (char *) NULL)
+		    {
+		      cp[strlen (cp) - 1] = '\0';
+		      while (isspace (*cp))
+			cp++;
+		      if (*cp == '[')
+			{	/* next section, abort */
+			  break;
+			}
+		      if (*cp && *cp != '#')
+d345 12
+a356 19
+			  for (rp = cp; *rp && !isspace (*rp) && *rp != '='; rp++)
+			    ;
+			  if (*rp)
+			    *rp++ = '\0';
+			  if (strcasecmp (name, cp) == 0)
+			    {	/* YES! var found */
+			      rp--;
+			      *rp = ' ';
+			      cp = rp;
+			      while (*cp != '=' && *cp != '\0')		/* find = */
+				cp++;
+			      if (*cp != '\0')
+				cp++;
+			      else
+				cp = rp;
+			      while (isspace (*cp))	/* skip whitespace */
+				cp++;
+			      for (rp = cp; *rp == '\n'; rp++);		/* go to end of line  or comment char */
+			      for (rp--; !isspace (*rp); rp--);		/* go back to last text */
+d359 27
+a385 5
+			      (void) fclose (thef);
+			      if (verbose > 1)
+				{
+				  sprintf (tmp, "ini: (File) section=%s, name=%s, value=%s", section, name, cp);
+				  showit (tmp);
+a386 1
+			      return cp;
+d393 5
+d400 5
+a404 1
+  (void) fclose (thef);
+d408 21
+d436 1
+a436 1
+char *
+d438 5
+a442 5
+     char *section;
+     char *name;
+     char *def;
+     char *fname;
+     int exitonerror;
+d444 1
+a444 1
+  char *tt;
+d468 5
+a472 5
+     char *section;
+     char *name;
+     int def;
+     char *fname;
+     int exitonerror;
+d474 1
+a474 1
+  char *tt;
+d501 9
+a509 9
+     char *section;
+     char *name;
+     int def;
+     char *fname;
+     int exitonerror;
+{
+  char *tt;
+  char *endptr;
+  int ttt;
+d550 1
+a550 1
+ *
+d552 6
+a557 6
+     char *section;
+     char *name;
+     double *def;
+     char *fname;
+     int *pts;
+     int exitonerror;
+d559 2
+a560 2
+  char *tt;
+  char *ept;
+d562 1
+a562 1
+  int i = 0;
+d602 9
+a610 9
+     char *section;
+     char *name;
+     double def;
+     char *fname;
+     int exitonerror;
+{
+  char *tt;
+  double ttt;
+  char *endptr;
+d653 2
+a654 2
+     char *fname;
+     int opt;
+d656 7
+a662 7
+  char *cp, *rp;
+  char buf[LBUFF];
+  FILE *thef;
+  char section[SECL];
+  char name[NAMEL];
+  char value[VALL];
+  char outp[LBUFF];
+d715 1
+a715 1
+		      while (*cp != '=' && *cp != '\0')		/* find = */
+d723 2
+a724 2
+		      for (rp = cp; *rp == '\n'; rp++);		/* go to end of line  or commentchar */
+		      for (rp--; !isspace (*rp); rp--);		/* go back to last text */
+a748 1
+
+d762 7
+a768 7
+     char *fname;
+     int format;
+     FILE *stream;
+{
+  FILE *out;
+  int i, j;
+  int *doneit;			/* these have been written */
+d867 8
+a874 8
+issection(section,fname)
+char *section;
+char *fname;
+{
+  int i;
+  char *cp, *rp;
+  char buf[LBUFF];
+  FILE *thef;
+d880 1
+a880 1
+	  return TRUE;
+d920 4
+a923 3
+	      if (strcasecmp(cp,section)==0){
+	      	return TRUE;
+		(void) fclose(thef);
+d925 1
+a925 1
+	     }
+d929 1
+a929 1
+  (void) fclose(thef);
+@
+
+
+1.11
+log
+@updated exitonerror
+@
+text
+@d2 1
+a2 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/util/RCS/deffile.c,v 1.10 1995/09/04 17:04:18 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1995/09/04 17:04:18 $
+d7 3
+d23 1
+a23 1
+"$Id: deffile.c,v 1.10 1995/09/04 17:04:18 schj Exp $";
+d45 3
+a47 3
+    char   *section;
+    char   *name;
+    char   *value;
+d54 3
+a56 3
+    char   *section;
+    char   *name;
+    char   *value;
+d61 4
+a64 4
+varst  *vars = (varst *) NULL;
+listt  *list = (listt *) NULL;
+int     nrvars = 0;
+int     nrlist = 0;
+d73 1
+a73 1
+char   *
+d75 3
+a77 3
+char   *s;
+int     size;
+FILE   *inf;
+d79 1
+a79 1
+  int     c, i;
+d121 7
+a127 9
+char   *section;
+char   *name;
+char   *value;
+int     check;
+{
+  int     i;
+  
+  if (strcasecmp(section,"soil")==0 || strcasecmp(name,"initprof")==0)
+  	fprintf(stderr,"section = %s %s %s %d\n",section,name,value,nrlist);
+a129 2
+  if (strcasecmp(section,"soil")==0 || strcasecmp(name,"initprof")==0)
+  	fprintf(stderr,"section = %s %s %s %d\n",section,name,value,nrlist);
+d131 3
+a133 3
+      list[nrlist].section = (char *) ts_memory ((void *) NULL, strlen (section)*sizeof(int), progname);
+      list[nrlist].name = (char *) ts_memory ((void *) NULL, strlen (name)*sizeof(int), progname);
+      list[nrlist].value = (char *) ts_memory ((void *) NULL, strlen (value)*sizeof(int), progname);
+d160 1
+a160 1
+int     getvaluehint = 0;
+d162 4
+a165 3
+*getvalue (section, name)
+char   *section;
+char   *name;
+d167 1
+a167 1
+  int     i;
+d202 1
+a202 1
+char   *s;
+d204 3
+a206 3
+  char    name[NAMEL];
+  char    section[SECL];
+  char    value[VALL];
+d234 1
+a234 1
+       *
+d236 1
+a236 1
+char   *s;
+d238 3
+a240 3
+  char    name[NAMEL];
+  char    section[SECL];
+  int     i;
+d261 3
+a263 3
+char   *section;
+char   *name;
+char   *fname;
+d275 1
+a275 1
+char   *
+d277 8
+a284 8
+char   *section;
+char   *name;
+char   *fname;
+{
+  char   *cp, *rp;
+  char    buf[LBUFF];
+  char    tmp[LBUFF];
+  FILE   *thef;
+d348 1
+a348 1
+			      while (*cp != '=' && *cp != '\0')	/* find = */
+d356 2
+a357 2
+			      for (rp = cp; *rp == '\n'; rp++);	/* go to end of line  or comment char*/
+			      for (rp--; !isspace (*rp); rp--);	/* go back to last text */
+d386 1
+a386 1
+char   *
+d388 5
+a392 5
+char   *section;
+char   *name;
+char   *def;
+char   *fname;
+int     exitonerror;
+d394 1
+a394 1
+  char   *tt;
+d418 5
+a422 5
+char   *section;
+char   *name;
+int     def;
+char   *fname;
+int     exitonerror;
+d424 1
+a424 1
+  char   *tt;
+d451 9
+a459 9
+char   *section;
+char   *name;
+int     def;
+char   *fname;
+int     exitonerror;
+{
+  char   *tt;
+  char   *endptr;
+  int     ttt;
+a462 6
+  if (strcasecmp (tt, "TRUE") == 0)
+    return 1;
+
+  if (strcasecmp (tt, "FALSE") == 0)
+    return 0;
+
+d472 5
+d500 1
+a500 1
+       *
+d502 6
+a507 6
+char   *section;
+char   *name;
+double *def;
+char   *fname;
+int    *pts;
+int     exitonerror;
+d509 2
+a510 2
+  char   *tt;
+  char   *ept;
+d512 1
+a512 1
+  int     i = 0;
+d552 9
+a560 9
+char   *section;
+char   *name;
+double  def;
+char   *fname;
+int     exitonerror;
+{
+  char   *tt;
+  double  ttt;
+  char   *endptr;
+d603 2
+a604 2
+char   *fname;
+int     opt;
+d606 7
+a612 7
+  char   *cp, *rp;
+  char    buf[LBUFF];
+  FILE   *thef;
+  char    section[SECL];
+  char    name[NAMEL];
+  char    value[VALL];
+  char    outp[LBUFF];
+d651 1
+a651 1
+		    goto nsec;	/* my first GOTO!!*/
+d665 1
+a665 1
+		      while (*cp != '=' && *cp != '\0')	/* find = */
+d673 2
+a674 2
+		      for (rp = cp; *rp == '\n'; rp++);	/* go to end of line  or commentchar*/
+		      for (rp--; !isspace (*rp); rp--);	/* go back to last text */
+d713 7
+a719 7
+char   *fname;
+int     format;
+FILE   *stream;
+{
+  FILE   *out;
+  int     i, j;
+  int    *doneit;		/* these have been written */
+d814 67
+@
+
+
+1.10
+log
+@added latex format to writememini (OT FINISHED)
+@
+text
+@d2 1
+a2 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/util/RCS/deffile.c,v 1.9 1995/09/04 11:37:20 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1995/09/04 11:37:20 $
+d7 3
+d20 1
+a20 1
+"$Id: deffile.c,v 1.9 1995/09/04 11:37:20 schj Exp $";
+a62 4
+int     exitonerror = FALSE;	/* if TRUE exits if asked var can not be found */
+
+static FILE *fp;
+
+d87 1
+a87 1
+  	Perror(1,RCSid,"Input string to large","Fgets()");
+d117 1
+a117 1
+setvalue (section, name, value,check)
+d121 1
+a121 1
+int	check;
+d124 3
+a126 1
+
+d129 2
+d132 3
+a134 3
+      list[nrlist].section = (char *) ts_memory ((void *) NULL, 1 + strlen (section), progname);
+      list[nrlist].name = (char *) ts_memory ((void *) NULL, 1 + strlen (name), progname);
+      list[nrlist].value = (char *) ts_memory ((void *) NULL, 1 + strlen (value), progname);
+d146 1
+a146 1
+	      list[i].value = (char *) ts_memory ((void *) list[i].value, 1 + strlen (value), progname);
+d161 1
+a161 1
+int getvaluehint=0;
+d170 3
+a172 2
+
+      for (i = getvaluehint; i < nrlist; i++)
+d174 2
+a175 5
+	  if ((strcasecmp (list[i].section, section) == 0) && (strcasecmp (list[i].name, name) == 0))
+	    {
+	      getvaluehint = i==0 ? i : i-1;
+	      return list[i].value;
+	    }
+d177 7
+a183 4
+	if (getvaluehint){
+		getvaluehint=0;
+		goto getrestart;
+	}
+d256 3
+a258 1
+
+d271 4
+d314 1
+a314 1
+    thef = fp;			/* assume already opened defaults */
+d356 1
+a356 1
+			      for (rp = cp; *rp == '\n'; rp++);	/* go to end of line */
+d360 1
+a360 2
+			      if (thef != fp)
+				(void) fclose (thef);
+d375 1
+a375 2
+  if (thef != fp)
+    (void) fclose (thef);
+d382 1
+a382 1
+ * char *getdefstr(char *section, char *name, char *def, char *fname)
+d387 1
+a387 1
+getdefstr (section, name, def, fname)
+d392 1
+d411 1
+a411 1
+ * int *getdefchar(char *section, char *name, int *def, char *fname)
+d417 1
+a417 1
+getdefchar (section, name, def, fname)
+d422 1
+d443 1
+a443 1
+ * int *getdefint(char *section, char *name, int *def, char *fname)
+d445 1
+d450 1
+a450 1
+getdefint (section, name, def, fname)
+d455 1
+d458 2
+d463 6
+d477 13
+a489 1
+      return atoi (tt);
+d496 1
+a496 1
+ * double *getdefar(char *section, char *name, double *def, char *fname)
+d502 1
+a502 1
+getdefar (section, name, def, fname, pts)
+d508 1
+d532 1
+a532 1
+	  	Perror(1,RCSid,"Array to large","getdefar()");
+d547 1
+a547 1
+ * double *getdefdoub(char *section, char *name, double *def, char *fname)
+d552 1
+a552 1
+getdefdoub (section, name, def, fname)
+d557 1
+d560 2
+d573 13
+d600 1
+d617 1
+a617 4
+      if (strcmp(fname,"-")==0){
+      	thef=stdin;
+	}else{
+      if ((thef = fopen (fname, "r")) == NULL)
+d619 1
+a619 1
+	  return 0;
+d621 6
+d630 1
+a630 1
+    thef = fp;			/* assume already opened defaults */
+d674 1
+a674 1
+		      for (rp = cp; *rp == '\n'; rp++);	/* go to end of line */
+d688 1
+a688 1
+			  setvalue (section, name, value,0);
+d698 1
+a698 2
+  if (thef != fp)
+    (void) fclose (thef);
+d701 1
+a701 1
+  return 0;
+d737 1
+a737 1
+  doneit = (int *) ts_memory ((void *) NULL, (1 + nrlist) * sizeof (int), progname);
+d751 1
+a751 1
+	    case 0: /* as ini file */
+d761 1
+a761 1
+	    case 1:        /* as tcl set */
+d766 1
+a766 1
+	    case 3:        /* as latex2e set */
+d768 1
+a768 1
+		(void) fprintf (out, "\\section{%s}\n {\\verb %s}={\\verb %s}\\\\\n", list[i].section, list[i].name,list[i].value);
+d770 1
+a770 1
+		}
+d795 5
+a799 5
+	    case 3:        /* as latex2e set */
+	      {
+		(void) fprintf (out, "{\\verb %s}={\\verb%s}\\\\\n",  list[j].name,list[j].value);
+		break;
+		}
+d814 1
+a814 1
+  return 0;
+@
+
+
+1.9
+log
+@increased buffer size, added check in Fgets()
+@
+text
+@d2 1
+a2 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/util/RCS/deffile.c,v 1.8 1995/09/01 11:43:50 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1995/09/01 11:43:50 $
+d7 3
+d17 1
+a17 1
+"$Id: deffile.c,v 1.8 1995/09/01 11:43:50 schj Exp $";
+d656 1
+d699 1
+a699 1
+	    case 0:
+d709 1
+a709 1
+	    case 1:
+d714 5
+d741 1
+d743 5
+@
+
+
+1.8
+log
+@updated header
+@
+text
+@d2 2
+a3 2
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/soil/RCS/swatsoil.c,v 1.10 1995/09/01 06:14:26 schj Exp $ */
+/*- $RCSfile: swatsoil.c,v $
+d5 5
+a9 2
+ *  $Date: 1995/09/01 06:14:26 $
+ *  $Log$
+d14 1
+a14 1
+"$Id: deffile.c,v 1.7 1995/09/01 06:09:11 schj Exp $";
+d21 1
+d29 4
+a32 1
+#include "../include/vamps.h"
+d84 3
+d155 1
+a155 1
+
+d162 2
+a163 1
+  int     stop;
+d165 1
+a165 1
+      for (i = 0; i < nrlist; i++)
+d169 1
+d173 4
+d197 3
+a199 3
+  char    name[BUFSIZ];
+  char    section[BUFSIZ];
+  char    value[BUFSIZ];
+d231 2
+a232 2
+  char    name[BUFSIZ];
+  char    section[BUFSIZ];
+d269 2
+a270 2
+  char    buf[BUFJTE];
+  char    tmp[BUFJTE];
+d303 1
+a303 1
+  while ((cp = Fgets (buf, BUFJTE, thef)) != (char *) NULL)
+d315 1
+a315 1
+		  while ((cp = Fgets (buf, BUFJTE, thef)) != (char *) NULL)
+d495 2
+d555 1
+a555 1
+  char    buf[BUFJTE];
+d557 4
+a560 4
+  char    section[1024];
+  char    name[1024];
+  char    value[1024];
+  char    outp[2048];
+d576 1
+a576 1
+  while ((cp = fgets (buf, BUFJTE, thef)) != (char *) NULL)
+d590 1
+a590 1
+	      while ((cp = Fgets (buf, BUFJTE, thef)) != (char *) NULL)
+@
+
+
+1.7
+log
+@removed hints, added nocheck option in getvalue
+@
+text
+@d2 6
+d11 1
+a11 1
+"$Id: deffile.c,v 1.6 1995/08/31 12:24:27 schj Exp $";
+@
+
+
+1.6
+log
+@added hint option in search list. Maybe insert everything sorted
+@
+text
+@d5 1
+a5 1
+"$Id: deffile.c,v 1.5 1995/08/24 20:53:01 schj Exp $";
+a38 1
+int     hint = 0;		/* Star searching in getvalue */
+d99 1
+a99 1
+setvalue (section, name, value)
+d103 1
+d107 1
+a107 1
+  if ((getvalue (section, name)) == NULL)	/* add a new entry */
+d141 1
+a141 2
+       *
+getvalue (section, name)
+a146 1
+  int     ohint;
+d148 1
+a148 4
+  ohint = hint;
+  do
+    {
+      for (i = ohint; i < nrlist; i++)
+a154 9
+      if (hint)
+	{
+	  ohint = 0;		/*hint maybe set to high */
+	  stop = FALSE;
+	}
+      else
+	stop = TRUE;
+    }
+  while (stop == FALSE);
+d540 3
+d547 1
+d608 1
+a608 2
+			  setvalue (section, name, value);
+			  hint++;
+a621 1
+  hint = 0;
+@
+
+
+1.5
+log
+@some stuff on writememini
+@
+text
+@d5 1
+a5 1
+"$Id: deffile.c,v 1.4 1995/08/24 14:14:24 schj Exp $";
+d39 1
+d49 1
+a49 1
+void	ini_exit __P((char *section, char *name, char *fname));
+d141 2
+a142 1
+*getvalue (section, name)
+d147 2
+d150 2
+a151 1
+  for (i = 0; i < nrlist; i++)
+d153 8
+a160 1
+      if ((strcasecmp (list[i].section, section) == 0) && (strcasecmp (list[i].name, name) == 0))
+d162 2
+a163 1
+	  return list[i].value;
+d165 2
+d168 1
+d251 1
+a251 1
+  Perror (3,RCSid,"Var not found","see above");
+d295 1
+a295 1
+  while ((cp = fgets (buf, BUFJTE, thef)) != (char *) NULL)
+d619 1
+d632 2
+d654 1
+a654 1
+  if (stream) /* Dump to stream if given */
+d662 1
+a662 1
+	      Perror (3,RCSid,"Cannot open for writing",fname);
+d688 1
+a688 1
+	    case 2: /* As a comment */
+d690 1
+a690 1
+		(void) fprintf (out, "\n\n%c[%s]\n%c%s = %s\n",commchar, list[i].section,commchar, list[i].name, list[i].value);
+d731 1
+a731 1
+	fclose (out);
+@
+
+
+1.4
+log
+@RCS
+@
+text
+@d5 1
+a5 1
+"$Id: deffile.c,v 1.3 1995/08/24 12:47:38 schj Exp $";
+d48 2
+d226 2
+a227 2
+int
+pro_exit (section, name, fname)
+d232 1
+a232 1
+  fprintf (stderr, "Fatal:\tcould not find ->%s<-\n", name);
+d367 1
+a367 1
+	pro_exit (section, name, fname);
+d394 1
+a394 1
+	pro_exit (section, name, fname);
+d425 1
+a425 1
+	pro_exit (section, name, fname);
+d461 1
+a461 1
+	pro_exit (section, name, fname);
+d503 1
+a503 1
+	pro_exit (section, name, fname);
+d619 1
+a619 1
+ *  int writememinit (char *fname, int format)
+d621 1
+a621 1
+ * 	format =0 in ini 1 is set (tcl)
+d635 1
+a635 1
+  if (stream)
+a649 1
+  fprintf (out, "# file produced by %s\n", progname);
+d669 5
+d693 5
+d711 3
+a713 1
+  fclose (out);
+@
+
+
+1.3
+log
+@included use of perror
+@
+text
+@d4 2
+a5 2
+static const char RCSid[] =
+"$Id: deffile.c,v 1.2 1995/08/24 12:25:38 schj Exp $";
+d230 1
+a230 1
+  fprintf (stderr, "Fatal: could not find ->%s<-\n", name);
+d233 1
+a233 1
+  perror (3,RCSid,"Var not found","see above");
+d641 1
+a641 1
+	      perror (3,RCSid,"Cannot open for writing",fname);
+@
+
+
+1.2
+log
+@added RCSid
+@
+text
+@d4 2
+a5 2
+static char RCSid[] =
+"$Id$";
+d233 1
+a233 1
+  exit (3);
+d641 1
+a641 2
+	      (void) fprintf (stderr, "%s: can not open %s for writing\n", progname, fname);
+	      exit (3);
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d3 4
+@

@@ -1,0 +1,4615 @@
+head	0.40;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+0.40
+date	99.01.06.12.13.01;	author schj;	state Alpha;
+branches;
+next	0.39;
+
+0.39
+date	99.01.06.12.07.49;	author schj;	state Alpha;
+branches;
+next	0.38;
+
+0.38
+date	97.10.30.18.20.20;	author schj;	state Exp;
+branches;
+next	0.37;
+
+0.37
+date	97.09.09.10.30.02;	author schj;	state Exp;
+branches;
+next	0.36;
+
+0.36
+date	97.09.09.09.43.48;	author schj;	state Exp;
+branches;
+next	0.35;
+
+0.35
+date	97.09.09.08.36.57;	author schj;	state Exp;
+branches;
+next	0.34;
+
+0.34
+date	97.01.16.15.00.01;	author schj;	state Exp;
+branches;
+next	0.33;
+
+0.33
+date	96.11.01.11.00.17;	author schj;	state Alpha;
+branches;
+next	0.32;
+
+0.32
+date	96.10.23.09.21.46;	author schj;	state Alpha;
+branches;
+next	0.31;
+
+0.31
+date	96.10.22.17.48.09;	author schj;	state Exp;
+branches;
+next	0.30;
+
+0.30
+date	96.10.14.19.12.24;	author schj;	state Alpha;
+branches;
+next	0.29;
+
+0.29
+date	96.08.05.14.28.09;	author schj;	state Alpha;
+branches;
+next	0.28;
+
+0.28
+date	96.03.25.07.49.08;	author schj;	state alpha;
+branches;
+next	0.27;
+
+0.27
+date	96.03.24.11.50.31;	author schj;	state alpha;
+branches;
+next	0.26;
+
+0.26
+date	96.03.18.14.56.17;	author schj;	state alpha;
+branches;
+next	0.25;
+
+0.25
+date	96.03.18.14.49.45;	author schj;	state Exp;
+branches;
+next	0.24;
+
+0.24
+date	96.02.08.08.19.43;	author schj;	state Exp;
+branches;
+next	0.23;
+
+0.23
+date	96.01.25.15.10.28;	author schj;	state Exp;
+branches;
+next	0.22;
+
+0.22
+date	95.12.17.21.58.53;	author schj;	state Exp;
+branches;
+next	0.21;
+
+0.21
+date	95.12.05.03.09.22;	author schj;	state Exp;
+branches;
+next	0.20;
+
+0.20
+date	95.10.30.13.59.49;	author schj;	state Exp;
+branches;
+next	0.19;
+
+0.19
+date	95.10.03.14.07.24;	author schj;	state Exp;
+branches;
+next	0.18;
+
+0.18
+date	95.10.01.21.02.49;	author schj;	state Exp;
+branches;
+next	0.17;
+
+0.17
+date	95.09.30.18.03.53;	author schj;	state Exp;
+branches;
+next	0.16;
+
+0.16
+date	95.09.26.09.23.51;	author schj;	state Exp;
+branches;
+next	0.15;
+
+0.15
+date	95.09.23.20.46.05;	author schj;	state Exp;
+branches;
+next	0.14;
+
+0.14
+date	95.09.19.13.43.18;	author schj;	state Exp;
+branches;
+next	0.13;
+
+0.13
+date	95.08.24.20.52.39;	author schj;	state Exp;
+branches;
+next	0.12;
+
+0.12
+date	95.08.24.14.13.25;	author schj;	state Exp;
+branches;
+next	0.11;
+
+0.11
+date	95.08.24.12.50.37;	author schj;	state Exp;
+branches;
+next	0.10;
+
+0.10
+date	95.08.23.14.57.06;	author schj;	state Exp;
+branches;
+next	0.9;
+
+0.9
+date	95.08.23.07.35.18;	author schj;	state Exp;
+branches;
+next	0.8;
+
+0.8
+date	95.08.23.07.30.30;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@Vamps main program loop, parses command line and generated help
+@
+
+
+0.40
+log
+@Version: 0.99g
+@
+text
+@/* $Header: /home/schj/src/vamps_0.99g/src/main/RCS/vamps.c,v 0.39 1999/01/06 12:07:49 schj Alpha $ */
+
+ 
+/* $RCSfile: vamps.c,v $
+ *  $Author: schj $
+ *  $Date: 1999/01/06 12:07:49 $ */
+
+/* Copyright (C) 1995 Jaap Schellekens.
+ * 
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2, or (at your option) any
+ * later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along
+ * with this program; see the file COPYING.  If not, write to the Free
+ * Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+ * 
+ * (C) Jaap Schellekens
+ * Faculty of Earth Sciences            |       International Institute 
+ * Vrije Universiteit                   |       for Tropical Forestry
+ * De Boelelaan 1085                    |       Rio Piedras
+ * 1081 HV Amsterdam                    |       Puerto Rico, USA
+ * The Netherlands                      |
+ * E-mail: schj@@geo.vu.nl               |
+ * schj@@xs4all.nl                       |
+ * ---------------------------------------------------------------------
+ * Parts of this program derived from swap.  The following is taken from
+ * the swap fortran code:
+ * 
+ * Author : Jan G. Wesseling
+ * 
+ * Correspondence
+ * 
+ * This program uses the ideas and experiences of various
+ * researchers at the Winand Staring Centre and the Wageningen
+ * Agricultural University. Currently the program is maintained
+ * and documented in cooperation by :
+ * 
+ * Dept. of Agrohydrology             Dept. of Water Resources
+ * Winand Staring Centre              Wageningen Agricultura
+ *                                    University
+ * Marijkeweg 11/22                   Nieuwe Kanaal 11
+ * 6700 AC  Wageningen                6709 PA  Wageningen
+ * The Netherlands                    The Netherlands
+ * Fax: +31 8370 24812                Fax: +31 8370 84885
+ */
+
+static char RCSid[] =
+ "$Id: vamps.c,v 0.39 1999/01/06 12:07:49 schj Alpha $";
+
+#define TRY_TOPSYS
+
+#include "nrutil.h"	/* nrutil type matrix operations */
+#include "getopt.h"
+#include "swatsoil.h"
+#include "s_init.h"
+#include "deffile.h"	/* input/output ini-file library */
+#include "vamps.h"
+#define VAMPS
+#ifndef NOMAQ
+#include "marquard.h"
+#endif
+#ifdef TRY_TOPSYS
+#include "../topsys/topsys.h"
+#endif 
+
+#include <math.h>
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#include <strings.h>
+
+/* Command line options...*/
+#define OPTSTR "fFE:L:vnclsho:O:HC:D:S:I:"
+
+#ifdef HAVE_LIBSLANG
+#define EXPL "\
+\t--verbose\t\tbe verbose about performed actions\n\
+\t--version\t\tshow version of vamps\n\
+\t--help\t\t\tshow this information\n\
+\t--Logfile file\t\tlog session to file\n\
+\t--copyright\t\tshow part of the GPL\n\
+\t--Output setname\tdump specified setname\n\
+\t--Determine variable\tdetermine the variable specified\n\
+\t--output filename\tsend output to filename\n\
+\t--showdef\t\tsend defaults to stdout\n\
+\t--noinputdump\t\tdon't include input file in output\n\
+\t--spEed speed\t\tset calculation speed to speed (1-6)\n\
+\t--Comment char\t\tset char(s) as commentchars\n\
+\t--Setvar section name value\tOverride value from input file\n\
+\t--Interpret\t\tInterpret filename as S-Lang file\n\
+\t--interFace\t\tStart up with interactive interface\n\
+"
+#define USAGE "\
+\n\t[-v][-h][-c][-f][-l][-O setname][-H][-C commentchars]\
+\n\t[-D variable][-s][-S section name value][-o filename]\
+\n\t[-n][-E speed][-L file][-I filename][-F] filename"
+#else
+#define USAGE "\
+\n\t[-v][-h][-c][-f][-l][-O setname][-H][-C commentchars]\
+\n\t[-D variable][-s][-S section name value][-o filename]\
+\n\t[-n][-E speed][-L file] filename"
+#define EXPL "\
+\t--verbose\t\tbe verbose about performed actions\n\
+\t--version\t\tshow version of vamps\n\
+\t--help\t\t\tshow this information\n\
+\t--Logfile file\t\tlog session to file\n\
+\t--copyright\t\tshow part of the GPL\n\
+\t--Output setname\tdump specified setname\n\
+\t--Determine variable\tdetermine the variable specified\n\
+\t--output filename\tsend output to filename\n\
+\t--showdef\t\tsend defaults to stdout\n\
+\t--noinputdump\t\tdon't include input file in output\n\
+\t--spEed speed\t\tset calculation speed to speed (1-6)\n\
+\t--Comment char\t\tset char(s) as commentchars\n\
+\t--Setvar section name value\tOverride value from input file\n\
+"
+#endif
+
+/*
+* GNU long options 
+*/
+struct option options[] =
+{
+	{"help", no_argument, 0, (int)'h'},
+	{"copyright", no_argument, 0, (int)'c'},
+	{"verbose", no_argument, 0, (int)'v'},
+	{"version", no_argument, 0, (int)'V'},
+	{"license", no_argument, 0, (int)'l'},
+	{"showdef", no_argument, 0, (int)'s'},
+	{"inputdump", no_argument, 0, (int)'i'},
+	{"output", required_argument, 0, (int)'o'},
+	{"Logfile", required_argument, 0, (int)'L'},
+	{"Setvar", required_argument, 0, (int)'E'},
+	{"speed", required_argument, 0, (int)'S'},
+	{"Output", required_argument, 0, (int)'O'},
+	{"Header", no_argument, 0, (int)'H'},
+	{"Comment", required_argument, 0, (int)'C'},
+	{"Determine", required_argument, 0, (int)'D'},
+#ifdef HAVE_LIBSLANG
+	{"Interpret", required_argument, 0, (int)'I'},
+	{"interFace", no_argument, 0, (int)'F'},
+#endif
+	{0, 0, 0, 0},
+};
+
+
+int max_sec_in_ts = MAX_SEC_IN_TS;
+int sl_in_input = 0;   /* if set to 1 the input file is also fed to the 
+		      S-Lang interpreter */
+int 	vers_char = VERS_CHAR;
+int     version = VERSIONNR;
+char    infilename[1024];
+char    outfilename[1024];
+char    s_lang_defs[1024];
+char	xtraoutfn[1024];
+char    vampslib[1024];
+char    rundir[512]=".";
+char	runsuffix[512]="NO SUFFIX";
+int     usesuffix = FALSE;
+int     iniinmem = TRUE;
+int     doxtraout = FALSE;
+int 	exit_is_inter = 0;
+char	**xtrasl; /* array of extra S-Lang files loaded _after_ .vampssl */
+int	xtraslnr = 0; /* number of extra S-Lang files loaded _after_ .vampssl */
+#ifndef __FAT__
+char    dotvampssl[128] = ".vampssl";
+#else
+char    dotvampssl[128] = "vampssl";
+#endif
+
+int VampsPid = 0;
+char   *progname;
+
+int     days = 0;
+double  starttime;             /* Start-time as specified by the user, 
+				or determined from endpos */
+double  endtime;               /* end-time as specified by the user or 
+				determined from steps and startpos */
+int     startpos = 0;          /* Start position in precipitation array */
+int     steps = 0;
+int     thisstep = 0;
+extern  char *progstr;
+FILE    *genoutfile = NULL;    /* general output of run */
+FILE    *xoutfile = NULL;      /* xtra time-series output */
+double  thiststep = 1.0;       /* actual length of this timestep in days. 
+				For the first step 1.0 is assumed 
+				(from initial to firstentry in the precip 
+				 file)*/
+
+void loaddefaults (char *defname);
+void showusage (char *argv[], int verb);
+void showdef (char *defname);
+extern void outfileheader (char *name);
+
+
+
+FILE   *infile;
+char    s[1024];
+char *cmline;
+int     dumpini = TRUE;
+int     Dsoil, Dcanop;
+
+#ifndef SLPATH
+#ifndef MSDOS
+#define SLPATH ".:"
+#else
+#define SLPATH ".:"
+#endif
+#endif
+
+char	**sl_argv;		/* command line argv */
+int	sl_argc;		/* command line argc */
+int	sl_tty;
+int	sl_optind = 0;		/* command line arg index */
+char	sl_arg0[256];
+static void tty_init();
+extern char  sl_path[2048];
+char  *sl_prompt[2];
+void processkey(char ch);
+extern void exitfunc(void);
+
+char *
+sl_getarg(void)
+{
+	if(sl_optind < sl_argc)
+		return(sl_argv[sl_optind++]);
+
+	return("--");
+}
+
+/*C:main
+ *@@int main (int argc, char *argv[])
+ *
+ * The main vamps program 
+ */
+int
+main (int argc, char *argv[])
+{
+	int  what;
+	char *path;
+ 	extern void sl_free_strv(char **strv);
+
+	atexit(&exitfunc); /* clean stuff at exit */
+
+	VampsPid = getpid();
+	(void)cpusec(); /* initialize counter */
+	if (argc <=1 && strcmp(argv[0],"ivamps") != 0) {
+		showusage (argv, 0);
+		exit(EXIT_FAILURE);
+	}
+
+	setsig (); /* sets up signal handling, kind of broken with DOS */
+	
+	if (getenv("VAMPSLIB")) /* Try and find library files..*/
+		strcpy(vampslib,getenv("VAMPSLIB"));
+	else
+		strcpy(vampslib,VAMPSLIB);
+
+	strcpy (infilename, "nothing yet");
+	strcpy (outfilename, "nothing yet");
+	strcpy (logfilename, "vamps.log");
+
+#ifdef HAVE_LIBSLANG	
+	strcpy (s_lang_defs, "vamps.sl");
+	sl_argc = argc;
+	sl_argv = argv;
+	strncpy(sl_arg0, argv[sl_optind++], 255);
+#endif
+
+	progstr = (char *) ts_memory (NULL, 3 * sizeof (char), progname);	
+	strcpy (progstr, "2");
+	progname = argv[0];
+	strcpy(deffname,getdefname (DEFNAME));
+	loaddefaults (deffname);/* loads defaults from deffname  */
+#ifdef HAVE_LIBSLANG	
+	sl_prompt[0] = SLmake_string("Vamps> ");
+	sl_prompt[1] = SLmake_string("Vamps?> ");
+	SLtt_get_terminfo();
+#ifdef __MSDOS__
+	if(SLang_init_tty(34, 0, 1)) {
+#else
+	if(SLang_init_tty(7, 0, 1)) {
+#endif
+		(void)fprintf(stderr, "%s: Can't initialize tty\n", argv[0]);
+		exit(1);
+	}
+#ifndef __GO32__
+	if(SLkp_init() == -1) {
+		(void)fprintf(stderr, "%s: Can't initialize keypad\n", argv[0]);
+		exit(1);
+	}
+#endif
+	tty_init();
+
+#ifdef unix
+	SLtt_get_screen_size();
+#endif
+	strcpy(sl_path,SLPATH);
+	if (getenv("HOME") != NULL){
+		strcat(sl_path,getenv("HOME"));
+		strcat(sl_path,":");
+	}
+
+	strcat(sl_path,vampslib);
+#ifdef HAVE_LIBSLANG
+	if (!noslang){
+		init_s(getdefname(s_lang_defs));/* Now read s-lang stuff */
+		if((path = sl_statfile(dotvampssl,sl_path)) != (char *)NULL){
+			SLang_load_file(path);
+			SLFREE(path);
+		}
+	}
+#endif
+#endif
+
+	cmline= ts_command (argc, argv);
+
+	/* This only works with UNIX systems... */
+#ifdef HAVE_LIBSLANG	
+	if (strcmp(argv[0],"ivamps") == 0){
+		 exit_is_inter = 1;
+		 (void)interpreter(1);
+		 exit(0);
+	}
+#endif
+	/* Parse the comand line and set options */
+	while ((what = getopt_long(argc, argv, OPTSTR, options, NULL)) != EOF){
+		switch (what){
+			case 'h':
+				showusage (argv, 1);
+				exit (0);
+				/* NOTREACHED */
+			case '?':
+				showit("vamps",ERR,"Option not known",0,0);
+				showusage (argv, 1);
+				exit (EXIT_FAILURE);
+				/* NOTREACHED */
+			case 'E':
+				sprintf(s,"soil speed %d",atoi(optarg));
+				setvar (s);
+				break;
+			case 'S':
+				setvar (optarg);
+				break;
+#ifdef HAVE_LIBSLANG	
+			case 'I':
+				/* Process S-Lang file and exit(0)*/
+				sl_optind = optind;
+				strncpy(sl_arg0, optarg, 255);
+				(void)SLang_load_file (getdefname(optarg));
+				exit(0);
+			case 'F':
+				exit_is_inter = 1;
+				(void)interpreter(1);
+				break;
+#endif
+			case 'V':
+				(void) fprintf(stderr,"%.2f%c\n",(double)version/100.0,vers_char);
+				exit(0);
+				/* NOTREACHED */
+			case 'L':
+				loggen = TRUE;
+				strcpy (logfilename, optarg);
+				break;
+			case 'v':
+				verbose++;
+				defverb = verbose;
+				break;
+			case 'c':
+				disclaim (argv[0]);
+				exit (0);
+			case 'O':
+				(void)to_outlist (optarg);
+				break;
+			case 'D':
+				(void) sprintf (s, "determine %s 1", optarg);
+				setvar (s);		/* Put into override list */
+				break;
+			case 'C':
+				strcpy(commchar, optarg);
+				break;
+			case 'H':
+				header = FALSE;
+				break;
+			case 'n':
+				dumpini = FALSE;
+				break;
+			case 'l':
+				disclaim (argv[0]);
+				exit (0);
+			case 'o':
+				strcpy(outfilename,optarg);
+				break;
+			case 's':
+				showdef (deffname);
+				exit (0);
+			default:
+				break;
+		}
+	}
+
+	if (argc > 1)
+		strcpy (infilename, argv[argc - 1]);
+
+
+	strcpy (infilename, argv[argc - 1]);
+	prelim();
+	dorun();
+	dotail();
+
+	/* deletes the ini memory list (if present)  */
+	
+	return 0;
+}
+
+/*C:dotail
+ *@@ Void dotail()
+ * 
+ * Does 'tail' part of a model run. Cleans op files and memory. Also saves
+ * some stuff to disk.
+ */ 
+void
+dotail()
+{
+	int i;
+	extern void settotzero();
+	
+	/* Clean up stuff */
+	if (Dsoil)
+		postsoil ();
+#ifdef TRY_TOPSYS
+#else	
+	if (Dcanop)
+		postcanop ();
+#endif	
+	closeout ();
+	xcloseout ();
+	/* Scan the outlist array and dump the sets that are found */
+	/* for (i = 0; i < outnr; i++)
+		dumpset (getsetbyname (outlist[i]), (FILE *) NULL); */
+
+
+	/* Dump the contents of the input file to the output file
+	 * if specified */
+	if (dumpini)
+		inidump();
+
+	endshow ();
+
+	outfiletrailer ();
+
+	/* Close the output stream if needed  */
+	(void)fclose (genoutfile);
+	
+#ifdef HAVE_LIBSLANG	
+	if(!noslang)
+		(void)at_end_f(); /* call the s-lang end function */
+#endif
+
+	settotzero();
+	/*show_tmplist();*/
+}
+
+/*C:dorun
+ *@@ Void dorun()
+ * 
+ * Does the main body of the model run. From the first to the last
+ * timestep. 
+ */ 
+void
+dorun()
+{
+	int i;
+
+	/* get length of first timestep (initial to first record )
+	 * by default this is set to the interval between step 0
+	 * and 1 or is startpos is specified between startpos and 
+	 * startpos -1*/
+	thiststep = getdefdoub ("time", "firststep",data[id.pre].xy[1+startpos].x- data[id.pre].xy[startpos].x, infilename, FALSE);
+	t = data[id.pre].xy[startpos].x - thiststep;
+	starttime = t;
+	endtime = data[id.pre].xy[startpos + steps - 1].x;
+	i = startpos;
+
+	/* Start the main loop over the Canopy and soil modules.
+	 * Note that both modules are only coupled once every
+	 * timestep and _NOT_ in the intermediate itterations. This
+	 * should not give much problems if the timestep is small
+	 * enough */
+	while (/*t >= starttime && */t < endtime){
+		alarm(max_sec_in_ts);
+#ifdef HAVE_LIBSLANG	
+		/* check for a pressed spacebar... */
+		if (SLang_input_pending(0) != 0)
+			processkey(SLang_getkey());
+#endif
+		
+
+		thisstep = i;
+		if (i != startpos){
+			thiststep = data[id.pre].xy[i].x - data[id.pre].xy[i - 1].x;
+			if (thiststep <=0.0)
+				Perror(progname,1,0,RCSid,"Timestep <=0","Check P input data");
+		}
+#ifdef HAVE_LIBSLANG	
+		if (switchtoint){
+			(void)interpreter(0);
+			switchtoint=0;
+		}
+#endif
+		utout (&i);
+#ifdef TRY_TOPSYS
+		tstep_top(i, &data[id.pre].xy[i].y, &data[id.inr].xy[i].y,
+				&data[id.ptr].xy[i].y, &data[id.spe].xy[i].y);
+#else		
+		if (Dcanop)
+			tstep_canop (&i);
+#endif
+		if (Dsoil)
+			tstep_soil (i,data[id.pre].xy[i].x, data[id.pre].xy[i].y,
+					data[id.inr].xy[i].y, data[id.ptr].xy[i].y,
+					data[id.spe].xy[i].y);
+		if (doxtraout)
+			xtraout (i);
+#ifdef HAVE_LIBSLANG	
+		fflush(genoutfile);
+		if(!noslang)
+			(void)each_step_f(); /* Call the s-lang each_step function */
+#endif
+		i++;
+		if (!Dsoil) /* we have to increase time*/
+			t+=thiststep;
+	}	
+}
+
+#ifdef HAVE_LIBSLANG	
+/*C:processkey
+ *@@ void processkey(char ch)
+ *
+ * */
+void processkey(char ch)
+{
+	switch (ch){
+	 case ' ':
+		fprintf(stderr,"\nkeypressed: switching to interactive mode, please wait...\n");
+		fprintf(stderr,"Type 'cont;' and a blank line to continue run while in interactive mode...\n\n");
+		switchtoint = 1;
+		break;
+	 default:
+		SLtt_beep();
+		break;
+	}
+}
+#endif
+	
+/*C:disclaim
+ *@@ void disclaim(char *progname)
+ *
+ * shows a short version of the GNU public licence on stderr
+ */
+void
+disclaim (char *progname)
+{
+	(void) fprintf (stderr, "%s:\n%s\n", progname,GNUL);
+}
+
+/*C:showusage
+ *@@ void showusage( char *argv, int verb)
+ *
+ * shows vamps program indentification and a short (verb == 0 )
+ * or long (verb >0 ) command line explanation.
+ */
+void
+showusage (char *argv[],int verb)
+{
+	(void) fprintf (stderr, "\n%s - %s\n\t%s (%s) %s\n\t%s (c) - %s\n", argv[0], DESCRIPTION, IDENTIFY, STATUS, PROVERSION, AUTHOR, DATE);
+	(void) fprintf (stderr, "\tBuild on %s at %s by %s (%s)\n", WHERE, BUILDDATE, WHO, OS);
+	(void) fprintf (stderr, "\t(%s)\n", RCSid);
+	(void) fprintf (stderr, "\n\tusage: %s %s\n\n", argv[0], USAGE);
+	if (verb)
+		(void) fprintf (stderr, "%s", EXPL);
+}
+
+
+/*C:loaddefaults
+ *@@ void loaddefaults ()
+ *
+ * loads defaults from the defaults-file. After that the defaults
+ * in the vamps section from the input file are loaded
+ */
+
+void
+loaddefaults (char *defname)
+{
+#ifdef HAVE_LIBSLANG
+  	extern char **sl_make_strv(char *str, char *sep, int *vlen);
+
+	char *tts;
+
+	tts =  getdefstr ("vamps", "xtrasl",NULL, defname, FALSE);
+	if (tts)
+		xtrasl = sl_make_strv(tts,",",&xtraslnr);
+#endif
+	
+	
+	verbose = getdefint ("vamps", "verbose", verbose, defname, FALSE);
+	sl_in_input = getdefint ("vamps", "sl_in_input", sl_in_input, defname, FALSE);
+	/* fmttime = getdefint ("vamps", "fmttime", fmttime, defname, FALSE);
+	 * */
+	strcpy(commchar,getdefstr ("vamps", "commentchars", commchar, defname, FALSE));
+	header = getdefint ("vamps", "header", header, defname, FALSE);
+	max_sec_in_ts = getdefint ("vamps", "max_sec_in_ts", max_sec_in_ts, defname, FALSE);
+	loggen = getdefint ("vamps", "logging", loggen, defname, FALSE);
+	iniinmem = getdefint ("vamps", "iniinmem", iniinmem, defname, FALSE);
+	strcpy (logfilename, getdefstr ("vamps", "logfilename", logfilename, defname, FALSE));
+	strcpy (progstr, getdefstr ("vamps", "progstr", progstr, defname, FALSE));
+	strcpy(s_lang_defs, getdefstr ("vamps", "s_lang_defs", s_lang_defs, defname, FALSE));
+	strcpy(graphcommand, getdefstr ("vamps", "graphcommand", graphcommand, defname, FALSE));
+#ifdef HAVE_LIBSLANG
+	noslang=getdefint ("vamps", "noslang", noslang, defname, FALSE);
+#endif
+
+}
+
+/*-
+ * void showdefaults ()
+ * shows defaults from the compiled in defaults combined with
+ * defaults-file (.vampsrc of vamps.rc)
+ */
+void
+showdef (char *defname)
+{
+	(void) fprintf (stdout, "#%s  defaults\n", progname);
+	(void) fprintf (stdout, "[vamps]\n");
+	(void) fprintf (stdout, "verbose = %d\n", getdefint ("vamps", "verbose", verbose, defname, FALSE));
+	(void) fprintf (stdout, "commentchars = %s\n", getdefstr ("vamps", "commentchars", commchar, defname, FALSE));
+	(void) fprintf (stdout, "max_sec_in_ts = %d\n", getdefint ("vamps", "max_sec_in_ts", max_sec_in_ts, defname, FALSE));
+	(void) fprintf (stdout, "header = %d\n", getdefint ("vamps", "header", header, defname, FALSE));
+	(void) fprintf (stdout, "logging = %d\n", getdefint ("vamps", "logging", loggen, defname, FALSE));
+	(void) fprintf (stdout, "logfilename = %s\n", getdefstr ("vamps", "logfilename", logfilename, defname, FALSE));
+	(void) fprintf (stdout, "iniinmem = %d\n", getdefint ("vamps", "iniinmem", iniinmem, defname, FALSE));
+	(void) fprintf (stdout, "progstr = %s\n", getdefstr ("vamps", "progstr", progstr, defname, FALSE));
+	fprintf (stdout, "s_lang_defs = %s\n", getdefstr ("vamps", "s_lang_defs",s_lang_defs, defname, FALSE));
+	fprintf (stdout, "graphcommand = %s\n", getdefstr ("vamps", "graphcommand",graphcommand, defname, FALSE));
+#ifdef HAVE_LIBSLANG
+	fprintf (stdout, "noslang = %d\n", getdefint ("vamps", "noslang",noslang, defname, FALSE));
+#endif
+	fprintf(stdout,"sl_in_input = %d\n", getdefint ("vamps", "sl_in_input", sl_in_input, defname, FALSE));
+}
+
+/*-
+ *  char *getdefname(char *defname)
+ *  searches for the full name of the defaults file
+ *  that can be opened. First the current dir, than $HOME, then
+ *  VAMPSLIB, then $VAMPSLIB and as last resort the dir in which
+ *  vamps resides.
+ */
+char *
+getdefname (char *defname)
+{
+	FILE   *tst;
+	static char   s[1024];
+	static char   ss[1024];
+	char *tmps;
+
+	strcpy(s,defname);
+	strcpy(ss,progname);
+	if ((tst = fopen (s, "r")) != NULL)
+	{
+		(void)fclose (tst);
+		return s;
+	}
+
+	tmps = getenv ("HOME");
+	if (tmps){
+		sprintf (s, "%s%c%s", tmps,DIRSEP, defname);
+		if ((tst = fopen (s, "r")) != NULL)
+		{
+			(void)fclose (tst);
+			return s;
+		}
+	}
+
+	sprintf (s, "%s%c%s", VAMPSLIB,DIRSEP, defname);
+	if ((tst = fopen (s, "r")) != NULL)
+	{
+		(void)fclose (tst);
+		return s;
+	}
+
+	/* Try to get name from program name, note the go32 uses UNIX style slashes*/
+	tmps= rindex(ss,DIRSEP);
+	if (tmps){
+		*tmps = '\0';
+		sprintf (s, "%s%c%s", ss,DIRSEP, defname);
+		if ((tst = fopen (s, "r")) != NULL)
+		{
+			(void)fclose (tst);
+			return s;
+		}
+	}
+
+	tmps = getenv ("VAMPSLIB");
+	if (tmps){
+		sprintf (s, "%s%c%s", tmps ,DIRSEP, defname);
+		if ((tst = fopen (s, "r")) != NULL)
+		{
+			(void)fclose (tst);
+			return s;
+		}
+	}
+
+  return defname;
+}
+
+
+
+
+
+/*C:prelim
+ *@@ void prelim(void)
+ *
+ */
+void 
+prelim ()
+{  
+ 	extern void sl_free_strv(char **strv);
+	char *path;
+	int i;
+	
+	/* Do preliminary stuff, get defaults from files */
+	loaddefaults (infilename);/* loads defaults from infilename*/
+
+#ifdef HAVE_LIBSLANG	
+	/* Run extra sl files defined in vamps section..... */
+	for (i = 0; i < xtraslnr; i++){
+		if((path = sl_statfile(xtrasl[i],sl_path)) != (char *)NULL){
+			SLang_load_file(path);
+			SLFREE(path);
+		}
+	}
+	if (xtrasl)
+		sl_free_strv(xtrasl);
+	xtraslnr = 0;/*....done.*/
+#endif
+	
+	if ((infile = fopen (infilename, "r")) == NULL)
+		Perror (progname, 1,1, RCSid, "File open failed:", infilename);
+
+#ifdef HAVE_LIBSLANG	
+	if (sl_in_input)
+		SLang_load_file(infilename);
+#endif
+
+	strcpy(rundir,getdefstr("run","rundir",rundir,infilename,FALSE));
+	/* First command line outputfile, then run section, then stdout*/
+	if(strcmp(outfilename,"nothing yet") != 0){
+		if ((genoutfile = fopen (outfilename, "w")) == NULL){
+			Perror (progname, 1,1, RCSid, "File open failed:", outfilename);
+		}
+	}else{
+		strcpy(outfilename,getdefstr("run","outputfile",outfilename,infilename,FALSE));
+		if(strcmp(outfilename,"nothing yet") != 0){
+			if ((genoutfile = fopen (outfilename, "w")) == NULL){
+				Perror (progname, 1,1, RCSid, "File open failed:", outfilename);
+			}
+		}else    
+			genoutfile = stdout;
+	}
+
+
+	/*
+	 * Start the outfile generation and print a small header 
+	 */
+	outfileheader (infilename);
+	printstr("command",cmline);
+	printstr("defaultsfile",deffname);
+
+	startshow ("vamps", infilename);
+	showit ("vamps",MESG,getdefstr ("environment", "caseid", "None", infilename, FALSE),1,verbose);
+	showit ("vamps",MESG,cmline,1,verbose);
+
+	/*
+	 * dumpini can only dump the memory list, so we have to read that list 
+	 */
+	if (dumpini && !iniinmem)
+		dumpini = FALSE;
+
+	/*
+	 * read the input file into the memory list 
+	 */
+	if (iniinmem)
+	{
+		showit ("vamps",MESG,"reading file in memory...",1,verbose);
+		rinmem (infilename);
+		showit ("vamps",MESG,"done reading ini file in memory",2,verbose);
+	}
+
+
+	days = getdefint ("time", "steps", 0, infilename, TRUE);
+	steps = days;
+	starttime = getdefdoub ("time", "start", 0.0, infilename, FALSE);
+	endtime = getdefdoub ("time", "end", 0.0, infilename, FALSE);
+	if (starttime == 0.0)
+		startpos = getdefint ("time","startpos",0,infilename,FALSE);
+	else
+		Perror(progname,1,0,RCSid,"Starttime not yet implemented","Use startpos instead");
+
+	sprintf (s, "run will contain %d steps", steps);
+	/* Check for precipitation. In the new setup a precipitation
+	 * file _MUST_ be present to derive the timesteps! */
+	if ((id.pre = getsetbyname ("pre")) < 0)
+	{
+		strcpy (s, getdefstr ("ts", "pre", "nothing", infilename, FALSE));
+		if (strcmp (s, "nothing") == 0)
+			Perror (progname, 1,0, RCSid, "Need precipitation data", "");
+		get_data (s, "pre",steps);
+		if (data[0].xy == NULL)
+			exit(1);
+		id.pre = getsetbyname ("pre");
+	}
+
+	showit ("vamps",MESG,s,1,verbose);
+
+	/* check for parameters to be determined THIS SHOULD CHANGE!! */
+	/*if (getdefint ("determine", "pevaporation", 0, infilename, FALSE)) 
+		(void) DoEvap (getdefint ("pevaporation", "method", 1, infilename, FALSE)); */
+
+	/* check for parameters to be determined */
+	/*if (getdefint ("determine", "evaporation", 0, infilename, FALSE))
+		(void) DoActEvap (getdefint ("evaporation", "method", 1, infilename, FALSE)); */
+	/* check for parameters to be determined */
+
+	/* Start soil moisture stuff if needed */
+	Dsoil = getdefint ("determine", "soilmoisture", 0, infilename, FALSE);
+	Dcanop = getdefint ("determine", "canopy", 0, infilename, FALSE);
+
+	/* Do preliminaries for all to be determined */
+	openout ();
+	strcpy (xtraoutfn, getdefstr ("xout", "filename", "nothing", infilename, FALSE));
+	if (strcmp (xtraoutfn, "nothing") != 0){
+		sprintf (s, "dumping xtra output to: %s\n",xtraoutfn);
+		showit("vamps",MESG,s,1,verbose);
+		doxtraout = TRUE;
+		xoutfile = fopen (xtraoutfn, "w");
+		xopenout ();
+	}
+	/* This used to be in dorun */
+#ifdef TRY_TOPSYS		
+	init_top(getdefint("top","system",TOP_PRE_CANOP,infilename,TRUE)); 
+	pre_top(); 
+#else
+	if (Dcanop) 
+		precanop ();
+#endif
+	if (Dsoil)  presoil ();
+#ifdef HAVE_LIBSLANG	
+	at_start_f(); /* Call the s_lang start function */
+#endif
+
+}
+
+void
+inidump(void)
+{
+	printcom(" --> start of input file dump <--\n");
+	printcom(" Settings at end of run (ini file dump)\n");
+	writememini (NULL, infilename, genoutfile);
+	printcom(" --> end of input file dump <--");
+}
+
+static void
+tty_init(void)
+{
+	if(isatty(fileno(stdin)))
+		sl_tty |= 1;
+	if(isatty(fileno(stdout)))
+		sl_tty |= 2;
+	else
+		return;
+
+	return;
+}
+@
+
+
+0.39
+log
+@Version: 0.99g
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99e/src/main/RCS/vamps.c,v 0.38 1997/10/30 18:20:20 schj Exp $ */
+d6 1
+a6 1
+ *  $Date: 1997/10/30 18:20:20 $ */
+d55 1
+a55 1
+ "$Id: vamps.c,v 0.38 1997/10/30 18:20:20 schj Exp $";
+@
+
+
+0.38
+log
+@Minor changes
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99e/src/main/RCS/vamps.c,v 0.37 1997/09/09 10:30:02 schj Exp $ */
+d6 1
+a6 1
+ *  $Date: 1997/09/09 10:30:02 $ */
+d55 1
+a55 1
+ "$Id: vamps.c,v 0.37 1997/09/09 10:30:02 schj Exp $";
+d74 1
+d76 2
+d153 2
+d197 3
+a199 3
+extern void loaddefaults (char *defname);
+extern void showusage (char *argv[], int verb);
+extern void showdef (char *defname);
+d250 2
+a251 1
+	atexit(&exitfunc);
+d294 1
+d299 1
+d377 1
+a377 1
+				disclaim ();
+d396 1
+a396 1
+				disclaim ();
+a413 1
+
+a414 2
+
+
+a415 1
+
+a418 3
+#ifdef HAVE_LIBSLANG	
+	SLang_reset_tty();
+#endif
+d446 2
+a447 2
+	for (i = 0; i < outnr; i++)
+		dumpset (getsetbyname (outlist[i]), (FILE *) NULL);
+d498 1
+d510 1
+a510 1
+				Perror(progname,1,RCSid,"Timestep <=0","Check P input data");
+d533 1
+d564 1
+a564 1
+ *@@ void disclaim()
+d569 1
+a569 1
+disclaim (void)
+d571 1
+a571 1
+	(void) fprintf (stderr, "%s\n", GNUL);
+d615 2
+a616 1
+	fmttime = getdefint ("vamps", "fmttime", fmttime, defname, FALSE);
+d619 1
+d644 1
+d755 1
+a755 1
+		Perror (progname, 1, RCSid, "File open failed:", infilename);
+d766 1
+a766 1
+			Perror (progname, 1, RCSid, "File open failed:", outfilename);
+d772 1
+a772 1
+				Perror (progname, 1, RCSid, "File open failed:", outfilename);
+d814 1
+a814 1
+		Perror(progname,1,RCSid,"Starttime not yet implemented","Use startpos instead");
+d823 1
+a823 1
+			Perror (progname, 1, RCSid, "Need precipitation data", "");
+@
+
+
+0.37
+log
+@added atexit call to add exitfunc
+@
+text
+@d1 1
+a1 2
+/* $Header: /home/schjpriv/schj/src/vamps_0.99e/src/main/RCS/vamps.c,v 0.36 1997/09/09 09:43:48 schj Exp $ */
+
+d3 1
+d6 1
+a6 1
+ *  $Date: 1997/09/09 09:43:48 $ */
+d55 1
+a55 1
+ "$Id: vamps.c,v 0.36 1997/09/09 09:43:48 schj Exp $";
+d177 5
+a181 5
+double  starttime; /* Start-time as specified by the user, 
+		  or determined from endpos */
+double  endtime; /* end-time as specified by the user or 
+		determined from steps and startpos */
+int     startpos = 0; /* Start position in precipitation array */
+d185 6
+a190 5
+FILE    *genoutfile = NULL; /* general output of run */
+FILE    *xoutfile = NULL; /* xtra time-series output */
+double  thiststep = 1.0; /* actual length of this timestep in days. 
+			For the first step 1.0 is assumed 
+			(from initial to firstentry in the precip file)*/
+d254 2
+a255 1
+	if (getenv("VAMPSLIB"))
+a259 1
+
+d422 6
+d434 1
+a434 3
+	/*
+	 * Clean up stuff 
+	 */
+d470 6
+d540 1
+d548 8
+a555 10
+		case ' ':
+			fprintf(stderr,"\nkeypressed: switching to interactive mode, please wait...\n");
+			fprintf(stderr,"Type 'cont;' and a blank line to continue run while in interactive mode...\n\n");
+			switchtoint = 1;
+			break;
+		default:
+#ifdef HAVE_LIBSLANG	
+			SLtt_beep();
+#endif
+			break;
+d558 2
+a559 1
+
+d721 2
+a722 2
+/*-
+ * void prelim(void)
+@
+
+
+0.36
+log
+@removed internal maq stuff
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99e/src/main/RCS/vamps.c,v 0.35 1997/09/09 08:36:57 schj Exp $ */
+d6 1
+a6 1
+ *  $Date: 1997/09/09 08:36:57 $ */
+d55 1
+a55 1
+ "$Id: vamps.c,v 0.35 1997/09/09 08:36:57 schj Exp $";
+d221 1
+d244 1
+a412 3
+	/* delete all datasets and free memory  */
+	del_all_sets ();
+
+a413 1
+	delmemlist ();
+@
+
+
+0.35
+log
+@0.99e version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99c/src/main/RCS/vamps.c,v 0.34 1997/01/16 15:00:01 schj Exp $ */
+d6 1
+a6 1
+ *  $Date: 1997/01/16 15:00:01 $ */
+d55 1
+a55 1
+ "$Id: vamps.c,v 0.34 1997/01/16 15:00:01 schj Exp $";
+a333 3
+			case 'f':
+				maqtst = 1;
+				break;
+@
+
+
+0.34
+log
+@removed NOSLANG defs
+move code to head and tail functions
+@
+text
+@d1 2
+a2 1
+/* $Header: /homes/schj/src/vamps_0.99/src/main/RCS/vamps.c,v 0.33 1996/11/01 11:00:17 schj Alpha $ */
+d6 1
+a6 2
+ *  $Date: 1996/11/01 11:00:17 $
+ */
+d8 1
+a8 2
+/*
+ * Copyright (C) 1995 Jaap Schellekens.
+d29 2
+a30 2
+ * The Netherlands                              |
+ * E-mail: schj@@geo.vu.nl                       |
+d46 2
+a47 1
+ * Winand Staring Centre              Wageningen Agricultural University
+d55 1
+a55 1
+ "$Id: vamps.c,v 0.33 1996/11/01 11:00:17 schj Alpha $";
+d57 1
+d59 1
+a59 1
+#include "vamps.h"
+d64 1
+d69 3
+d74 1
+d76 1
+d79 18
+d98 1
+a98 1
+\n\t[-v][-h][-c][-f][-l][-O setname][-H][-C commentchar]\
+d101 5
+a105 1
+
+a115 1
+\t--fit\t\t\tFit data to settings in fit section\n\
+d118 1
+a118 1
+\t--Comment char\t\tset char as commentchar\n\
+a119 2
+\t--Interpret\t\tInterpret filename as S-Lang file\n\
+\t--interFace\t\tAct as an S-Lang interpreter\n\
+d121 2
+a137 1
+	{"fit", no_argument, 0, (int)'f'},
+d143 1
+d146 1
+d150 3
+a159 1
+char    deffname[512];
+d165 7
+d173 1
+a196 6
+#ifndef NOMAQ
+extern double mainfit(double **par);
+int maqtst=0;
+int fitset=-1;
+extern void dofit();
+#endif
+d214 1
+d217 1
+d220 1
+d231 2
+a232 2
+/*-
+ * int main (int argc, char *argv[])
+d239 1
+a239 1
+	int     what;
+d241 1
+d243 2
+d250 1
+a250 1
+	setsig ();
+a257 1
+
+d261 6
+a266 2
+	if (!noslang)
+		strcpy (s_lang_defs, "vamps.sl");
+a269 3
+	sl_argc = argc;
+	sl_argv = argv;
+	strncpy(sl_arg0, argv[sl_optind++], 255);
+d273 1
+d277 5
+a281 1
+	if(SLang_init_tty(-1, 0, 1)) {
+d289 1
+d301 1
+d304 1
+a304 1
+		if((path = sl_statfile(".vampssl",sl_path)) != (char *)NULL){
+d309 2
+d314 2
+d321 1
+d323 75
+a397 94
+	while ((what = getopt_long (argc, argv, OPTSTR, options, NULL)) != EOF)
+	{
+		strncpy(sl_arg0, argv[sl_optind++], 255);
+		switch (what)
+		{
+		 case 'h':{
+			 showusage (argv, 1);
+			 exit (0);
+			 /* NOTREACHED */
+		 }
+		 case '?':{
+			 showit("vamps",ERR,"Option not known",0,0);
+			 showusage (argv, 1);
+			 exit (EXIT_FAILURE);
+			 /* NOTREACHED */
+		 }
+		 case 'f':{
+			 maqtst = 1;
+			 break;
+		 }
+		 case 'E':{
+			 sprintf(s,"soil speed %d",atoi(optarg));
+			 setvar (s);
+			 break;
+		 }
+		 case 'S':{
+			 setvar (optarg);
+			 break;
+		 }
+		 case 'I':{
+			 /* Process Slang file and exit(0)*/
+			 strncpy(sl_arg0, argv[sl_optind++], 255);
+			 (void)SLang_load_file (getdefname(optarg));
+			 exit(0);
+		 }
+		 case 'F':{
+			 exit_is_inter = 1;
+			 (void)interpreter(1);
+			 break;
+		 }
+		 case 'V':{
+			 (void) fprintf(stderr,"%.2f\n",(double)version/100.0);
+			 exit(0);
+			 /* NOTREACHED */
+		 }
+		 case 'L':{
+			 loggen = TRUE;
+			 strcpy (logfilename, optarg);
+			 break;
+		 }
+		 case 'v':{
+			 verbose++;
+			 defverb = verbose;
+			 break;
+		 }
+		 case 'c':{
+			 disclaim ();
+			 exit (0);
+		 }
+		 case 'O':{
+			 (void)to_outlist (optarg);
+			 break;
+		 }
+		 case 'D':{
+			 (void) sprintf (s, "determine %s 1", optarg);
+			 setvar (s);		/* Put into override list */
+			 break;
+		 }
+		 case 'C':{
+			 commchar = (int) *optarg;
+			 break;
+		 }
+		 case 'H':{
+			 header = FALSE;
+			 break;
+		 }
+		 case 'n':{
+			 dumpini = FALSE;
+			 break;
+		 }
+		 case 'l':{
+			 disclaim ();
+			 exit (0);
+		 }
+		 case 'o':{
+			 strcpy(outfilename,optarg);
+			 break;
+		 }
+		 case 's':{
+			 showdef (deffname);
+			 exit (0);
+		 }
+		 default:
+			break;
+d400 1
+a400 1
+	
+d403 1
+a403 1
+	
+d406 1
+a406 1
+	/* Do preliminary stuff, get defaults from files */
+d408 4
+a411 8
+	
+	
+	if (maqtst || getdefint ("determine","fit",0,infilename,FALSE)){
+		dofit();
+	}else{
+		dorun();
+	}
+	
+d419 4
+d437 2
+d441 1
+a441 2
+	if(!noslang)
+		(void)at_end_f(); /* call the s-lang end function */
+d444 1
+a444 4
+
+	/*
+	 * Scan the outlist array and dump the sets that are found 
+	 */
+d459 7
+a465 2
+	if (genoutfile != stdout)	
+		(void)fclose (genoutfile);
+d467 1
+d474 1
+a474 7
+	
+	if (Dcanop) 
+		precanop ();
+	
+	if (Dsoil)  presoil ();
+	at_start_f(); /* Call the s_lang start function */
+	
+d476 1
+a476 1
+		* by default this is set to the interval between step 0
+d479 2
+a480 2
+	thiststep = getdefdoub ("time", "firststep",data[preset].xy[1+startpos].x- data[preset].xy[startpos].x, infilename, FALSE);
+	t = data[preset].xy[startpos].x - thiststep;
+d482 1
+a482 1
+	endtime = data[preset].xy[startpos + steps - 1].x;
+d484 1
+a484 1
+	
+d490 8
+a497 2
+	while (t >= starttime && t < endtime)
+	{
+d500 1
+a500 1
+			thiststep = data[preset].xy[i].x - data[preset].xy[i - 1].x;
+d504 1
+d509 1
+d511 4
+d517 1
+d519 3
+a521 1
+			tstep_soil (&i);
+d524 1
+d527 1
+d534 19
+d554 4
+a557 3
+/*-
+ * void disclaim()
+ *	shows the GNU public licence
+d565 5
+a569 5
+/*-
+ * void showusage( char *argv, int verb)
+ *	shows program indentification and a short (verb == 0 )
+ *	or long (verb >0 ) command line
+ *	explanation.
+d583 5
+a587 5
+/*-
+ * void loaddefaults ()
+ * loads defaults from the defaults-file 
+ * After that the defaults in the vamps section from the input file
+ * are loaded
+d593 11
+a603 1
+	showit ("vamps",MESG,"starting",2,verbose);
+d605 1
+d607 1
+a607 1
+	commchar = getdefchar ("vamps", "commentchar", commchar, defname, FALSE);
+a612 2
+	showgraph = getdefint ("vamps", "showgraph", showgraph, defname, FALSE);
+	strcpy(graphcommand,getdefstr ("vamps", "graphcommand", GRAPHCOMMAND, defname, FALSE));
+d614 2
+d617 1
+a618 15
+	/*
+	 * input file 
+	 */
+	verbose = getdefint ("vamps", "verbose", verbose, infilename, FALSE);
+	fmttime = getdefint ("vamps", "fmttime", fmttime, infilename, FALSE);
+	commchar = getdefchar ("vamps", "commentchar", commchar, infilename, FALSE);
+	header = getdefint ("vamps", "header", header, infilename, FALSE);
+	loggen = getdefint ("vamps", "logging", loggen, infilename, FALSE);
+	iniinmem = getdefint ("vamps", "iniinmem", iniinmem, infilename, FALSE);
+	strcpy (logfilename, getdefstr ("vamps", "logfilename", logfilename, infilename, FALSE));
+	strcpy (progstr, getdefstr ("vamps", "progstr", progstr, infilename, FALSE));
+	showgraph= getdefint ("vamps", "showgraph", showgraph, infilename, FALSE);
+	strcpy(graphcommand,getdefstr ("vamps", "graphcommand", graphcommand, infilename, FALSE));
+	strcpy(s_lang_defs, getdefstr ("vamps", "s_lang_defs", s_lang_defs, infilename, FALSE));
+	noslang = getdefint ("vamps", "noslang", noslang, infilename, FALSE);
+d632 1
+a632 1
+	(void) fprintf (stdout, "commentchar = %c\n", getdefchar ("vamps", "commentchar", commchar, defname, FALSE));
+a637 2
+	(void) fprintf (stdout, "showgraph = %d\n", getdefint ("vamps", "showgraph", showgraph, defname, FALSE));
+	fprintf (stdout, "graphcommand = %s\n", getdefstr ("vamps", "graphcommand", graphcommand, defname, FALSE));
+d639 2
+d642 2
+d671 1
+a671 1
+		sprintf (s, "%s%c%s", tmps,PATHSAP, defname);
+d679 1
+a679 1
+	sprintf (s, "%s%c%s", VAMPSLIB,PATHSAP, defname);
+d687 1
+a687 1
+	tmps= rindex(ss,PATHSAP);
+d690 1
+a690 1
+		sprintf (s, "%s%c%s", ss,PATHSAP, defname);
+d700 1
+a700 1
+		sprintf (s, "%s%c%s", tmps ,PATHSAP, defname);
+d721 7
+a727 3
+{  /*
+    * Output to stdout by default 
+    */
+d729 13
+a742 1
+	{
+d744 5
+a748 1
+	}
+d753 1
+a753 2
+		if ((genoutfile = fopen (outfilename, "w")) == NULL)
+		{
+d759 1
+a759 2
+			if ((genoutfile = fopen (outfilename, "w")) == NULL)
+			{
+d771 2
+a772 2
+	(void) fprintf (genoutfile, "command=%s\n",cmline);
+	(void) fprintf (genoutfile, "defaultsfile=%s\n", deffname);
+a794 15
+	/*
+	 * Check for precipitation. In the new setup a precipitation
+	 * * file _MUST_ be present to derive the timesteps! 
+	 */
+	if ((preset = getsetbyname ("precipitation")) < 0)
+	{
+		strcpy (s, getdefstr ("ts", "precipitation", "nothing", infilename, FALSE));
+		if (strcmp (s, "nothing") == 0)
+			Perror (progname, 1, RCSid, "Need precipitation data", "");
+		get_data (s, "precipitation");
+		if (data[0].xy == NULL)
+			exit(1);
+		preset = getsetbyname ("precipitation");
+	}
+
+d796 1
+a803 1
+	steps = days;
+d805 13
+d820 8
+a827 19
+	/*
+	 * check for parameters to be determined 
+	 */
+	if (getdefint ("determine", "pevaporation", 0, infilename, FALSE)) 
+		(void) DoEvap (getdefint ("pevaporation", "method", 1, infilename, FALSE));
+
+	/*
+	 * check for parameters to be determined 
+	 */
+	if (getdefint ("determine", "evaporation", 0, infilename, FALSE))
+		(void) DoActEvap (getdefint ("evaporation", "method", 1, infilename, FALSE));
+	/*
+	 * check for parameters to be determined 
+	 */
+	/*
+	 * check interception method and feed to interception stuff 
+	 */
+	if (getdefint ("determine", "interception", 0, infilename, FALSE))
+		getintercept (getdefint ("interception", "method", 0, infilename, FALSE));
+d833 1
+a833 3
+	/*
+	 * Do preliminaries for all to be determined 
+	 */
+d836 1
+a836 2
+	if (strcmp (xtraoutfn, "nothing") != 0)
+	{
+d843 13
+d861 17
+a877 5
+	int format=0;
+	(void) fprintf (genoutfile, "# -------> start of input file dump <---\n");
+	(void) fprintf (genoutfile, "# Settings at end of run (ini file dump)\n");
+	writememini (NULL, &format, genoutfile);
+	(void) fprintf (genoutfile, "# -------> end of input file dump <-------");
+@
+
+
+0.33
+log
+@Set to Alpha version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.99/src/main/RCS/vamps.c,v 0.32 1996/10/23 09:21:46 schj Alpha $ */
+d4 3
+a6 3
+*  $Author: schj $
+*  $Date: 1996/10/23 09:21:46 $
+*/
+d9 45
+a53 44
+* Copyright (C) 1995 Jaap Schellekens.
+* 
+* This program is free software; you can redistribute it and/or modify it
+* under the terms of the GNU General Public License as published by the
+* Free Software Foundation; either version 2, or (at your option) any
+* later version.
+* 
+* This program is distributed in the hope that it will be useful, but
+* WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+* General Public License for more details.
+* 
+* You should have received a copy of the GNU General Public License along
+* with this program; see the file COPYING.  If not, write to the Free
+* Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+* 
+* (C) Jaap Schellekens
+* Faculty of Earth Sciences            |       International Institute 
+* Vrije Universiteit                   |       for Tropical Forestry
+* De Boelelaan 1085                    |       Rio Piedras
+* 1081 HV Amsterdam                    |       Puerto Rico, USA
+* The Netherlands                              |
+* E-mail: schj@@geo.vu.nl                       |
+* schj@@xs4all.nl                       |
+* ---------------------------------------------------------------------
+* Parts of this program derived from swap.  The following is taken from
+* the swap fortran code:
+* 
+* Author : Jan G. Wesseling
+* 
+* Correspondence
+* 
+* This program uses the ideas and experiences of various
+* researchers at the Winand Staring Centre and the Wageningen
+* Agricultural University. Currently the program is maintained
+* and documented in cooperation by :
+* 
+* Dept. of Agrohydrology             Dept. of Water Resources
+* Winand Staring Centre              Wageningen Agricultural University
+* Marijkeweg 11/22                   Nieuwe Kanaal 11
+* 6700 AC  Wageningen                6709 PA  Wageningen
+* The Netherlands                    The Netherlands
+* Fax: +31 8370 24812                Fax: +31 8370 84885
+*/
+d55 1
+a55 1
+"$Id: vamps.c,v 0.32 1996/10/23 09:21:46 schj Alpha $";
+d61 2
+a62 3
+#include "deffile.h"		/*
+			     * input/output file library 
+			     */
+d70 1
+a70 2
+#ifndef NOSLANG
+#define OPTSTR "fFE:L:vnclsho:O:HC:D:S:I"
+d75 1
+a75 1
+\n\t[-n][-E speed][-L file][-I][-F] filename"
+d100 19
+a118 19
+ {"help", no_argument, 0, (int)'h'},
+ {"copyright", no_argument, 0, (int)'c'},
+ {"verbose", no_argument, 0, (int)'v'},
+ {"version", no_argument, 0, (int)'V'},
+ {"license", no_argument, 0, (int)'l'},
+ {"showdef", no_argument, 0, (int)'s'},
+ {"inputdump", no_argument, 0, (int)'i'},
+ {"output", required_argument, 0, (int)'o'},
+ {"Logfile", required_argument, 0, (int)'L'},
+ {"Setvar", required_argument, 0, (int)'E'},
+ {"fit", no_argument, 0, (int)'f'},
+ {"speed", required_argument, 0, (int)'S'},
+ {"Output", required_argument, 0, (int)'O'},
+ {"Header", no_argument, 0, (int)'H'},
+ {"Comment", required_argument, 0, (int)'C'},
+ {"Determine", required_argument, 0, (int)'D'},
+ {"Interpret", no_argument, 0, (int)'I'},
+ {"interFace", no_argument, 0, (int)'F'},
+ {0, 0, 0, 0},
+a119 49
+#else /* No slang used */
+
+#define OPTSTR "fE:L:vnclsho:O:HC:D:S:"
+
+#define USAGE "\
+\n\t[-v][-h][-c][-l][-O setname][-H][-C commentchar]\
+\n\t[-D variable][-s][-S section name value][-o filename]\
+\n\t[-n][-E speed][-L file] filename"
+
+#define EXPL "\
+\t--verbose\t\tbe verbose about performed actions\n\
+\t--version\t\tshow version of vamps\n\
+\t--help\t\t\tshow this information\n\
+\t--Logfile file\t\tlog session to file\n\
+\t--copyright\t\tshow part of the GPL\n\
+\t--Output setname\tdump specified setname\n\
+\t--Determine variable\tdetermine the variable specified\n\
+\t--fit\t\t\tFit data to settings in fit section\n\
+\t--output filename\tsend output to filename\n\
+\t--showdef\t\tsend defaults to stdout\n\
+\t--noinputdump\t\tdon't include input file in output\n\
+\t--spEed speed\t\tset calculation speed to speed (1-6)\n\
+\t--Comment char\t\tset char as commentchar\n\
+\t--Setvar section name value\tOverride value from input file\n\
+"
+/*
+* GNU long options 
+*/
+struct option options[] =
+{
+ {"help", no_argument, 0, (int)'h'},
+ {"copyright", no_argument, 0, (int)'c'},
+ {"verbose", no_argument, 0, (int)'v'},
+ {"version", no_argument, 0, (int)'V'},
+ {"license", no_argument, 0, (int)'l'},
+ {"showdef", no_argument, 0, (int)'s'},
+ {"inputdump", no_argument, 0, (int)'i'},
+ {"fit", no_argument, 0, (int)'f'},
+ {"output", required_argument, 0, (int)'o'},
+ {"Logfile", required_argument, 0, (int)'L'},
+ {"Setvar", required_argument, 0, (int)'E'},
+ {"speed", required_argument, 0, (int)'S'},
+ {"Output", required_argument, 0, (int)'O'},
+ {"Header", no_argument, 0, (int)'H'},
+ {"Comment", required_argument, 0, (int)'C'},
+ {"Determine", required_argument, 0, (int)'D'},
+ {0, 0, 0, 0},
+};
+#endif /* NOSLANG */
+d121 1
+d133 1
+d171 24
+d196 4
+a199 4
+* int main (int argc, char *argv[])
+*
+* The main vamps program 
+*/
+d203 42
+a244 2
+  int     what, i;
+  char ttfname[512];
+d246 2
+a247 22
+  if (argc <=1) {
+    showusage (argv, 0);
+    exit(EXIT_FAILURE);
+  }
+  
+  setsig ();
+  if (getenv("VAMPSLIB"))
+    strcpy(vampslib,getenv("VAMPSLIB"));
+  else
+    strcpy(vampslib,VAMPSLIB);
+  
+  if (argc > 1)
+    strcpy (infilename, argv[argc - 1]);
+  else
+    strcpy (infilename, "nothing yet");
+  
+  strcpy (outfilename, "nothing yet");
+  strcpy (logfilename, "vamps.log");
+
+#ifndef NOSLANG
+  if (!noslang)
+    strcpy (s_lang_defs, "vamps.sl");
+d249 5
+d255 8
+a262 2
+/* this is probably not portable */
+  progstr = (char *) ts_memory (NULL, 2 * sizeof (int), progname);	
+d264 1
+a264 1
+  strcpy (progstr, "2");
+d266 7
+a272 15
+  progname = argv[0];
+  strcpy(deffname,getdefname (DEFNAME));
+  loaddefaults (deffname);/* loads defaults from deffname  */
+#ifndef NOSLANG
+  if (!noslang)
+    init_s(getdefname(s_lang_defs));/* Now read s-lang stuff */
+#endif
+  
+  cmline= ts_command (argc, argv);
+  /*
+   * Parse the comand line and set options 
+   */
+  while ((what = getopt_long (argc, argv, OPTSTR, options, NULL)) != EOF)
+    {
+      switch (what)
+d274 93
+a366 151
+	case 'h':
+	  {
+	    showusage (argv, 1);
+	    exit (0);
+	    /* NOTREACHED */
+	  }
+         case '?':
+           {
+	      showit("vamps",ERR,"Option not known",0,0);
+              showusage (argv, 1);
+	      exit (EXIT_FAILURE);
+	      /* NOTREACHED */
+           }
+	case 'f':
+	  {
+	    maqtst = 1;
+	    break;
+	  }
+	case 'E':
+	  {
+	    sprintf(s,"soil speed %d",atoi(optarg));
+	    setvar (s);
+	    break;
+	  }
+	case 'S':
+	  {
+	    setvar (optarg);
+	    break;
+	  }
+#ifndef NOSLANG
+	case 'I':
+	  {
+	    /* Process Slang file and exit(0)*/
+	    strcpy(ttfname,argv[argc-1]);
+	    if (ttfname && (strcmp("-I",ttfname)!=0)){
+	      (void)SLang_load_file (getdefname(ttfname));
+	    }else {
+	      (void)interpreter(1);
+	    }
+	    exit(0);
+	    /* NOTREACHED */
+	  }
+	case 'F':
+	  {
+	    (void)interpreter(1);
+	    exit(0);
+	    /* NOTREACHED */
+	  }
+#endif
+	case 'V':
+	  {
+	    (void) fprintf(stderr,"%s\n",PROVERSION);
+	    exit(0);
+	    /* NOTREACHED */
+	  }
+	case 'L':
+	  {
+	    loggen = TRUE;
+	    strcpy (logfilename, optarg);
+	    break;
+	  }
+	case 'v':
+	  {
+	    verbose++;
+	    defverb = verbose;
+	    break;
+	  }
+	case 'c':
+	  {
+	    disclaim ();
+	    exit (0);
+	  }
+	case 'O':
+	  {
+	    (void)to_outlist (optarg);
+	    break;
+	  }
+	case 'D':
+	  {
+	    (void) sprintf (s, "determine %s 1", optarg);
+	    setvar (s);		/* Put into override list */
+	    break;
+	  }
+	case 'C':
+	  {
+	    commchar = (int) *optarg;
+	    break;
+	  }
+	case 'H':
+	  {
+	    header = FALSE;
+	    break;
+	  }
+	case 'n':
+	  {
+	    dumpini = FALSE;
+	    break;
+	  }
+	case 'l':
+	  {
+	    disclaim ();
+	    exit (0);
+	  }
+	case 'o':
+	  {
+	    strcpy(outfilename,optarg);
+	    break;
+	  }
+	case 's':
+	  {
+	    showdef (deffname);
+	    exit (0);
+	  }
+	default:
+	  break;
+	}
+    }
+
+  /* Do preliminary stuff, get defaults from files */
+   prelim();
+  
+  if (Dcanop)
+    precanop ();
+#ifndef NOMAQ
+  if (maqtst || getdefint ("determine","fit",0,infilename,FALSE)){
+    dofit();
+  }else{  
+#endif
+    if (Dsoil)
+      presoil ();
+#ifndef NOSLANG
+    if(!noslang) 
+      at_start_f(); /* Call the s_lang start function */
+#endif
+
+    /* get length of first timestep (initial to first record )
+       by default this is set to the interval between step 0
+       and 1 or is startpos is specified between startpos and 
+       startpos -1*/
+    thiststep = getdefdoub ("time", "firststep",data[preset].xy[1+startpos].x- data[preset].xy[startpos].x, infilename, FALSE);
+    t = data[preset].xy[startpos].x - thiststep;
+    starttime = t;
+    endtime = data[preset].xy[startpos + steps - 1].x;
+    i = startpos;
+    while (t >= starttime && t < endtime)
+      {
+	thisstep = i;
+	if (i != startpos){
+	  thiststep = data[preset].xy[i].x - data[preset].xy[i - 1].x;
+	  if (thiststep <=0.0)
+	    Perror(progname,1,RCSid,"Timestep <=0","Check P input data");
+d368 14
+a381 6
+#ifndef NOSLANG
+	if(!noslang)
+	  (void)each_step_f(); /* Call the s-lang each_step function */
+        if (switchtoint){
+		(void)interpreter(0);
+		switchtoint=0;
+d383 22
+a404 2
+#endif
+	utout (&i);
+d406 27
+a432 25
+	  daycanop (&i);
+	if (Dsoil)
+	  daysoil (&i);
+	if (doxtraout)
+	  xtraout (i);
+	i++;
+	if (!Dsoil) /* we have to increase time*/
+	  t+=thiststep;
+      }
+#ifndef NOMAQ
+  }
+#endif
+  /*
+   * Clean up stuff 
+   */
+  if (Dsoil)
+    postsoil ();
+  if (Dcanop)
+    /*postcanop ()*/;
+#ifndef NOSLANG
+  if(!noslang)
+    (void)at_end_f(); /* call the s-lang end function */
+#endif
+  closeout ();
+  xcloseout ();
+d434 51
+a484 26
+  /*
+   * Scan the outlist array and dump the sets that are found 
+   */
+  /*
+   * this should change !!! (see input list ) 
+   */
+  for (i = 0; i < outnr; i++)
+    dumpset (getsetbyname (outlist[i]), (FILE *) NULL);
+
+
+  if (dumpini)
+    inidump();
+
+  endshow ();
+
+  outfiletrailer ();
+  printsum (stderr);	/* print summary to stderr  */
+
+  if (genoutfile != stdout)	/* Close the stream if needed  */
+    (void)fclose (genoutfile);
+
+  /* delete all datasets and free memory  */
+  del_all_sets ();
+  /* deletes the ini memory list (if present)  */
+  delmemlist ();
+  return 0;
+d495 1
+a495 1
+  (void) fprintf (stderr, "%s\n", GNUL);
+d505 8
+a512 10
+showusage (argv, verb)
+char   *argv[];
+int     verb;
+{
+  (void) fprintf (stderr, "\n%s - %s\n\t%s (%s) %s\n\t%s (c) - %s\n", argv[0], DESCRIPTION, IDENTIFY, STATUS, PROVERSION, AUTHOR, DATE);
+  (void) fprintf (stderr, "\tBuild on %s at %s by %s (%s)\n", WHERE, BUILDDATE, WHO, OS);
+  (void) fprintf (stderr, "\t(%s)\n", RCSid);
+  (void) fprintf (stderr, "\n\tusage: %s %s\n\n", argv[0], USAGE);
+  if (verb)
+    (void) fprintf (stderr, "%s", EXPL);
+d526 29
+a554 33
+  showit ("vamps",MESG,"starting",2,verbose);
+  verbose = getdefint ("vamps", "verbose", verbose, defname, FALSE);
+  fmttime = getdefint ("vamps", "fmttime", fmttime, defname, FALSE);
+  commchar = getdefchar ("vamps", "commentchar", commchar, defname, FALSE);
+  header = getdefint ("vamps", "header", header, defname, FALSE);
+  loggen = getdefint ("vamps", "logging", loggen, defname, FALSE);
+  iniinmem = getdefint ("vamps", "iniinmem", iniinmem, defname, FALSE);
+  strcpy (logfilename, getdefstr ("vamps", "logfilename", logfilename, defname, FALSE));
+  strcpy (progstr, getdefstr ("vamps", "progstr", progstr, defname, FALSE));
+  showgraph = getdefint ("vamps", "showgraph", showgraph, defname, FALSE);
+  strcpy(graphcommand,getdefstr ("vamps", "graphcommand", GRAPHCOMMAND, defname, FALSE));
+  strcpy(s_lang_defs, getdefstr ("vamps", "s_lang_defs", s_lang_defs, defname, FALSE));
+#ifndef NOSLANG
+  noslang=getdefint ("vamps", "noslang", noslang, defname, FALSE);
+#endif
+
+  /*
+   * input file 
+   */
+  verbose = getdefint ("vamps", "verbose", verbose, infilename, FALSE);
+  fmttime = getdefint ("vamps", "fmttime", fmttime, infilename, FALSE);
+  commchar = getdefchar ("vamps", "commentchar", commchar, infilename, FALSE);
+  header = getdefint ("vamps", "header", header, infilename, FALSE);
+  loggen = getdefint ("vamps", "logging", loggen, infilename, FALSE);
+  iniinmem = getdefint ("vamps", "iniinmem", iniinmem, infilename, FALSE);
+  strcpy (logfilename, getdefstr ("vamps", "logfilename", logfilename, infilename, FALSE));
+  strcpy (progstr, getdefstr ("vamps", "progstr", progstr, infilename, FALSE));
+  showgraph= getdefint ("vamps", "showgraph", showgraph, infilename, FALSE);
+  strcpy(graphcommand,getdefstr ("vamps", "graphcommand", graphcommand, infilename, FALSE));
+  strcpy(s_lang_defs, getdefstr ("vamps", "s_lang_defs", s_lang_defs, infilename, FALSE));
+#ifndef NOSLANG
+  noslang = getdefint ("vamps", "noslang", noslang, infilename, FALSE);
+#endif
+d560 1
+a560 1
+ * defaults-file (.vamps of vamps.def)
+d565 13
+a577 15
+  (void) fprintf (stdout, "#%s  defaults\n", progname);
+  (void) fprintf (stdout, "[vamps]\n");
+  (void) fprintf (stdout, "verbose = %d\n", getdefint ("vamps", "verbose", verbose, defname, FALSE));
+  (void) fprintf (stdout, "commentchar = %c\n", getdefchar ("vamps", "commentchar", commchar, defname, FALSE));
+  (void) fprintf (stdout, "header = %d\n", getdefint ("vamps", "header", header, defname, FALSE));
+  (void) fprintf (stdout, "logging = %d\n", getdefint ("vamps", "logging", loggen, defname, FALSE));
+  (void) fprintf (stdout, "logfilename = %s\n", getdefstr ("vamps", "logfilename", logfilename, defname, FALSE));
+  (void) fprintf (stdout, "iniinmem = %d\n", getdefint ("vamps", "iniinmem", iniinmem, defname, FALSE));
+  (void) fprintf (stdout, "progstr = %s\n", getdefstr ("vamps", "progstr", progstr, defname, FALSE));
+  (void) fprintf (stdout, "showgraph = %d\n", getdefint ("vamps", "showgraph", showgraph, defname, FALSE));
+  fprintf (stdout, "graphcommand = %s\n", getdefstr ("vamps", "graphcommand", graphcommand, defname, FALSE));
+  fprintf (stdout, "s_lang_defs = %s\n", getdefstr ("vamps", "s_lang_defs",s_lang_defs, defname, FALSE));
+#ifndef NOSLANG
+  fprintf (stdout, "noslang = %d\n", getdefint ("vamps", "noslang",noslang, defname, FALSE));
+#endif
+d590 51
+a640 43
+  FILE   *tst;
+  static char   s[1024];
+  static char   ss[1024];
+  char *tmps;
+
+  strcpy(s,defname);
+  strcpy(ss,progname);
+  if ((tst = fopen (s, "r")) != NULL)
+    {
+      (void)fclose (tst);
+      return s;
+    }
+
+  sprintf (s, "%s%c%s", getenv ("HOME"),PATHSAP, defname);
+  if ((tst = fopen (s, "r")) != NULL)
+    {
+      (void)fclose (tst);
+      return s;
+    }
+
+  sprintf (s, "%s%c%s", VAMPSLIB,PATHSAP, defname);
+  if ((tst = fopen (s, "r")) != NULL)
+    {
+      (void)fclose (tst);
+      return s;
+    }
+
+  /* Try to get name from program name, note the go32 uses UNIX style slashes*/
+  tmps= rindex(ss,PATHSAP);
+  *tmps = '\0';
+  sprintf (s, "%s%c%s", ss,PATHSAP, defname);
+  if ((tst = fopen (s, "r")) != NULL)
+    {
+      (void)fclose (tst);
+      return s;
+    }
+
+  sprintf (s, "%s%c%s", getenv ("VAMPSLIB"),PATHSAP, defname);
+  if ((tst = fopen (s, "r")) != NULL)
+    {
+      (void)fclose (tst);
+      return s;
+    }
+d656 2
+a657 2
+   * Output to stdout by default 
+   */
+d659 1
+a659 9
+  if ((infile = fopen (infilename, "r")) == NULL)
+    {
+      Perror (progname, 1, RCSid, "File open failed:", infilename);
+    }
+
+   strcpy(rundir,getdefstr("run","rundir",rundir,infilename,FALSE));
+   /* First command line outputfile, then run section, then stdout*/
+   if(strcmp(outfilename,"nothing yet") != 0){
+      if ((genoutfile = fopen (outfilename, "w")) == NULL)
+d661 113
+a773 1
+	   Perror (progname, 1, RCSid, "File open failed:", outfilename);
+a774 104
+   }else{
+      strcpy(outfilename,getdefstr("run","outputfile",outfilename,infilename,FALSE));
+      if(strcmp(outfilename,"nothing yet") != 0){
+	 if ((genoutfile = fopen (outfilename, "w")) == NULL)
+	   {
+	      Perror (progname, 1, RCSid, "File open failed:", outfilename);
+	   }
+      }else    
+	genoutfile = stdout;
+   }
+
+
+  /*
+   * Start the outfile generation and print a small header 
+   */
+  outfileheader (infilename);
+  (void) fprintf (genoutfile, "command=%s\n",cmline);
+  (void) fprintf (genoutfile, "defaultsfile=%s\n", deffname);
+
+  startshow ("vamps", infilename);
+  showit ("vamps",MESG,getdefstr ("environment", "caseid", "None", infilename, FALSE),1,verbose);
+  showit ("vamps",MESG,cmline,1,verbose);
+  
+  /*
+   * dumpini can only dump the memory list, so we have to read that list 
+   */
+  if (dumpini && !iniinmem)
+    dumpini = FALSE;
+
+  /*
+   * read the input file into the memory list 
+   */
+  if (iniinmem)
+    {
+      showit ("vamps",MESG,"reading file in memory...",1,verbose);
+      rinmem (infilename);
+      showit ("vamps",MESG,"done reading ini file in memory",2,verbose);
+    }
+
+
+  /*
+   * Check for precipitation. In the new setup a precipitation
+   * * file _MUST_ be present to derive the timesteps! 
+   */
+  if ((preset = getsetbyname ("precipitation")) < 0)
+    {
+      strcpy (s, getdefstr ("ts", "precipitation", "nothing", infilename, FALSE));
+      if (strcmp (s, "nothing") == 0)
+	Perror (progname, 1, RCSid, "Need precipitation data", "");
+      get_data (s, "precipitation");
+      if (data[0].xy == NULL)
+      	exit(1);
+      preset = getsetbyname ("precipitation");
+    }
+
+  days = getdefint ("time", "steps", 0, infilename, TRUE);
+  starttime = getdefdoub ("time", "start", 0.0, infilename, FALSE);
+  endtime = getdefdoub ("time", "end", 0.0, infilename, FALSE);
+  if (starttime == 0.0)
+    startpos = getdefint ("time","startpos",0,infilename,FALSE);
+  else
+    Perror(progname,1,RCSid,"Starttime not yet implemented","Use startpos instead");
+
+  steps = days;
+  sprintf (s, "run will contain %d steps", steps);
+  showit ("vamps",MESG,s,1,verbose);
+
+  /*
+   * check for parameters to be determined 
+   */
+  if (getdefint ("determine", "pevaporation", 0, infilename, FALSE)) 
+    (void) DoEvap (getdefint ("pevaporation", "method", 1, infilename, FALSE));
+
+  /*
+   * check for parameters to be determined 
+   */
+  if (getdefint ("determine", "evaporation", 0, infilename, FALSE))
+    (void) DoActEvap (getdefint ("evaporation", "method", 1, infilename, FALSE));
+  /*
+   * check for parameters to be determined 
+   */
+  /*
+   * check interception method and feed to interception stuff 
+   */
+  if (getdefint ("determine", "interception", 0, infilename, FALSE))
+    getintercept (getdefint ("interception", "method", 0, infilename, FALSE));
+
+  /* Start soil moisture stuff if needed */
+  Dsoil = getdefint ("determine", "soilmoisture", 0, infilename, FALSE);
+  Dcanop = getdefint ("determine", "canopy", 0, infilename, FALSE);
+
+  /*
+   * Do preliminaries for all to be determined 
+   */
+  openout ();
+  strcpy (xtraoutfn, getdefstr ("xout", "filename", "nothing", infilename, FALSE));
+  if (strcmp (xtraoutfn, "nothing") != 0)
+    {
+      sprintf (s, "dumping xtra output to: %s\n",xtraoutfn);
+      showit("vamps",MESG,s,1,verbose);
+      doxtraout = TRUE;
+      xoutfile = fopen (xtraoutfn, "w");
+      xopenout ();
+    }
+d780 5
+a784 5
+  int format=0;
+  (void) fprintf (genoutfile, "# -------> start of input file dump <---\n");
+  (void) fprintf (genoutfile, "# Settings at end of run (ini file dump)\n");
+  writememini (NULL, &format, genoutfile);
+  (void) fprintf (genoutfile, "# -------> end of input file dump <-------");
+a785 5
+
+
+
+
+
+@
+
+
+0.32
+log
+@Changed status to Alpha
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.99/src/main/RCS/vamps.c,v 0.31 1996/10/22 17:48:09 schj Exp $ */
+d4 3
+a6 3
+ *  $Author: schj $
+ *  $Date: 1996/10/22 17:48:09 $
+ */
+d9 44
+a52 44
+ * Copyright (C) 1995 Jaap Schellekens.
+ * 
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2, or (at your option) any
+ * later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along
+ * with this program; see the file COPYING.  If not, write to the Free
+ * Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+ * 
+ * (C) Jaap Schellekens
+ * Faculty of Earth Sciences            |       International Institute 
+ * Vrije Universiteit                   |       for Tropical Forestry
+ * De Boelelaan 1085                    |       Rio Piedras
+ * 1081 HV Amsterdam                    |       Puerto Rico, USA
+ * The Netherlands                              |
+ * E-mail: schj@@geo.vu.nl                       |
+ * schj@@xs4all.nl                       |
+ * ---------------------------------------------------------------------
+ * Parts of this program derived from swap.  The following is taken from
+ * the swap fortran code:
+ * 
+ * Author : Jan G. Wesseling
+ * 
+ * Correspondence
+ * 
+ * This program uses the ideas and experiences of various
+ * researchers at the Winand Staring Centre and the Wageningen
+ * Agricultural University. Currently the program is maintained
+ * and documented in cooperation by :
+ * 
+ * Dept. of Agrohydrology             Dept. of Water Resources
+ * Winand Staring Centre              Wageningen Agricultural University
+ * Marijkeweg 11/22                   Nieuwe Kanaal 11
+ * 6700 AC  Wageningen                6709 PA  Wageningen
+ * The Netherlands                    The Netherlands
+ * Fax: +31 8370 24812                Fax: +31 8370 84885
+ */
+d54 1
+a54 1
+"$Id: vamps.c,v 0.31 1996/10/22 17:48:09 schj Exp $";
+d61 2
+a62 2
+				 * input/output file library 
+				 */
+d93 1
+a93 1
+\t--Interpret\t\tInterpret the S-Lang file\n\
+d97 2
+a98 2
+ * GNU long options 
+ */
+d101 19
+a119 19
+     {"help", no_argument, 0, (int)'h'},
+     {"copyright", no_argument, 0, (int)'c'},
+     {"verbose", no_argument, 0, (int)'v'},
+     {"version", no_argument, 0, (int)'V'},
+     {"license", no_argument, 0, (int)'l'},
+     {"showdef", no_argument, 0, (int)'s'},
+     {"inputdump", no_argument, 0, (int)'i'},
+     {"output", required_argument, 0, (int)'o'},
+     {"Logfile", required_argument, 0, (int)'L'},
+     {"Setvar", required_argument, 0, (int)'E'},
+     {"fit", no_argument, 0, (int)'f'},
+     {"speed", required_argument, 0, (int)'S'},
+     {"Output", required_argument, 0, (int)'O'},
+     {"Header", no_argument, 0, (int)'H'},
+     {"Comment", required_argument, 0, (int)'C'},
+     {"Determine", required_argument, 0, (int)'D'},
+     {"Interpret", no_argument, 0, (int)'I'},
+     {"interFace", no_argument, 0, (int)'F'},
+     {0, 0, 0, 0},
+d147 2
+a148 2
+ * GNU long options 
+ */
+d151 17
+a167 17
+     {"help", no_argument, 0, (int)'h'},
+     {"copyright", no_argument, 0, (int)'c'},
+     {"verbose", no_argument, 0, (int)'v'},
+     {"version", no_argument, 0, (int)'V'},
+     {"license", no_argument, 0, (int)'l'},
+     {"showdef", no_argument, 0, (int)'s'},
+     {"inputdump", no_argument, 0, (int)'i'},
+     {"fit", no_argument, 0, (int)'f'},
+     {"output", required_argument, 0, (int)'o'},
+     {"Logfile", required_argument, 0, (int)'L'},
+     {"Setvar", required_argument, 0, (int)'E'},
+     {"speed", required_argument, 0, (int)'S'},
+     {"Output", required_argument, 0, (int)'O'},
+     {"Header", no_argument, 0, (int)'H'},
+     {"Comment", required_argument, 0, (int)'C'},
+     {"Determine", required_argument, 0, (int)'D'},
+     {0, 0, 0, 0},
+d176 2
+a177 5
+#ifdef __FAT__
+cgar    rundir[512]="\\."
+#else
+char	rundir[512]="/.";
+#endif
+a179 1
+
+d187 1
+a187 1
+		      or determined from endpos */
+d189 1
+a189 1
+		    determined from steps and startpos */
+d197 2
+a198 2
+			    For the first step 1.0 is assumed 
+			    (from initial to firstentry in the precip file)*/
+a202 1
+extern char *getdefname (char *defname);
+d220 4
+a223 4
+ * int main (int argc, char *argv[])
+ *
+ * The main vamps program 
+ */
+a229 1
+
+d231 2
+a232 2
+	 showusage (argv, 0);
+	 exit(EXIT_FAILURE);
+d234 1
+a234 1
+
+d237 1
+a237 1
+	strcpy(vampslib,getenv("VAMPSLIB"));
+d239 2
+a240 2
+  	strcpy(vampslib,VAMPSLIB);
+
+d245 1
+a245 1
+
+d254 1
+a254 1
+   /* this is probably not portable */
+d256 1
+a256 1
+  
+d260 2
+a261 5
+  strcpy(deffname,DEFNAME);
+  strcpy(deffname,getdefname (deffname));
+  loaddefaults (deffname);	/*
+				 * loads defaults from deffname 
+				 */
+d534 1
+d552 1
+d615 1
+a615 5
+#if defined(__FAT__) || defined(__OS2__)
+  sprintf (s, "%s\%s", getenv ("HOME"), defname);
+#else
+  sprintf (s, "%s/%s", getenv ("HOME"), defname);
+#endif
+d622 1
+a622 5
+#if defined(__FAT__) || defined(__OS2__)
+  sprintf (s, "%s\%s", VAMPSLIB, defname);
+#else
+  sprintf (s, "%s/%s", VAMPSLIB, defname);
+#endif
+d629 4
+a632 9
+#if defined(__FAT__) || defined(__OS2__)
+  tmps= rindex(ss,'\\');
+  tmps = '\0';
+  sprintf (s, "%s\%s", ss, defname);
+#else
+  tmps= rindex(ss,'/');
+  tmps = '\0';
+  sprintf (s, "%s/%s", ss, defname);
+#endif
+d639 1
+a639 5
+#if defined(__FAT__) || defined(__OS2__)
+  sprintf (s, "%s\%s", getenv ("VAMPSLIB"), defname);
+#else
+  sprintf (s, "%s/%s", getenv ("VAMPSLIB"), defname);
+#endif
+@
+
+
+0.31
+log
+@updated for showit
+added run section outfilename
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/main/RCS/vamps.c,v 0.30 1996/10/14 19:12:24 schj Alpha $ */
+d5 1
+a5 1
+ *  $Date: 1996/10/14 19:12:24 $
+d54 1
+a54 1
+"$Id: vamps.c,v 0.30 1996/10/14 19:12:24 schj Alpha $";
+d196 4
+a199 4
+int thisstep = 0;
+extern char *progstr;
+FILE   *genoutfile = NULL; /* general output of run */
+FILE   *xoutfile = NULL; /* xtra time-series output */
+@
+
+
+0.30
+log
+@In process of cleaning
+@
+text
+@d1 3
+a3 5
+/*
+ * $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.98/src/main/RCS/vamps.c,v 0.29 1996/08/05 14:28:09 schj Exp $ 
+ */
+/*
+ *  $RCSfile: vamps.c,v $
+d5 1
+a5 1
+ *  $Date: 1996/08/05 14:28:09 $
+d54 2
+a55 1
+"$Id: vamps.c,v 0.29 1996/08/05 14:28:09 schj Exp $";
+d63 1
+d176 7
+d190 5
+a194 9
+double  starttime;		/*
+				 * Start-time as specified by the user, or determined from endpos 
+				 */
+double  endtime;		/*
+				 * end-time as specified by the user or determined from steps and startpos 
+				 */
+int     startpos = 0;		/*
+				 * Start position in precipitation array 
+				 */
+d198 5
+a202 11
+FILE   *genoutfile = NULL;	/*
+				 * general output of run 
+				 */
+FILE   *xoutfile = NULL;	/*
+				 * xtra time-series output 
+				 */
+double  thiststep = 1.0;	/*
+				 * actual length of this timestep in days. For the
+				 * first step 1.0 is assumed (from initial to first
+				 * entry in the precip file)
+				 */
+d223 5
+a227 2
+/*
+ * The main program 
+d242 5
+a246 1
+  strcpy(vampslib,VAMPSLIB);
+d292 1
+a292 1
+	      showit("vamps: error: Option not known",0,0);
+d431 1
+a431 1
+	if (i){
+d541 1
+a541 1
+  showit ("loaddefaults: mesg: starting",2,verbose);
+a685 2
+  if (!genoutfile)
+    genoutfile = stdout;
+d692 18
+a710 5
+  if(strcmp(outfilename,"nothing yet") != 0)
+    if ((genoutfile = fopen (outfilename, "w")) == NULL)
+      {
+	Perror (progname, 1, RCSid, "File open failed:", outfilename);
+      }
+d719 2
+a720 2
+  showit (getdefstr ("environment", "caseid", "None", infilename, FALSE),1,verbose);
+  showit (cmline,1,verbose);
+d733 1
+a733 1
+      showit ("Reading file in memory...",1,verbose);
+d735 1
+a735 1
+      showit ("Done reading ini file in memory",2,verbose);
+d763 2
+a764 2
+  sprintf (s, "Run will contain %d steps", steps);
+  showit (s,1,verbose);
+d797 2
+a798 2
+      sprintf (s, "%s: dumping xtra output to: %s\n", progname, xtraoutfn);
+      showit(s,1,verbose);
+@
+
+
+0.29
+log
+@Added S-Lang stuff, make this optional is future?
+@
+text
+@d2 1
+a2 1
+ * $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.98/src/main/RCS/vamps.c,v 0.28 1996/03/25 07:49:08 schj alpha $ 
+d4 2
+a5 1
+/*- $RCSfile: vamps.c,v $
+d7 1
+a7 44
+ *  $Date: 1996/03/25 07:49:08 $
+ *  $Log: vamps.c,v $
+ *  Revision 0.28  1996/03/25 07:49:08  schj
+ *  removed TRY_SUBDAY
+ *
+ *  Revision 0.27  1996/03/24 11:50:31  schj
+ *  added signal handling stuff + cosmetic changes
+ *
+ *  Revision 0.26  1996/03/18 14:56:17  schj
+ *  alpha version
+ *
+ *  Revision 0.25  1996/03/18 14:49:45  schj
+ *  added xtraout stuff
+ *
+ * Revision 0.24  1996/02/08  08:19:43  schj
+ * added subdaily stuff
+ *
+ * Revision 0.23  1996/01/25  15:10:28  schj
+ * fixed small startpos bug
+ *
+ *  Revision 0.22  1995/12/17 21:58:53  schj
+ *  added support for staring simulation at no-zero
+ *
+ *  Revision 0.21  1995/12/05 03:09:22  schj
+ *  added multiple -v option, and some comments
+ *
+ * Revision 0.20  1995/10/30  13:59:49  schj
+ * added copyright suff
+ * added deffile.h
+ *
+ * Revision 0.19  1995/10/03  14:07:24  schj
+ * changed ePOT to pevaporation
+ * added determine evaporation
+ *
+ * Revision 0.18  1995/10/01  21:02:49  schj
+ * added getdefname() for defaults file searching
+ * first current dir, then HOME, then VAMPSLIB
+ *
+ * Revision 0.17  1995/09/30  18:03:53  schj
+ * move DEFNAME to vamps.h
+ *
+ * Revision 0.16  1995/09/26  09:23:51  schj
+ * Added log in header
+ * change e0 to pevaporation
+d56 1
+a56 1
+"$Id: vamps.c,v 0.28 1996/03/25 07:49:08 schj alpha $";
+d64 4
+d70 52
+d123 1
+a123 1
+#define OPTSTR "E:L:vnclsho:O:HC:D:S:"
+d138 1
+d151 17
+a167 16
+  {"help", no_argument, 0, 'h'},
+  {"copyright", no_argument, 0, 'c'},
+  {"verbose", no_argument, 0, 'v'},
+  {"version", no_argument, 0, 'V'},
+  {"license", no_argument, 0, 'l'},
+  {"showdef", no_argument, 0, 's'},
+  {"inputdump", no_argument, 0, 'i'},
+  {"output", required_argument, 0, 'o'},
+  {"Logfile", required_argument, 0, 'l'},
+  {"Setvar", required_argument, 0, 'E'},
+  {"speed", required_argument, 0, 'S'},
+  {"Output", required_argument, 0, 'O'},
+  {"Header", no_argument, 0, 'H'},
+  {"Comment", required_argument, 0, 'C'},
+  {"Determine", required_argument, 0, 'D'},
+  {0, 0, 0, 0},
+d169 1
+a169 1
+
+d172 1
+a172 1
+char    logfilename[1024];
+d175 1
+d193 1
+a193 1
+char    outfilename[1024];
+a205 2
+extern void    setsig ();
+extern void    unsetsig ();
+d207 5
+d214 6
+d221 5
+a231 3
+  FILE   *infile;
+  char    s[1024];
+  int     dumpini = TRUE;
+d233 7
+a239 17
+  int     Dsoil, Dcanop;
+  void    showusage (char *argv[], int verb);
+  void    showdef ();
+  void    disclaim ();
+  void    loaddefaults ();
+  extern void presoil ();
+  extern void postsoil ();
+  extern void daysoil (int i);
+  extern void precanop ();
+  extern void postcanop ();
+  extern void daycanop (int i);
+  extern void utout (int tstep);
+  char   *getdefname (char *deffname);
+  void    onsig (int sig);
+  extern void outfileheader (char *name);
+  extern void outfiletrailer ();
+  extern void init_s (char *vamps_sl); /* Initialize s-lang stuff */
+a240 1
+  
+d242 1
+a242 1
+
+a249 4
+  strcpy (s_lang_defs, "vamps.sl");
+  progstr = (char *) ts_memory (NULL, 2 * sizeof (int), progname);	/*
+									 * this is probably not portable 
+									 */
+d251 8
+d264 1
+a264 1
+  loaddefaults ();		/*
+d267 6
+a272 2
+  init_s(getdefname(s_lang_defs));/* Now read s-lang stuff */
+
+d284 13
+d309 20
+d333 1
+a333 1
+	    break;
+d354 1
+a354 1
+	    to_outlist (optarg);
+d360 1
+a360 3
+	    setvar (s);		/*
+				 * Put into override list 
+				 */
+d365 1
+a365 1
+	    commchar = *optarg;
+d385 1
+a385 4
+	    if ((genoutfile = fopen (optarg, "w")) == NULL)
+	      {
+		Perror (progname, 1, RCSid, "File open failed:", optarg);
+	      }
+d390 1
+a390 1
+	    showdef ();
+d398 3
+a400 136
+  /*
+   * Output to stdout by default 
+   */
+  if (!genoutfile)
+    genoutfile = stdout;
+
+  /*
+   * Open the input file or show help and exit if none is given 
+   */
+  if (optind < argc && argc > 1)
+    {
+      if ((infile = fopen (argv[argc - 1], "r")) == NULL)
+	{
+	  Perror (progname, 1, RCSid, "File open failed:", argv[argc - 1]);
+	}
+      strcpy (infilename, argv[argc - 1]);
+      (void) fclose (infile);
+    }
+  else
+    {
+      showusage (argv, verbose);
+      exit (1);
+    }
+
+  /*
+   * Start the outfile generation and print a small header 
+   */
+  outfileheader (infilename);
+  (void) fprintf (genoutfile, "command=%s\n", ts_command (argc, argv));
+  (void) fprintf (genoutfile, "defaultsfile=%s\n", deffname);
+
+  if (verbose)
+    {
+      startshow (argv[0], infilename);
+      showit (getdefstr ("environment", "caseid", "None", infilename, FALSE));
+      showit (ts_command (argc, argv));
+    }
+
+  /*
+   * dumpini can only dump the memory list, so we have to read that list 
+   */
+  if (dumpini && !iniinmem)
+    dumpini = FALSE;
+
+  /*
+   * read the input file into the memory list 
+   */
+  if (iniinmem)
+    {
+      if (verbose > 1)
+	showit ("Reading file in memory...");
+      rinmem (infilename);
+      if (verbose > 1)
+	showit ("Done reading ini file in memory");
+    }
+
+
+  /*
+   * Check for precipitation. In the new setup a precipitation
+   * * file _MUST_ be present to derive the timesteps! 
+   */
+  if ((preset = getsetbyname ("precipitation")) < 0)
+    {
+      strcpy (s, getdefstr ("ts", "precipitation", "nothing", infilename, FALSE));
+      if (strcmp (s, "nothing") == 0)
+	Perror (progname, 1, RCSid, "Need precipitation data", "");
+      get_data (s, "precipitation");
+      preset = getsetbyname ("precipitation");
+    }
+
+  days = getdefint ("time", "steps", 0, infilename, TRUE);
+  starttime = getdefdoub ("time", "start", 0.0, infilename, FALSE);
+  endtime = getdefdoub ("time", "end", 0.0, infilename, FALSE);
+  if (starttime == 0.0)
+    {
+      startpos = 0;
+    }
+  else
+    /*
+     * one can also give startpos directly 
+     */
+    {				/*
+				 * determine this thing !
+				 */
+    }
+  startpos = getdefint ("time", "startpos", startpos, infilename, FALSE);
+  steps = days;
+  if (verbose)
+    {
+      sprintf (s, "Run will contain %d days", days);
+      showit (s);
+    }
+
+
+  /*
+   * check for parameters to be determined 
+   */
+  if (getdefint ("determine", "pevaporation", 0, infilename, FALSE)) 
+    (void) DoEvap (getdefint ("pevaporation", "method", 1, infilename, FALSE));
+
+  /*
+   * check for parameters to be determined 
+   */
+  if (getdefint ("determine", "evaporation", 0, infilename, FALSE))
+    {
+      (void) DoActEvap (getdefint ("evaporation", "method", 1, infilename, FALSE));
+    }
+
+  /*
+   * check for parameters to be determined 
+   */
+  /*
+   * check interception method and feed to interception stuff 
+   */
+  if (getdefint ("determine", "interception", 0, infilename, FALSE))
+    getintercept (getdefint ("interception", "method", 0, infilename, FALSE));
+
+  /*
+   * Start soil moisture stuff if needed 
+   */
+  Dsoil = getdefint ("determine", "soilmoisture", 0, infilename, FALSE);
+  Dcanop = getdefint ("determine", "canopy", 0, infilename, FALSE);
+
+  /*
+   * Do preliminaries for all to be determined 
+   */
+  openout ();
+  strcpy (xtraoutfn, getdefstr ("xout", "filename", "nothing", infilename, FALSE));
+  if (strcmp (xtraoutfn, "nothing") != 0)
+    {
+      if (verbose)
+	fprintf (stderr, "%s: dumping xtra output to: %s\n", progname, xtraoutfn);
+      doxtraout = TRUE;
+      xoutfile = fopen (xtraoutfn, "w");
+      xopenout ();
+    }
+d403 11
+a413 2
+  if (Dsoil)
+    presoil ();
+d415 39
+a453 21
+  /*
+   * get length of first timestep (initial to first record )
+   */
+  thiststep = getdefdoub ("time", "firststep", thiststep, infilename, FALSE);
+  t = data[preset].xy[0].x - thiststep;
+  starttime = t;
+  endtime = data[preset].xy[startpos + steps - 1].x;
+  i = 0;
+  while (t >= starttime && t < endtime)
+    {
+      if (i)
+	thiststep = data[preset].xy[i].x - data[preset].xy[i - 1].x;
+      utout (i);
+      if (Dcanop)
+	daycanop (i);
+      if (Dsoil)
+	daysoil (i);
+      if (doxtraout)
+	xtraout (i);
+      i++;
+    }
+a456 2
+  if (Dcanop)
+    postcanop ();
+d459 6
+d477 1
+d479 1
+a479 6
+    {
+      (void) fprintf (genoutfile, "# -------> start of input file dump <---\n");
+      (void) fprintf (genoutfile, "# Settings at end of run (ini file dump)\n");
+      writememini (NULL, 0, genoutfile);
+      (void) fprintf (genoutfile, "# -------> end of input file dump <-------");
+    }
+d481 1
+a481 2
+  if (verbose)
+    endshow ();
+d484 1
+a484 3
+  printsum (stderr);		/*
+				 * print summary to stderr 
+				 */
+d486 2
+a487 4
+  if (genoutfile != stdout)	/*
+				 * Close the stream if needed 
+				 */
+    fclose (genoutfile);
+d489 1
+a489 3
+  /*
+   * delete all datasets and free memory 
+   */
+d491 1
+a491 3
+  /*
+   * deletes the ini memory list (if present) 
+   */
+d498 1
+a498 1
+ *	void disclaim()
+d502 1
+a502 1
+disclaim ()
+d508 1
+a508 1
+ *	void showusage( char *argv, int verb)
+d529 1
+a529 2
+ * loads defaults from the defaults-file (.vamps of vamps.def)
+ * at present this file is only sought for in the current dir
+d535 1
+a535 1
+loaddefaults ()
+d537 14
+a550 12
+  if (verbose > 2)
+    showit ("loaddefaults: starting");
+  verbose = getdefint ("vamps", "verbose", verbose, deffname, FALSE);
+  commchar = getdefchar ("vamps", "commentchar", commchar, deffname, FALSE);
+  header = getdefint ("vamps", "header", header, deffname, FALSE);
+  loggen = getdefint ("vamps", "logging", loggen, deffname, FALSE);
+  iniinmem = getdefint ("vamps", "iniinmem", iniinmem, deffname, FALSE);
+  strcpy (logfilename, getdefstr ("vamps", "logfilename", logfilename, deffname, FALSE));
+  strcpy (progstr, getdefstr ("vamps", "progstr", progstr, deffname, FALSE));
+  showgraph = getdefint ("vamps", "showgraph", showgraph, deffname, FALSE);
+  graphcommand = getdefstr ("vamps", "graphcommand", GRAPHCOMMAND, deffname, FALSE);
+  strcpy(s_lang_defs, getdefstr ("vamps", "s_lang_defs", s_lang_defs, deffname, FALSE));
+d562 6
+a567 3
+  showgraph = getdefint ("vamps", "showgraph", showgraph, infilename, FALSE);
+  graphcommand = getdefstr ("vamps", "graphcommand", graphcommand, infilename, FALSE);
+  strcpy(s_lang_defs, getdefstr ("vamps", "s_lang_defs", s_lang_defs, deffname, FALSE));
+d576 1
+a576 1
+showdef ()
+d580 13
+a592 10
+  (void) fprintf (stdout, "verbose = %d\n", getdefint ("vamps", "verbose", verbose, deffname, FALSE));
+  (void) fprintf (stdout, "commentchar = %c\n", getdefchar ("vamps", "commentchar", commchar, deffname, FALSE));
+  (void) fprintf (stdout, "header = %d\n", getdefint ("vamps", "header", header, deffname, FALSE));
+  (void) fprintf (stdout, "logging = %d\n", getdefint ("vamps", "logging", loggen, deffname, FALSE));
+  (void) fprintf (stdout, "logfilename = %s\n", getdefstr ("vamps", "logfilename", logfilename, deffname, FALSE));
+  (void) fprintf (stdout, "iniinmem = %d\n", getdefint ("vamps", "iniinmem", iniinmem, deffname, FALSE));
+  (void) fprintf (stdout, "progstr = %s\n", getdefstr ("vamps", "progstr", progstr, deffname, FALSE));
+  (void) fprintf (stdout, "showgraph = %d\n", getdefint ("vamps", "showgraph", showgraph, deffname, FALSE));
+  fprintf (stdout, "graphcommand = %s\n", getdefstr ("vamps", "graphcommand", graphcommand, deffname, FALSE));
+  fprintf (stdout, "s_lang_defs = %s\n", getdefstr ("vamps", "s_lang_defs",s_lang_defs, deffname, FALSE));
+d595 2
+a596 1
+/*- char *getdefname(char *deffname)
+d598 3
+a600 2
+ *  that can be opened. First the current dir, than $HOME, than
+ *  VAMPSLIB.
+d603 1
+a603 2
+getdefname (deffname)
+char   *deffname;
+d607 2
+d610 2
+a611 1
+  strcpy(s,deffname);
+d614 1
+a614 1
+      fclose (tst);
+d619 1
+a619 1
+  sprintf (s, "%s\%s", getenv ("HOME"), deffname);
+d621 1
+a621 1
+  sprintf (s, "%s/%s", getenv ("HOME"), deffname);
+d625 1
+a625 1
+      fclose (tst);
+d630 1
+a630 1
+  sprintf (s, "%s\%s", VAMPSLIB, deffname);
+d632 1
+a632 1
+  sprintf (s, "%s/%s", VAMPSLIB, deffname);
+d636 1
+a636 1
+      fclose (tst);
+d640 158
+a797 1
+  return NULL;
+d799 4
+@
+
+
+0.28
+log
+@removed TRY_SUBDAY
+@
+text
+@d2 1
+a2 1
+ * $Header: /home/schj/src/vamps_0.98/src/main/RCS/vamps.c,v 0.27 1996/03/24 11:50:31 schj Exp $ 
+d6 1
+a6 1
+ *  $Date: 1996/03/24 11:50:31 $
+d8 3
+d12 1
+a12 1
+ *  added siganal handling stuff + cosmetic changes
+d98 1
+a98 1
+"$Id: vamps.c,v 0.27 1996/03/24 11:50:31 schj Exp $";
+a106 1
+#include <signal.h>
+d108 2
+a109 1
+#define OPTSTR "L:vnclsho:O:HC:D:S:"
+d114 1
+a114 1
+\n\t[-n][-L file] filename"
+d127 1
+d145 2
+a146 1
+  {"Setvar", required_argument, 0, 'S'},
+a153 13
+/* Number of signals to be ignored */
+#define MAXIG 5
+#define CATCHSIGS SIGINT, SIGABRT, SIGTERM, SIGFPE, SIGHUP
+/*
+ * Signals to be caught or ignored 
+ */
+const int catch[] =
+{CATCHSIGS, 0};
+
+/* Needed in djgpp */
+#ifndef SIG_ERR
+#define SIG_ERR 1
+#endif
+d157 2
+d162 1
+d189 5
+a193 2
+void    setsig ();
+void    unsetsig ();
+d221 1
+d223 1
+a223 1
+
+d233 1
+d241 2
+a242 1
+  (void) getdefname (deffname);
+d246 1
+d260 6
+d442 1
+a442 4
+  if (getdefint ("determine", "pevaporation", 0, infilename, FALSE))
+    /*
+     * check pevaporation method 
+     */
+d472 2
+a473 2
+  strcpy (s, getdefstr ("xout", "filename", "nothing", infilename, FALSE));
+  if (strcmp (s, "nothing") != 0)
+d476 1
+a476 1
+	fprintf (stderr, "%s: dumping xtra output to: %s\n", progname, s);
+d478 1
+a478 1
+      xoutfile = fopen (s, "w");
+d591 1
+a591 1
+ * loads defauls from the defaults-file (.vamps of vamps.def)
+d611 1
+d625 1
+d647 1
+d651 1
+a651 1
+ *  searches for the full naem of the defaults file
+d660 1
+d662 2
+a663 2
+  strcpy (deffname, DEFNAME);
+  if ((tst = fopen (deffname, "r")) != NULL)
+d666 1
+a666 1
+      return deffname;
+d670 1
+a670 1
+  sprintf (deffname, "%s\%s", getenv ("HOME"), DEFNAME);
+d672 1
+a672 1
+  sprintf (deffname, "%s/%s", getenv ("HOME"), DEFNAME);
+d674 1
+a674 1
+  if ((tst = fopen (deffname, "r")) != NULL)
+d677 1
+a677 1
+      return deffname;
+d681 1
+a681 1
+  sprintf (deffname, "%s\%s", VAMPSLIB, DEFNAME);
+d683 1
+a683 1
+  sprintf (deffname, "%s/%s", VAMPSLIB, DEFNAME);
+d685 1
+a685 1
+  if ((tst = fopen (deffname, "r")) != NULL)
+d688 1
+a688 1
+      return deffname;
+a693 84
+
+/*-
+ * void onsig (int sig)
+ *
+ *	New signal handler, setup is run after handling the signal
+ *	as Linux reset them to default behaviour. I suppose
+ *	this is no proble on other systems.
+ */
+void 
+onsig (int sig)
+{
+  static int ign = 0;		/*
+				 * How may sigs may be ignored 
+				 */
+  switch (sig)
+    {
+    case SIGINT:
+      ign++;
+      (void) fprintf (stderr, "Ignoring keyboard interrupt (%d/%d)\n", ign, MAXIG);
+      if (ign < MAXIG)
+	setsig ();
+      else
+	unsetsig ();
+      break;
+    case SIGABRT:
+      ign++;
+      (void) fprintf (stderr, "Ignoring abort signal (%d/%d)\n", ign, MAXIG);
+      if (ign < MAXIG)
+	setsig ();
+      else
+	unsetsig ();
+      break;
+    case SIGFPE:
+      (void) fprintf (stderr, "Floating point error(%d)\n", sig);
+      (void) fprintf (stderr, "Please check input parameters.\n");
+      Perror (progname, 1, RCSid, "Exiting on floating point error.", "");
+      break;
+    default:
+      (void) fprintf (stderr, "\n\nExiting on signal %d\n", sig);
+      exit (5);
+      break;
+    }
+}
+
+/*-
+ * void setsig()
+ * set up custom signal handling
+ */
+void 
+setsig ()
+{
+  int     err = 0;
+  int     i;
+
+  /*
+   * set up signal handler 
+   */
+  for (i = 0; catch[i] && !err; i++)
+    if (signal (catch[i], onsig) == SIG_ERR)
+      {
+	Perror (progname, 0, RCSid, "Cant set up signal handler", "");
+	err++;
+      }
+}
+/*-
+ * unvoid setsig()
+ * resets signal handling
+ */
+void 
+unsetsig ()
+{
+  int     err = 0;
+  int     i;
+
+  /*
+   * resets signal handler 
+   */
+  for (i = 0; catch[i] && !err; i++)
+    if (signal (catch[i], SIG_DFL) == SIG_ERR)
+      {
+	Perror (progname, 0, RCSid, "Cant set up signal handler", "");
+	err++;
+      }
+}
+@
+
+
+0.27
+log
+@added siganal handling stuff + cosmetic changes
+@
+text
+@d2 1
+a2 1
+ * $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.975/src/main/RCS/vamps.c,v 0.26 1996/03/18 14:56:17 schj alpha $ 
+d6 1
+a6 1
+ *  $Date: 1996/03/18 14:56:17 $
+d8 3
+d95 1
+a95 1
+"$Id: vamps.c,v 0.26 1996/03/18 14:56:17 schj alpha $";
+d115 1
+d135 1
+d263 6
+a487 1
+#ifdef TRY_SUBDAY
+a501 13
+#else
+  /*
+   * Main loop for day= 0 to number of days 
+   */
+  for (i = startpos; i < (steps + startpos); i++)
+    {
+      utout (i);
+      if (Dcanop)
+	daycanop (i);
+      if (Dsoil)
+	daysoil (i);
+    }
+#endif
+d575 1
+a575 1
+  (void) fprintf (stderr, "\n%s - %s\n\t%s (%s) %s\n\t%s (c) %s\n", argv[0], DESCRIPTION, IDENTIFY, STATUS, PROVERSION, AUTHOR, DATE);
+@
+
+
+0.26
+log
+@alpha version
+@
+text
+@d1 3
+a3 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.975/src/main/RCS/vamps.c,v 0.25 1996/03/18 14:49:45 schj Exp $ */
+d6 1
+a6 1
+ *  $Date: 1996/03/18 14:49:45 $
+d8 3
+d47 44
+a90 44
+Copyright (C) 1995 Jaap Schellekens.
+
+This program is free software; you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the
+Free Software Foundation; either version 2, or (at your option) any
+later version.
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+General Public License for more details.
+
+You should have received a copy of the GNU General Public License along
+with this program; see the file COPYING.  If not, write to the Free
+Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+
+(C) Jaap Schellekens
+Faculty of Earth Sciences		|	International Institute 
+Vrije Universiteit 			|	for Tropical Forestry
+De Boelelaan 1085			|	Rio Piedras
+1081 HV Amsterdam			|	Puerto Rico, USA
+The Netherlands				|
+E-mail: schj@@geo.vu.nl 			|
+	schj@@xs4all.nl			|
+---------------------------------------------------------------------
+Parts of this program derived from swap.  The following is taken from
+the swap fortran code:
+
+   Author : Jan G. Wesseling
+
+                     Correspondence
+
+     This program uses the ideas and experiences of various
+     researchers at the Winand Staring Centre and the Wageningen
+     Agricultural University. Currently the program is maintained
+     and documented in cooperation by :
+
+     Dept. of Agrohydrology             Dept. of Water Resources
+     Winand Staring Centre              Wageningen Agricultural University
+     Marijkeweg 11/22                   Nieuwe Kanaal 11
+     6700 AC  Wageningen                6709 PA  Wageningen
+      The Netherlands                    The Netherlands
+     Fax: +31 8370 24812                Fax: +31 8370 84885
+*/
+d92 1
+a92 1
+"$Id: vamps.c,v 0.25 1996/03/18 14:49:45 schj Exp $";
+d97 3
+a99 1
+#include "deffile.h"  /* input/output file library */
+d101 1
+d123 3
+a125 1
+/* GNU long options */
+d144 14
+d162 1
+a162 1
+int	doxtraout = FALSE;
+d166 9
+a174 3
+double  starttime; /* Start-time as specified by the user, or determined from endpos */
+double  endtime; /* end-time as specified by the user or determined from steps and startpos */
+int     startpos=0;  /* Start position in precipitation array */
+d178 17
+a194 6
+FILE   *genoutfile = NULL;	/* general output of run */
+FILE   *xoutfile = NULL;	/* xtra time-series output */
+double thiststep=1.0; /* actual length of this timestep in days. For the
+			 first step 1.0 is assumed (from initial to first
+			 entry in the precip file)*/
+/* The main program */
+d196 1
+a196 1
+main (int argc,char  *argv[])
+d203 10
+a212 10
+  void showusage  (char *argv[], int verb);
+  void showdef  ();
+  void disclaim  ();
+  void loaddefaults  ();
+  extern void presoil  ();
+  extern void postsoil  ();
+  extern void daysoil  (int i);
+  extern void precanop  ();
+  extern void postcanop  ();
+  extern void daycanop  (int i);
+d214 3
+a216 2
+  char   *getdefname  (char *deffname);
+  extern void outfileheader  (char *name);
+d219 3
+d229 3
+a231 1
+  progstr = (char *) ts_memory (NULL, 2 * sizeof (int), progname); /* this is probably not portable */
+d237 7
+a243 3
+  loaddefaults ();		/* loads defaults from deffname */
+
+  /* Parse the comand line and set options */
+d267 1
+a267 1
+	    defverb=verbose;
+d283 3
+a285 1
+	    setvar (s);		/* Put into override list */
+d326 3
+a328 1
+  /* Output to stdout by default */
+d332 3
+a334 1
+  /* Open the input file or show help and exit if none is given */
+d350 3
+a352 1
+  /* Start the outfile generation and print a small header */
+d364 3
+a366 1
+  /* dumpini can only dump the memory list, so we have to read that list */
+d370 3
+a372 1
+  /* read the input file into the memory list */
+d383 4
+a386 8
+  /* check length of simulation period */
+   /* This will have to move until after the precip
+    * file has been read, to determine the number of steps.
+    * Mayby the progress module should be made differently
+    */
+  
+   /* Check for precipitation. In the new setup a precipitation
+    * file _MUST_ be present to derive the timesteps! */
+d394 2
+a395 2
+    }  
+   
+d399 12
+a410 4
+  if (starttime == 0.0){
+    startpos = 0;
+  }else /* one can also give startpos directly */
+    { /* determine this thing !*/}
+d420 3
+a422 1
+  /* check for parameters to be determined */
+d424 3
+a426 1
+    /* check pevaporation method */
+d429 3
+a431 1
+  /* check for parameters to be determined */
+d437 6
+a442 2
+  /* check for parameters to be determined */
+  /* check interception method and feed to interception stuff */
+d446 3
+a448 1
+  /* Start soil moisture stuff if needed */
+d452 13
+a464 10
+  /* Do preliminaries for all to be determined */
+  openout();
+  strcpy(s,getdefstr ("xout","filename","nothing",infilename,FALSE));
+  if (strcmp(s,"nothing")!=0){
+     if (verbose)
+     	fprintf(stderr,"%s: dumping xtra output to: %s\n",progname,s);
+     doxtraout = TRUE;
+     xoutfile=fopen(s,"w");
+     xopenout(); 
+  }
+d470 3
+a472 1
+    /* get length of first timestep (initial to first record */
+d476 1
+a476 1
+  endtime = data[preset].xy[startpos+steps-1].x;
+d478 14
+a491 12
+  i =0;
+  while ( t >= starttime && t<endtime){
+    if (i)
+    thiststep= data[preset].xy[i].x-data[preset].xy[i-1].x;
+    utout(i);
+    if (Dcanop)
+      daycanop (i);
+    if (Dsoil)
+      daysoil (i);
+    if (doxtraout) xtraout(i);
+    i++;
+  }
+d493 3
+a495 1
+  /* Main loop for day= 0 to number of days */
+d498 1
+a498 1
+      utout(i);
+d505 3
+a507 1
+  /* Clean up stuff */
+d512 2
+a513 2
+  closeout();
+  xcloseout();
+d515 6
+a520 2
+  /* Scan the outlist array and dump the sets that are found */
+  /* this should change !!! (see input list ) */
+d525 1
+a525 1
+    {				/* dump settings at this time to outfile */
+d536 7
+a542 3
+  printsum(stderr); /* print summary to stderr */
+
+  if (genoutfile != stdout)	/* Close the stream if needed */
+d545 8
+a552 4
+  /* delete all datasets and free memory */
+  del_all_sets();
+  /* deletes the ini memory list (if present) */
+  delmemlist();
+d610 3
+a612 1
+  /* input file */
+d650 2
+a651 2
+char
+*getdefname (deffname)
+d686 85
+@
+
+
+0.25
+log
+@added xtraout stuff
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.97/src/main/RCS/vamps.c,v 0.24 1996/02/08 08:19:43 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1996/02/08 08:19:43 $
+d6 3
+d87 1
+a87 1
+"$Id: vamps.c,v 0.24 1996/02/08 08:19:43 schj Exp $";
+@
+
+
+0.24
+log
+@added subdaily stuff
+@
+text
+@d1 1
+a1 1
+/* $Header: /homes/schj/src/vamps_0.96/src/main/RCS/vamps.c,v 0.23 1996/01/25 15:10:28 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1996/01/25 15:10:28 $
+d6 3
+d84 1
+a84 1
+"$Id: vamps.c,v 0.23 1996/01/25 15:10:28 schj Exp $";
+a91 3
+int     iniinmem = TRUE;
+char   *progname;
+
+d134 4
+d146 1
+d150 1
+a150 1
+
+d152 1
+a152 3
+main (argc, argv)
+int     argc;
+char   *argv[];
+d159 13
+a171 13
+  void showusage __P ((char *argv[], int verb));
+  void showdef __P (());
+  void disclaim __P (());
+  void loaddefaults __P (());
+  extern void presoil __P (());
+  extern void postsoil __P (());
+  extern void daysoil __P ((int i));
+  extern void precanop __P (());
+  extern void postcanop __P (());
+  extern void daycanop __P ((int i));
+  extern void utout __P((int tstep));
+  char   *getdefname __P ((char *deffname));
+  extern void outfileheader __P ((char *name));
+d302 3
+a304 3
+  /* dumpini can only dump the memory list, so we have to read that */
+  if (dumpini)
+    iniinmem = TRUE;
+d317 18
+a334 2
+  /* check length of simulation period (at present in days) */
+  days = getdefint ("time", "days", 0, infilename, TRUE);
+d336 1
+d371 9
+a379 1
+  openout(outfilename);
+a389 1
+  fprintf(stderr,"%f %f %f %d\n",starttime,endtime,t,startpos);
+d400 1
+d420 1
+d446 2
+@
+
+
+0.23
+log
+@fixed small startpos bug
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.96/src/main/RCS/vamps.c,v 0.22 1995/12/17 21:58:53 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/12/17 21:58:53 $
+d6 3
+d81 1
+a81 1
+"$Id: vamps.c,v 0.22 1995/12/17 21:58:53 schj Exp $";
+d135 2
+a136 1
+double  starttime; /* Start-time as specified by the user */
+d142 3
+d329 1
+d356 20
+d385 1
+@
+
+
+0.22
+log
+@added support for staring simulation at no-zero
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.95/src/main/RCS/vamps.c,v 0.21 1995/12/05 03:09:22 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/12/05 03:09:22 $
+d6 3
+d78 1
+a78 1
+"$Id: vamps.c,v 0.21 1995/12/05 03:09:22 schj Exp $";
+d310 1
+a310 1
+  if (starttime == 0.0)
+d312 1
+a312 1
+  else /* one can also give startpos directly */
+d314 1
+a314 1
+  startpos = getdefint ("time", "startpos", startpos, infilename, TRUE);
+@
+
+
+0.21
+log
+@added multiple -v option, and some comments
+@
+text
+@d1 1
+a1 1
+/* $Header: /homes/schj/src/vamps_0.91/RCS/vamps.c,v 0.20 1995/10/30 13:59:49 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/10/30 13:59:49 $
+d6 3
+a26 1
+ *
+d75 1
+a75 1
+"$Id: vamps.c,v 0.20 1995/10/30 13:59:49 schj Exp $";
+a124 10
+/*setspec setspecs[] =
+   {
+   {"interception", "precipitation"},
+   {"stemflow", "precipitation"},
+   {"throughfall", "precipitation"},
+   {"Cstorage", "interception"},
+   {"canopy_E", "interception"},
+   {0, 0},
+}; */
+
+d129 2
+d306 6
+a329 1
+
+d333 1
+a333 1
+    getintercept (getdefstr ("interception", "method", "calder", infilename, FALSE));
+d346 1
+a346 1
+  for (i = 0; i < steps; i++)
+d368 1
+a368 1
+      (void) fprintf (genoutfile, "# -------> start of input file dump <---------\n");
+d371 1
+a371 1
+      (void) fprintf (genoutfile, "# -------> end of input file dump <---------");
+d378 1
+d383 2
+@
+
+
+0.20
+log
+@added copyright suff
+added deffile.h
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/main/RCS/vamps.c,v 0.19 1995/10/03 14:07:24 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/10/03 14:07:24 $
+d6 4
+d28 1
+a28 58
+ * Copyright (C) 1995 Jaap Schellekens.
+ *
+ * This program is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 2, or (at your option) any later
+ * version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; see the file COPYING.  If not, write to the Free Software
+ * Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+ *
+ * (C) Jaap Schellekens
+ * Faculty of Earth Sciences
+ * Vrije Universiteit
+ * De Boelelaan 1085
+ * 1081 HV Amsterdam
+ * The Netherlands
+ * E-mail: schj@@geo.vu.nl 
+ *	   schj@@xs4all.nl
+ *
+ * Parts of this program derived from swap.
+ * The following is taken from the swap fortran code:
+ *
+ *    Author : Jan G. Wesseling
+ *
+ *                      Correspondence
+ *
+ *      This program uses the ideas and experiences of various
+ *      researchers at the Winand Staring Centre and the Wageningen
+ *      Agricultural University. Currently the program is maintained
+ *      and documented in cooperation by :
+ *
+ *      Dept. of Agrohydrology             Dept. of Water Resources
+ *      Winand Staring Centre              Wageningen Agricultural University
+ *      Marijkeweg 11/22                   Nieuwe Kanaal 11
+ *      6700 AC  Wageningen                6709 PA  Wageningen
+ *       The Netherlands                    The Netherlands
+ *      Fax: +31 8370 24812                Fax: +31 8370 84885
+ *
+ *      Feedback from the users of the program is highly appreciated.
+ *
+ *
+ *                      Disclaimer
+ *
+ *      The user of SWAP 1993 accepts and uses the program as it is, at
+ *      the user's own risk, relying solely upon his/her own
+ *      inspection of the program material without reliance upon
+ *      other descriptions.
+ *      In no event will the Winand Staring Centre or the Agricultural 
+ *      University, or their individual staff members, be liable 
+ *      for any incidental or consequential damage attributed
+ *      to the use of this program.  
+ */
+d30 42
+d73 1
+a73 1
+"$Id: vamps.c,v 0.19 1995/10/03 14:07:24 schj Exp $";
+d75 4
+a78 4
+#include "../include/vamps.h"
+#include "../include/getopt.h"
+#include "../include/swatsoil.h"
+#include "../include/deffile.h"
+d131 1
+a131 1
+   }; */
+d174 1
+a174 1
+  progstr = (char *) ts_memory (NULL, 2 * sizeof (int), progname);
+d205 2
+a206 1
+	    verbose = TRUE;
+d267 1
+a267 1
+  /* Open the input file */
+d283 1
+a283 1
+  /* Start the outfile generation */
+d295 1
+d299 1
+d304 1
+a304 1
+      rinmem (infilename, 4);	/* read input file in memory for increased speed */
+@
+
+
+0.19
+log
+@changed ePOT to pevaporation
+added determine evaporation
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/main/RCS/vamps.c,v 0.18 1995/10/01 21:02:49 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/10/01 21:02:49 $
+d6 4
+d23 60
+d84 1
+a84 1
+"$Id: vamps.c,v 0.18 1995/10/01 21:02:49 schj Exp $";
+d88 2
+d92 2
+a93 2
+int iniinmem = TRUE;
+char *progname;
+d144 2
+a145 2
+char infilename[1024];
+char logfilename[1024];
+d147 3
+a149 3
+int days = 0;
+int steps = 0;
+char outfilename[1024];
+d151 1
+a151 1
+FILE *genoutfile = NULL;	/* general output of run */
+d155 2
+a156 2
+     int argc;
+     char *argv[];
+d158 5
+a162 4
+  FILE *infile;
+  char s[1024];
+  int dumpini = TRUE;
+  int what, i;
+d167 8
+a174 2
+  void dosoil __P (());
+  char *getdefname __P ((char *deffname));
+d186 1
+d259 1
+a259 1
+		Perror (1, RCSid, "File open failed:", optarg);
+d282 1
+a282 1
+	  Perror (1, RCSid, "File open failed:", argv[argc - 1]);
+d333 3
+a335 2
+  if (getdefint ("determine", "evaporation", 0, infilename, FALSE)){
+    (void) DoActEvap (getdefint ("evaporation", "method", 1, infilename, FALSE));
+d338 1
+d343 1
+d345 24
+a368 2
+  if (getdefint ("determine", "soilmoisture", 0, infilename, FALSE))
+    dosoil ();
+d407 1
+a407 1
+ *	shows program indentification and a short (verb == 0 ) 
+d413 2
+a414 2
+     char *argv[];
+     int verb;
+d417 1
+a417 1
+  (void) fprintf (stderr, "\tBuild on %s at %s by %s\n", WHERE, BUILDDATE, WHO);
+d445 3
+a447 3
+  showgraph = getdefint("vamps","showgraph",showgraph,deffname,FALSE);
+  graphcommand = getdefstr("vamps","graphcommand",GRAPHCOMMAND,deffname,FALSE);
+  
+d456 2
+a457 2
+  showgraph = getdefint("vamps","showgraph",showgraph,infilename,FALSE);
+  graphcommand = getdefstr("vamps","graphcommand",graphcommand,infilename,FALSE);
+a463 1
+ * (at present this file is only sought for in the current dir)
+d477 2
+a478 2
+      (void) fprintf (stdout,"showgraph = %d\n",getdefint("vamps","showgraph",showgraph,deffname,FALSE));
+      fprintf(stdout,"graphcommand = %s\n",getdefstr("vamps","graphcommand",graphcommand,deffname,FALSE));
+d483 1
+a483 1
+ *  that can be opened. First the current dir, than $HOME,
+d487 2
+a488 3
+ *
+getdefname (deffname)
+     char *deffname;
+d490 1
+a490 1
+  FILE *tst;
+d499 1
+a499 1
+#ifdef __FAT__
+d510 3
+d514 1
+@
+
+
+0.18
+log
+@added getdefname() for defaults file searching
+first current dir, then HOME, then VAMPSLIB
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/prosper/vamps_0.9/main/RCS/vamps.c,v 0.17 1995/09/30 18:03:53 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/09/30 18:03:53 $
+d6 4
+d15 1
+a15 1
+ * change e0 to ePOT
+d20 1
+a20 1
+"$Id: vamps.c,v 0.17 1995/09/30 18:03:53 schj Exp $";
+d254 8
+a261 3
+  if (getdefint ("determine", "ePOT", 0, infilename, FALSE))
+    /* check ePOT method */
+    (void) DoEvap (getdefint ("evaporation", "method", 1, infilename, FALSE));
+d346 3
+d357 2
+d379 2
+@
+
+
+0.17
+log
+@move DEFNAME to vamps.h
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/pr/src/prosper/vamps_0.9/main/RCS/vamps.c,v 0.16 1995/09/26 09:23:51 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/09/26 09:23:51 $
+d6 3
+d16 1
+a16 1
+"$Id: vamps.c,v 0.16 1995/09/26 09:23:51 schj Exp $";
+d22 2
+a23 2
+int     iniinmem = TRUE;
+char   *progname;
+d65 17
+a81 17
+{
+  {"interception", "precipitation"},
+  {"stemflow", "precipitation"},
+  {"throughfall", "precipitation"},
+  {"Cstorage", "interception"},
+  {"canopy_E", "interception"},
+  {0, 0},
+};*/
+
+char    infilename[1024];
+char    logfilename[1024];
+
+int     days = 0;
+int     steps = 0;
+char    outfilename[1024];
+extern  char *progstr;
+FILE   *genoutfile = NULL; /* general output of run */
+d85 2
+a86 2
+int     argc;
+char   *argv[];
+d88 4
+a91 4
+  FILE   *infile;
+  char    s[1024];
+  int     dumpini = TRUE;
+  int     what, i;
+d97 1
+d101 4
+a104 4
+   if (argc >1)
+       strcpy (infilename, argv[argc - 1]);
+   else
+       strcpy (infilename, "nothing yet");
+d108 2
+a109 2
+  progstr=(char *)ts_memory(NULL,2*sizeof(int),progname);
+  strcpy(progstr,"2");
+d112 3
+a114 2
+  loaddefaults ();		/* loads defaults from .vamps */
+ 
+d188 1
+a188 1
+	    exit(0);
+d217 2
+a218 1
+  (void)fprintf(genoutfile,"command=%s\n",ts_command (argc, argv));
+d223 1
+a223 1
+      showit (getdefstr ("environment", "caseid", "None", infilename,FALSE));
+d228 1
+a228 1
+	iniinmem=TRUE;
+d240 2
+a241 2
+  /* check length of simulation period (at present in days)*/
+  days = getdefint ("time", "days", 0, infilename,TRUE);
+d243 5
+a247 4
+  if (verbose){
+     sprintf(s,"Run will contain %d days",days);
+     showit(s);
+  }
+d250 1
+a250 1
+  if (getdefint ("determine", "ePOT", 0, infilename,FALSE))
+d252 1
+a252 1
+    (void) DoEvap (getdefint ("evaporation", "method", 1, infilename,FALSE));
+d256 2
+a257 2
+  if (getdefint ("determine", "interception", 0, infilename,FALSE))
+    getintercept (getdefstr ("interception", "method", "calder", infilename,FALSE));
+d259 1
+a259 1
+  if (getdefint ("determine", "soilmoisture", 0, infilename,FALSE))
+d267 7
+a273 6
+  if (dumpini){ /* dump settings at this time to outfile */
+    (void)fprintf(genoutfile,"# -------> start of input file dump <---------\n");
+    (void)fprintf(genoutfile,"# Settings at end of run (ini file dump)\n");
+    writememini (NULL, 0, genoutfile);
+    (void)fprintf(genoutfile,"# -------> end of input file dump <---------");
+  }
+d280 1
+a280 1
+  if (genoutfile != stdout) /* Close the stream if needed */
+d305 2
+a306 2
+char   *argv[];
+int     verb;
+d308 3
+a310 3
+   (void) fprintf (stderr, "\n%s - %s\n\t%s (%s) %s\n\t%s (c) %s\n", argv[0], DESCRIPTION, IDENTIFY,STATUS, PROVERSION, AUTHOR, DATE);
+   (void) fprintf (stderr, "\tBuild on %s at %s by %s\n", WHERE, BUILDDATE, WHO);
+   (void)fprintf(stderr,"\t(%s)\n",RCSid);
+d330 7
+a336 7
+  verbose = getdefint ("vamps", "verbose", verbose, DEFNAME,FALSE);
+  commchar = getdefchar ("vamps", "commentchar", commchar, DEFNAME,FALSE);
+  header = getdefint ("vamps", "header", header, DEFNAME,FALSE);
+  loggen = getdefint ("vamps", "logging", loggen, DEFNAME,FALSE);
+  iniinmem = getdefint ("vamps", "iniinmem", iniinmem, DEFNAME,FALSE);
+  strcpy (logfilename, getdefstr ("vamps", "logfilename", logfilename, DEFNAME,FALSE));
+  strcpy (progstr, getdefstr ("vamps", "progstr", progstr, DEFNAME,FALSE));
+d338 7
+a344 7
+  verbose = getdefint ("vamps", "verbose", verbose, infilename,FALSE);
+  commchar = getdefchar ("vamps", "commentchar", commchar, infilename,FALSE);
+  header = getdefint ("vamps", "header", header, infilename,FALSE);
+  loggen = getdefint ("vamps", "logging", loggen, infilename,FALSE);
+  iniinmem = getdefint ("vamps", "iniinmem", iniinmem, infilename,FALSE);
+  strcpy (logfilename, getdefstr ("vamps", "logfilename", logfilename, infilename,FALSE));
+  strcpy (progstr, getdefstr ("vamps", "progstr", progstr, infilename,FALSE));
+d358 47
+a404 7
+  (void) fprintf (stdout, "verbose = %d\n", getdefint ("vamps", "verbose", verbose, DEFNAME,FALSE));
+  (void) fprintf (stdout, "commentchar = %c\n", getdefchar ("vamps", "commentchar", commchar, DEFNAME,FALSE));
+  (void) fprintf (stdout, "header = %d\n", getdefint ("vamps", "header", header, DEFNAME,FALSE));
+  (void) fprintf (stdout, "logging = %d\n", getdefint ("vamps", "logging", loggen, DEFNAME,FALSE));
+  (void) fprintf (stdout, "logfilename = %s\n", getdefstr ("vamps", "logfilename", logfilename, DEFNAME,FALSE));
+  (void) fprintf (stdout, "iniinmem = %d\n", getdefint ("vamps", "iniinmem", iniinmem, DEFNAME,FALSE));
+  (void) fprintf (stdout, "progstr = %s\n", getdefstr ("vamps", "progstr", progstr, DEFNAME,FALSE));
+@
+
+
+0.16
+log
+@Added log in header
+change e0 to ePOT
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/main/RCS/vamps.c,v 0.15 1995/09/23 20:46:05 schj Exp $ */
+d4 6
+a9 2
+ *  $Date: 1995/09/23 20:46:05 $
+ *  $Log$
+d13 1
+a13 1
+"$Id: vamps.c,v 0.15 1995/09/23 20:46:05 schj Exp $";
+a315 5
+#ifdef __MSDOS__
+#define DEFNAME "vamps.def"
+#else
+#define DEFNAME ".vamps"
+#endif
+@
+
+
+0.15
+log
+@updated header
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/main/RCS/vamps.c,v 0.14 1995/09/19 13:43:18 schj Exp $ */
+d4 2
+a5 1
+ *  $Date: 1995/09/19 13:43:18 $
+d9 1
+a9 1
+"$Id: vamps.c,v 0.14 1995/09/19 13:43:18 schj Exp $";
+d239 2
+a240 2
+  if (getdefint ("determine", "e0", 0, infilename,FALSE))
+    /* check e0 method */
+@
+
+
+0.14
+log
+@updated exitonerror
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/main/RCS/vamps.c,v 0.13 1995/08/24 20:52:39 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/08/24 20:52:39 $
+d8 1
+a8 1
+"$Id: vamps.c,v 0.13 1995/08/24 20:52:39 schj Exp $";
+d295 1
+a295 1
+   (void) fprintf (stderr, "\n%s:\n\t%s\n\t%s (%s) %s\n\t%s (c) %s\n", argv[0], DESCRIPTION, IDENTIFY,STATUS, PROVERSION, AUTHOR, DATE);
+@
+
+
+0.13
+log
+@more output stuff
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/main/RCS/vamps.c,v 0.12 1995/08/24 14:13:25 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/08/24 14:13:25 $
+d8 1
+a8 1
+"$Id: vamps.c,v 0.12 1995/08/24 14:13:25 schj Exp $";
+d17 1
+a17 1
+#define OPTSTR "L:viclsho:O:HC:D:S:"
+d20 3
+a22 4
+\n\t[-v|--verbose][-h|--help][-c|--copyright][-l|--license]\
+\n\t[-O|--Output setname][-H|--Header][-C|--Comment commentchar]\
+\n\t[-D|--Determine variable][-s][-S|--Setvar section name value]\
+\n\t[-o|--output filename][-i][-l|--Logfile file] filename"
+d33 1
+a33 1
+\t--inputdump\t\tsend all settings to stderr after run\n\
+d37 1
+d56 1
+a56 1
+setspec setspecs[] =
+d64 1
+a64 1
+};
+d71 3
+a73 2
+char    outfilename[1024] = "nothing yet";
+FILE   *genoutfile = NULL;
+d82 1
+a82 1
+  int     dumpini = FALSE;
+d92 6
+a97 1
+  strcpy (infilename, argv[argc - 1]);
+d99 2
+d104 2
+a105 1
+
+d157 1
+a157 1
+	case 'i':
+d159 1
+a159 2
+	    dumpini = TRUE;
+	    iniinmem = TRUE;
+d178 1
+a178 1
+	    break;
+a183 1
+  while ((what = getopt_long (argc, argv, OPTSTR, options, NULL)) != EOF);
+d185 1
+d189 1
+d212 2
+a213 2
+      showit ((char *) getdefstr ("environment", "caseid", "None", infilename));
+      showit ((char *) ts_command (argc, argv));
+d216 3
+d222 1
+a222 1
+	showit ("Reading ini file in memory...");
+d229 2
+a230 3
+  /* check length of simulation period (at present in days*/
+  exitonerror = TRUE;
+  days = getdefint ("time", "days", 0, infilename);
+d232 4
+a236 1
+  exitonerror = FALSE;
+d238 3
+a240 3
+  if (getdefint ("determine", "e0", 0, infilename))
+    /* check e0 method and feed to on stuff */
+    (void) DoEvap (getdefint ("evaporation", "method", 1, infilename));
+d244 2
+a245 2
+  if (getdefint ("determine", "interception", 0, infilename))
+    getintercept (getdefstr ("interception", "method", "calder", infilename));
+d247 1
+a247 1
+  if (getdefint ("determine", "soilmoisture", 0, infilename))
+d256 2
+a257 2
+    (void)fprintf(genoutfile,"# -------> start of input file dump <---------");
+    (void)fprintf(genoutfile,"# Settings at end of run (ini file dump)");
+d274 4
+d284 6
+d295 3
+a297 5
+  if (verb)
+    {
+      (void) fprintf (stderr, "\n%s:\n\t%s\n\t%s %s\n\t%s (c) %s\n", argv[0], DESCRIPTION, IDENTIFY, PROVERSION, AUTHOR, DATE);
+      (void) fprintf (stderr, "\tBuild on %s at %s by %s\n", WHERE, BUILDDATE, WHO);
+    }
+d322 7
+a328 6
+  verbose = getdefint ("vamps", "verbose", verbose, DEFNAME);
+  commchar = getdefchar ("vamps", "commentchar", commchar, DEFNAME);
+  header = getdefint ("vamps", "header", header, DEFNAME);
+  loggen = getdefint ("vamps", "logging", loggen, DEFNAME);
+  iniinmem = getdefint ("vamps", "iniinmem", iniinmem, DEFNAME);
+  strcpy (logfilename, getdefstr ("vamps", "logfilename", logfilename, DEFNAME));
+d330 7
+a336 6
+  verbose = getdefint ("vamps", "verbose", verbose, infilename);
+  commchar = getdefchar ("vamps", "commentchar", commchar, infilename);
+  header = getdefint ("vamps", "header", header, infilename);
+  loggen = getdefint ("vamps", "logging", loggen, infilename);
+  iniinmem = getdefint ("vamps", "iniinmem", iniinmem, infilename);
+  strcpy (logfilename, getdefstr ("vamps", "logfilename", logfilename, infilename));
+d350 7
+a356 7
+  (void) fprintf (stdout, "verbose = %d\n", getdefint ("vamps", "verbose", verbose, DEFNAME));
+  (void) fprintf (stdout, "commentchar = %c\n", getdefchar ("vamps", "commentchar", commchar, DEFNAME));
+  (void) fprintf (stdout, "header = %d\n", getdefint ("vamps", "header", header, DEFNAME));
+  (void) fprintf (stdout, "logging = %d\n", getdefint ("vamps", "logging", loggen, DEFNAME));
+  (void) fprintf (stdout, "logfilename = %s\n", getdefstr ("vamps", "logfilename", logfilename, DEFNAME));
+  (void) fprintf (stdout, "iniinmem = %d\n", getdefint ("vamps", "iniinmem", iniinmem, DEFNAME));
+  exit (0);
+@
+
+
+0.12
+log
+@Added outputfile header and trailer
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/main/RCS/vamps.c,v 0.11 1995/08/24 12:50:37 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/08/24 12:50:37 $
+d7 2
+a8 2
+static  char RCSid[] =
+"$Id: deffile.c,v 1.3 1995/08/24 12:47:38 schj Exp $";
+d14 2
+a15 2
+int iniinmem = TRUE;
+char *progname;
+d66 2
+a67 2
+char infilename[1024];
+char logfilename[1024];
+d69 4
+a72 4
+int	days = 0;
+int	steps = 0;
+char    outfilename[1024]="nothing yet";
+FILE	*genoutfile = NULL;
+d76 2
+a77 2
+     int argc;
+     char *argv[];
+d79 4
+a82 4
+  FILE *infile;
+  char s[1024];
+  int dumpini = FALSE;
+  int what, i;
+d88 2
+a89 2
+  extern void outfileheader __P((char *name));
+  extern void outfiletrailer();
+d151 1
+d161 4
+a164 4
+      if ((genoutfile = fopen (optarg, "w")) == NULL)
+	{
+	  Perror (1,RCSid,"File open failed:",argv[argc-1]);
+	}
+d179 1
+a179 1
+  	genoutfile = stdout;
+d185 1
+a185 1
+	  Perror (1,RCSid,"File open failed:",argv[argc-1]);
+d196 3
+a199 1
+  outfileheader(infilename);
+d237 1
+d241 6
+a246 2
+  if (dumpini)
+    writememini (NULL, 0, stderr);
+d251 1
+a251 1
+  outfiletrailer();
+d253 2
+a254 2
+  if (genoutfile != stdout)
+  	fclose(genoutfile);
+d268 2
+a269 2
+     char *argv[];
+     int verb;
+d324 1
+a324 1
+  (void) fprintf (stderr, "#%s  defaults\n", progname);
+@
+
+
+0.11
+log
+@include use of perror
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/main/RCS/vamps.c,v 0.10 1995/08/23 14:57:06 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/08/23 14:57:06 $
+d7 3
+d71 2
+a81 1
+  FILE *outfile;
+d88 2
+a90 2
+  outfile = stdout;		/* Send output to stdout, unless otherwise
+				   stated */
+d160 4
+a163 4
+	    if ((outfile = freopen (optarg, "w", outfile)) == NULL)
+	      {
+		perror (1,RCSid,"File open failed:",optarg);
+	      }
+d177 3
+d184 1
+a184 1
+	  perror (1,RCSid,"File open failed:",argv[argc-1]);
+d195 2
+d242 5
+@
+
+
+0.10
+log
+@added days and step stuff, at present only daily steps !
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/main/RCS/vamps.c,v 0.9 1995/08/23 07:35:18 schj Exp $ */
+d4 1
+a4 2
+ *  $Date: 1995/08/23 07:35:18 $
+ *
+d158 1
+a158 2
+		(void) fprintf (stderr, "%s: file open failed: %s\n", argv[0], optarg);
+		exit (1);
+d177 1
+a177 2
+	  (void) fprintf (stderr, "%s: file open failed: %s\n", argv[0], argv[argc - 1]);
+	  exit (1);
+@
+
+
+0.9
+log
+@added rcs header
+@
+text
+@d1 2
+a2 2
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/soil/RCS/swatsoil.c,v 1.3 1995/08/23 07:22:22 schj Exp $ */
+/*- $RCSfile: swatsoil.c,v $
+d4 1
+a4 1
+ *  $Date: 1995/08/23 07:22:22 $
+d67 3
+d208 6
+@
+
+
+0.8
+log
+@initial revision
+@
+text
+@d1 6
+a6 1
+/* Some sort of introduction should reside here!! */
+@

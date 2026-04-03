@@ -1,0 +1,615 @@
+head	1.16;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.16
+date	99.01.06.12.13.01;	author schj;	state Alpha;
+branches;
+next	1.15;
+
+1.15
+date	99.01.06.12.07.49;	author schj;	state Alpha;
+branches;
+next	1.14;
+
+1.14
+date	97.09.09.08.39.39;	author schj;	state Exp;
+branches;
+next	1.13;
+
+1.13
+date	97.01.16.15.04.47;	author schj;	state Exp;
+branches;
+next	1.12;
+
+1.12
+date	96.11.05.15.00.48;	author schj;	state Alpha;
+branches;
+next	1.11;
+
+1.11
+date	96.10.22.17.56.00;	author schj;	state Exp;
+branches;
+next	1.10;
+
+1.10
+date	96.04.09.12.08.16;	author schj;	state Exp;
+branches;
+next	1.9;
+
+1.9
+date	96.03.24.11.36.47;	author schj;	state alpha;
+branches;
+next	1.8;
+
+1.8
+date	95.12.05.03.01.04;	author schj;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	95.11.14.20.29.16;	author schj;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	95.10.19.13.05.57;	author schj;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	95.10.03.14.06.53;	author schj;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	95.09.23.20.46.22;	author schj;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	95.09.04.11.40.29;	author schj;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	95.09.01.06.14.07;	author schj;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	95.08.29.14.00.04;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@reduce soil evaporation swap94 version
+@
+
+
+1.16
+log
+@Version: 0.99g
+@
+text
+@/* $Header: /home/schj/src/vamps_0.99g/src/soil/RCS/reduceva.c,v 1.15 1999/01/06 12:07:49 schj Alpha $ */
+/*  $RCSfile: reduceva.c,v $
+ *  $Author: schj $
+ *  $Date: 1999/01/06 12:07:49 $
+ */
+
+static char RCSid[] =
+"$Id: reduceva.c,v 1.15 1999/01/06 12:07:49 schj Alpha $";
+
+#include "swatsoil.h"
+#include <math.h>
+
+double  cofred;
+double  reva;
+int     swredu;
+extern double peva;
+
+/*C:reduceeva
+ *@@double reduceva (int swreduc)
+ *
+ * Calculates reduction of soil evaporation
+ *
+ * Returns reducted soil evaporation */
+
+double  ldwet, spev, spev1, saev, saev1, theta1, thepf2;
+
+double
+reduceva (int swreduc)
+{
+	double  t1,reva = 0;
+
+	switch (swreduc){
+		case 0:
+			reva = peva;
+			break;
+		case 1:
+			/* Black model */
+			if (daynr == 1)
+				ldwet = 0.0;
+			if (prec > 1.0)
+				ldwet = 0.0;
+			ldwet++;
+			reva = cofred * (sqrt (ldwet) - sqrt (ldwet - 1.0));
+			reva = reva < peva ? reva : peva;
+			break;
+		case 2:
+			/* Boesten and Stroosnijder */
+			if (daynr == 1){
+				spev = 0.0;
+				saev = 0.0;
+			}
+			if ((prec - intc) < peva){
+				spev += (peva - (prec - intc));
+				t1 = spev < cofred * sqrt (spev) - saev ? 
+					spev : cofred * sqrt (spev) - saev;
+				reva = prec + t1;
+				saev = spev < cofred * sqrt (spev) ?
+					spev : cofred * sqrt (spev);
+			}else{
+				reva = peva;
+				saev = 0.0 > saev - (prec - intc - peva) ?
+					0.0 : saev - (prec - intc - peva);
+				spev = saev > (saev * saev) / (cofred * cofred) ?
+					saev : (saev * saev) / (cofred * cofred);
+			}
+			break;
+		case 3:
+			/* Adapted Boesten and Stroosnijder */
+			if (daynr == 1){
+				thepf2 = node[1].sp->h2t (node[1].soiltype, -100.0);
+				spev1 = thepf2 - theta[0] * fabs (dz[0]);
+				if (spev1 > 0.0)
+					saev1 = cofred * sqrt (spev1);
+				else
+					saev1 = 0.0;
+				theta1 = theta[0];
+			}
+			spev1 -= (theta[0] - theta1) * fabs (dz[0]);
+			spev = spev1 + peva - (prec - intc);
+			spev = spev < peva ? peva : spev;
+			if (spev1 > 0.0)
+				saev1 = cofred * sqrt (spev1);
+			else
+				saev1 = 0.0;
+			saev = cofred * sqrt (spev);
+			reva = saev - saev1 + (prec - intc);
+			theta1 = theta[0];
+			break;
+		default:
+			Perror(progname,1,0,RCSid,"Method not known","");
+			break;
+	}
+
+  return reva;
+}
+@
+
+
+1.15
+log
+@Version: 0.99g
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99e/src/soil/RCS/reduceva.c,v 1.14 1997/09/09 08:39:39 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1997/09/09 08:39:39 $
+d8 1
+a8 1
+"$Id: reduceva.c,v 1.14 1997/09/09 08:39:39 schj Exp $";
+@
+
+
+1.14
+log
+@0.99e version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99c/src/soil/RCS/reduceva.c,v 1.13 1997/01/16 15:04:47 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1997/01/16 15:04:47 $
+d8 1
+a8 1
+"$Id: reduceva.c,v 1.13 1997/01/16 15:04:47 schj Exp $";
+d90 1
+a90 1
+			Perror(progname,1,RCSid,"Method not known","");
+@
+
+
+1.13
+log
+@layout + stuff + uses less global vars
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/soil/RCS/reduceva.c,v 1.12 1996/11/05 15:00:48 schj Alpha $ */
+d4 1
+a4 1
+ *  $Date: 1996/11/05 15:00:48 $
+d8 1
+a8 1
+"$Id: reduceva.c,v 1.12 1996/11/05 15:00:48 schj Alpha $";
+d18 2
+a19 1
+/*+Name: reduceeva
+d21 1
+a21 1
+ *  Prototype:  double reduceva ()
+d23 1
+a23 3
+ *  Description: calculate reduction of soil evaporation
+ *
+ *  Returns: reducted soil evaporation+*/
+d26 1
+d28 1
+a28 1
+reduceva ()
+d30 1
+a30 1
+  double  t1,reva;
+d32 60
+a91 47
+  switch (swredu)
+    {
+    case 0:
+      reva = peva;
+      break;
+    case 1:
+      /* Black model */
+      if (daynr == daysta)
+	ldwet = 0.0;
+      if (prec > 1.0)
+	ldwet = 0.0;
+      ldwet++;
+      reva = cofred * (sqrt (ldwet) - sqrt (ldwet - 1.0));
+      reva = reva < peva ? reva : peva;
+      break;
+    case 2:
+      /* Boesten and Stroosnijder */
+      if (daynr == daysta)
+	{
+	  spev = 0.0;
+	  saev = 0.0;
+	}
+      if ((prec - intc) < peva)
+	{
+	  spev += (peva - (prec - intc));
+	  t1 = spev < cofred * sqrt (spev) - saev ? spev : cofred * sqrt (spev) - saev;
+	  reva = prec + t1;
+	  saev = spev < cofred * sqrt (spev) ? spev : cofred * sqrt (spev);
+	}
+      else
+	{
+	  reva = peva;
+	  saev = 0.0 > saev - (prec - intc - peva) ? 0.0 : saev - (prec - intc - peva);
+	  spev = saev > (saev * saev) / (cofred * cofred) ? saev : (saev * saev) / (cofred * cofred);
+	}
+      break;
+    case 3:
+      /* Adapted Boesten and Stroosnijder */
+      if (daynr == daysta)
+	{
+	  thepf2 = node[1].sp->h2t (node[1].soiltype, -100.0);
+	  spev1 = thepf2 - theta[0] * fabs (dz[0]);
+	  if (spev1 > 0.0)
+	    saev1 = cofred * sqrt (spev1);
+	  else
+	    saev1 = 0.0;
+	  theta1 = theta[0];
+a92 15
+      spev1 -= (theta[0] - theta1) * fabs (dz[0]);
+      spev = spev1 + peva - (prec - intc);
+      spev = spev < peva ? peva : spev;
+      if (spev1 > 0.0)
+	saev1 = cofred * sqrt (spev1);
+      else
+	saev1 = 0.0;
+      saev = cofred * sqrt (spev);
+      reva = saev - saev1 + (prec - intc);
+      theta1 = theta[0];
+      break;
+    default:
+      Perror(progname,1,RCSid,"Method not known","");
+      break;
+    }
+@
+
+
+1.12
+log
+@Updated to Alpha version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/soil/RCS/reduceva.c,v 1.11 1996/10/22 17:56:00 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1996/10/22 17:56:00 $
+d8 1
+a8 1
+"$Id: reduceva.c,v 1.11 1996/10/22 17:56:00 schj Exp $";
+d18 1
+a18 3
+/*- 
+ * void reduceva ()
+ * calculate reduction of soil evaporation
+d20 5
+a24 1
+ */
+d27 1
+a27 1
+void
+d30 1
+a30 1
+  double  t1;
+d72 1
+a72 1
+	  thepf2 = soilparm[1].thenodeF (1, -100.0);
+d95 2
+@
+
+
+1.11
+log
+@removed log in file
+@
+text
+@d1 1
+a1 1
+/* $Header: /homes/schj/src/vamps_0.98/src/soil/RCS/reduceva.c,v 1.10 1996/04/09 12:08:16 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1996/04/09 12:08:16 $
+d8 1
+a8 1
+"$Id: reduceva.c,v 1.10 1996/04/09 12:08:16 schj Exp $";
+@
+
+
+1.10
+log
+@minor
+@
+text
+@d1 2
+a2 2
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.98/src/soil/RCS/reduceva.c,v 1.9 1996/03/24 11:36:47 schj alpha $ */
+/*- $RCSfile: reduceva.c,v $
+d4 1
+a4 20
+ *  $Date: 1996/03/24 11:36:47 $
+ *  $Log: reduceva.c,v $
+ *  Revision 1.9  1996/03/24 11:36:47  schj
+ *  cosmetic changes
+ *
+ * Revision 1.8  1995/12/05  03:01:04  schj
+ * change methof array to integer
+ *
+ *  Revision 1.7  1995/11/14 20:29:16  schj
+ *  changed include
+ *
+ * Revision 1.5  1995/10/03  14:06:53  schj
+ * added ifdef DDEBUG
+ *
+ * Revision 1.4  1995/09/23  20:46:22  schj
+ * added ifdef DDEBUG
+ *
+ * Revision 1.3  1995/09/04  11:40:29  schj
+ * added log in RCS header
+ *
+d8 1
+a8 1
+"$Id: reduceva.c,v 1.9 1996/03/24 11:36:47 schj alpha $";
+d70 1
+a70 1
+	  thepf2 = thenode (1, -100.0,soilparm[1].method);
+@
+
+
+1.9
+log
+@cosmetic changes
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.97/src/soil/RCS/reduceva.c,v 1.8 1995/12/05 03:01:04 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/12/05 03:01:04 $
+d6 3
+d27 1
+a27 1
+"$Id: reduceva.c,v 1.8 1995/12/05 03:01:04 schj Exp $";
+@
+
+
+1.8
+log
+@change methof array to integer
+,
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.91/soil/RCS/reduceva.c,v 1.7 1995/11/14 20:29:16 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/11/14 20:29:16 $
+d6 3
+a11 3
+ * Revision 1.6  1995/10/19  13:05:57  schj
+ * *** empty log message ***
+ *
+d24 1
+a24 1
+"$Id: reduceva.c,v 1.7 1995/11/14 20:29:16 schj Exp $";
+d34 3
+a36 1
+/*- calculate reduction of soil evaporation
+@
+
+
+1.7
+log
+@changed include
+@
+text
+@d1 1
+a1 1
+/* $Header: /homes/schj/src/vamps_0.91/RCS/reduceva.c,v 1.6 1995/10/19 13:05:57 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/10/19 13:05:57 $
+d6 3
+d24 1
+a24 1
+"$Id: reduceva.c,v 1.6 1995/10/19 13:05:57 schj Exp $";
+d84 1
+a84 1
+	  thepf2 = thenode (1, -100.0,soilparm[1].method[THENODE]);
+@
+
+
+1.6
+log
+@*** empty log message ***
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/soil/RCS/reduceva.c,v 1.5 1995/10/03 14:06:53 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/10/03 14:06:53 $
+d6 3
+d21 1
+a21 1
+"$Id: reduceva.c,v 1.5 1995/10/03 14:06:53 schj Exp $";
+d23 1
+a23 1
+#include "../include/swatsoil.h"
+@
+
+
+1.5
+log
+@added ifdef DDEBUG
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/prosper/vamps_0.9/soil/RCS/reduceva.c,v 1.4 1995/09/23 20:46:22 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/09/23 20:46:22 $
+d6 3
+d18 1
+a18 1
+"$Id: reduceva.c,v 1.4 1995/09/23 20:46:22 schj Exp $";
+d98 1
+a98 1
+      Perror(1,RCSid,"Method not known","");
+@
+
+
+1.4
+log
+@added ifdef DDEBUG
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/soil/RCS/reduceva.c,v 1.3 1995/09/04 11:40:29 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/09/04 11:40:29 $
+d6 3
+d15 1
+a15 1
+"$Id: reduceva.c,v 1.3 1995/09/04 11:40:29 schj Exp $";
+d95 1
+@
+
+
+1.3
+log
+@added log in RCS header
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/soil/RCS/reduceva.c,v 1.2 1995/09/01 06:14:07 schj Exp $ */
+d4 5
+a8 2
+ *  $Date: 1995/09/01 06:14:07 $
+ *  $Log$
+d12 1
+a12 1
+"$Id: reduceva.c,v 1.2 1995/09/01 06:14:07 schj Exp $";
+d72 1
+a72 1
+	  thepf2 = thenode (1, -100.0);
+@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/soil/RCS/reduceva.c,v 1.1 1995/08/29 14:00:04 schj Exp $ */
+d4 2
+a5 2
+ *  $Date: 1995/08/29 14:00:04 $
+ *
+d9 1
+a9 1
+"$Id: reduceva.c,v 1.1 1995/08/29 14:00:04 schj Exp $";
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 2
+a2 2
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/soil/RCS/evapotra.c,v 1.1 1995/08/28 13:43:40 schj Exp $ */
+/*- $RCSfile: evapotra.c,v $
+d4 1
+a4 1
+ *  $Date: 1995/08/28 13:43:40 $
+d9 1
+a9 1
+"$Id: evapotra.c,v 1.1 1995/08/28 13:43:40 schj Exp $";
+a37 1
+      ldwet++;
+d40 1
+a90 5
+
+#ifdef DEBUG
+fprintf(stderr,"%s\n",RCSid);
+fprintf(stderr,"reva= %f, peva= %f\n",reva,peva);
+#endif
+@

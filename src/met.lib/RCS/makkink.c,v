@@ -1,0 +1,79 @@
+head	1.2;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.2
+date	99.01.06.12.13.01;	author schj;	state Alpha;
+branches;
+next	1.1;
+
+1.1
+date	97.09.09.08.45.20;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@Makkink reference evaporation
+@
+
+
+1.2
+log
+@Version: 0.99g
+@
+text
+@/* $Header: /home/schjpriv/schj/src/vamps_0.99e/src/met.lib/RCS/makkink.c,v 1.1 1997/09/09 08:45:20 schj Exp $ */
+
+/* $RCSfile: makkink.c,v $
+ * $Author: schj $
+ * $Date: 1997/09/09 08:45:20 $ */
+
+/* metut.c Assorted meteorological functions to estimate
+ * evapo(trans)piration.  Most have been
+ * translated from Pascal (provided by Arnoud F) to C
+ *
+ * Jaap Schellekens */
+
+#include <math.h>
+#include <float.h>
+#include "met.h"
+
+
+/*C:makkink
+ *@@double makkink(double rad,double Slope,double Gamma,double Lambda)
+ *
+ * calculates reference evaporation according to Makkink
+ * The C1 constant is taken as 0.65 and C2 0.0
+ *
+ * Returns: makkink reference evaporation in mm/day*/
+double makkink(double rad,double Slope,double Gamma,double Lambda)
+{
+	double C1 = 0.65;
+	double C2 = 0.0;
+	/* 0.1 to calculate mbar to kpa */
+	/* 1000 to calculate m to mm */
+
+ 	return  (C2 +  (C1 * (Slope)/(Slope + Gamma) * rad)) * 86400/Lambda;
+}
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99c/src/topsys/RCS/metut.c,v 1.1 1997/04/07 19:43:25 schj Exp $ */
+d3 1
+a3 1
+/* $RCSfile: metut.c,v $
+d5 1
+a5 1
+ * $Date: 1997/04/07 19:43:25 $ */
+@

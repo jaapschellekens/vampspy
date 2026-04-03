@@ -1,0 +1,132 @@
+
+
+
+vangenu(1)                                             vangenu(1)
+
+
+NNAAMMEE
+       vangenu  -  determine  van  Genuchten parameters from a pF
+       curve
+
+
+SSYYNNOOPPSSIISS
+       ggeettssttrr  [----hheellpp]  [----HHeeaaddeerr]   [----ccooppyyrriigghhtt]   [----lliicceennssee]
+       [----aallpphhaa _a_l_p_h_a]       [----nn _n]      ----tthheettaarr _r_e_s_i_d_u_a_l___t_h_e_t_a
+       ----tthheettaass _t_h_e_t_a___a_t___s_a_t_u_r_a_t_i_o_n _f_i_l_e_n_a_m_e
+
+
+DDEESSCCRRIIPPIIOONN
+       vvaannggeennuu can determine the van Genuchten  parameters  alpha
+       and  n  from pairs of pF theta values. It uses Marquardt's
+       non-linear regression to do so.
+
+       Input is read from either _f_i_l_e_n_a_m_e or standard  input.  If
+       _f_i_l_e_n_a_m_e  is specified as a single dash ``--'', it is taken
+       from standard input. Output is  written  to  the  standard
+       output.
+
+       The  input file must contain two columns, containing pF in
+       the first column and the corresponding theta value in  the
+       second.  The following shows an example:
+
+              0.4 0.370
+              1.0 0.360
+              1.4 0.34
+              1.7 0.30
+              2.0 0.28
+              2.4 0.24
+              2.7 0.23
+
+
+OOPPTTIIOONNSS
+       Options   may  be  given  as  either  standard  one-letter
+       options, or GNU style long  options.  Long  options  start
+       with  two  dashes ``----'' and may be truncated to any unam-
+       biguous abbreviation.
+
+
+       ----ccooppyyrriigghhtt
+              Show copyright information and exit
+
+
+       ----HHeeaaddeerr
+              Omit headers from output.
+
+
+       ----lliicceennssee
+              Print license information and exit.
+
+
+       ----hheellpp Print help text and exit.
+
+
+
+                    Version 0.99f -- Nov 1997                   1
+
+
+
+
+
+vangenu(1)                                             vangenu(1)
+
+
+       ----aallpphhaa _v_a_l_u_a___f_o_r___a_l_p_h_a
+              Give the initial value for alpha. Note that unreal-
+              istic  values  can  cause  the  fitting  process to
+              crash.
+
+
+       ----nn _v_a_l_u_e___f_o_r___n
+              Give the initial value for n. Note that unrealistic
+              values can cause the fitting process to crash.
+
+
+
+UUSSAAGGEE
+       All  options  cane be entered as GNU style long options or
+       abbriviated to the first letter op the option.
+
+
+EEXXAAMMPPLLEESS
+       vangenu ---alpha 0.04 -n 1.3  -thetas  0.46  -thetar  0.04
+       mydata.dat
+
+
+SSEEEE AALLSSOO
+       vvaammppss(1), vvaammppss(5).
+
+
+
+AAUUTTHHOORR
+       J. Schellekens
+       schj@geo.vu.nl
+       schj@xs4all.nl
+
+
+
+BBUUGGSS
+       The fitting process can crash if initial values deviate to
+       much from the optimal ones.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    Version 0.99f -- Nov 1997                   2
+
+

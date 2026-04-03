@@ -1,0 +1,86 @@
+head	1.2;
+access;
+symbols;
+locks;
+comment	@# @;
+
+
+1.2
+date	95.08.24.14.13.25;	author schj;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	95.08.23.07.35.01;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@initial inclusion
+@
+
+
+1.2
+log
+@updated description
+@
+text
+@/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/main/RCS/vamps.c,v 0.10 1995/08/23 14:57:06 schj Exp $ */
+/*- $RCSfile: vamps.c,v $
+ *  $Author: schj $
+ *  $Date: 1995/08/23 14:57:06 $
+ */
+
+#define IDENTIFY "vamps C version"
+#define DESCRIPTION "a model of Vegetation-AtMosPhere-Soil water flow"
+#define PROVERSION "0.8"
+#define STATUS "test version"
+#define AUTHOR "J. Schellekens"
+#define DATE "January 1995"
+#define EMAIL "schj@@geo.vu.nl or schj@@xs4all.nl"
+#define ADDRESS "\n \
+\tJ. Schellekens\n \
+\tTheophile de Bockstraat 29 hs\n \
+\t1058 TW Amsterdam\n \
+\tThe Netherlands\n"
+
+#define CPR " \
+This program may be used free of charge providing\n \
+it is used for NO-COMMERCIAL purposes.\n \
+For commercial use written permission must be obtained from\n \
+ITF and FUA (see the README file) and the author."
+
+#define GNUL " \
+       Copyright (C) 1995 Jaap Schellekens.\n \
+\n \
+ This program is free software; you can redistribute it and/or modify\n \
+ it under the terms of the GNU General Public License as published by\n \
+ the Free Software Foundation; either version 2, or (at your option)\n \
+ any later version.\n \
+ \n \
+ This program is distributed in the hope that it will be useful,\n \
+ but WITHOUT ANY WARRANTY; without even the implied warranty of\n \
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n \
+ GNU General Public License for more details.\n \
+ \n \
+ You should have received a copy of the GNU General Public License\n \
+ along with this program; see the file COPYING.  If not, write to\n \
+ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.\n \
+\n \
+\n"
+
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 6
+d8 1
+a8 1
+#define DESCRIPTION "A model of atmosphere-soil-plant water flow"
+d10 1
+@

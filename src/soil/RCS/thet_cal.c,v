@@ -1,0 +1,156 @@
+head	1.1;
+access;
+symbols;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	96.03.24.11.40.30;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@calculate richards via theta -- from old swatr
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/* soilut.c
+ *	contains functions for calculating head etc in swatsoil.c
+ *
+ */
+
+
+
+#include "soils.h"
+#include "swatsoil.h"
+#include <math.h>
+
+/* These are scratch arrays of layers size, allocated in dosoil() */
+extern	double *tar3;
+extern	double *tar4;
+
+/*-
+ *	void calchead()
+ *	Calculates the pressure heads in the soil profile
+ */
+void
+calchead ()
+{
+  double  cv, cu, cw, cx;
+  double  lowelt, plus;
+  int     i, j;
+  int     fltsat, flsat;	/* true or false in this case */
+  int     lastl;
+
+  /* Allocate mem for temp arrays */
+
+  /* Check if profile is completely saturated */
+  fltsat = TRUE;
+  for (i = 0; i < layers; i++)
+    if (hm1[i] < 0.0)
+      fltsat = FALSE;
+
+  if (fltsat)
+    {	/* Profile is completely saturated, use other method */
+      if (qtop > (qbot - qdrtot))
+	{
+	  /* Change from completely saturated to unsaturated */
+	  theta[0] = soilparm[0].thetas - ((qbot - qtop - qdrtot) * dt / dz[0]);
+	  h[0] = prhnode (0, theta[0], soilparm[0].method);
+	}
+    }
+  else
+    {/* Profile remains unsaturated; solving Richard's equation
+  	with a tri huppel algorithm */
+
+      /* Parameters at upper nod */
+      cv = (dt / (dz[0] * depth[1])) * kgeom[1];
+      cu = -1.0 * (diffmoist[0] + cv);
+      cw = -1.0 * diffmoist[0] * hm1[0] - (dt / dz[0]) * (kgeom[1] +
+		      qtop + qrot[0] + qdra[0][0] + qdra[1][0] + qdra[2][0] +
+							  qdra[3][0]);
+      tar3[0] = cw / cu;
+      tar4[0] = cv / cu;
+
+      /* Calculations for the middle nodes */
+      for (j = 1; j < (layers - 1); j++)
+	{
+	  cx = (dt / (dz[j] * depth[j])) * kgeom[j];
+	  cv = (dt / (dz[j] * depth[j + 1])) * kgeom[j + 1];
+	  cu = -1.0 * (diffmoist[j] + cv +cx);
+	  cw = -1.0 * diffmoist[j] * hm1[j] - (dt / dz[j]) * (kgeom[j + 1] -
+		  kgeom[j] + qrot[j] + qdra[0][j] + qdra[1][j] + qdra[2][j] +
+							      qdra[3][j]);
+	  lowelt = cu - (cx * tar4[j - 1]);
+	  tar3[j] = (cw - cx * (tar3[j - 1])) / lowelt;
+	  tar4[j] = cv / lowelt;
+	}
+
+      lastl = layers - 1;	/* Because C arrays start at 0 */
+      /* Calculations for the bottom nodes, lower boundary conditions */
+      if (lbc != 0 && lbc != 4)
+	{			/* Check these !!! */
+	  cx = (dt / (dz[lastl] * depth[lastl])) * kgeom[lastl];
+	  cu = -1.0 * (diffmoist[lastl] + cx);
+	  cw = (-1.0 * diffmoist[lastl] * hm1[lastl]) - (dt / dz[lastl]) *
+	    (-1.0 * qbot - kgeom[lastl] + qrot[lastl] + qdra[0][lastl] +
+	     qdra[1][lastl] + qdra[2][lastl] + qdra[3][lastl]);
+	  tar3[lastl] = (cw - cx * tar3[lastl - 1]) / (cu - cx * tar4[lastl - 1]);
+	  h[lastl] = tar3[lastl] < fabs (z[lastl]) ? tar3[lastl] : fabs (z[lastl]);
+	}
+
+      for (j = lastl - 1; j >= 0; j--)
+	{
+	  h[j] = tar3[j] - tar4[j] * h[j+1];
+	  h[j] = h[j] < fabs (z[j]) ?  h[j ] : fabs (z[j]);
+	}
+    }
+
+
+  /* Now we can calculate the new water content from diffmoist and
+     the change in pressure head */
+  for (j = 0; j < layers; j++)
+    {
+      theta[j] = thetm1[j] + diffmoist[j] * (h[j] - hm1[j]);
+    }
+
+  /* Move surplus of water to the nearest saturated node */
+  for (j = layers - 1; j >= 0; j--)
+    {
+      if (theta[j] > soilparm[j].thetas)
+	{
+	  plus = theta[j] - soilparm[j].thetas;
+	  theta[j] = soilparm[j].thetas;
+	  if (j)		/* j!=0 */
+	    theta[j - 1] += plus * dz[j] / dz[j - 1];
+	  else
+	    qtop -= plus * (dz[j] / dt);
+	}
+    }
+
+  /* Calculate pressure heads with the new water content */
+  for (j = 0; j < layers; j++)
+    if (h[j] < 0.0)
+      h[j] = prhnode (j, theta[j],soilparm[j].method);
+
+  if (pond > 0.0)
+    {
+      flsat = TRUE;
+      for (j = 0; j < layers; j++)
+	{
+	  if (h[j] < 0.0)
+	    flsat = FALSE;
+	  else
+	    h[j] += pond;
+	}
+    }
+
+}
+@

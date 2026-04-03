@@ -1,0 +1,133 @@
+head	1.2;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.2
+date	99.01.06.12.13.01;	author schj;	state Alpha;
+branches;
+next	1.1;
+
+1.1
+date	99.01.06.12.07.49;	author schj;	state Alpha;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@Version: 0.99g
+@
+text
+@/*
+ * coordinate conversion is done columnwise.
+ * matrix represented as double m[6]:
+ *
+ *	m[0]  m[1]  0
+ *	m[2]  m[3]  0
+ *	m[4]  m[5]  1
+ *
+ * so:	x' = m[0] * x + m[2] * y + m[4]
+ *	y' = m[1] * x + m[3] * y + m[5]
+ */
+#include <math.h>
+#include "graph.h"
+
+/* this is our plot space */
+#define LLX	0
+#define LLY	0
+#define URX	4096
+#define URY	4096
+
+/* viewport & coordinate transformation matrices */
+double	vpm[6];
+double	ctm[6];
+
+void
+setviewport(x0, y0, x1, y1)
+double	x0, y0, x1, y1;
+{
+	vpm[0] = (URX - LLX) * (x1 - x0);
+	vpm[1] = 0.0;
+	vpm[2] = 0.0;
+	vpm[3] = (URY - LLY) * (y1 - y0);
+	vpm[4] = (URX - LLY) * x0 + (double)LLX;
+	vpm[5] = (URY - LLY) * y0 + (double)LLY;
+
+	return;
+}
+
+void
+getviewport(x0, y0, x1, y1)
+int	*x0, *y0, *x1, *y1;
+{
+	*x0 = (int)(vpm[4] + copysign(0.5, vpm[4]));
+	*y0 = (int)(vpm[5] + copysign(0.5, vpm[5]));
+	*x1 = (int)(vpm[0] + vpm[4] + copysign(0.5, vpm[0] + vpm[4]));
+	*y1 = (int)(vpm[3] + vpm[5] + copysign(0.5, vpm[3] + vpm[5]));
+
+	return;
+}
+
+void
+setmatrix(x0, y0, x1, y1, transpose)
+double	x0, y0, x1, y1;
+{
+	double	mtx[6];
+
+	if(!transpose) {
+		mtx[0] = 1.0 / (x1 - x0);
+		mtx[1] = 0.0;
+		mtx[2] = 0.0;
+		mtx[3] = 1.0 / (y1 - y0);
+		mtx[4] = -x0 / (x1 - x0);
+		mtx[5] = -y0 / (y1 - y0);
+	}
+	else {
+		mtx[1] = 1.0 / (x1 - x0);
+		mtx[0] = 0.0;
+		mtx[3] = 0.0;
+		mtx[2] = 1.0 / (y1 - y0);
+		mtx[5] = -x0 / (x1 - x0);
+		mtx[4] = -y0 / (y1 - y0);
+	}
+
+/* ctm = vpm x mtx */
+	ctm[0] = vpm[0] * mtx[0] + vpm[2] * mtx[1];
+	ctm[1] = vpm[1] * mtx[0] + vpm[3] * mtx[1];
+	ctm[2] = vpm[0] * mtx[2] + vpm[2] * mtx[3];
+	ctm[3] = vpm[1] * mtx[2] + vpm[3] * mtx[3];
+	ctm[4] = vpm[0] * mtx[4] + vpm[2] * mtx[5] + vpm[4];
+	ctm[5] = vpm[1] * mtx[4] + vpm[3] * mtx[5] + vpm[5];
+
+	return;
+}
+
+void
+getmatrix(mtx)
+double	mtx[];
+{
+	mtx[0] = ctm[0];
+	mtx[1] = ctm[1];
+	mtx[2] = ctm[2];
+	mtx[3] = ctm[3];
+	mtx[4] = ctm[4];
+	mtx[5] = ctm[5];
+
+	return;
+}
+@
+
+
+1.1
+log
+@Version: 0.99g
+@
+text
+@@

@@ -1,0 +1,587 @@
+head	1.17;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.17
+date	99.01.06.12.13.01;	author schj;	state Alpha;
+branches;
+next	1.16;
+
+1.16
+date	99.01.06.12.07.49;	author schj;	state Alpha;
+branches;
+next	1.15;
+
+1.15
+date	97.01.16.15.07.27;	author schj;	state Exp;
+branches;
+next	1.14;
+
+1.14
+date	96.11.05.14.59.13;	author schj;	state Alpha;
+branches;
+next	1.13;
+
+1.13
+date	96.10.22.17.40.41;	author schj;	state Exp;
+branches;
+next	1.12;
+
+1.12
+date	96.03.25.07.55.04;	author schj;	state alpha;
+branches;
+next	1.11;
+
+1.11
+date	96.02.27.11.39.25;	author schj;	state Exp;
+branches;
+next	1.10;
+
+1.10
+date	95.12.17.21.56.04;	author schj;	state Exp;
+branches;
+next	1.9;
+
+1.9
+date	95.12.05.03.07.11;	author schj;	state Exp;
+branches;
+next	1.8;
+
+1.8
+date	95.10.23.07.52.03;	author schj;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	95.09.23.20.45.12;	author schj;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	95.09.22.15.43.24;	author schj;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	95.09.01.11.43.50;	author schj;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	95.08.29.13.56.44;	author schj;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	95.08.24.12.47.38;	author schj;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	95.08.24.12.25.38;	author schj;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	95.08.23.13.22.08;	author schj;	state Beta;
+branches;
+next	;
+
+
+desc
+@output list manupilation functions, needs restructure!
+@
+
+
+1.17
+log
+@Version: 0.99g
+@
+text
+@/* $Header: /home/schj/src/vamps_0.99g/src/util/RCS/output.c,v 1.16 1999/01/06 12:07:49 schj Alpha $ */
+/*
+ *  $RCSfile: output.c,v $
+ *  $Author: schj $
+ *  $Date: 1999/01/06 12:07:49 $
+ */
+#include "vamps.h"
+#include <string.h>
+
+#ifdef DDEBUG
+static char RCSid[] =
+"$Id: output.c,v 1.16 1999/01/06 12:07:49 schj Alpha $";
+#endif
+
+/* This should change*/
+char outlist[64][128];
+int detnr;
+int outnr=0;
+
+int
+to_outlist(char *s)
+{
+  outnr++;
+  strcpy(outlist[outnr-1],s);
+
+  return 0;
+}
+
+/*-
+ * inoutlist - returns TRUE if asked set in outlist
+ *
+ * int inoutlist(char *s)
+ *	returns TRUE if S is in outlist
+ */
+int 
+inoutlist(char *s)
+{
+int	i;
+for (i=0;i<outnr;i++)
+    if (strcmp(outlist[i],s)==0)
+    	return TRUE;
+    	
+return FALSE;
+}
+@
+
+
+1.16
+log
+@Version: 0.99g
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99e/src/util/RCS/output.c,v 1.15 1997/01/16 15:07:27 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1997/01/16 15:07:27 $
+d12 1
+a12 1
+"$Id: output.c,v 1.15 1997/01/16 15:07:27 schj Exp $";
+@
+
+
+1.15
+log
+@layout + stuff
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/util/RCS/output.c,v 1.14 1996/11/05 14:59:13 schj Alpha $ */
+d5 1
+a5 1
+ *  $Date: 1996/11/05 14:59:13 $
+d12 1
+a12 1
+"$Id: output.c,v 1.14 1996/11/05 14:59:13 schj Alpha $";
+@
+
+
+1.14
+log
+@Updated to Alpha version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/util/RCS/output.c,v 1.13 1996/10/22 17:40:41 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1996/10/22 17:40:41 $
+d12 1
+a12 1
+"$Id: output.c,v 1.13 1996/10/22 17:40:41 schj Exp $";
+@
+
+
+1.13
+log
+@no changes
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.98/src/util/RCS/output.c,v 1.12 1996/03/25 07:55:04 schj alpha $ */
+d5 1
+a5 19
+ *  $Date: 1996/03/25 07:55:04 $
+ *  $Log: output.c,v $
+ *  Revision 1.12  1996/03/25 07:55:04  schj
+ *  0.98
+ *
+ *  Revision 1.11  1996/02/27 11:39:25  schj
+ *  changed to ansi
+ *
+ * Revision 1.10  1995/12/17  21:56:04  schj
+ * no change
+ *
+ *  Revision 1.9  1995/12/05 03:07:11  schj
+ *
+ * Revision 1.7  1995/09/23  20:45:12  schj
+ * added ifdef DDEBUG
+ *
+ * Revision 1.5  1995/09/01  11:43:50  schj
+ * updated header
+ *
+d12 1
+a12 1
+"$Id: output.c,v 1.12 1996/03/25 07:55:04 schj alpha $";
+@
+
+
+1.12
+log
+@0.98
+@
+text
+@d1 2
+a2 3
+
+/* $Header: /home/schj/src/vamps_0.975/src/util/RCS/output.c,v 1.11 1996/02/27 11:39:25 schj Exp $ */
+/*-
+d5 1
+a5 1
+ *  $Date: 1996/02/27 11:39:25 $
+d7 3
+d30 1
+a30 1
+"$Id: output.c,v 1.11 1996/02/27 11:39:25 schj Exp $";
+@
+
+
+1.11
+log
+@changed to ansi
+@
+text
+@d2 1
+a2 1
+/* $Header: /homes/schj/src/vamps_0.96/src/util/RCS/output.c,v 1.10 1995/12/17 21:56:04 schj Exp $ */
+d6 1
+a6 1
+ *  $Date: 1995/12/17 21:56:04 $
+d8 3
+d28 1
+a28 1
+"$Id: output.c,v 1.10 1995/12/17 21:56:04 schj Exp $";
+@
+
+
+1.10
+log
+@no change
+@
+text
+@d2 1
+a2 1
+/* $Header: /home/schj/src/vamps_0.95/src/util/RCS/output.c,v 1.9 1995/12/05 03:07:11 schj Exp $ */
+d6 1
+a6 1
+ *  $Date: 1995/12/05 03:07:11 $
+d8 3
+d25 1
+a25 1
+"$Id: output.c,v 1.9 1995/12/05 03:07:11 schj Exp $";
+d34 1
+a34 2
+to_outlist(s)
+char	*s;
+d49 1
+a49 2
+inoutlist(s)
+char	*s;
+@
+
+
+1.9
+log
+@*** empty log message ***
+@
+text
+@d2 1
+a2 1
+/* $Header: /homes/schj/src/vamps_0.91/RCS/output.c,v 1.8 1995/10/23 07:52:03 schj Exp $ */
+d6 1
+a6 1
+ *  $Date: 1995/10/23 07:52:03 $
+d8 1
+a8 2
+ * Revision 1.8  1995/10/23  07:52:03  schj
+ * *** empty log message ***
+a12 3
+ * Revision 1.6  1995/09/22  15:43:24  schj
+ * *** empty log message ***
+ *
+d22 1
+a22 1
+"$Id: output.c,v 1.8 1995/10/23 07:52:03 schj Exp $";
+@
+
+
+1.8
+log
+@*** empty log message ***
+@
+text
+@d2 1
+a2 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/util/RCS/output.c,v 1.7 1995/09/23 20:45:12 schj Exp $ */
+d6 1
+a6 1
+ *  $Date: 1995/09/23 20:45:12 $
+d8 3
+d21 1
+a21 1
+#include "../include/vamps.h"
+d26 1
+a26 1
+"$Id: output.c,v 1.7 1995/09/23 20:45:12 schj Exp $";
+@
+
+
+1.7
+log
+@added ifdef DDEBUG
+@
+text
+@d2 3
+a4 2
+/* $Header: /home/schj/src/prosper/vamps_0.9/util/RCS/output.c,v 1.6 1995/09/22 15:43:24 schj Exp $ */
+/*- $RCSfile: output.c,v $
+d6 1
+a6 1
+ *  $Date: 1995/09/22 15:43:24 $
+d8 3
+d23 1
+a23 1
+"$Id: output.c,v 1.6 1995/09/22 15:43:24 schj Exp $";
+@
+
+
+1.6
+log
+@*** empty log message ***
+@
+text
+@d2 1
+a2 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/util/RCS/output.c,v 1.5 1995/09/01 11:43:50 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1995/09/01 11:43:50 $
+d7 3
+d17 1
+a17 1
+
+d19 2
+a20 1
+"$Id: output.c,v 1.5 1995/09/01 11:43:50 schj Exp $";
+@
+
+
+1.5
+log
+@updated header
+@
+text
+@d2 2
+a3 2
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/soil/RCS/swatsoil.c,v 1.10 1995/09/01 06:14:26 schj Exp $ */
+/*- $RCSfile: swatsoil.c,v $
+d5 5
+a9 2
+ *  $Date: 1995/09/01 06:14:26 $
+ *  $Log$
+d16 1
+a16 1
+"$Id: output.c,v 1.4 1995/08/29 13:56:44 schj Exp $";
+a19 1
+char detlist[64][128];
+a48 49
+}
+
+/*-
+ * indetlist - returns TRUE if S is in detlist
+ *
+ * int indetlist(char *s)
+ *	returns TRUE if S is in detlist
+ */
+int 
+indetlist(s)
+char	*s;
+{
+int	i;
+
+for (i=0;i<detnr;i++)
+    if (strcmp(detlist[i],s)==0)
+    	return TRUE;
+
+return FALSE;
+}
+
+/*-
+ * to_detlist - adds s to detlist
+ *
+ *	int	to_detlist(char *s)
+ *	
+ *	adds s to detlist
+ */
+
+int
+to_detlist(s)
+char	*s;
+{
+char ss[1024];
+int	i;
+
+  for (i=0; i< detnr;i++){ /* check for double parameters */
+    if (strcmp(detlist[i],s)==0){
+    	return -1;
+    }
+   }
+
+  detnr++;
+  strcpy(detlist[detnr-1],s);
+  if (verbose){
+    sprintf(ss,"Adding %s to determine-list",s);
+    showit(ss);
+  }
+  return 0;
+@
+
+
+1.4
+log
+@removed some error stuff, added printfl
+@
+text
+@d1 7
+d13 1
+a13 1
+"$Id: output.c,v 1.3 1995/08/24 12:47:38 schj Exp $";
+@
+
+
+1.3
+log
+@included use of perror
+@
+text
+@d1 89
+a89 89
+#include "../include/vamps.h"
+#include <string.h>
+
+
+static const char RCSid[] =
+"$Id: output.c,v 1.2 1995/08/24 12:25:38 schj Exp $";
+
+/* This should change*/
+char outlist[64][128];
+char detlist[64][128];
+int detnr;
+int outnr=0;
+
+int
+to_outlist(s)
+char	*s;
+{
+  outnr++;
+  strcpy(outlist[outnr-1],s);
+
+  return 0;
+}
+
+/*-
+ * inoutlist - returns TRUE if asked set in outlist
+ *
+ * int inoutlist(char *s)
+ *	returns TRUE if S is in outlist
+ */
+int 
+inoutlist(s)
+char	*s;
+{
+int	i;
+for (i=0;i<outnr;i++)
+    if (strcmp(outlist[i],s)==0)
+    	return TRUE;
+    	
+return FALSE;
+}
+
+/*-
+ * indetlist - returns TRUE if S is in detlist
+ *
+ * int indetlist(char *s)
+ *	returns TRUE if S is in detlist
+ */
+int 
+indetlist(s)
+char	*s;
+{
+int	i;
+
+for (i=0;i<detnr;i++)
+    if (strcmp(detlist[i],s)==0)
+    	return TRUE;
+
+return FALSE;
+}
+
+/*-
+ * to_detlist - adds s to detlist
+ *
+ *	int	to_detlist(char *s)
+ *	
+ *	adds s to detlist
+ */
+
+int
+to_detlist(s)
+char	*s;
+{
+char ss[1024];
+int	i;
+
+  for (i=0; i< detnr;i++){ /* check for double parameters */
+    if (strcmp(detlist[i],s)==0){
+    	return -1;
+    }
+   }
+
+  detnr++;
+  strcpy(detlist[detnr-1],s);
+  if (verbose){
+    sprintf(ss,"Adding %s to determine-list",s);
+    showit(ss);
+  }
+  return 0;
+}
+@
+
+
+1.2
+log
+@added RCSid
+@
+text
+@d5 2
+a6 2
+static char RCSid[] =
+"$Id$";
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d4 4
+@

@@ -1,0 +1,151 @@
+[vamps]
+iniinmem=0
+
+[run]
+outputfile = fiji.out
+
+[determine]
+soilmoisture = 1
+
+[soilevaporation]
+method = 4
+
+[top]
+system = 5
+
+[time]
+steps = 61
+
+[ts]
+pre	=precip.prn
+nra	=rnet.prn
+ira	=inrad.prn
+rlh 	=rh.prn
+tem	=newt.prn
+win	=wind.prn
+
+
+[interception]
+method = 0
+# These are pre-cyclone values
+E_avg/R = 0.147
+p_f = 0.6
+p_tr = 0.017
+S = 0.08
+St = 0.0062
+
+
+[canopy]
+transpiration = 2
+Rnet_absorb = 0.975
+method = 2
+layers = 1
+ra=7.0
+z = 12.7
+z_0 = 1.5
+d = 7.0
+# Frumau rs 45 - 80, make it 60 Fig 7.32
+rs = 60
+
+[roots]
+swsink = 0
+swhypr = 0
+swupfu = 0
+
+#root non-active stuff to zero (zronam = 0)
+depth = 120.0
+#this should also be an array someday
+hlim1 = -5.0
+hlim2u = -50.0
+hlim2l = -50.0
+hlim3h = -800.0
+hlim3l = -1000.0
+hlim3 = -1800.0
+hlim4 = -12000.0
+
+[soil]
+dtmin = 0.6E-3
+dtmax = 1.0E-2
+mbck = 1
+swredu=0
+cofred= 0.35
+gwlevel = 1.0
+outdir = output
+pondmx = 0.0
+verbose=1
+layers= 77
+bottom= 6
+initprof = 0
+mktable = 1
+dumptables = 1
+
+theta_initial = 0.200000 0.210000 0.220000 0.220000 0.265000\
+0.300000 0.350000 0.375817 0.377095 0.383497\
+0.380000 0.380000 0.380000 0.443651 0.400000\
+0.400000 0.400000 0.400000 0.410000 0.420000\
+0.430000 0.440000 0.470000 0.470000 0.470000\
+0.470000 0.470000 0.544194 0.470000 0.470000\
+0.460000 0.460000 0.460000 0.460000 0.582024\
+0.460000 0.460000 0.460000 0.460000 0.460000\
+0.460000 0.514537 0.506907 0.506545 0.505096\
+0.504733 0.495707 0.489597 0.492829 0.501117\
+0.505820 0.499311 0.497508 0.497508 0.497508\
+0.497508 0.497508 0.497508 0.497508 0.497508\
+0.497508 0.497508 0.497508 0.497508 0.497508\
+0.497508 0.497508 0.497508 0.497508 0.497508\
+0.497508 0.497508 0.497508 0.497508 0.497508\
+0.497508 0.497508 
+
+# This is from page 70 phd waterloo
+# total depth = 2.000000
+[layer_0]
+description = Tulasewa top layer
+thickness=2.000000
+soilsection = st_0
+
+[st_0]
+method =1
+#thetas =0.6
+thetas =0.5
+theta_residual = 0.08
+thickness = 2.5
+alpha = 0.061
+n = 1.098
+l=0.5
+ksat=1800
+
+
+# total depth = 30.000000
+[layer_14]
+description = Tulasewa 30 - 75 cm layer
+thickness = 2.000000
+soilsection = st_1
+
+[st_1]
+method =1
+#thetas = 0.64
+thetas = 0.6
+alpha = 0.042
+n = 1.094
+l = 0.5
+#ksat=380.0
+ksat=44.0
+theta_residual = 0.08
+
+
+# total depth = 74.000000
+[layer_36]
+description = Tulsewa deep layer > 75 cm
+thickness=2.000000
+soilsection = st_2
+
+[st_2]
+method =1
+#ksat = 3.0 <- original
+ksat = 400.0
+#thetas = 0.6 
+thetas = 0.55
+theta_residual = 0.08
+alpha = 0.042
+n = 1.094
+l = 0.5

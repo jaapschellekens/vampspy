@@ -1,0 +1,3 @@
+Graphic functions (S-Lang intrinsics) based on Plotutils-1.1 In principle
+all plot functions are implemented as new S-Lang intrinsics. Some high
+level functions wriitten in S-Lang scripts.

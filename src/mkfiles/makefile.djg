@@ -1,0 +1,166 @@
+# You should not need to change anything below this
+#---------------------------------------------------------------------------
+#edit make .in!
+include make.in
+
+#----------------------------------------------------------------------------
+#              Targets start here
+#
+def:
+	echo Makefile for vamps 
+	echo "-------------------------------------"
+	echo Use one of the following targets:
+	echo 	"dep (dependencies, start with this)"	
+	echo 	"lib (libraries vamps needs)"
+	echo	"all (the rest)"
+	echo	"install (install in ${BINDIR})"
+	echo   ""
+	echo   "Further targets:"
+	echo 	"clean (clean object files)"
+	echo 	"distclean (clean object files and libs)"
+	echo 	"dist (make distribution .tgz file of current dir)"	
+
+
+lib: ${THELIBS}
+
+all: ${PROGS}
+
+scripts: dummy
+	$(MAKE) -S scripts
+
+deffile.lib/libdef.a: dummy
+	$(MAKE) -C deffile.lib
+
+nr_ut.lib/libnru.a: dummy
+	$(MAKE) -C nr_ut.lib
+
+${SLANGLIBDIR}/libslang.a: dummy
+	(cd slang/src; $(MAKE) )
+
+maq.lib/libmaq.a: dummy
+	$(MAKE) -C maq.lib
+
+ts.lib/libts.a: dummy
+	$(MAKE) -Cts.lib
+
+met.lib/libmet.a: dummy
+	$(MAKE) -C met.lib
+
+${PROGRAM}:  ${SUBDIR} 
+	${CC} -o ${PROGRAM}  ${LDFLAGS} ${MOBJ} ${GROBJ} ${UOBJ} ${TOBJ} ${SOBJ} ${LDDIRS} ${LIBS}
+
+#getstr:
+#	${CC} -o getstr ${LDDIRS} ${OBJDIR}/perror.o ${OBJDIR}/getstr.o ${OBJDIR}/getopt.o  ${LIBS}
+
+vsel: 
+	${CC} -o vsel ${LDDIRS} ${OBJDIR}/vsel.o ${OBJDIR}/getopt.o ${LIBS}
+
+test: 
+	${CC} -o test ${LDDIRS}  util/test.o util/getopt.o ${LIBS}
+
+vangenu: 
+	(cd soil; ${MAKE}  CC='${CC}' vangenu)
+
+#issec:
+#	${CC} -o issec ${LDDIRS}  ${OBJDIR}/perror.o ${OBJDIR}/issec.o ${OBJDIR}/getopt.o ${LIBS}
+
+#wrini:
+#	${CC} -o wrini ${LDDIRS} ${OBJDIR}/wrini.o ${OBJDIR}/getopt.o ${LIBS}
+
+util: dummy
+	$(MAKE) -Cutil
+
+topsys: dummy
+	$(MAKE) -Ctopsys
+
+main: dummy
+	$(MAKE) -Cmain
+
+soil: dummy
+	$(MAKE) -Csoil
+
+sllib: dummy
+	$(MAKE) -Csllib BINDIR="$(BINDIR)"
+
+clean:
+	${RM} ${TRASH}
+	(cd ${OBJDIR}; ${RM} *.o)
+
+
+distclean: clean
+	${RM} ../lib/*.a
+	(cd deffile.lib; ${MAKE} RM='${RM}' TRASH='${TRASH}' clean)
+	(cd nr_ut.lib; ${MAKE} RM='${RM}' TRASH='${TRASH}' clean)
+	(cd ts.lib; ${MAKE} RM='${RM}' TRASH='${TRASH}' clean)
+	(cd met.lib; ${MAKE} RM='${RM}' TRASH='${TRASH}' clean)
+	(cd maq.lib; ${MAKE} RM='${RM}' TRASH='${TRASH}' clean)
+	(cd sllib; ${MAKE} RM='${RM}' TRASH='${TRASH}' clean)
+	(cd util; ${RM} ${TRASH})
+	(cd main; ${RM} ${TRASH})
+	(cd soil; ${RM} ${TRASH})
+	(cd topsys; ${RM} ${TRASH})
+#	(cd environ; ${RM} ${TRASH})
+	${RM} ID
+
+doc: 
+	(cd deffile.lib; ${MAKE} RM='${RM}' TRASH='${TRASH}' doc)
+	(cd nr_ut.lib; ${MAKE} RM='${RM}' TRASH='${TRASH}' doc)
+	(cd ts.lib; ${MAKE} RM='${RM}' TRASH='${TRASH}' doc)
+	(cd met.lib; ${MAKE} RM='${RM}' TRASH='${TRASH}' doc)
+	(cd maq.lib; ${MAKE} RM='${RM}' TRASH='${TRASH}' doc)
+	(cd util; ${MAKE} RM='${RM}' TRASH='${TRASH}' doc)
+	(cd main; ${MAKE} RM='${RM}' TRASH='${TRASH}' doc)
+	(cd soil; ${MAKE} RM='${RM}' TRASH='${TRASH}' doc)
+	(cd topsys; ${MAKE} RM='${RM}' TRASH='${TRASH}' doc)
+	(cd sllib; ${MAKE} RM='${RM}' TRASH='${TRASH}' doc)
+
+
+newversion: clean-all
+	csh mknewversion.csh
+
+flop:
+	(cd ../../; tar cvzf /dev/fd0 vamps_${SHORTPROGVERSION})
+
+dosflop:
+	(cd ../../; zip -9 -r vamps.zip vamps_${SHORTPROGVERSION})
+	(cd ../../; mcopy vamps.zip a:)
+
+zip:
+	(cd ../../; zip -9 -r vamps_${SHORTPROGVERSION}.zip vamps_${SHORTPROGVERSION})
+
+dist:
+	@echo Making docs...
+	(cd ../doc; make catman; make ps; make clean)
+	(cd /tmp; rm -rf vamps_${SHORTPROGVERSION})
+	(cd ../../; tar cf - vamps_${SHORTPROGVERSION} |(cd /tmp; tar xvf -))
+	(cd /tmp; rm -rf `find -name RCS -print`)
+	(cd /tmp; rm -f `find -name "*.o"  -print`)
+	(cd /tmp; rm -f `find -name "*~"  -print`)
+	(cd /tmp; tar cvzf vamps_${SHORTPROGVERSION}.tgz vamps_${SHORTPROGVERSION})
+	(cp /tmp/vamps_${SHORTPROGVERSION}.tgz ../../)
+	(cd /tmp; rm -rf vamps_${SHORTPROGVERSION})
+	(cd /tmp; rm -f vamps_${SHORTPROGVERSION}.tgz)
+
+depend dep: 
+	${MAKE} -Cutil DEFS='${DEFS}' ${MAKEDEFS} dep
+	${MAKE} -Cmain DEFS='${DEFS}' ${MAKEDEFS} dep
+#	${MAKE} -Cenviron DEFS='${DEFS}' ${MAKEDEFS} dep
+	${MAKE} -Csoil DEFS='${DEFS}' ${MAKEDEFS} dep
+
+des:
+	rm -f FileDes
+	(cd deffile.lib; Fdesc) > FileDes
+	(cd nr_ut.lib; Fdesc) > FileDes
+	(cd util; Fdesc) >> FileDes
+	(cd soil; Fdesc) >> FileDes
+	(cd ts.lib; Fdesc) >> FileDes
+	(cd met.lib; Fdesc) >> FileDes
+#	(cd environ; Fdesc) >> FileDes
+	(cd main; Fdesc) >> FileDes
+	(cd maq.lib; Fdesc) >> FileDes
+
+mkid:
+	mkid `find soil/ topsys/ util/ nr_ut.lib/ deffile.lib/ main/ ts.lib/ met.lib/ maq.lib/ include/ -name "*.[ch]"`
+
+dummy:
+

@@ -1,0 +1,37 @@
+# If you use `make install' this file (renamed to .vampsrc) is copied to the
+# vampslib  dir. Most of the time a personal copy in you homedir is the best
+# solution.
+
+
+# Only one section allowed in this file, vamps
+[vamps]
+	# Make vamps silent (more or less) by default. You can override this 
+	# with the -v command line option. 
+verbose = FALSE
+
+	# Add some extra header info in the output file	
+header = YES
+
+	# Set logging on by default	
+logging = YES
+
+	# Filename for logging info 	
+logfilename = vamps.log
+
+	# Read the input file into memory. 
+iniinmem = YES
+
+	# Display progress info	
+progstr = 2
+
+	# Don't open a pipe to gnuplot	
+showgraph = NO
+
+	# File with S-Lang startup stuff	
+s_lang_defs = vamps.sl
+
+	# Use S-Lang. Not much use in setting this to NO	
+noslang = FALSE
+
+	# How to call gnuplot if used	
+graphcommand = gnuplot -title Vamps-Plotting

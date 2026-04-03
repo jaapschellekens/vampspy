@@ -1,0 +1,38 @@
+OS = linux
+
+BUILDDIR = ${HOME}/src/vamps_0.99e
+
+# S-Lang library location.
+#SLANGLIBDIR = -L${BUILDDIR}/src/slang/src/objs
+#SLANGLIBDIR = -L/home/schjpriv/lib/sun
+#SLANGLIBDIR = -Lf:/lib/go32
+
+# If you want to use AGL set this to the dir the AGL lib can be found
+#AGLLIBDIR = -L/home/schjpriv/lib
+AGLLIBDIR = -L/home/schj/lib
+
+#X11 stuff
+X11INCDIR = -I/usr/X11R6/include 
+X11LIBDIR = -L/usr/X11R6/lib 
+
+# where to install vamps
+#BINDIR = ${HOME}/bin.sun
+BINDIR = ${HOME}/bin
+
+# Were to find the S-Lang include files
+#SLANGINC = /usr/include
+#SLANGINC = ${BUILDDIR}/src/slang/src 
+SLANGINC = /home/schjpriv/src/slang/src 
+
+SLDOC = vamps -I sldoc
+
+TRASH = *% *~  *.a *.o core ${PROGRAM} *.BAK *.bak  vsel 
+	#getstr issec vangenu *.a depend FileDes wrini
+
+
+DEFS =  -DOS=\"${OS}\" ${XTRADEFS} -DSLPATH=\".:~:\"
+RM = rm -f
+CP = cp
+AR = ar
+#AR = /usr/xpg4/bin/ar
+LD = ld

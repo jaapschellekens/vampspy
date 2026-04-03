@@ -1,0 +1,1237 @@
+head	1.30;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.30
+date	99.01.06.12.13.01;	author schj;	state Alpha;
+branches;
+next	1.29;
+
+1.29
+date	99.01.06.12.07.49;	author schj;	state Alpha;
+branches;
+next	1.28;
+
+1.28
+date	97.09.09.08.39.39;	author schj;	state Exp;
+branches;
+next	1.27;
+
+1.27
+date	97.01.16.15.05.24;	author schj;	state Exp;
+branches;
+next	1.26;
+
+1.26
+date	96.11.05.15.00.48;	author schj;	state Alpha;
+branches;
+next	1.25;
+
+1.25
+date	96.10.22.17.56.46;	author schj;	state Exp;
+branches;
+next	1.24;
+
+1.24
+date	96.04.09.12.08.16;	author schj;	state Exp;
+branches;
+next	1.23;
+
+1.23
+date	96.03.24.11.38.21;	author schj;	state alpha;
+branches;
+next	1.22;
+
+1.22
+date	96.02.08.08.18.32;	author schj;	state Exp;
+branches;
+next	1.21;
+
+1.21
+date	95.12.17.21.45.07;	author schj;	state Exp;
+branches;
+next	1.20;
+
+1.20
+date	95.12.05.03.04.12;	author schj;	state Exp;
+branches;
+next	1.19;
+
+1.19
+date	95.11.14.20.29.16;	author schj;	state Exp;
+branches;
+next	1.18;
+
+1.18
+date	95.10.20.11.28.50;	author schj;	state Exp;
+branches;
+next	1.17;
+
+1.17
+date	95.10.19.13.05.57;	author schj;	state Exp;
+branches;
+next	1.16;
+
+1.16
+date	95.10.03.14.06.53;	author schj;	state Exp;
+branches;
+next	1.15;
+
+1.15
+date	95.09.23.20.46.22;	author schj;	state Exp;
+branches;
+next	1.14;
+
+1.14
+date	95.09.19.13.41.58;	author schj;	state Exp;
+branches;
+next	1.13;
+
+1.13
+date	95.09.04.11.40.29;	author schj;	state Exp;
+branches;
+next	1.12;
+
+1.12
+date	95.09.01.06.15.04;	author schj;	state Exp;
+branches;
+next	1.11;
+
+1.11
+date	95.08.29.14.00.30;	author schj;	state Exp;
+branches;
+next	1.10;
+
+1.10
+date	95.08.28.13.43.40;	author schj;	state Exp;
+branches;
+next	1.9;
+
+1.9
+date	95.08.24.20.50.46;	author schj;	state Exp;
+branches;
+next	1.8;
+
+1.8
+date	95.08.24.19.44.52;	author schj;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	95.08.24.14.14.44;	author schj;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	95.08.24.12.59.06;	author schj;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	95.08.23.13.14.25;	author schj;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	95.08.23.11.37.45;	author schj;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	95.08.16.14.09.50;	author schj;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	95.08.16.14.08.25;	author schj;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	95.08.16.13.42.02;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@output per timestep
+@
+
+
+1.30
+log
+@Version: 0.99g
+@
+text
+@/* $Header: /home/schj/src/vamps_0.99g/src/soil/RCS/soilout.c,v 1.29 1999/01/06 12:07:49 schj Alpha $ */
+/*  $RCSfile: soilout.c,v $
+ *  $Author: schj $
+ *  $Date: 1999/01/06 12:07:49 $
+ */
+
+#ifdef DEBUG
+static char RCSid[] =
+"$Id: soilout.c,v 1.29 1999/01/06 12:07:49 schj Alpha $";
+#endif
+
+#include "vamps.h"
+#include "swatsoil.h"
+#define  GENOUT "%.4f "
+extern double volini;
+
+/*+Name: soilout
+ *
+ *  Prototype:  void soilout(int tstep)
+ *
+ *  Description:  ini type output per timestep
+ *
+ *  Returns:  nothing +*/
+void
+soilout (int tstep)
+{
+  printfl ("dt", dt);
+  printfl ("pond", pond);
+  printfl ("surface_runoff", surface_runoff);
+  printfl ("runots", runots);
+  printfl ("cumeva", cumeva);
+  printfl ("cumtra", cumtra);
+  printfl ("cumprec", cumprec);
+  printfl ("cumintc", cumintc);
+  printfl ("cqbot", cqbot);
+  printfl ("cqbotts", cqbotts);
+  printfl ("cumtop", cumtop);
+  printfl ("qtop", qtop);
+  printfl ("qbot", qbot);
+  printfl ("cumbot", cumbot);
+  printfl ("avgtheta", avgtheta);
+  printfl ("SMD", SMD);   
+  printfl ("rootextract", rootextract);
+  printfl ("rootts", rootts/thiststep);
+  printfl ("soilevaporation", reva);
+  printfl ("pot_soilevaporation", peva);
+  printfl ("prec", prec);
+  printfl ("intc", intc);
+  printfl ("masbal", masbal);
+  printfl ("volact", volact);
+  printfl ("ptra", ptra);
+  printar ("theta", theta, layers);
+  printar ("k", k, layers);
+  printar ("h", h, layers);
+  printar ("gwl", gwl, 2);
+  printar ("q", q, layers + 1);
+  printar ("inq", inq, layers + 1);
+  printar ("qrot", qrot, layers);
+  printar ("howsat", howsat, layers);
+  if (dodrain){
+	  printfl("cqdra",cqdra);
+	  printfl("cumdra",cumdra);
+	  printar("drainage",mqdra,layers);
+  }
+  printint("converror",error[tstep]);
+  printint("itter",itter[tstep]);
+}
+@
+
+
+1.29
+log
+@Version: 0.99g
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99e/src/soil/RCS/soilout.c,v 1.28 1997/09/09 08:39:39 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1997/09/09 08:39:39 $
+d9 1
+a9 1
+"$Id: soilout.c,v 1.28 1997/09/09 08:39:39 schj Exp $";
+@
+
+
+1.28
+log
+@0.99e version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99c/src/soil/RCS/soilout.c,v 1.27 1997/01/16 15:05:24 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1997/01/16 15:05:24 $
+d9 1
+a9 1
+"$Id: soilout.c,v 1.27 1997/01/16 15:05:24 schj Exp $";
+@
+
+
+1.27
+log
+@layout + stuff
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/soil/RCS/soilout.c,v 1.26 1996/11/05 15:00:48 schj Alpha $ */
+d4 1
+a4 1
+ *  $Date: 1996/11/05 15:00:48 $
+d9 1
+a9 1
+"$Id: soilout.c,v 1.26 1996/11/05 15:00:48 schj Alpha $";
+a12 1
+#include "canopy.h"
+d47 1
+a47 1
+  printfl ("precipitation", prec);
+@
+
+
+1.26
+log
+@Updated to Alpha version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/soil/RCS/soilout.c,v 1.25 1996/10/22 17:56:46 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1996/10/22 17:56:46 $
+d7 1
+d9 2
+a10 1
+"$Id: soilout.c,v 1.25 1996/10/22 17:56:46 schj Exp $";
+d18 7
+a24 4
+/*- 
+ *	void soilout(int tstep)
+ * 	ini type output per timestep
+ */
+d37 1
+d56 1
+@
+
+
+1.25
+log
+@removed log in file
+added some vars
+@
+text
+@d1 1
+a1 1
+/* $Header: /homes/schj/src/vamps_0.98/src/soil/RCS/soilout.c,v 1.24 1996/04/09 12:08:16 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1996/04/09 12:08:16 $
+d8 1
+a8 1
+"$Id: soilout.c,v 1.24 1996/04/09 12:08:16 schj Exp $";
+@
+
+
+1.24
+log
+@minor
+@
+text
+@d1 2
+a2 2
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.98/src/soil/RCS/soilout.c,v 1.23 1996/03/24 11:38:21 schj alpha $ */
+/*- $RCSfile: soilout.c,v $
+d4 1
+a4 35
+ *  $Date: 1996/03/24 11:38:21 $
+ *  $Log: soilout.c,v $
+ *  Revision 1.23  1996/03/24 11:38:21  schj
+ *  cosmetic changes
+ *
+ * Revision 1.22  1996/02/08  08:18:32  schj
+ * added cumdra
+ *
+ * Revision 1.21  1995/12/17  21:45:07  schj
+ * added convergenge and itter output
+ *
+ *  Revision 1.20  1995/12/05 03:04:12  schj
+ *  added qdra
+ *
+ *  Revision 1.19  1995/11/14 20:29:16  schj
+ *  changed include
+ *
+ * Revision 1.18  1995/10/20  11:28:50  schj
+ * trimmed down, other stuf now in utout.c and envout.c
+ *
+ * Revision 1.17  1995/10/19  13:05:57  schj
+ * seems to work now
+ *
+ * Revision 1.16  1995/10/03  14:06:53  schj
+ * added ifdef DDEBUG
+ *
+ * Revision 1.15  1995/09/23  20:46:22  schj
+ * added ifdef DDEBUG
+ *
+ * Revision 1.14  1995/09/19  13:41:58  schj
+ * added printint
+ *
+ * Revision 1.13  1995/09/04  11:40:29  schj
+ * added log in RCS header
+ *
+d8 1
+a8 1
+"$Id: soilout.c,v 1.23 1996/03/24 11:38:21 schj alpha $";
+a22 1
+  printcom(RCSid);
+d36 2
+d39 1
+@
+
+
+1.23
+log
+@cosmetic changes
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.97/src/soil/RCS/soilout.c,v 1.22 1996/02/08 08:18:32 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1996/02/08 08:18:32 $
+d6 3
+d42 1
+a42 1
+"$Id: soilout.c,v 1.22 1996/02/08 08:18:32 schj Exp $";
+a48 1
+extern double cumdra;
+d60 1
+a60 1
+  printfl ("surface_runoff", runots);
+@
+
+
+1.22
+log
+@added cumdra
+@
+text
+@d1 1
+a1 1
+/* $Header: /homes/schj/src/vamps_0.96/src/soil/RCS/soilout.c,v 1.21 1995/12/17 21:45:07 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/12/17 21:45:07 $
+d6 3
+d39 1
+a39 1
+"$Id: soilout.c,v 1.21 1995/12/17 21:45:07 schj Exp $";
+d48 2
+a49 1
+/*- void soilout(int tstep)
+d53 1
+a53 2
+soilout (tstep)
+int     tstep;
+d71 1
+d83 1
+@
+
+
+1.21
+log
+@added convergenge and itter output
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.95/src/soil/RCS/soilout.c,v 1.20 1995/12/05 03:04:12 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/12/05 03:04:12 $
+d6 3
+d36 1
+a36 1
+"$Id: soilout.c,v 1.20 1995/12/05 03:04:12 schj Exp $";
+d43 1
+d81 1
+@
+
+
+1.20
+log
+@added qdra
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.91/soil/RCS/soilout.c,v 1.19 1995/11/14 20:29:16 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/11/14 20:29:16 $
+d6 3
+d33 1
+a33 1
+"$Id: soilout.c,v 1.19 1995/11/14 20:29:16 schj Exp $";
+d79 2
+@
+
+
+1.19
+log
+@changed include
+@
+text
+@d1 1
+a1 1
+/* $Header: /homes/schj/src/vamps_0.91/RCS/soilout.c,v 1.18 1995/10/20 11:28:50 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/10/20 11:28:50 $
+d6 3
+d30 1
+a30 1
+"$Id: soilout.c,v 1.18 1995/10/20 11:28:50 schj Exp $";
+d72 4
+@
+
+
+1.18
+log
+@trimmed down, other stuf now in utout.c and envout.c
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.9/soil/RCS/soilout.c,v 1.17 1995/10/19 13:05:57 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/10/19 13:05:57 $
+d6 3
+d27 1
+a27 1
+"$Id: soilout.c,v 1.17 1995/10/19 13:05:57 schj Exp $";
+d29 3
+a31 3
+#include "../include/vamps.h"
+#include "../include/canopy.h"
+#include "../include/swatsoil.h"
+@
+
+
+1.17
+log
+@seems to work now
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/soil/RCS/soilout.c,v 1.16 1995/10/03 14:06:53 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/10/03 14:06:53 $
+d6 3
+d24 1
+a24 1
+"$Id: soilout.c,v 1.16 1995/10/03 14:06:53 schj Exp $";
+d29 1
+a29 1
+#define  GENOUT "%.7f "
+a30 6
+static FILE *outfile;
+void printar __P ((char *des, double *ar, int pts));
+void printfl __P ((char *des, double fl));
+void printint __P ((char *des, int intje));
+void printcom __P ((char *des));
+
+d32 1
+a32 1
+/*- void genout(int tstep)
+d36 1
+a36 1
+genout (tstep)
+d39 1
+a39 1
+  (void)fprintf (outfile, "[time_%d]\n", tstep);
+a40 1
+  printfl ("t", t);
+a65 117
+#ifdef DEBUG
+  printar ("thetm1", thetm1, layers);
+  printar ("hm1", hm1, layers);
+#endif
+  printfl("ra",canop[0].ra);
+  printfl("rs",canop[0].rs);
+  printfl("rho",canop[0].rho);
+  printfl("ea",canop[0].ea);
+  printfl("es",canop[0].es);
+  printfl("gamma",canop[0].gamma);
+  printfl("slope",canop[0].slope);
+  printfl("L",canop[0].L);
+  printfl("Cp",canop[0].Cp);
+  printfl("interception",canop[0].E_wet);
+  printfl("transpiration",canop[0].E_dry);
+  printfl("stemflow",canop[0].stemflow);
+  printfl("throughfall",canop[0].throughfall);
+}
+
+/*- void printfl(char *des,double fl)
+ *
+ */
+void
+printfl (des, fl)
+char   *des;
+double  fl;
+{
+  (void)fprintf (outfile, "%s=", des);
+  (void)fprintf (outfile, GENOUT, fl);
+  (void)fprintf (outfile, "\n");
+}
+
+/*- void printint(char *des,int intje)
+ *
+ */
+void
+printint (des, intje)
+char   *des;
+int     intje;
+{
+  (void)fprintf (outfile, "%s=%d\n", des, intje);
+}
+
+/*- void printcom (char *des)
+ *
+ */
+void
+printcom(des)
+char *des;
+{
+  (void)fprintf(outfile,"%c %s\n",commchar,des);
+}
+
+
+/*- void printar(char *des,double *ar, int pts)
+ *
+ */
+void
+printar (des, ar, pts)
+char   *des;
+double *ar;
+int     pts;
+{
+  int     i;
+
+  (void)fprintf (outfile, "%s=", des);
+  for (i = 0; i < pts; i++)
+    {
+      if (!fprintf (outfile, GENOUT, ar[i]))
+	Perror (progname,1, RCSid, "Could not write to outfile", "printar()");
+      if (i % 6 == 0 && i < pts - 1 && i != 0)
+	if (!fprintf (outfile, "\\\n"))
+	  Perror (progname,1, RCSid, "Could not write to outfile", "printar()");
+    }
+  if (!fprintf (outfile, "\n"))
+    Perror (progname,1, RCSid, "Could not write to outfile", "printar()");
+}
+
+/*- void openout()
+ *
+ */
+void
+openout ()
+{
+int i;
+
+  if (!genoutfile)
+    outfile = stdout;
+  else
+    outfile = genoutfile;
+
+
+  (void)fprintf (outfile, "\n[initial]\n");
+  printcom("number of steps in modelling");
+  printint ("steps", steps);
+  printint ("layers", layers);
+  printcom("initial water content of the profile");
+  printfl ("volini", volini);
+  printar ("z", z, layers);
+  printar ("theta", theta, layers);
+  printar ("k", k, layers);
+  printar ("h", h, layers);
+  fprintf(genoutfile,"as_above=");
+  for (i=0;i<layers;i++)
+  	fprintf(genoutfile,"%d ",soilparm[i].as_above);
+  fprintf(genoutfile,"\n");
+}
+
+/*-
+ * void closeout()
+ *
+ */
+void
+closeout ()
+{
+  if (!fprintf (outfile, "[final]\n"))
+    Perror (progname,1, RCSid, "Could not write to outfile", "closeout()");
+@
+
+
+1.16
+log
+@added ifdef DDEBUG
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/prosper/vamps_0.9/soil/RCS/soilout.c,v 1.15 1995/09/23 20:46:22 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/09/23 20:46:22 $
+d6 3
+d21 1
+a21 1
+"$Id: soilout.c,v 1.15 1995/09/23 20:46:22 schj Exp $";
+d24 1
+d26 1
+a26 1
+#define  GENOUT "%.4f "
+d46 1
+d54 2
+d57 3
+a59 2
+  printfl ("reva", reva);
+  printfl ("prec", prec);
+d63 1
+d74 13
+d139 1
+a139 1
+	Perror (1, RCSid, "Could not write to outfile", "printar()");
+d142 1
+a142 1
+	  Perror (1, RCSid, "Could not write to outfile", "printar()");
+d145 1
+a145 1
+    Perror (1, RCSid, "Could not write to outfile", "printar()");
+d186 1
+a186 1
+    Perror (1, RCSid, "Could not write to outfile", "closeout()");
+@
+
+
+1.15
+log
+@added ifdef DDEBUG
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/soil/RCS/soilout.c,v 1.14 1995/09/19 13:41:58 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/09/19 13:41:58 $
+d6 3
+d18 1
+a18 1
+"$Id: soilout.c,v 1.14 1995/09/19 13:41:58 schj Exp $";
+d38 1
+a38 1
+  (void)fprintf (outfile, "\n[time_%d]\n", tstep);
+d119 1
+a119 1
+	if (!fprintf (outfile, "\\\n\t"))
+d153 1
+@
+
+
+1.14
+log
+@added printint
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/soil/RCS/soilout.c,v 1.13 1995/09/04 11:40:29 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/09/04 11:40:29 $
+d6 3
+d15 1
+a15 1
+"$Id: soilout.c,v 1.13 1995/09/04 11:40:29 schj Exp $";
+d20 1
+d25 1
+d88 11
+d129 1
+d138 1
+d141 2
+d147 3
+@
+
+
+1.13
+log
+@added log in RCS header
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/soil/RCS/soilout.c,v 1.12 1995/09/01 06:15:04 schj Exp $ */
+d4 5
+a8 2
+ *  $Date: 1995/09/01 06:15:04 $
+ *  $Log$
+d11 2
+a12 2
+static  char RCSid[] =
+"$Id: soilout.c,v 1.12 1995/09/01 06:15:04 schj Exp $";
+d17 4
+a20 3
+static	FILE *outfile;
+void printar __P((char *des,double *ar, int pts));
+void printfl __P((char *des,double fl));
+d27 2
+a28 2
+genout(tstep)
+int 	tstep;
+d30 23
+a52 23
+fprintf(outfile,"\n[time_%d]\n",tstep);
+printfl("dt",dt);
+printfl("t",t);
+printfl("pond",pond);
+printfl("runots",runots);
+printfl("cumeva",cumeva);
+printfl("cumtra",cumtra);
+printfl("cumprec",cumprec);
+printfl("cumintc",cumintc);
+printfl("cqbot",cqbot);
+printfl("cumtop",cumtop);
+printfl("cumbot",cumbot);
+printfl("reva",reva);
+printfl("prec",prec);
+printfl("intc",intc);
+printfl("masbal",masbal);
+printfl("volact",volact);
+printar("theta",theta,layers);
+printar("k",k,layers);
+printar("h",h,layers);
+printar("q",q,layers+1);
+printar("inq",inq,layers+1);
+printar("qrot",qrot,layers);
+d54 2
+a55 2
+printar("thetm1",thetm1,layers);
+printar("hm1",hm1,layers);
+d59 22
+a80 8
+void 
+printfl(des,fl)
+char	*des;
+double	fl;
+{
+fprintf(outfile,"%s=",des);
+fprintf(outfile,GENOUT,fl);
+fprintf(outfile,"\n");
+d83 3
+d87 18
+a104 17
+printar(des,ar,pts)
+char	*des;
+double	*ar;
+int	pts;
+{
+int	i;
+
+fprintf(outfile,"%s=",des);
+for (i=0;i<pts;i++){
+	if(!fprintf(outfile,GENOUT,ar[i]))
+		Perror(1,RCSid,"Could not write to outfile","printar()");
+	if (i % 6 == 0 && i < pts-1 && i != 0)
+		if(!fprintf(outfile,"\\\n\t"))
+			Perror(1,RCSid,"Could not write to outfile","printar()");
+	}
+if (!fprintf(outfile,"\n"))
+	Perror(1,RCSid,"Could not write to outfile","printar()");
+d107 3
+d111 1
+a111 1
+openout()
+d114 13
+a126 12
+if (!genoutfile)
+	outfile = stdout;
+else
+	outfile=genoutfile;
+	
+
+fprintf(outfile,"\n[initial]\n");
+fprintf(outfile,"steps=%d\n",steps);
+printar("z",z,layers);
+printar("theta",theta,layers);
+printar("k",k,layers);
+printar("h",h,layers);
+d129 4
+d134 1
+a134 1
+closeout()
+d136 2
+a137 2
+  if (!fprintf(outfile,"[final]\n"))
+	Perror(1,RCSid,"Could not write to outfile","closeout()");
+@
+
+
+1.12
+log
+@added some vars
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/soil/RCS/soilout.c,v 1.11 1995/08/29 14:00:30 schj Exp $ */
+d4 2
+a5 1
+ *  $Date: 1995/08/29 14:00:30 $
+d9 1
+a9 1
+"$Id: soilout.c,v 1.11 1995/08/29 14:00:30 schj Exp $";
+d30 1
+@
+
+
+1.11
+log
+@removed some error stuff, added printfl
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/soil/RCS/soilout.c,v 1.10 1995/08/28 13:43:40 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/08/28 13:43:40 $
+d8 1
+a8 1
+"$Id: soilout.c,v 1.10 1995/08/28 13:43:40 schj Exp $";
+a16 25
+/*-
+ *	void output ()
+ *	outputs 'daily' totals
+ */
+void
+output (tstep)
+int     tstep;
+{
+  int     i;
+  FILE   *ofile;
+  char    s[512];
+
+
+  sprintf (s, "output/%d_out", tstep);
+  if ((ofile = fopen (s, "w")) == NULL)
+    {
+      Perror (1,RCSid,"Could not open:",s);
+    }
+  for (i = 0; i < layers; i++)
+    {
+      (void) fprintf (ofile, "%f\t%f\t%f\t%f\t%f\n", z[i], k[i], h[i], theta[i], kgeom[i]);
+    }
+  fclose (ofile);
+}
+
+d26 3
+d47 4
+@
+
+
+1.10
+log
+@fixed small typo's
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/soil/RCS/soilout.c,v 1.9 1995/08/24 20:50:46 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/08/24 20:50:46 $
+d8 1
+a8 1
+"$Id: soilout.c,v 1.9 1995/08/24 20:50:46 schj Exp $";
+d12 1
+d14 2
+d50 20
+a69 1
+void printar __P((double *ar, int pts));
+d71 8
+a78 19
+if (!fprintf(outfile,"\n[time_%d]\n",tstep))
+	Perror(1,RCSid,"Could not write to outfile","genout()");
+if (!fprintf(outfile,"cqbot=%f\n",cqbot))
+	Perror(1,RCSid,"Could not write to outfile","genout()");
+if (!fprintf(outfile,"theta="))
+	Perror(1,RCSid,"Could not write to outfile","genout()");
+printar(theta,layers);
+if (!fprintf(outfile,"k="))
+	Perror(1,RCSid,"Could not write to outfile","genout()");
+printar(k,layers);
+if (!fprintf(outfile,"h="))
+	Perror(1,RCSid,"Could not write to outfile","genout()");
+printar(h,layers);
+if (!fprintf(outfile,"q="))
+	Perror(1,RCSid,"Could not write to outfile","genout()");
+printar(q,layers+1);
+if (!fprintf(outfile,"inq="))
+	Perror(1,RCSid,"Could not write to outfile","genout()");
+printar(inq,layers+1);
+d82 2
+a83 1
+printar(ar,pts)
+d89 1
+d91 1
+a91 1
+	if(!fprintf(outfile,"%f ",ar[i]))
+d111 6
+a116 16
+if (!fprintf(outfile,"\n[initial]\n"))
+	Perror(1,RCSid,"Could not write to outfile","openout()");
+if (!fprintf(outfile,"steps=%d\n",steps))
+	Perror(1,RCSid,"Could not write to outfile","openout()");
+if (!fprintf(outfile,"z="))
+	Perror(1,RCSid,"Could not write to outfile","openout()");
+printar(z,layers);
+if (!fprintf(outfile,"theta="))
+	Perror(1,RCSid,"Could not write to outfile","openout()");
+printar(theta,layers);
+if (!fprintf(outfile,"k="))
+	Perror(1,RCSid,"Could not write to outfile","openout()");
+printar(k,layers);
+if (!fprintf(outfile,"h="))
+	Perror(1,RCSid,"Could not write to outfile","openout()");
+printar(h,layers);
+@
+
+
+1.9
+log
+@*** empty log message ***
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/prosper/vamps_0.8/soil/RCS/soilout.c,v 1.8 1995/08/24 19:44:52 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/08/24 19:44:52 $
+d8 1
+a8 1
+"$Id: soilout.c,v 1.8 1995/08/24 19:44:52 schj Exp $";
+d78 1
+a78 1
+	if(!fprintf(outfile,"%f=",ar[i]))
+@
+
+
+1.8
+log
+@added absurd error checking for fprintf
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/soil/RCS/soilout.c,v 1.7 1995/08/24 14:14:44 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/08/24 14:14:44 $
+d8 1
+a8 1
+"$Id: soilout.c,v 1.7 1995/08/24 14:14:44 schj Exp $";
+a46 1
+int	i;
+d78 1
+a78 1
+	if(!fprintf(outfile,"%f\t",ar[i]))
+d80 1
+a80 1
+	if (i % 5 == 0 && i < pts-1 && i != 0)
+@
+
+
+1.7
+log
+@added genoutfile support
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/soil/RCS/soilout.c,v 1.6 1995/08/24 12:59:06 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/08/24 12:59:06 $
+d8 1
+a8 1
+"$Id: soilout.c,v 1.6 1995/08/24 12:59:06 schj Exp $";
+d50 19
+a68 7
+(void)fprintf(outfile,"\n[time_%d]\n",tstep);
+(void)fprintf(outfile,"cqbot=%f\n",cqbot);
+(void)fprintf(outfile,"theta=");printar(theta,layers);
+(void)fprintf(outfile,"k=");printar(k,layers);
+(void)fprintf(outfile,"h=");printar(h,layers);
+(void)fprintf(outfile,"q=");printar(q,layers+1);
+(void)fprintf(outfile,"inq=");printar(inq,layers+1);
+d79 5
+a83 3
+	(void)fprintf(outfile,"%f ",ar[i]);
+	if (i % 6 == 0 && i < pts-1 && i != 0)
+		(void)fprintf(outfile,"\\\n\t");
+d85 2
+a86 1
+(void)fprintf(outfile,"\n");
+d99 16
+a114 6
+(void)fprintf(outfile,"\n[initial]\n");
+(void)fprintf(outfile,"steps=%d\n",steps);
+(void)fprintf(outfile,"z=");printar(z,layers);
+(void)fprintf(outfile,"theta=");printar(theta,layers);
+(void)fprintf(outfile,"k=");printar(k,layers);
+(void)fprintf(outfile,"h=");printar(h,layers);
+d120 2
+a121 1
+  (void)fprintf(outfile,"[final]\n");
+@
+
+
+1.6
+log
+@added RCSid and use of perror
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/soil/RCS/soilout.c,v 1.5 1995/08/23 13:14:25 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/08/23 13:14:25 $
+d7 2
+a8 2
+static const char RCSid[] =
+"$Id: vsel.c,v 1.5 1995/08/24 12:47:38 schj Exp $";
+d30 1
+a30 1
+      perror (1,RCSid,"Could not open:",s);
+d51 1
+a51 1
+(void)fprintf(outfile,"\ncqbot=%f\n",cqbot);
+d75 1
+a75 2
+openout(name)
+char	*name;
+d77 2
+a78 1
+if (!name)
+d81 2
+a82 3
+	if (!(outfile=fopen(name,"rw"))){
+      		perror (1,RCSid,"Could not open:",name);
+	}
+d95 1
+a95 2
+if(outfile != stdout)
+	fclose (outfile);
+@
+
+
+1.5
+log
+@updated to .ini type output
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/soil/RCS/soilout.c,v 1.4 1995/08/23 11:37:45 schj Exp $ */
+d4 1
+a4 2
+ *  $Date: 1995/08/23 11:37:45 $
+ *
+d6 4
+d30 1
+a30 2
+      showit ("ERRRO");
+      exit (1);
+d82 1
+a82 3
+		showit("Error opening output file");
+		showit("Exiting...");
+		exit(1);
+@
+
+
+1.4
+log
+@added output fuctions, ini style
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/soil/RCS/soilout.c,v 1.3 1995/08/16 14:09:50 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/08/16 14:09:50 $
+d37 4
+d49 1
+d53 2
+d85 2
+a86 1
+(void)fprintf(outfile,"\n[initial]\n",tstep);
+@
+
+
+1.3
+log
+@Deleted stderr log, added z[]
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/soil/RCS/soilout.c,v 1.2 1995/08/16 14:08:25 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/08/16 14:08:25 $
+d9 1
+d35 55
+@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@d1 2
+a2 2
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/soil/RCS/headcalc.c,v 1.3 1995/08/16 14:05:43 schj Exp $ */
+/*- $RCSfile: headcalc.c,v $
+d4 1
+a4 1
+ *  $Date: 1995/08/16 14:05:43 $
+a28 2
+  (void) fprintf (stderr, "qbot = %f\tqtop=%f\n", qbot, qtop);
+  (void) fprintf (stderr, "depth\t\tk\t\th\ttheta\n");
+d31 1
+a31 1
+      (void) fprintf (ofile, "%f\t%f\t%f\t%f\t%f\n", depth[i], k[i], h[i], theta[i], kgeom[i]);
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 6
+@

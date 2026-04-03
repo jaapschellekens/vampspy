@@ -1,0 +1,487 @@
+head	1.6;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.6
+date	99.01.06.12.13.01;	author schj;	state Alpha;
+branches;
+next	1.5;
+
+1.5
+date	99.01.06.12.07.49;	author schj;	state Alpha;
+branches;
+next	1.4;
+
+1.4
+date	97.09.09.08.43.02;	author schj;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	97.05.09.09.26.35;	author schj;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	97.05.07.11.05.44;	author schj;	state Sta;
+branches;
+next	1.1;
+
+1.1
+date	97.05.07.11.00.29;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@S-Lang interface to the deffile lib
+@
+
+
+1.6
+log
+@Version: 0.99g
+@
+text
+@/* $Header: /home/schj/src/vamps_0.99g/src/deffile.lib/RCS/sl_inter.c,v 1.5 1999/01/06 12:07:49 schj Alpha $ 
+ */
+/* 
+ *  $RCSfile: sl_inter.c,v $
+ *  $Author: schj $
+ *  $Date: 1999/01/06 12:07:49 $
+ */
+
+/*F:sl_inter.c
+ * S-Lang interface for libdef
+ *
+ * S-Lang intrinsics to process .ini type files
+ */ 
+static char RCSid[] =
+"$Id: sl_inter.c,v 1.5 1999/01/06 12:07:49 schj Alpha $";
+
+#ifdef HAVE_CONFIG_H
+#include "vconfig.h"
+#endif
+
+#ifdef HAVE_LIBSLANG
+#define FLOAT_TYPE 3
+
+#include <stdio.h>
+#include "slang.h"
+#include "deffile.h"
+static int _defversion = DEFFILE_VERSION;
+
+
+int Sgetnextvar()
+{
+	char *ss,sn[512],nn[512],vn[512];
+	int reset,ret;
+
+	if (SLang_pop_integer(&reset)) return -1;
+	if (SLpop_string(&ss)) return -1;
+
+	ret = getnextvar(ss,sn,nn,vn,reset);
+
+	if (ret != -1) {
+   		SLang_push_string(vn);
+   		SLang_push_string(nn);
+   		SLang_push_string(sn);
+		return ret;
+	}else {
+		return ret;
+	}
+}
+
+int
+Sdelfile()
+{
+	char *ss;
+
+	if (SLpop_string(&ss)) return -1;
+
+	return delfile(ss);
+}
+
+char *Sgetvar()
+{
+	char *ss;
+
+	if (SLpop_string(&ss)) return NULL;
+
+	return getvar(ss);
+}
+
+void Ssetvar()
+{
+	char *ss;
+
+	if (SLpop_string(&ss)) return;
+
+	setvar(ss);
+}
+
+void
+Sprintsection()
+{
+	char *fname,*secname;
+
+	if (SLpop_string(&secname)) return;
+	if (SLpop_string(&fname)) return;
+
+	if (printsection(fname,secname) != 0) {
+		rinmem(fname);
+		printsection(fname,secname);
+	}
+}
+
+void
+Saddvar(char *fname, char *section, char *var, char *val, int *check)
+{
+	addvar(fname, section, var, val, *check);
+}
+
+int
+s_writememini(char *fname,char *inifile)
+{
+	return	writememini(fname,inifile,NULL);
+}
+
+void 
+Sgetdefar (const char *section,const char *name,
+	     char *fname, int *exitonerror)
+{
+	double *ttar = NULL;
+	int pts = 0;
+
+	ttar = getdefar (section,name,ttar,fname,&pts,*exitonerror);
+
+	if (pts != 0)
+		SLang_push_user_object((SLuser_Object_Type *)SLcreate_array((char *)ttar, 
+				1, pts, 0, 0, 'f', 0));
+	
+
+	SLang_push_integer(pts);
+}
+
+char 
+*Sgetdefstr (const char *section,const char *name,
+	     char *def,char *fname, int *exitonerror)
+{
+	return getdefstr (section,name,def,fname,*exitonerror);
+}
+
+int 
+Sgetdefint (const char *section,const char *name,
+	     int *def,char *fname, int *exitonerror)
+{
+	return getdefint (section,name,*def,fname,*exitonerror);
+}
+
+double 
+Sgetdefdoub (const char *section,const char *name,
+	     double *def,char *fname, int *exitonerror)
+{
+	return getdefdoub (section,name,*def,fname,*exitonerror);
+}
+
+/* This table provides the deffile utilities */
+SLang_Name_Type Def_Lib[] =
+{
+	MAKE_INTRINSIC(".addvar", Saddvar, VOID_TYPE, 5),
+	/*I:addvar
+	 *@@ Void addvar(char *fname, char *section, char *var,
+	 *@@		char *val, int *check)
+	 */
+	MAKE_INTRINSIC(".getvar", Sgetvar, STRING_TYPE, 0),
+	/*I:getvar
+	 *@@ String getvar (String s);
+	 * Gets @@s@@ from the override list. Format of String s should
+	 * be: "section name" (without the ")
+	 */ 
+	MAKE_INTRINSIC(".setvar", Ssetvar, VOID_TYPE, 0),
+	/*I:setvar
+	 *@@ String setvar (String s);
+	 * Sets @@s@@ in the override list. Format of String s should
+	 * be: "section name value" (without the ")
+	 *
+	 * Note: once a variable has been set it cannot be unset!!
+	 * This is a major bug ;-)
+	 */ 
+	MAKE_VARIABLE(".usesecptr", &usesecptr, INT_TYPE, 0),
+	MAKE_VARIABLE(".nrsectionlist", &nrsectionlist, INT_TYPE, 0),     
+	MAKE_INTRINSIC(".getdefstr",Sgetdefstr, STRING_TYPE, 5),
+	MAKE_INTRINSIC(".getnextvar",Sgetnextvar, INT_TYPE, 0),
+	/*I:getnextvar
+	 *@@Int [, String sec, String var, String val] getnextvar(String fname,
+	 *@@	Int reset)
+	 *
+	 * get the next variable from the memlist of @@fname@@. If @@reset@@ is
+	 * non zero the pointer is set to the beginning of the list. If the
+	 * end of the list is reached or the list is non-existent -1 is
+	 * returned, otherwise 0 plus the @@sec@@, @@var@@ and @@val@@ strings.  
+	 *
+	 * This example prints the contents of fiji.inp:
+	 *
+	 *@@ variable sec,val,var;
+	 *@@ () = rinmem("fiji.inp");
+	 *@@
+	 *@@ if (getnextvar("fiji.inp",1) != -1){
+	 *@@         sec = ();
+	 *@@         var = ();
+	 *@@         val = ();
+	 *@@         fprintf(stderr,"%s:%s:%s\n",sec,var,val,3);
+	 *@@ } 
+	 *@@ while (getnextvar("fiji.inp",0) != -1){
+	 *@@         sec = ();
+	 *@@         var = ();
+	 *@@         val = ();
+	 *@@         fprintf(stderr,"%s:%s:%s\n",sec,var,val,3);
+	 *@@ }
+	 */ 
+	MAKE_INTRINSIC(".getdefar",Sgetdefar, VOID_TYPE, 4),
+	MAKE_INTRINSIC(".printsection",Sprintsection, VOID_TYPE, 0),
+	/*I:printsection 
+	 *@@ Int printsection(String fname,  String secname)
+	 *
+	 * Prints section @@section@@ in file @@fname@@ (in the mem image)
+	 * to stdout.
+	 * */
+	MAKE_INTRINSIC(".getdefint",Sgetdefint, INT_TYPE, 5),
+	MAKE_INTRINSIC(".getdefdoub",Sgetdefdoub, FLOAT_TYPE, 5),
+	/*I:getdefstr
+	 *I:getdefint
+	 *I:getdefdoub
+	 *I:getdefar
+	 *@@String getdefstr(section, name, def, fname, exitonerror)
+	 *@@Int getdefint(section, name, def, fname, exitonerror)
+	 *@@Float getdefdoub(section, name, def, fname, exitonerror)
+	 *@@Int, Array getdefar(section, name, fname, exitonerror)
+	 *
+	 * A series of functions te get information from Vamps input/output files.
+	 *
+	 * They get the value for variable @@name@@ in section @@section@@ 
+	 * of the file @@fname@@. If @@exitonerror@@ != 0 then the
+	 * program is terminated if @@name@@ is not found in @@section@@.
+	 * If @@exitonerror@@ == 0 and @@name@@ is not found @@def@@ is
+	 * returned instead. 
+	 * @@getdefar@@ is somewhat different. Is does not allow a @@def@@
+	 * variable and return either one or two values. It always returns
+	 * the number of points read. If zero
+	 * points are read no array is returned.
+	 * 
+	 * Say we use the following file (named ex.inp):
+	 *@@[example]
+	 *@@ examplename = nonsense
+	 * And then call the @@getdefstr@@ function like this:
+	 *@@variable exn = getdefstr("example","examplename","Not found","ex.inp",0);
+	 * the variable exn will now hold the string "nonsense".
+	 * */
+	MAKE_INTRINSIC(".issection", issection, INT_TYPE, 2),
+	MAKE_INTRINSIC(".makeindex", makeindex, INT_TYPE, 1),
+	/*I:makeindex
+	 *@@Int makeindex(filename)
+	 *
+	 * Makes an index (in memory) of file @@filename@@. It is usefull
+	 * to speed up random access to large vamps output files. Use
+	 * @@saveindex@@ to save the index to a file.
+	 * */
+	MAKE_INTRINSIC(".saveindex", saveindex, INT_TYPE, 1),
+	/*I:saveindex
+	 *@@Int saveindex(filename)
+	 *
+	 * Save the index to the file @@filename@@.
+	 * */
+	MAKE_INTRINSIC(".readindex", readindex, INT_TYPE, 1),
+	/*I:readindex
+	 *@@Int readindex(filename)
+	 *
+	 * Reads an index previously save with @@saveindex@@.
+	 * */
+	MAKE_INTRINSIC(".rinmem",rinmem, INT_TYPE, 1),
+	MAKE_INTRINSIC(".delmemlist",delmemlist, VOID_TYPE, 0),
+	MAKE_INTRINSIC(".delfile",Sdelfile, INT_TYPE, 0),
+	/*I:delfile
+	 *@@Int delfile(string fname)
+	 *
+	 * Delete mem-list of input file @@fname@@.
+	 * Return -1 on error
+	 */ 
+	MAKE_INTRINSIC(".delindex",delseclist, VOID_TYPE, 0),
+	MAKE_INTRINSIC(".opendef",opendef, INT_TYPE, 1),
+	/*I:opendef
+	 *@@Int opendef (String fname)
+	 * open a file for processing, close with closedef()
+	 *
+	 * Returns: 0 on error, otherwise 1
+	 *
+	 * Remarks: Opendef is used to speed up processing of files that are used
+	 * in a _sequential_ way. If files must be accessed randomely @@rinimem@@
+	 * or @@readindex@@ should be used
+	 */
+	MAKE_INTRINSIC(".closedef",closedef, INT_TYPE, 0),
+	/*I:closedef
+	 *@@int closedef ()
+	 * Description: closes a file previously opened with opendef
+	 * Returns: fclose's result
+	 */
+	MAKE_INTRINSIC(".writememini",s_writememini, INT_TYPE, 2),
+	/*I:writememini
+	 *@@Int writememini(fname, inifname)
+	 *
+	 * Writes the file read into memory with the @@rinmem@@ function
+	 * to a file. If @@fname@@ is "-" output is send to stdout. 
+	 * inifname if the name of the file in memory.
+	 * */
+	MAKE_VARIABLE(".defverb", &defverb, INT_TYPE, 0),
+	/*I:defverb
+	 *@@ Int defverb
+	 *
+	 * The verbose level in the input file routines. 0 is quit. A higher
+	 * the number makes this part of Vamps more verbose */
+	MAKE_VARIABLE("._defversion", &_defversion, INT_TYPE, 0),
+	SLANG_END_TABLE
+};
+
+/*C:sl_def_init
+ * @@int sl_def_init (void)
+ *
+ * Initializes the deffile.lib S-Lang intrinsics
+ * Returns: -1 on error 0 on success
+ **/
+int
+sl_def_init (void)
+{
+	if (!SLang_add_table(Def_Lib, "Def_Lib")) {
+		(void)fprintf(stderr, "Unable to initialize Def_Lib S-Lang intrinsics.\n");
+		return -1;
+	}
+	/* Turn on debugging */
+	SLang_Traceback = 1;
+
+	return 0;
+}
+
+#endif /*NOSLANG*/
+@
+
+
+1.5
+log
+@Version: 0.99g
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99e/src/deffile.lib/RCS/sl_inter.c,v 1.4 1997/09/09 08:43:02 schj Exp $ 
+d6 1
+a6 1
+ *  $Date: 1997/09/09 08:43:02 $
+d15 1
+a15 1
+"$Id: sl_inter.c,v 1.4 1997/09/09 08:43:02 schj Exp $";
+@
+
+
+1.4
+log
+@0.99e version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99c/src/deffile.lib/RCS/sl_inter.c,v 1.3 1997/05/09 09:26:35 schj Exp $ 
+d6 1
+a6 1
+ *  $Date: 1997/05/09 09:26:35 $
+d9 5
+d15 1
+a15 1
+"$Id: sl_inter.c,v 1.3 1997/05/09 09:26:35 schj Exp $";
+d29 63
+d93 1
+a93 1
+Saddvar(char *fname, char *section, char *var, char *name, int *check)
+d95 1
+a95 1
+	addvar(fname, section, var, name, *check);
+d146 19
+d168 28
+d197 7
+d257 7
+@
+
+
+1.3
+log
+@Added _defversion var
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99c/src/deffile.lib/RCS/sl_inter.c,v 1.2 1997/05/07 11:05:44 schj Sta $ 
+d6 1
+a6 1
+ *  $Date: 1997/05/07 11:05:44 $
+d10 1
+a10 1
+"$Id: sl_inter.c,v 1.2 1997/05/07 11:05:44 schj Sta $";
+d12 5
+a16 1
+#ifndef NOSLANG
+d22 1
+a22 1
+
+d46 1
+a46 1
+		SLang_push_user_object(SLcreate_array((char *)ttar, 
+d77 1
+a77 1
+	MAKE_INTRINSIC(".addvar", Saddvar, VOID_TYPE, 4),
+d167 1
+a167 1
+	MAKE_VARIABLE("._defversion", DEFFILE_VERSION, INT_TYPE, 0),
+d190 1
+a190 1
+#endif NOSLANG
+@
+
+
+1.2
+log
+@Stable version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99c/src/deffile.lib/RCS/sl_inter.c,v 1.1 1997/05/07 11:00:29 schj Exp $ 
+d6 1
+a6 1
+ *  $Date: 1997/05/07 11:00:29 $
+d10 1
+a10 1
+"$Id: sl_inter.c,v 1.1 1997/05/07 11:00:29 schj Exp $";
+d163 1
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99c/src/main/RCS/init_s.c,v 1.7 1997/01/16 14:58:41 schj Exp $ 
+d4 1
+a4 1
+ *  $RCSfile: init_s.c,v $
+d6 1
+a6 1
+ *  $Date: 1997/01/16 14:58:41 $
+d10 1
+a10 1
+"$Id: init_s.c,v 1.7 1997/01/16 14:58:41 schj Exp $";
+@

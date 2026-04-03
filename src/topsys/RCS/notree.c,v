@@ -1,0 +1,378 @@
+head	1.4;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.4
+date	99.01.06.12.13.01;	author schj;	state Alpha;
+branches;
+next	1.3;
+
+1.3
+date	99.01.06.12.07.49;	author schj;	state Alpha;
+branches;
+next	1.2;
+
+1.2
+date	97.09.09.08.40.34;	author schj;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	97.04.07.19.43.25;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@topsystem with bare soil
+@
+
+
+1.4
+log
+@Version: 0.99g
+@
+text
+@/* $Header: /home/schj/src/vamps_0.99g/src/topsys/RCS/notree.c,v 1.3 1999/01/06 12:07:49 schj Alpha $ */
+
+/* $RCSfile: notree.c,v $
+ * $Author: schj $
+ * $Date: 1999/01/06 12:07:49 $ */
+
+static char RCSid[] =
+ "$Id: notree.c,v 1.3 1999/01/06 12:07:49 schj Alpha $";
+
+/*F:notree.c
+ * This file contains the 'bare-soil' topsystem. In this case interception and
+ * transpiration are always zero. All available energy is used for soil
+ * evaporation. At the moment soilevaporation can be calculated using one of
+ * the folowing methods:
+ * 	0	E0SUNRAD
+ * 	1	E0NETRAD
+ * 	2	PENMON_NOSOIL
+ * 	3	PENMON_SOIL
+ * 	4	MAKKINK
+ *
+ * The following datasets are _always_ needed:
+ * 	rlh
+ * 	tem
+ * 	for MAKKINK:
+ * 		ira
+ * 	for E0SUNRAD:
+ * 		ira
+ * 		win
+ * 		sur
+ * 	for E0NETRAD
+ * 		ira
+ * 		ref
+ * 		win
+ * 		nra
+ */ 	
+
+#include "topsys.h"
+#include "vamps.h"
+#include "met.h"
+#include "deffile.h"
+
+
+typedef struct  { 
+	int	id;
+	char	*description;
+	int	*req_sets;	/* list of required sets */
+} s_evaptype;
+
+/* How to define soil evaporation we need a solution for the
+ * soil-interaction as well */
+#define E0SUNRAD 0
+#define E0NETRAD 1
+#define PENMON_NOSOIL   2
+#define PENMON_SOIL 3
+#define MAKKINK  4
+
+static int how = MAKKINK;
+static double soilevap(int tstep);
+static double top_makkink(int tstep);
+static double top_e0sunrad(int tstep);
+static double top_e0netrad(int tstep);
+	
+
+/* No canopy at all */
+void
+tstep_top_notree(int tstep, double *precipitation, double *interception,
+		double *transpiration, double *soilevaporation)
+{
+	*precipitation = data[id.pre].xy[tstep].y;
+	*interception = 0.0;
+	*transpiration = 0.0;
+	*soilevaporation = soilevap(tstep);
+	topout(tstep);
+}
+
+
+void
+pre_top_notree()
+{
+	/* This one should set how to determine stuff and get info from
+	 * input file. Also sets should be added and mem allocated */
+
+#ifdef TRY_SUBDAY
+	fprintf(stderr,"Warning: using experimental topsys only MAKKINK (4) supported\n");
+#endif	
+	/* Get evap - method */
+	how = getdefint("top","soilevaporation",how,infilename,TRUE);
+
+	/* we need at least: rlh, tem */
+	if ((id.rlh = getsetbyname("rlh")) == -1)
+		(void)get_data(getdefstr("ts","rlh","NON",infilename,TRUE),"rlh",0);
+	id.rlh = getsetbyname("rlh");
+	if ((id.tem = getsetbyname("tem")) == -1)
+		(void)get_data(getdefstr("ts","tem","NON",infilename,TRUE),"tem",0);
+	id.tem = getsetbyname("tem");
+
+	switch (how){
+		case MAKKINK: /* we need ira and nothing else */
+			if ((id.ira = getsetbyname("ira")) == -1)
+				(void)get_data(getdefstr("ts","ira","NON",
+						infilename,TRUE),"ira",0);
+			id.ira = getsetbyname("ira");
+			break;
+		case E0NETRAD:
+			if ((id.ira = getsetbyname("ira")) == -1)
+				(void)get_data(getdefstr("ts","ira","NON",
+						infilename,TRUE),"ira",0);
+			id.ira = getsetbyname("ira");
+			if ((id.win = getsetbyname("win")) == -1)
+				(void)get_data(getdefstr("ts","win","NON",
+						infilename,TRUE),"win",0);
+			id.win = getsetbyname("win");
+			if ((id.nra = getsetbyname("nra")) == -1)
+				(void)get_data(getdefstr("ts","nra","NON",
+						infilename,TRUE),"nra",0);
+			id.nra = getsetbyname("nra");
+			if ((id.ref = getsetbyname("ref")) == -1)
+				(void)get_data(getdefstr("ts","ref","NON",
+						infilename,TRUE),"ref",0);
+			id.ref = getsetbyname("ref");
+			break;
+		case E0SUNRAD:
+			if ((id.ira = getsetbyname("ira")) == -1)
+				(void)get_data(getdefstr("ts","ira","NON",
+						infilename,TRUE),"ira",0);
+			id.ira = getsetbyname("ira");
+			if ((id.win = getsetbyname("win")) == -1)
+				(void)get_data(getdefstr("ts","win","NON",
+						infilename,TRUE),"win",0);
+			id.win = getsetbyname("win");
+			if ((id.sur = getsetbyname("sur")) == -1)
+				(void)get_data(getdefstr("ts","sur","NON",
+						infilename,TRUE),"sur",0);
+			id.sur = getsetbyname("sur");
+			break;
+		case PENMON_NOSOIL:
+			break;
+		default:
+			Perror(progname,1,0,RCSid,"Invalid soilevap method","");
+			break;
+	}
+}
+
+void
+post_top_notree()
+{
+}
+
+static double soilevap(int tstep)
+{
+	double retval = 0.0;
+
+	switch (how){
+	case E0SUNRAD:
+		retval = 0.1 * top_e0sunrad(tstep);
+		break;
+	case E0NETRAD:
+		retval = 0.1 * top_e0netrad(tstep);
+		break;
+	case MAKKINK:
+		retval = 0.1 * top_makkink(tstep);
+		break;
+	default:
+		break;
+	}
+
+	return retval;
+}
+
+static double
+top_makkink(int tstep)
+{
+	double Slope, L, Gamma, Es,Ea;
+
+	eaes(data[id.tem].xy[tstep].y,data[id.rlh].xy[tstep].y,
+			&Ea, &Es);
+	Slope = vslope(data[id.tem].xy[tstep].y, Es);
+	L = lambda(data[id.tem].xy[tstep].y);
+	Gamma = mgamma(data[id.tem].xy[tstep].y,L);
+	return makkink(data[id.ira].xy[tstep].y,Slope, Gamma,L);
+}
+
+static double 
+penman_mon_soilevap()
+{
+	return 0.0;
+}
+
+static double 
+top_e0sunrad(int tstep)
+{
+	double Ea, Es,Slope,Gamma,L, Earo,rnopen;
+
+	/* Get Ea and Es from tdry and relative humidity */
+	eaes(data[id.tem].xy[tstep].y,data[id.rlh].xy[tstep].y,
+			&Ea, &Es);
+	Slope = vslope(data[id.tem].xy[tstep].y, Es);
+	L = lambda(data[id.tem].xy[tstep].y);
+	Gamma = mgamma(data[id.tem].xy[tstep].y,L);
+	Earo = earo(Ea, Es, data[id.win].xy[tstep].y);
+
+	rnopen = rnet_open_nN(data[id.ira].xy[tstep].y,data[id.sur].xy[tstep].y,
+			data[id.tem].xy[tstep].y,Ea,L);
+
+	return e0(rnopen,Slope,Gamma,Earo);
+}
+
+static double 
+top_e0netrad(int tstep)
+{
+	double Ea, Es,Slope,Gamma,L, Earo,rnopen;;
+
+	/* Get Ea and Es from tdry and relative humidity */
+	eaes(data[id.tem].xy[tstep].y,data[id.rlh].xy[tstep].y,
+			&Ea, &Es);
+	Slope = vslope(data[id.tem].xy[tstep].y, Es);
+	L = lambda(data[id.tem].xy[tstep].y);
+	Gamma = mgamma(data[id.tem].xy[tstep].y,L);
+	Earo = earo(Ea, Es, data[id.win].xy[tstep].y);
+	rnopen = rnet_open(data[id.ira].xy[tstep].y,data[id.ref].xy[tstep].y,
+			data[id.nra].xy[tstep].y,L);
+
+	return e0(rnopen,Slope,Gamma,Earo);
+}
+@
+
+
+1.3
+log
+@Version: 0.99g
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99e/src/topsys/RCS/notree.c,v 1.2 1997/09/09 08:40:34 schj Exp $ */
+d5 1
+a5 1
+ * $Date: 1997/09/09 08:40:34 $ */
+d8 1
+a8 1
+ "$Id: notree.c,v 1.2 1997/09/09 08:40:34 schj Exp $";
+@
+
+
+1.2
+log
+@0.99e version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99c/src/topsys/RCS/notree.c,v 1.1 1997/04/07 19:43:25 schj Exp $ */
+d5 1
+a5 1
+ * $Date: 1997/04/07 19:43:25 $ */
+d8 1
+a8 1
+ "$Id: notree.c,v 0.34 1997/01/16 15:00:01 schj Exp $";
+d12 1
+a12 1
+ * transpiration are always zero. All available anergy is used for soil
+d42 7
+d139 1
+a139 1
+			Perror(progname,1,RCSid,"Invalid soilevap method","");
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99c/src/topsys/script.c,v 1.1 1997/04/02 06:44:49 schj Exp $ */
+d3 1
+a3 1
+/* $RCSfile: script.c,v $
+d5 31
+a35 1
+ * $Date: 1997/04/02 06:44:49 $ */
+d39 1
+a39 1
+#include "metut.h"
+d44 1
+a44 1
+#define E0SUNRAT 0
+d53 2
+a54 1
+static double penman_e0_soilevap(int tstep);
+d66 1
+d80 1
+a80 1
+	how = getdefint("soilevaporation","method",how,infilename,TRUE);
+d93 26
+a118 1
+				(void)get_data(getdefstr("ts","ira","NON",infilename,TRUE),"ira",0);
+d120 13
+a134 9
+	if (getsetbyname("inr") == -1)
+		(void)add_set (NULL, "inr", "inr", steps, 0, 0);
+	if (getsetbyname("spe") == -1)
+		(void)add_set (NULL, "spe", "spe", steps, 0, 0);
+	if (getsetbyname("ptr") == -1)
+		(void)add_set (NULL, "ptr", "ptr", steps, 0, 0);
+	id.inr = getsetbyname("inr");
+	id.spe = getsetbyname("spe");
+	id.ptr = getsetbyname("ptr");
+d147 3
+a149 1
+	case E0SUNRAT:
+d151 1
+a151 1
+		retval = penman_e0_soilevap(tstep);
+d154 1
+a154 1
+		retval = top_makkink(tstep);
+d172 2
+a173 2
+	Gamma = gamma(data[id.tem].xy[tstep].y,L);
+	return makkink(data[id.ira].xy[tstep].y,Slope, Gamma);
+d179 20
+d202 1
+a202 1
+penman_e0_soilevap(int tstep)
+d204 1
+a204 1
+	double Ea, Es,Slope,Gamma,L, Earo;
+d211 1
+a211 1
+	Gamma = gamma(data[id.tem].xy[tstep].y,L);
+d213 2
+d216 1
+a216 4
+	return e0a(data[id.tem].xy[tstep].y,data[id.inr].xy[tstep].y,
+			data[id.sun].xy[tstep].y,
+			data[id.win].xy[tstep].y,
+			Ea, Es, Slope, Gamma, L, Earo);
+@

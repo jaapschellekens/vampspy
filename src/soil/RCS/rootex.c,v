@@ -1,0 +1,696 @@
+head	1.16;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.16
+date	99.01.06.12.13.01;	author schj;	state Alpha;
+branches;
+next	1.15;
+
+1.15
+date	99.01.06.12.07.49;	author schj;	state Alpha;
+branches;
+next	1.14;
+
+1.14
+date	97.09.09.08.39.39;	author schj;	state Exp;
+branches;
+next	1.13;
+
+1.13
+date	97.01.16.15.05.00;	author schj;	state Exp;
+branches;
+next	1.12;
+
+1.12
+date	96.11.05.15.00.48;	author schj;	state Alpha;
+branches;
+next	1.11;
+
+1.11
+date	96.10.22.17.56.06;	author schj;	state Exp;
+branches;
+next	1.10;
+
+1.10
+date	96.04.09.12.08.16;	author schj;	state Exp;
+branches;
+next	1.9;
+
+1.9
+date	96.03.24.11.37.12;	author schj;	state alpha;
+branches;
+next	1.8;
+
+1.8
+date	95.12.05.03.02.41;	author schj;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	95.11.14.20.28.14;	author schj;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	95.10.19.13.05.57;	author schj;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	95.10.03.14.06.53;	author schj;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	95.09.04.11.40.29;	author schj;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	95.08.29.13.59.48;	author schj;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	95.08.28.13.43.40;	author schj;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	95.08.24.12.55.52;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@calculate root extraction rates
+@
+
+
+1.16
+log
+@Version: 0.99g
+@
+text
+@/* $Header: /home/schj/src/vamps_0.99g/src/soil/RCS/rootex.c,v 1.15 1999/01/06 12:07:49 schj Alpha $ */
+/*  $RCSfile: rootex.c,v $
+ *  $Author: schj $
+ *  $Date: 1999/01/06 12:07:49 $
+ */
+
+static char RCSid[] =
+"$Id: rootex.c,v 1.15 1999/01/06 12:07:49 schj Alpha $";
+
+#include "vamps.h"
+#include "swatsoil.h"
+#include <math.h>
+
+double	drootz;
+double	tronae,tronab,zronam;
+int	swupfu; /* roo ex method */
+extern	double	ptra; /* Potential tranporation */
+double	cofszb,cofsza;
+int	swsink;
+double	hlim3,hlim3h,hlim3l;
+double  hlim4;
+int	swhypr;
+double	cofsha,cofshb;
+double	hlim1,hlim2u,hlim2l;
+double	redosm;
+double  *rootfrac; /* Fraction of roots/total soil */
+
+
+/*+Name: rootex
+ *
+ *  Prototype: void rootex(int pt, double drz)
+ *
+ *  Description:  Calculates root extraction rates as a function of
+ *  head pt -> timestep drz -> rooting dept in timestep
+ *
+ *  Returns:  nothing+*/
+void
+rootex (int pt,double drz)
+{
+  int     i,noddrz=0;
+  double  t1;
+  double  htotal,hlim2,rootdepth,zrona,a,b,top,bot;
+
+  for (i = 0; i < layers; i++)	/* Set to zero */
+    qrot[i] = 0.0;
+
+  if (drz > -1.0E-3)
+    {
+      /* nothing here, no roots, skip */
+    }
+  else
+    {
+      /* determine lowest compartment containing roots */
+      rootdepth = 0.0;		/* depth in swap */
+      for (i = 0; i < layers; i++)
+	{
+	  noddrz = i;
+	  rootdepth += dz[i];
+	  if (drz >= (rootdepth - 1.0E-6))
+	    break;
+	}
+
+      /* Compute zone where roots are non-active */
+      zrona = 0.0;
+      if (t < tronae)
+	{
+	  if (t > tronab)
+	    zrona = zronam * (t - tronab) / (tronae - tronab);
+	}
+      else
+	zrona = zronam;
+
+      /* Calculate intercept and slope */
+      switch (swupfu)
+	{
+	  /* Calculate intercept and slope (Fedded, Kowalik, Zaradny) */
+	case 0:
+	  a = ptra / fabs (drz);
+	  b = 0.0;
+	  break;
+	case 1:		/* (Hoogland, Belmans, Feddes) */
+	  b = cofszb;
+	  t1 = ptra / fabs (drz) + 0.5 * b * fabs (drz);
+	  a = cofsza < t1 ? cofsza : t1;
+	  break;
+	case 2:		/* (Prasad) */
+	  a = ptra * 2.0 / fabs (drz);
+	  b = ptra * 2.0 / pow (fabs (drz), 2.0);
+	  break;
+	default:
+	  a=0;b=0;
+	  Perror(progname,1,0,RCSid,"Rootextract method not Known","");
+	  break;
+	}
+
+      /* Calculation of root extraction of the compartments */
+      for (i = 0; i <= noddrz; i++)
+	{			/* Check this !! */
+	  top = fabs (z[i] - 0.5 * dz[i]);
+	  bot = fabs (z[i] + 0.5 * dz[i]);
+	  if (zrona <= (z[i] + 0.5 * dz[i]))
+	    bot = top;
+	  else if (zrona < (z[i] - 0.5 * dz[i]))
+	    bot = fabs (zrona);
+	  if ((z[i] + 0.5 * dz[i]) < drz)
+	    bot = fabs (drz);
+	  qrot[i] = (a - (b * (bot + top) * 0.2)) * (bot - top);
+	}
+
+      /* Calculation of critical point hlim3 according to Feddes
+     in the Hoogland option hlim3 is given */
+      if (swsink != 1)
+	{
+	  hlim3 = hlim3h;
+	  if (ptra >= 0.1)
+	    {
+	      if (ptra <= 0.5)
+		{
+		  hlim3 = hlim3h + ((0.5 - ptra) / (0.5 - 0.1)) *
+		    (hlim3l - hlim3h);
+		}
+	    }
+	  else
+	    {
+	      hlim3 = hlim3l;
+	    }
+	  /* coefficients for exponential relation between hlim3 + hlim4 */
+	  if (swhypr == 1)
+	    {
+	      cofshb = -1.0 * log (1.0E-2) / (hlim3 - hlim4);
+	      cofsha = 1.0 / exp (cofshb * hlim3);
+	    }
+	}
+      /* Calculation of transpiration reduction */
+      hlim2 = hlim2u;
+      for (i = 0; i <= noddrz; i++){
+	  /* removed some solute stuff *
+	   * hosma = osmota + cml[i] * osmotb;*/
+	  htotal = h[i]/* + redosm * hosma*/;
+	  if (i > 0)
+	    hlim2 = hlim2l;
+	  /* Transpiration reduction due to wet circumstances */
+	  if (h[i] <= hlim1 && h[i] > hlim2)
+	    qrot[i] *= (hlim1 - h[i]) / (hlim1 - hlim2);
+	  /* Transpiration reduction due to dry circumstances */
+	  if (h[i] <= hlim3 && htotal >= hlim4)
+	    {
+	      if (swhypr == 1)
+		{
+		  qrot[i] *= cofsha * exp (cofshb * htotal);
+		}
+	      else
+		{
+		  qrot[i] *= (hlim4 - htotal) / (hlim4 - hlim3);
+		}
+	    }
+	  /* No transpiration */
+	  if (h[i] > hlim1 || htotal < hlim4)
+	    qrot[i] = 0.0;
+	}
+    }
+
+}
+@
+
+
+1.15
+log
+@Version: 0.99g
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99e/src/soil/RCS/rootex.c,v 1.14 1997/09/09 08:39:39 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1997/09/09 08:39:39 $
+d8 1
+a8 1
+"$Id: rootex.c,v 1.14 1997/09/09 08:39:39 schj Exp $";
+@
+
+
+1.14
+log
+@0.99e version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99c/src/soil/RCS/rootex.c,v 1.13 1997/01/16 15:05:00 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1997/01/16 15:05:00 $
+d8 1
+a8 1
+"$Id: rootex.c,v 1.13 1997/01/16 15:05:00 schj Exp $";
+d92 1
+a92 1
+	  Perror(progname,1,RCSid,"Rootextract method not Known","");
+@
+
+
+1.13
+log
+@layout + stuff
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/soil/RCS/rootex.c,v 1.12 1996/11/05 15:00:48 schj Alpha $ */
+d4 1
+a4 1
+ *  $Date: 1996/11/05 15:00:48 $
+d8 1
+a8 1
+"$Id: rootex.c,v 1.12 1996/11/05 15:00:48 schj Alpha $";
+d42 1
+a42 1
+  double  htotal,hlim2,rootdepth,zrona,a,b,top,bot,hosma;
+d136 4
+a139 4
+      for (i = 0; i <= noddrz; i++)
+	{
+	  hosma = osmota + cml[i] * osmotb;
+	  htotal = h[i] + redosm * hosma;
+@
+
+
+1.12
+log
+@Updated to Alpha version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/soil/RCS/rootex.c,v 1.11 1996/10/22 17:56:06 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1996/10/22 17:56:06 $
+d8 1
+a8 1
+"$Id: rootex.c,v 1.11 1996/10/22 17:56:06 schj Exp $";
+d29 8
+a36 6
+/*- 
+ *	void rootex(int pt, double drz)
+ *	Calculates root extraction rates as a function of head
+ *	pt -> timestep
+ *	drz -> rooting dept in timestepl
+ */
+@
+
+
+1.11
+log
+@removed log in file
+@
+text
+@d1 1
+a1 1
+/* $Header: /homes/schj/src/vamps_0.98/src/soil/RCS/rootex.c,v 1.10 1996/04/09 12:08:16 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1996/04/09 12:08:16 $
+d8 1
+a8 1
+"$Id: rootex.c,v 1.10 1996/04/09 12:08:16 schj Exp $";
+@
+
+
+1.10
+log
+@minor
+@
+text
+@d1 2
+a2 2
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.98/src/soil/RCS/rootex.c,v 1.9 1996/03/24 11:37:12 schj alpha $ */
+/*- $RCSfile: rootex.c,v $
+d4 1
+a4 20
+ *  $Date: 1996/03/24 11:37:12 $
+ *  $Log: rootex.c,v $
+ *  Revision 1.9  1996/03/24 11:37:12  schj
+ *  added 'descriptive' error messages and comments
+ *
+ * Revision 1.8  1995/12/05  03:02:41  schj
+ * aded rootfractio, not implemented
+ *
+ *  Revision 1.7  1995/11/14 20:28:14  schj
+ *  changed include
+ *
+ * Revision 1.6  1995/10/19  13:05:57  schj
+ * fixed depth buf (last layer not included)
+ *
+ * Revision 1.5  1995/10/03  14:06:53  schj
+ * added ifdef DDEBUG
+ *
+ * Revision 1.4  1995/09/04  11:40:29  schj
+ * added log in RCS header
+ *
+d8 1
+a8 1
+"$Id: rootex.c,v 1.9 1996/03/24 11:37:12 schj alpha $";
+@
+
+
+1.9
+log
+@added 'descriptive' error messages and comments
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.97/src/soil/RCS/rootex.c,v 1.8 1995/12/05 03:02:41 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/12/05 03:02:41 $
+d6 3
+d27 1
+a27 1
+"$Id: rootex.c,v 1.8 1995/12/05 03:02:41 schj Exp $";
+d33 1
+a33 1
+double	*drootz;
+d49 1
+a49 1
+ *	void rootex(int pt)
+d51 2
+d55 1
+a55 1
+rootex (int pt)
+d59 1
+a59 1
+  double  htotal,hlim2,rootdepth,zrona,a,b,top,bot,drz,tfrac,hosma;
+a62 10
+
+  /* Rooting depth */
+  tfrac = t - (int) t;
+  if (tfrac == 0.0)
+    tfrac = 1.0;
+
+  if ((pt == dayend && year == yearen) || (pt == ndyear))
+    drz = drootz[pt];
+  else
+    drz = drootz[pt] + tfrac * (drootz[pt + 1] - drootz[pt]);
+@
+
+
+1.8
+log
+@aded rootfractio, not implemented
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.91/soil/RCS/rootex.c,v 1.7 1995/11/14 20:28:14 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/11/14 20:28:14 $
+d6 3
+d24 1
+a24 1
+"$Id: rootex.c,v 1.7 1995/11/14 20:28:14 schj Exp $";
+d45 3
+a47 2
+/*- void rootex()
+ *	Calculates root extraction rates a a function of head
+d50 1
+a50 1
+rootex ()
+d64 2
+a65 2
+  if ((daynr == dayend && year == yearen) || (daynr == ndyear))
+    drz = drootz[daynr];
+d67 1
+a67 1
+    drz = drootz[daynr] + tfrac * (drootz[daynr + 1] - drootz[daynr]);
+d114 1
+a114 1
+	  Perror(progname,1,RCSid,"Method not Known","");
+@
+
+
+1.7
+log
+@changed include
+@
+text
+@d1 1
+a1 1
+/* $Header: /homes/schj/src/vamps_0.91/RCS/rootex.c,v 1.6 1995/10/19 13:05:57 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/10/19 13:05:57 $
+d6 3
+d21 1
+a21 1
+"$Id: rootex.c,v 1.6 1995/10/19 13:05:57 schj Exp $";
+d39 1
+@
+
+
+1.6
+log
+@fixed depth buf (last layer not included)
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/soil/RCS/rootex.c,v 1.5 1995/10/03 14:06:53 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/10/03 14:06:53 $
+d6 3
+d18 1
+a18 1
+"$Id: rootex.c,v 1.5 1995/10/03 14:06:53 schj Exp $";
+d20 2
+a21 2
+#include "../include/vamps.h"
+#include "../include/swatsoil.h"
+@
+
+
+1.5
+log
+@added ifdef DDEBUG
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/prosper/vamps_0.9/soil/RCS/rootex.c,v 1.4 1995/09/04 11:40:29 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/09/04 11:40:29 $
+d6 3
+d15 1
+a15 1
+"$Id: rootex.c,v 1.4 1995/09/04 11:40:29 schj Exp $";
+d103 1
+a103 1
+	  Perror(1,RCSid,"Method not Known","");
+d108 1
+a108 1
+      for (i = 0; i < noddrz; i++)
+d147 1
+a147 1
+      for (i = 0; i < noddrz; i++)
+@
+
+
+1.4
+log
+@added log in RCS header
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/soil/RCS/rootex.c,v 1.3 1995/08/29 13:59:48 schj Exp $ */
+d4 5
+a8 2
+ *  $Date: 1995/08/29 13:59:48 $
+ *  $Log$
+d12 1
+a12 1
+"$Id: rootex.c,v 1.3 1995/08/29 13:59:48 schj Exp $";
+d38 1
+a38 1
+  int     i,noddrz;
+d99 2
+@
+
+
+1.3
+log
+@minor stuff
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/soil/RCS/rootex.c,v 1.2 1995/08/28 13:43:40 schj Exp $ */
+d4 2
+a5 2
+ *  $Date: 1995/08/28 13:43:40 $
+ *
+d9 1
+a9 1
+"$Id: rootex.c,v 1.2 1995/08/28 13:43:40 schj Exp $";
+@
+
+
+1.2
+log
+@completed to swap94
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/soil/RCS/rootex.c,v 1.1 1995/08/24 12:55:52 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/08/24 12:55:52 $
+d8 2
+a9 2
+static const char RCSid[] =
+"$Id: rootex.c,v 1.1 1995/08/24 12:55:52 schj Exp $";
+d143 1
+a143 1
+	  if (i > botcom[0])
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 2
+a2 2
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/soil/RCS/setzero.c,v 1.1 1995/08/23 13:14:25 schj Exp $ */
+/*- $RCSfile: setzero.c,v $
+d4 1
+a4 1
+ *  $Date: 1995/08/23 13:14:25 $
+d9 1
+a9 1
+"$Id: vsel.c,v 1.5 1995/08/24 12:47:38 schj Exp $";
+d13 1
+d15 17
+d33 1
+a33 1
+rootex()
+d35 129
+a163 52
+int	i;
+double	t1;
+
+for (i = 0 ; i< layers; i++) /* Set to zero */
+	qrot[i] = 0.0;
+
+/* Rooting depth */
+tfrac =  t -(int) t;
+if (tfrac == 0.0 ) tfrac = 1.0;
+
+if ((daynr == dayend && year == yearen) || (daynr == ndyear))
+	drz = drootz[daynr];
+else
+	drz = drootz[daynr]  + tfrac* (drootz[daynr+1] - drootz[daynr]);
+
+if (drz > -1.0E-3){
+  /* nothing here, no roots, skip */
+}else{
+  /* determine lowest compartment containing roots */
+  rootdepth = 0.0; /* depth in swap */
+  for (i = 0; i <layers; i++){
+  	rootdepth += dz[i];
+	if (drz >= rootdepth - 1.0E-6)
+		break;
+  }
+
+  /* Compute zone where roots are non-active */
+  zrona = 0.0;
+  if (t < tronae){
+  	if (t > tronab)
+		zrona = zronam* ( t- tronab)/(tronae - tronab);
+  }else
+  	zrona = zronam;
+
+  /* Calculate intercept and slope */
+  switch (swupfu) {
+  /* Calculate intercept and slope (Fedded, Kowalik, Zaradny) */
+  case 0:
+  	a = ptra/fabs(drz);
+	b = 0.0;
+	break;
+  case 1: /* (Hoogland, Belmans, Feddes) */
+  	b = cofszb;
+	t1 = ptra/fabs(drz) + 0.5 * b * fabs(drz);
+	a = cofsza < t1 ? cofsza : t1;
+	break;
+  case 2: /* (Prasad) */
+  	a = ptra*2.0/fabs(drz);
+	b = ptra * 2.0/power(fabs(drz),2.0);
+	break;
+  default:
+  	break;
+a164 8
+
+  /* Calculation of root extraction of the compartments */
+  for (i=0; i <noddrz; i ++ ){ /* Check this !! */
+  	top = fabs (z[i] - 0.5*dz[i]);
+	bot = fabs (z[i] + 0.5 *dz[i]);
+
+  }
+}
+@

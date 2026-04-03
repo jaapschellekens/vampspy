@@ -1,0 +1,118 @@
+[vamps]
+showgraph = 0
+
+[time]
+steps = 171
+
+[run]
+outputfile = nlys.out
+
+[determine]
+soilmoisture = true
+
+[evaporation]
+method = 1
+cropfac = 1.0
+
+
+[roots]
+depth = 30
+swsink = 1
+swhypr = 0
+swupfu = 0
+hlim1 = -0.1
+hlim2u = -1.0
+hlim2l = -1.0
+hlim3 = -10000.0
+hlim3h = -9000.0
+hlim3l = -11000.0
+hlim4 = -15000.0
+
+
+[ts]
+pevaporation = zit.in
+ptranspiration = 1365eth.in
+interception = inter.in
+precipitation = rain.in
+
+
+[soil]
+verbose = 1
+dtmin = 0.001
+dtmax = 0.001
+initprof = 0
+swredu = 0
+bottom = 5
+layers = 11
+pondmx = 0
+mktable = 1
+dumptables = 1
+theta_initial = \
+0.4 0.4 0.4 0.4 0.4\
+0.4 0.4 0.4 0.4 0.4 0.4
+
+[drainage]
+method = 1
+slope = 1.0
+exclude = 0 1 2 3 4 5 6 7 8 9
+
+[layer_0]
+soilsection = st_0
+thickness = 5.0
+
+[layer_2]
+soilsection = st_1
+thickness = 7.5
+
+[layer_9]
+thickness = 7.5
+soilsection = st_2
+
+[layer_10]
+thickness = 10
+soilsection = st_3
+
+[st_0]
+method = 4
+tablefile = st0.soil
+description = topsoil
+ksat = 630.0
+thetas = 0.67
+theta_residual = 0.348
+alpha = 0.35
+n = 1.4
+l = 0.5
+
+[st_1]
+method = 4
+tablefile = st1.soil
+description = subsoil
+ksat = 630.0
+thetas = 0.67
+theta_residual = 0.386
+alpha = 0.5
+n = 1.4
+l = 0.5
+
+[st_2]
+method = 4
+tablefile = st2.soil
+description = drainlayer
+ksat = 630
+#thetas = 0.54
+thetas = 0.44
+theta_residual = 0.297
+alpha = 0.6
+n = 1.3
+l = 0.5
+
+[st_3]
+method = 4
+tablefile = st2.soil
+description = extra drainlayer
+ksat = 1630
+thetas = 0.54
+theta_residual = 0.0
+alpha = 0.6
+n = 1.3
+l = 0.5

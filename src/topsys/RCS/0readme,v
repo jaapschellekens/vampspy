@@ -1,0 +1,61 @@
+head	1.1;
+access;
+symbols;
+locks;
+comment	@# @;
+
+
+1.1
+date	97.04.07.19.48.34;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@readme file for topsystem
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@
+$Id: 1997/04/07 19:43:25 $ 
+
+Outline for new canopy/topsystem module
+---------------------------------------
+
+- A brand-new (less compex but better ;-) ) top-system, canopy module
+  is in the make in the topsys dir
+
+- Four functions called from main:
+	1	init_top(type) to initialize the system
+	2	pre_top - initialize module
+	3	tstep_top - each timestep
+		should return four values for soil module:
+		interception   --> zero if no canopy
+		precipitation
+		transpiration  --> zero if no canopy
+		soilevaporation
+
+	4	post_top - clean module
+
+  These functions should be pointers to the actual functions that get
+  set according to the type of topsystem (i.e. no canopy, simple canopy
+  or full water balance). These pointers should be set in init_topsys.
+
+
+Usage
+-----
+First init_top should be called with a flag determining which functions
+should be used.  After pre_top is called tstep_top can be called at each
+timestep post_top can be called to clean up stuff.
+
+
+How to determine required data?
+-------------------------------
+1)	check if interception, precipitation, transpiration and soilevap
+	are in mem or can be read from file. If so nothing more to do!
+@

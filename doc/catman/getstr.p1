@@ -1,0 +1,198 @@
+
+
+
+getstr(1)                                               getstr(1)
+
+
+NNAAMMEE
+       getstr - extract vars from a vamps output file
+
+
+SSYYNNOOPPSSIISS
+       ggeettssttrr   [----hheellpp]   [----HHeeaaddeerr]  [----ccooppyyrriigghhtt]  [----lliicceennssee]
+       [[----sseeccttiioonn _s_e_c_t_i_o_n]                     [----nnaammee _n_a_m_e]_._._.]
+       [----CCoommmmeenntt _c_o_m_m_e_n_t_c_h_a_r]    [----iinnddeexx _i_n_d_e_x_f_i_l_e]    [----eexxiitt]
+       [----vveerrbboossee] [----pprriinntt--aass--aarrrraayy] _f_i_l_e_n_a_m_e
+
+
+DDEESSCCRRIIPPIIOONN
+       ggeettssttrr Can be used to extract information from vvaammppss  out-
+       put/input files. It is intended for use in any scripts the
+       uses needs to post- or preprocess vvaammppss data  files.   The
+       vvsseell((11))  utillity should be sufficient for most users, but
+       one never knows.  Input is read from  either  _f_i_l_e_n_a_m_e  or
+       standard  input. If _f_i_l_e_n_a_m_e is specified as a single dash
+       ``--'', it is taken from standard input. Output is  written
+       to the standard output.
+
+
+OOPPTTIIOONNSS
+       Options   may  be  given  as  either  standard  one-letter
+       options, or GNU style long  options.  Long  options  start
+       with  two  dashes ``----'' and may be truncated to any unam-
+       biguous abbreviation.
+
+
+       ----ccooppyyrriigghhtt
+              Show copyright information and exit
+
+
+       ----HHeeaaddeerr
+              Omit headers from output.
+
+
+       ----lliicceennssee
+              Print license information and exit.
+
+
+       ----vveerrbboossee
+              Increase verbose level.
+
+
+       ----hheellpp Print help text and exit.
+
+
+       ----iinnddeexx _i_n_d_e_x_f_i_l_e
+              Use section-index from _i_n_d_e_x_f_i_l_e This provides much
+              faster  output  from  large files. You can build an
+              index with the vvsseell(1) program.
+
+
+
+
+
+                    Version 0.99f -- Nov 1997                   1
+
+
+
+
+
+getstr(1)                                               getstr(1)
+
+
+       ----sseeccttiioonn _s_e_c_t_i_o_n
+              Search for the section _s_e_c_t_i_o_n.  Each section argu-
+              ment should have a coresponding name argument.
+
+
+       ----nnaammee _n_a_m_e
+              Search  for  name  _n_a_m_e.  Each name argument should
+              have a coresponding section argument.
+
+
+       ----CCoommmmeenntt _c_o_m_m_e_n_t_c_h_a_r
+              Set the commentchar to char _c_o_m_m_e_n_t_c_h_a_r_.
+
+
+       ----eexxiitt Don't produce any output but set the exitlevel (for
+              use in scrips etc.).  The level is set to 1 if _n_a_m_e
+              is not found in section _s_e_c_t_i_o_n_.  If  the  name  is
+              found, the exitlevel is set to 0.
+
+
+       ----pprriinntt--aass--aarrrraayy
+              The  variable will be printed as a column of float-
+              ing point values.
+
+
+UUSSAAGGEE
+       All options cane be entered as GNU style long  options  or
+       abbriviated to the first letter op the option.
+
+       If  multiple  names are searched for and the --exit option
+       is used the results are AND.
+
+
+EEXXAAMMPPLLEESS
+       To display the variable description in section soil in the
+       file tt.tt:
+       ggeettssttrr --ss ssooiill --nn ddeessccrriippttiioonn tttt..tttt
+
+       To check for the existance of a variable in a (csh) script
+       you could use:
+       ggeettssttrr --ee --ss vvaammppss --nn vveerrbboossee tteessttffiillee  &&&&  eecchhoo  vvaarriiaabbllee
+       vveerrbboossee eexxiissttss iinn sseeccttiioonn vvaammppss ooff tteessttffiillee
+
+
+SSEEEE AALLSSOO
+       vvaammppss(5), iisssseecc(1), vvsseell(1).
+
+
+
+AAUUTTHHOORR
+       J. Schellekens
+       schj@geo.vu.nl
+       schj@xs4all.nl
+
+
+
+
+                    Version 0.99f -- Nov 1997                   2
+
+
+
+
+
+getstr(1)                                               getstr(1)
+
+
+BBUUGGSS
+       ;-)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    Version 0.99f -- Nov 1997                   3
+
+

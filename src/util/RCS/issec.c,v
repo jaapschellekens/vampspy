@@ -1,0 +1,558 @@
+head	1.13;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.13
+date	97.09.09.08.39.10;	author schj;	state Exp;
+branches;
+next	1.12;
+
+1.12
+date	97.01.16.15.06.51;	author schj;	state Exp;
+branches;
+next	1.11;
+
+1.11
+date	96.11.05.14.59.13;	author schj;	state Alpha;
+branches;
+next	1.10;
+
+1.10
+date	96.10.22.17.40.14;	author schj;	state Exp;
+branches;
+next	1.9;
+
+1.9
+date	96.03.25.07.54.37;	author schj;	state alpha;
+branches;
+next	1.8;
+
+1.8
+date	96.02.27.11.38.42;	author schj;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	95.12.05.03.07.11;	author schj;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	95.10.30.13.54.33;	author schj;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	95.10.23.07.52.03;	author schj;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	95.10.01.21.02.26;	author schj;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	95.09.30.18.03.14;	author schj;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	95.09.26.21.54.50;	author schj;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	95.09.26.21.19.56;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@determine if a section exist
+@
+
+
+1.13
+log
+@0.99e version
+@
+text
+@/* $Header: /home/schj/src/vamps_0.99c/src/util/RCS/issec.c,v 1.12 1997/01/16 15:06:51 schj Exp $ */
+/*
+ *  $RCSfile: issec.c,v $
+ *  $Author: schj $
+ *  $Date: 1997/01/16 15:06:51 $
+ */
+
+/*
+ * issec.c - determine if section exists in vamps output file */
+
+static char RCSid[] =
+"$Id: issec.c,v 1.12 1997/01/16 15:06:51 schj Exp $";
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "vamps.h"
+#include "deffile.h"
+#include "getopt.h"
+
+#define VSELDES "determine if section exists in vamps output file"
+
+struct option options[] =
+{
+  {"help", no_argument, 0, 'h'},
+  {"copyright", no_argument, 0, 'c'},
+  {"license", no_argument, 0, 'l'},
+  {"Comment", required_argument, 0, 'C'},
+  {"section", required_argument, 0, 's'},
+  {"exit", no_argument, 0, 'e'},
+  {0, 0, 0, 0},
+};
+
+#define USE "\t[-h][-c][-l][-e] -s section filename"
+#define EXPL "\
+\t--help\t\t\tshow this information\n\
+\t--copyright\t\tshow part of the GPL\n\
+\t--licence\t\tshow part of the GPL\n\
+\t--Comment commentchar\tset the commentchar\n\
+\t--exit\t\t\tproduce result as exitstatus (0 if found)\n\
+\t--section\t\tname of the section\n\
+"
+#define OPTSTR "lchs:eC:"
+char *progname;
+FILE *genoutfile = NULL;
+/* Dummy vars for perror.c */
+int interpreter(int verb) {return 0;}
+int exit_is_inter = 0;
+int switchtoint = 0;
+
+int
+main (int argc,char *argv[])
+{
+  char section[1024];
+  char *inname = NULL;
+  void disclaim ();
+  void showinfo (int verb);
+  int what;
+  int error = FALSE;
+
+  progname = argv[0];
+
+  if (argv[1] == NULL)
+    {
+      showinfo (0);
+    }
+
+  if (*argv[argc - 1] != '-' || strcmp(argv[argc-1],"-") == 0)
+    {
+      inname = argv[argc - 1];
+      if (!opendef (inname))
+	Perror (progname,1, RCSid, "Could not open:", inname);
+    }
+
+  while ((what = getopt_long (argc, argv, OPTSTR, options, NULL)) != EOF)
+    {
+      switch (what)
+	{
+	case 'e':
+	  {
+	    error = TRUE;
+	    break;
+	  }
+	case 'l':
+	  {
+	    disclaim ();
+	    break;
+	  }
+	case 'C':
+	  {
+	    commchar[0]= *optarg;
+	    break;
+	  }
+	case 'c':
+	  {
+	    disclaim ();
+	    break;
+	  }
+	case 's':
+	  {
+	    strcpy (section, optarg);
+	    break;
+	  }
+	case 'h':
+	  {
+	    showinfo (1);
+	    break;
+	  }
+	default:
+	  break;
+	}
+    }
+
+  if (issection (section,(char *)NULL))
+    {
+      if (inname)
+	closedef ();
+      if (error)
+	return 0;
+      else
+	fprintf (stdout, "0\n");
+    }
+  else
+    {
+      if (inname)
+	closedef ();
+      if (error)
+	return 1;
+      else
+	fprintf (stdout, "1\n");
+    }
+
+  return 0;
+}
+
+void
+disclaim ()
+{
+  (void) fprintf (stderr, "%s\n", GNUL);
+  exit (0);
+}
+
+void
+showinfo (int verb)
+{
+  (void) fprintf (stderr, "%s - %s\n\t(c) %s - %s\n\t(%s)\n", progname, VSELDES, AUTHOR, DATE, RCSid);
+  (void) fprintf (stderr, "\n\tfor vamps %s\n",PROVERSION);
+  (void) fprintf (stderr, "\tBuild on %s at %s by %s (%s)", WHERE, BUILDDATE, WHO,OS);
+  (void) fprintf (stderr, "\n\n\tusage:\n\t%s %s\n\n", progname, USE);
+  if (verb)
+    (void) fprintf (stderr, "%s", EXPL);
+  exit (1);
+}
+@
+
+
+1.12
+log
+@layout + stuff
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/util/RCS/issec.c,v 1.11 1996/11/05 14:59:13 schj Alpha $ */
+d5 1
+a5 1
+ *  $Date: 1996/11/05 14:59:13 $
+d12 1
+a12 1
+"$Id: issec.c,v 1.11 1996/11/05 14:59:13 schj Alpha $";
+d91 1
+a91 1
+	    commchar= *optarg;
+@
+
+
+1.11
+log
+@Updated to Alpha version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/util/RCS/issec.c,v 1.10 1996/10/22 17:40:14 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1996/10/22 17:40:14 $
+d12 1
+a12 1
+"$Id: issec.c,v 1.10 1996/10/22 17:40:14 schj Exp $";
+d46 4
+@
+
+
+1.10
+log
+@no changes
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.98/src/util/RCS/issec.c,v 1.9 1996/03/25 07:54:37 schj alpha $ */
+d5 1
+a5 39
+ *  $Date: 1996/03/25 07:54:37 $
+ *  $Log: issec.c,v $
+ *  Revision 1.9  1996/03/25 07:54:37  schj
+ *  updated help message (link to vamps version)
+ *
+ *  Revision 1.8  1996/02/27 11:38:42  schj
+ *  changed to ansi
+ *
+ * Revision 1.7  1995/12/05  03:07:11  schj
+ * updated include paths
+ *
+ * Revision 1.6  1995/10/30  13:54:33  schj
+ * added deffile.h
+ * ,
+ *
+ * Revision 1.5  1995/10/23  07:52:03  schj
+ * *** empty log message ***
+ *
+ * Revision 1.4  1995/10/01  21:02:26  schj
+ * fixed help screen layout
+ *
+ * Revision 1.3  1995/09/30  18:03:14  schj
+ * added stdin support
+ *
+ * Revision 1.2  1995/09/26  21:54:50  schj
+ * added -e
+ *
+ * Revision 1.1  1995/09/26  21:19:56  schj
+ * Initial revision
+ *
+ * Revision 1.5  1995/09/25  12:54:26  schj
+ * updated layout of help screen
+ *
+ * Revision 1.4  1995/09/19  13:42:39  schj
+ * updated exitonerror
+ *
+ * Revision 1.3  1995/09/01  11:43:50  schj
+ * updated header
+ *
+d12 1
+a12 1
+"$Id: issec.c,v 1.9 1996/03/25 07:54:37 schj alpha $";
+d39 2
+a40 2
+\t--Comment\t\tset commentchar\n\
+\t--exit\t\t\tproduce result as exitstatus (1 if found)\n\
+@
+
+
+1.9
+log
+@updated help message (link to vamps version)
+@
+text
+@d1 2
+a2 2
+/* $Header: /home/schj/src/vamps_0.975/src/util/RCS/issec.c,v 1.8 1996/02/27 11:38:42 schj Exp $ */
+/*-
+d5 1
+a5 1
+ *  $Date: 1996/02/27 11:38:42 $
+d7 3
+d46 1
+a46 1
+/*-
+d50 1
+a50 1
+"$Id: issec.c,v 1.8 1996/02/27 11:38:42 schj Exp $";
+@
+
+
+1.8
+log
+@changed to ansi
+@
+text
+@d1 1
+a1 1
+/* $Header: /homes/schj/src/vamps_0.96/src/util/RCS/issec.c,v 1.7 1995/12/05 03:07:11 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1995/12/05 03:07:11 $
+d7 3
+d47 1
+a47 1
+"$Id: issec.c,v 1.7 1995/12/05 03:07:11 schj Exp $";
+d178 1
+@
+
+
+1.7
+log
+@updated include paths
+@
+text
+@d1 1
+a1 1
+/* $Header: /homes/schj/src/vamps_0.91/RCS/issec.c,v 1.6 1995/10/30 13:54:33 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1995/10/30 13:54:33 $
+d7 3
+d44 1
+a44 1
+"$Id: issec.c,v 1.6 1995/10/30 13:54:33 schj Exp $";
+d80 1
+a80 3
+main (argc, argv)
+     int argc;
+     char *argv[];
+d84 2
+a85 2
+  void disclaim __P (());
+  void showinfo __P ((int verb));
+d172 1
+a172 2
+showinfo (verb)
+     int verb;
+@
+
+
+1.6
+log
+@added deffile.h
+,
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.9/util/RCS/issec.c,v 1.5 1995/10/23 07:52:03 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1995/10/23 07:52:03 $
+d7 4
+d41 1
+a41 1
+"$Id: issec.c,v 1.5 1995/10/23 07:52:03 schj Exp $";
+d46 3
+a48 3
+#include "../include/vamps.h"
+#include "../include/deffile.h"
+#include "../include/getopt.h"
+@
+
+
+1.5
+log
+@*** empty log message ***
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/util/RCS/issec.c,v 1.4 1995/10/01 21:02:26 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1995/10/01 21:02:26 $
+d7 3
+d37 1
+a37 1
+"$Id: issec.c,v 1.4 1995/10/01 21:02:26 schj Exp $";
+d43 1
+@
+
+
+1.4
+log
+@fixed help screen layout
+@
+text
+@d1 3
+a3 2
+/* $Header: /home/schj/src/prosper/vamps_0.9/util/RCS/issec.c,v 1.3 1995/09/30 18:03:14 schj Exp $ */
+/*- $RCSfile: issec.c,v $
+d5 1
+a5 1
+ *  $Date: 1995/09/30 18:03:14 $
+d7 3
+d30 2
+a31 1
+/*- issec.c - determine if section exists in vamps output file */
+d34 1
+a34 1
+"$Id: issec.c,v 1.3 1995/09/30 18:03:14 schj Exp $";
+d91 1
+a91 1
+	Perror (1, RCSid, "Could not open:", inname);
+d166 3
+a168 2
+  (void) fprintf (stderr, "%s - %s\n\t(c) %s - %s\n\t(%s)", progname, VSELDES, AUTHOR, DATE, RCSid);
+  (void) fprintf (stderr, "\n\n\tusage:\n\t%s %s\n", progname, USE);
+@
+
+
+1.3
+log
+@added stdin support
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/prosper/vamps_0.9/util/RCS/issec.c,v 1.2 1995/09/26 21:54:50 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/09/26 21:54:50 $
+d6 3
+d29 1
+a29 1
+"$Id: issec.c,v 1.2 1995/09/26 21:54:50 schj Exp $";
+d57 1
+a57 1
+\t--section\t\t\tname of the section\n\
+@
+
+
+1.2
+log
+@added -e
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/prosper/vamps_0.9/util/RCS/issec.c,v 1.1 1995/09/26 21:19:56 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/09/26 21:19:56 $
+d6 3
+d26 1
+a26 1
+"$Id: issec.c,v 1.1 1995/09/26 21:19:56 schj Exp $";
+d54 1
+d79 1
+a79 1
+  if (*argv[argc - 1] != '-')
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 2
+a2 2
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/util/RCS/getdefstr.c,v 1.5 1995/09/25 12:54:26 schj Exp $ */
+/*- $RCSfile: getdefstr.c,v $
+d4 5
+a8 2
+ *  $Date: 1995/09/25 12:54:26 $
+ *  $Log: getdefstr.c,v $
+d23 1
+a23 1
+"$Id: getdefstr.c,v 1.5 1995/09/25 12:54:26 schj Exp $";
+d40 1
+a40 1
+  {"error", no_argument, 0, 'e'},
+d50 1
+a50 1
+\t--error\t\t\tproduce result as exitstatus\n\
+d126 1
+a126 1
+	return 1;
+d128 1
+a128 1
+	fprintf (stdout, "1\n");
+d135 1
+a135 1
+	return 0;
+d137 1
+a137 1
+	fprintf (stdout, "0\n");
+@

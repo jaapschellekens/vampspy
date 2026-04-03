@@ -1,0 +1,40 @@
+List of known BUGS/missing features
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+"Calculation" Bugs
+------------------
+
+- Rutter interception is not working properly
+
+- Gash should only be used for daily input 
+
+
+
+General Bugs
+------------
+
+- more than one space after a filename in the input file is _not_
+  stripped!
+
+- the help pager does not work in the msdos version. This means
+  you might have trouble reading help screens longer than 25 lines.
+
+- SL-keyboard stuff sometimes failes when switching mode. Use
+  SLang_init_tty; to fix in interactive mode.
+
+- smoothing does not work with tables. Broken completely in >99b
+
+- a sigfpe is generated in the msdos version if the input file
+  cannot be opened.
+
+- Crash if no determine variable is set
+
+- popen never returns NULL and does not set errno
+  fixed by intercepting SIGPIPE and restarting the program. Only
+  tested on UNIX systems.
+
+- the maq stuff can crash very easely (just call maqend with a nonsense
+  argument...)
+
+- warning messages and logging a bit of a mess at the moment  
+

@@ -1,0 +1,2163 @@
+head	1.30;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.30
+date	99.01.06.12.13.01;	author schj;	state Alpha;
+branches;
+next	1.29;
+
+1.29
+date	99.01.06.12.07.49;	author schj;	state Alpha;
+branches;
+next	1.28;
+
+1.28
+date	97.09.09.08.39.10;	author schj;	state Exp;
+branches;
+next	1.27;
+
+1.27
+date	97.01.16.15.08.23;	author schj;	state Exp;
+branches;
+next	1.26;
+
+1.26
+date	96.11.05.14.59.13;	author schj;	state Alpha;
+branches;
+next	1.25;
+
+1.25
+date	96.10.22.17.43.22;	author schj;	state Exp;
+branches;
+next	1.24;
+
+1.24
+date	96.03.25.07.56.12;	author schj;	state alpha;
+branches;
+next	1.23;
+
+1.23
+date	96.02.27.11.40.38;	author schj;	state Exp;
+branches;
+next	1.22;
+
+1.22
+date	95.12.05.03.07.11;	author schj;	state Exp;
+branches;
+next	1.21;
+
+1.21
+date	95.10.30.13.54.33;	author schj;	state Exp;
+branches;
+next	1.20;
+
+1.20
+date	95.10.23.07.52.03;	author schj;	state Exp;
+branches;
+next	1.19;
+
+1.19
+date	95.10.01.21.01.56;	author schj;	state Exp;
+branches;
+next	1.18;
+
+1.18
+date	95.09.30.18.01.56;	author schj;	state Exp;
+branches;
+next	1.17;
+
+1.17
+date	95.09.26.22.10.54;	author schj;	state Exp;
+branches;
+next	1.16;
+
+1.16
+date	95.09.26.21.20.22;	author schj;	state Exp;
+branches;
+next	1.15;
+
+1.15
+date	95.09.25.12.54.26;	author schj;	state Exp;
+branches;
+next	1.14;
+
+1.14
+date	95.09.23.20.45.12;	author schj;	state Exp;
+branches;
+next	1.13;
+
+1.13
+date	95.09.19.13.42.39;	author schj;	state Exp;
+branches;
+next	1.12;
+
+1.12
+date	95.09.05.09.07.28;	author schj;	state Exp;
+branches;
+next	1.11;
+
+1.11
+date	95.09.04.17.05.29;	author schj;	state Exp;
+branches;
+next	1.10;
+
+1.10
+date	95.09.04.11.38.34;	author schj;	state Exp;
+branches;
+next	1.9;
+
+1.9
+date	95.09.01.11.43.50;	author schj;	state Exp;
+branches;
+next	1.8;
+
+1.8
+date	95.09.01.06.09.11;	author schj;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	95.08.29.13.56.44;	author schj;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	95.08.24.14.14.24;	author schj;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	95.08.24.12.47.38;	author schj;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	95.08.24.12.25.38;	author schj;	state Beta;
+branches;
+next	1.3;
+
+1.3
+date	95.08.24.12.19.54;	author schj;	state Beta;
+branches;
+next	1.2;
+
+1.2
+date	95.08.24.12.01.05;	author schj;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	95.08.23.13.22.08;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@output file (ini format) parser and gnuplot input generator
+@
+
+
+1.30
+log
+@Version: 0.99g
+@
+text
+@/* $Header: /home/schj/src/vamps_0.99g/src/util/RCS/vsel.c,v 1.29 1999/01/06 12:07:49 schj Alpha $ 
+ */
+/*
+ *  $RCSfile: vsel.c,v $
+ *  $Author: schj $
+ *  $Date: 1999/01/06 12:07:49 $
+ */
+
+static char RCSid[] =
+"$Id: vsel.c,v 1.29 1999/01/06 12:07:49 schj Alpha $";
+
+#define VSEL
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "vamps.h"
+#include "deffile.h"
+#include "getopt.h"
+
+#define VSELDES "extract data from vamps output files"
+#define MAXPAR 50
+#define COLSAP "\t"
+
+struct option options[] =
+{
+  {"help", no_argument, 0, 'h'},
+  {"copyright", no_argument, 0, 'c'},
+  {"index", required_argument, 0, 'i'},     
+  {"Index", required_argument, 0, 'I'},     
+  {"verbose", no_argument, 0, 'v'},
+  {"license", no_argument, 0, 'l'},
+  {"memuse", no_argument, 0, 'm'},
+  {"starttime", required_argument, 0, 's'},
+  {"parameter", required_argument, 0, 'p'},
+  {"outfile", required_argument, 0, 'o'},
+  {"number", required_argument, 0, 'n'},
+  {"endtime", required_argument, 0, 'e'},
+  {"time", required_argument, 0, 't'},
+  {"Header", no_argument, 0, 'H'},
+  {"Comment", required_argument, 0, 'C'},
+  {"sKip", required_argument, 0, 'K'},
+  {0, 0, 0, 0},
+};
+
+#define USE "\t[-h][-v][-H][-c][-l][-m][-K][-o outfile][[-p parameter]...]\
+\n\t[[-n layer number]...][[-t time]...][-i filename][-I filename] filename"
+
+#define EXPL "\
+\t--verbose\t\tbe verbose about performed actions\n\
+\t--help\t\t\tshow this information\n\
+\t--copyright\t\tshow part of the GPL\n\
+\t--licence\t\tshow part of the GPL\n\
+\t--Header\t\tomit header in output\n\
+\t--parameter parameter\toutput this parameter (k,h ...)\n\
+\t--memuse\t\tuse more memory (some speedup)\n\
+\t--index filename\tuse filename as index\n\
+\t--Index filename\tgenerate index in filename\n\
+\t--outfile file\t\toutput file (- is stdout)\n\
+\t--time time\t\tonly output this time\n\
+\t--Comment commentchar\tset the commentchar\n\
+\t--sKip n\t\tskip n times\n\
+\t--number layer\t\toutput only this layer\n\
+"
+
+#define OPTSTR "i:I:K:C:mo:t:lcHhvp:n:V"
+char *progname;
+char command[1024];
+char *indexfname;
+int mkindex=0;
+FILE *outfile = NULL;
+FILE *genoutfile = NULL;
+double *z;
+char section[1024];
+char **var;
+double ttime;
+char *inname = NULL;
+int *layer;
+int skipset=0;
+int verbose =0;
+
+/* Dummy vars for perror.c */
+int interpreter(int verb) {return 0;}
+int exit_is_inter = 0;
+int switchtoint = 0;
+
+int
+main (int argc, char *argv[])
+{
+  int pars = 0;			/*
+				 * number of parameters asked 
+				 */
+  int header = TRUE;
+  int skip = 1;			/*
+				 * means no skipping 
+				 */
+  int memsave = TRUE;
+  char outfilename[1024];
+  int steps;
+  double *time;
+  int times = 0;
+  int layers = 0;
+  int i, k, pts;
+  int what=0;
+  void disclaim ();
+  void showinfo (int verb);
+  void printit (int varnr);
+
+
+  usesecptr=0;
+  progname = argv[0];
+
+  /*
+   * Allocate memory for parameters 
+   */
+  var = (char **) ts_memory (NULL, MAXPAR * sizeof (char *), progname);
+  layer = (int *) ts_memory (NULL, MAXPAR * sizeof (int), progname);
+  time = (double *) ts_memory (NULL, MAXPAR * sizeof (double), progname);
+
+  for (i = 0; i < MAXPAR; i++)
+    {
+      var[i] = (char *) ts_memory (NULL, 1024 * sizeof (char), progname);
+
+      layer[i] = (-999);
+    }
+
+  while ((what = getopt_long (argc, argv, OPTSTR, options, NULL)) != EOF)
+    {
+      switch (what)
+	{
+	case 'o':
+	  {
+	    strcpy (outfilename, optarg);
+	    if (strcmp (outfilename, "-") == 0)
+	      outfile = stdout;
+	    else if ((outfile = fopen (outfilename, "w")) == NULL)
+	      {
+		Verror (progname, 1,1, RCSid, "Could not open file for writing:", outfilename);
+	      }
+	    break;
+	  }
+	case 'K':
+	  {
+	    skip = atoi (optarg);
+	    skip = skip <= 0 ? 1 : skip;
+	    skipset++;
+	    break;
+	  }
+	case 'I':
+	  {
+	    mkindex = 1;
+	    indexfname = optarg;
+	    break;
+	  }
+	case 'i':
+	  {
+	    mkindex = 2;
+	    indexfname = optarg;
+	    break;
+	  }
+	case 'C':
+	  {
+	    commchar[0] = *optarg;
+	    break;
+	  }
+	case 'p':
+	  {
+	    strcpy (var[pars], optarg);
+	    pars++;
+	    if (pars == MAXPAR)
+	      Verror (progname, 1,0, RCSid, "Maximum number of parameters exceeded", "");
+	    break;
+	  }
+	case 'H':
+	  {
+	    header = FALSE;
+	    break;
+	  }
+	case 'V':
+	  {
+	    verbose = 6;
+	    break;
+	  }
+	case 'm':
+	  {
+	    memsave = memsave == FALSE ? TRUE : FALSE;
+	    break;
+	  }
+	case 'v':
+	  {
+	    verbose = TRUE;
+	    break;
+	  }
+	case 'l':
+	  {
+	    disclaim (argv[0]);
+	    break;
+	  }
+	case 'c':
+	  {
+	    disclaim (argv[0]);
+	    break;
+	  }
+	case 'n':
+	  {
+	    layer[layers] = atoi (optarg);
+	    layers++;
+	    break;
+	  }
+	case 'h':
+	  {
+	    showinfo (1);
+	    break;
+	  }
+	case 't':
+	  {
+	    time[times] = atof (optarg);
+	    times++;
+	    break;
+	  }
+	default:
+	  break;
+	}
+    }
+
+  strcpy (command, ts_command (argc, argv));
+
+   if (!inname)
+     inname = argv[optind];
+
+   if (mkindex == 2)
+     {
+       usesecptr=1;
+       readindex(indexfname);
+       firstpass = 0;
+     }
+   else{
+    if(mkindex == 1){
+      usesecptr=1;
+      makeindex(inname);
+      saveindex(indexfname);
+      exit(0);
+   }
+   }
+   
+   
+  if (pars < 1)
+    showinfo (0);
+
+   if (!memsave && !mkindex)
+    {
+      rinmem (inname);
+    }
+  else
+    {
+      if (!opendef (inname))
+	Verror (progname, 1,1, RCSid, "could not open infile:", inname);
+      inname = (char *) NULL;
+    }
+
+  steps = getdefint ("initial", "steps", 0, inname, TRUE);
+  z = getdefar ("initial", "z", NULL, inname, &pts, FALSE);
+#ifdef __MSDOS__
+  pts--;
+#endif
+
+  if (!layers)
+    layers++;
+
+
+  if (!outfile)
+    outfile = stdout;
+
+  if (header)
+    fprintf (outfile, "%s\n", command);
+
+  if (!skipset) /* default, check for skipfactor in file */
+  	skip=getdefint("initial","outskip",skip,inname,FALSE);
+
+  for (k = 0; k < pars; k++)
+    {
+      i = 0;
+      if (header)
+	(void) fprintf (outfile, "%c this is %s\n", commchar[0], var[k]);
+      do
+	{
+	  if (!(i % skip))
+	    {
+	      sprintf (section, "t_%d", i);
+	      ttime = getdefdoub (section, "t", (-50.0), inname, FALSE);
+	      /* bail out */
+	      if (ttime == -50.0 && k >= pars - 1)
+		{
+		  if (memsave)
+		    (void) closedef ();
+		  delmemlist ();
+		  exit (0);
+		}
+	      else if (ttime == time[0] || times == 0)
+		printit (k);
+	    }
+	    i++;
+	}
+      while (ttime >= 0.0);
+
+      if (outfile != stdout)
+	fclose (outfile);
+    }
+
+  if (memsave)
+    (void) closedef ();
+
+  delmemlist ();		/*
+				 * deletes the memory list (if present) 
+				 */
+
+  return 0;
+}
+
+
+void
+printit (int varnr)
+{
+  int j, pts = 0;
+  double *outar;
+
+  outar = getdefar (section, var[varnr], NULL, inname, &pts, FALSE);
+  if (outar)
+    {
+      if (pts > 1 && layer[0] == -999)
+	{
+	  for (j = 0; j < pts; j++)
+	    fprintf (outfile, "%f%s%f\n", z[j], COLSAP, outar[j]);
+	}
+      else
+	{
+	  if (pts != 1)
+	    fprintf (outfile, "%f%s%f\n", ttime, COLSAP, outar[layer[0]]);
+	  else
+	    fprintf (outfile, "%f%s%f\n", ttime, COLSAP, outar[0]);
+	}
+     free(outar);
+    }
+}
+
+/*-
+ * void disclaim(char *progname)
+ *
+ *  Shows part of GPL
+ */
+void
+disclaim (char *progname)
+{
+  (void) fprintf (stderr, "%s:\n%s\n", progname,GNUL);
+  exit (0);
+}
+
+/*-
+ * void showinfo(int verb)
+ *
+ *  Shows some help info
+ *
+ */
+void
+showinfo (int verb)
+{
+  (void) fprintf (stderr, "\n%s - %s\n\t(c) %s - %s\n", progname, VSELDES, AUTHOR, DATE);
+  (void) fprintf (stderr, "\tfor vamps %s\n",PROVERSION);
+  (void) fprintf (stderr, "\tBuild on %s at %s by %s (%s)\n", WHERE, BUILDDATE, WHO, OS);
+  (void) fprintf (stderr, "\t(%s)\n", RCSid);
+  (void) fprintf (stderr, "\n\tusage: %s\n%s\n", progname, USE);
+  if (verb)
+    (void) fprintf (stderr, "%s", EXPL);
+  (void) fprintf (stderr, "\n");
+  exit (1);
+}
+
+Verror (char *Eprogname,int exitval,int prr,char *from,const char *descr,const char *xtr)
+{
+	if (!exitval) {
+		(void) fprintf (stderr, "%s:\terror message:\n", Eprogname);
+		(void) fprintf (stderr, "\tfrom: %s\n", from);
+		(void) fprintf (stderr, "\tdescription: %s %s\n", descr, xtr);
+		if (prr)
+			perror("syserr");
+	} else {
+		(void) fprintf (stderr, "%s:\terror message:\n", Eprogname);
+		(void) fprintf (stderr, "\tfrom: %s\n", from);
+		(void) fprintf (stderr, "\tdescription: %s %s\n", descr, xtr);
+		if (prr)
+			perror("syserr");
+		delmemlist ();
+		exit (exitval);
+	}
+}
+@
+
+
+1.29
+log
+@Version: 0.99g
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99e/src/util/RCS/vsel.c,v 1.28 1997/09/09 08:39:10 schj Exp $ 
+d6 1
+a6 1
+ *  $Date: 1997/09/09 08:39:10 $
+d10 1
+a10 1
+"$Id: vsel.c,v 1.28 1997/09/09 08:39:10 schj Exp $";
+@
+
+
+1.28
+log
+@0.99e version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99c/src/util/RCS/vsel.c,v 1.27 1997/01/16 15:08:23 schj Exp $ 
+d6 1
+a6 1
+ *  $Date: 1997/01/16 15:08:23 $
+d10 1
+a10 1
+"$Id: vsel.c,v 1.27 1997/01/16 15:08:23 schj Exp $";
+d138 1
+a138 1
+		Perror (progname, 1, RCSid, "Could not open file for writing:", outfilename);
+d171 1
+a171 1
+	      Perror (progname, 1, RCSid, "Maximum number of parameters exceeded", "");
+d196 1
+a196 1
+	    disclaim ();
+d201 1
+a201 1
+	    disclaim ();
+d257 1
+a257 1
+	Perror (progname, 1, RCSid, "could not open infile:", inname);
+d347 1
+a347 1
+ * void disclaim()
+d352 1
+a352 1
+disclaim ()
+d354 1
+a354 1
+  (void) fprintf (stderr, "%s\n", GNUL);
+d378 1
+a378 11
+/*C:Perror
+ *@@ void Perror(char *Eprogname,int exitval, char *from,
+ *		const char *descr,const char *xtr)
+ *
+ * Prints an error message on stderr and exits with level
+ * exitval if this value is > 0	
+ * Normally called with something like:
+ * @@Perror(progname,1,RCSid,"A fatal error","divide by zero");@@
+ */
+void
+Perror (char *Eprogname,int exitval,char *from,const char *descr,const char *xtr)
+d384 2
+d390 2
+@
+
+
+1.27
+log
+@*** empty log message ***
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/util/RCS/vsel.c,v 1.26 1996/11/05 14:59:13 schj Alpha $ 
+d6 1
+a6 1
+ *  $Date: 1996/11/05 14:59:13 $
+d10 1
+a10 1
+"$Id: vsel.c,v 1.26 1996/11/05 14:59:13 schj Alpha $";
+d163 1
+a163 1
+	    commchar = *optarg;
+d284 1
+a284 1
+	(void) fprintf (outfile, "%c this is %s\n", commchar, var[k]);
+d324 1
+a324 1
+  int j, pts;
+a327 3
+#ifdef __MSDOS__
+  pts--;
+#endif
+d378 24
+@
+
+
+1.26
+log
+@Updated to Alpha version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/util/RCS/vsel.c,v 1.25 1996/10/22 17:43:22 schj Exp $ 
+d6 1
+a6 1
+ *  $Date: 1996/10/22 17:43:22 $
+d10 3
+a12 1
+"$Id: vsel.c,v 1.25 1996/10/22 17:43:22 schj Exp $";
+d82 4
+@
+
+
+1.25
+log
+@plenty undocumented.
+NB vsel is still broken for multiple layers and vars!!
+@
+text
+@d1 1
+a1 5
+/*
+ * vsel.c - extract data from vamps output files 
+ */
+/*
+ * $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.98/src/util/RCS/vsel.c,v 1.24 1996/03/25 07:56:12 schj alpha $ 
+d6 1
+a6 1
+ *  $Date: 1996/03/25 07:56:12 $
+d10 1
+a10 1
+"$Id: vsel.c,v 1.24 1996/03/25 07:56:12 schj alpha $";
+d59 1
+a59 1
+\t--Comment\t\tset commentchar\n\
+d116 1
+a116 1
+      var[i] = (char *) ts_memory (NULL, 1024 * sizeof (int), progname);
+d283 1
+a283 1
+	      sprintf (section, "time_%d", i);
+@
+
+
+1.24
+log
+@updated help message (link to vamps version)
+changed layout
+@
+text
+@d1 1
+a1 1
+/*-
+d5 1
+a5 1
+ * $Header: /home/schj/src/vamps_0.975/src/util/RCS/vsel.c,v 1.23 1996/02/27 11:40:38 schj Exp $ 
+d7 1
+a7 1
+/*-
+d10 1
+a10 43
+ *  $Date: 1996/02/27 11:40:38 $
+ *  $Log: vsel.c,v $
+ *  Revision 1.23  1996/02/27 11:40:38  schj
+ *  added support for flaxible timesteps
+ *  at present vsel is somewhat broken!!
+ *  changed to ansi
+ *
+ * Revision 1.21  1995/10/30  13:54:33  schj
+ * added deffile.h
+ *
+ * Revision 1.19  1995/10/01  21:01:56  schj
+ * added ()
+ *
+ * Revision 1.18  1995/09/30  18:01:56  schj
+ * added multiple time and layer options
+ *
+ * Revision 1.17  1995/09/26  22:10:54  schj
+ * added Commentchar; update error message
+ *
+ * Revision 1.16  1995/09/26  21:20:22  schj
+ * updated options
+ *
+ * Revision 1.15  1995/09/25  12:54:26  schj
+ * updated for use with opendef() and closedef()
+ *
+ * Revision 1.14  1995/09/23  20:45:12  schj
+ * added output all to stdout (-o - )
+ *
+ * Revision 1.13  1995/09/19  13:42:39  schj
+ * updated exitonerror
+ *
+ * Revision 1.12  1995/09/05  09:07:28  schj
+ * added multiple parameters in one run stuff
+ *
+ * Revision 1.11  1995/09/04  17:05:29  schj
+ * added check for header
+ *
+ * Revision 1.10  1995/09/04  11:38:34  schj
+ * added -V debug
+ *
+ * Revision 1.9  1995/09/01  11:43:50  schj
+ * updated header
+ *
+a12 1
+
+d14 1
+a14 1
+"$Id: vsel.c,v 1.23 1996/02/27 11:40:38 schj Exp $";
+d31 2
+d49 1
+a49 1
+\n\t[[-n layer number]...][[-t time]...] filename"
+d59 2
+d68 1
+a68 1
+#define OPTSTR "K:C:mo:t:lcHhvp:n:V"
+d71 2
+d82 1
+d102 1
+a102 1
+  int what;
+d107 2
+a124 5
+  if (argv[1] == NULL)
+    {
+      showinfo (0);
+    }
+
+d147 12
+d226 19
+d248 1
+a248 4
+  if (!inname)
+    inname = argv[optind];
+
+  if (!memsave)
+a249 5
+      if (verbose)
+	showit ("Reading file...");
+      delmemlist ();
+      rinmem (inname);
+      delmemlist ();
+a258 2
+  if (verbose)
+    showit ("Processing..");
+d260 1
+a260 1
+  z = getdefar ("initial", "z", NULL, inname, &pts, TRUE);
+a267 2
+  if (verbose)
+    showit ("Writing...");
+d343 1
+d348 2
+d360 2
+d378 1
+@
+
+
+1.23
+log
+@added support for flaxible timesteps
+at present vsel is somewhat broken!!
+changed to ansi
+@
+text
+@d1 6
+a6 3
+/*- vsel.c - extract data from vamps output files */
+
+/* $Header: /homes/schj/src/vamps_0.96/src/util/RCS/vsel.c,v 1.22 1995/12/05 03:07:11 schj Exp $ */
+d10 1
+a10 1
+ *  $Date: 1995/12/05 03:07:11 $
+d12 5
+d57 1
+a57 1
+"$Id: vsel.c,v 1.22 1995/12/05 03:07:11 schj Exp $";
+d79 1
+a79 1
+  {"outdir", required_argument, 0, 'o'},
+d85 1
+d89 2
+a90 2
+#define USE "\t[-h][-v][-H][-c][-l][-m][-o outdir][[-p parameter]...]\
+\n\t[[-n layer number]...][[-t time]...][-s starttime -e endtime] filename"
+d100 1
+a100 1
+\t--outdir dir\t\toutput dir (- is stdout)\n\
+a101 2
+\t--starttime time\tset starttime\n\
+\t--endtime time\t\tset endtime\n\
+d103 1
+d107 12
+a118 5
+#define OPTSTR "C:mo:s:e:t:lcHhvp:n:V"
+char   *progname;
+char    command[1024];
+FILE   *outfile = NULL;
+FILE   *genoutfile = NULL;
+d122 1
+a122 1
+main (int argc,char  *argv[])
+d124 10
+a133 12
+  int     pars = 0;		/* number of parameters asked */
+  int     header = TRUE;
+  int     memsave = TRUE;
+  char  **var;
+  char    outdir[1024];
+  char    outpath[1024];
+  char    outfname[1024];
+  char    s[1024];
+  double *outar;
+  double *z;
+  double  ttime;
+  int     steps;
+d135 4
+a138 11
+  int     times = 0;
+  int    *layer;
+  int     layers = 0;
+  int     l, i, k, pts;
+  int     j = 0;
+  int     what;
+  char    outfstr[1024];
+  char    section[1024];
+  char   *inname = NULL;
+  int     start = (-999);
+  int     end = (-999);
+d141 1
+a142 2
+  strcpy (outfstr, "%d_%s");
+  strcpy (outdir, "./");
+d145 3
+a147 1
+  /* Allocate memory for parameters */
+d168 1
+a168 1
+	case 'e':
+d170 7
+a176 2
+	    end = atoi (optarg);
+	    end++;
+d179 1
+a179 1
+	case 'o':
+d181 3
+a183 3
+	    strcpy (outdir, optarg);
+	    if (strcmp (outdir, "-") == 0)
+	      outfile = stdout;
+a228 5
+	case 's':
+	  {
+	    start = atoi (optarg);
+	    break;
+	  }
+a282 20
+  /* All this stuff should change because of the new subdaily stuff
+*/
+  time = (double *) ts_memory (time, steps * sizeof (double), progname);
+
+  if (!times)			/* No seperate time given at the command-line */
+    {
+      if ((start = !(-999)) && end == (-999))
+	{
+	  times = end - start;
+	  for (i = 0; i < times; i++)
+	    time[i] = start + i;
+	}
+      else
+	{
+	  times = steps;
+	  for (i = 0; i < times; i++)
+	    time[i] = i;
+	}
+    }
+
+d288 10
+d300 4
+a303 1
+      for (l = 0; l < layers; l++)
+d305 1
+a305 28
+	  /* a time serie */
+	  if (layer[l] != (-999))
+	    sprintf (outfname, "%s_%d", var[k], layer[l]);
+	  else
+	    sprintf (outfname, "%s_ts", var[k]);
+	  strcat (outpath, outdir);
+	  strcat (outpath, "/");
+	  strcat (outpath, outfname);
+	  if (verbose)
+	    {
+	      sprintf (s, "writing: %s", outpath);
+	      showit (s);
+	    }
+	  if (outfile != stdout)
+	    if ((outfile = fopen (outpath, "w")) == NULL)
+	      {
+		Perror (progname, 1, RCSid, "Could not open:", outfname);
+	      }
+	  if (header)
+	    {
+	      (void) fprintf (outfile, "%s\n", command);
+	      if (times > 1)
+		(void) fprintf (outfile, "\n");
+	    }
+	  strcpy (outpath, "");
+
+	  i = 0;
+	  do			/* This is the times loop */
+d308 3
+a310 1
+	      if ((ttime = getdefdoub (section, "t", (-50.0), inname, FALSE)) == -50.0)
+d314 1
+a314 1
+		  delmemlist ();/* deletes the memory list (if present) */
+a315 39
+		};
+	      outar = getdefar (section, var[k], NULL, inname, &pts, TRUE);
+#ifdef __MSDOS__
+	      pts--;
+#endif
+	      if (pts == 1)
+		layer[l] = 0;
+	      if (layer[l] == (-999))
+		{		/* more than one time */
+		  sprintf (outfname, outfstr, i, var[k]);
+		  strcat (outpath, outdir);
+		  strcat (outpath, "/");
+		  strcat (outpath, outfname);
+		  if (verbose)
+		    {
+		      sprintf (s, "writing: %s", outpath);
+		      showit (s);
+		    }
+		  if (outfile != stdout)
+		    if ((outfile = fopen (outpath, "w")) == NULL)
+		      {
+			Perror (progname, 1, RCSid, "Could not open:", outfname);
+		      }
+		  strcpy (outpath, "");
+		  if (header)
+		    {
+		      (void) fprintf (outfile, "%s\n\n", command);
+		    }
+		}
+	      if (layer[l] == (-999))
+		{
+		  for (j = 0; j < pts; j++)
+		    fprintf (outfile, "%f%s%f\n", z[j], COLSAP, outar[j]);
+		}
+	      else
+		{
+		  if (layer[l] >= pts)
+		    Perror (progname, 1, RCSid, "Layer does not exist", "to large");
+		  fprintf (outfile, "%f%s%f\n", ttime, COLSAP, outar[layer[l]]);
+d317 2
+a318 4
+	      if (layer[l] == (-999))
+		if (outfile != stdout)
+		  fclose (outfile);
+	      i++;
+d320 3
+a322 1
+	  while (ttime >= 0.0);
+d324 2
+a325 4
+	  if (layer[l] != (-999))
+	    if (outfile != stdout)
+	      fclose (outfile);
+	}
+d331 3
+a333 1
+  delmemlist ();		/* deletes the memory list (if present) */
+d338 28
+d384 1
+@
+
+
+1.22
+log
+@*** empty log message ***
+@
+text
+@d3 1
+a3 1
+/* $Header: /homes/schj/src/vamps_0.91/RCS/vsel.c,v 1.21 1995/10/30 13:54:33 schj Exp $ */
+d7 1
+a7 1
+ *  $Date: 1995/10/30 13:54:33 $
+a10 4
+ * ,
+ *
+ * Revision 1.20  1995/10/23  07:52:03  schj
+ * *** empty log message ***
+d49 1
+a49 1
+"$Id: vsel.c,v 1.21 1995/10/30 13:54:33 schj Exp $";
+d100 5
+a104 4
+char *progname;
+char command[1024];
+FILE *outfile = NULL;
+FILE *genoutfile = NULL;
+d107 1
+a107 3
+main (argc, argv)
+     int argc;
+     char *argv[];
+d109 8
+a116 8
+  int pars = 0;			/* number of parameters asked */
+  int header = TRUE;
+  int memsave = TRUE;
+  char **var;
+  char outdir[1024];
+  char outpath[1024];
+  char outfname[1024];
+  char s[1024];
+d119 16
+a134 15
+  int steps;
+  int *time;
+  int times = 0;
+  int *layer;
+  int layers = 0;
+  int l, i, k, pts;
+  int j = 0;
+  int what;
+  char outfstr[1024];
+  char section[1024];
+  char *inname = NULL;
+  int start = (-999);
+  int end = (-999);
+  void disclaim __P (());
+  void showinfo __P ((int verb));
+d143 1
+a143 1
+  time = (int *) ts_memory (NULL, MAXPAR * sizeof (int), progname);
+d148 1
+d235 1
+a235 1
+	    time[times] = atoi (optarg);
+d256 3
+d273 1
+a273 1
+   pts--;
+a274 1
+  time = (int *) ts_memory (time, steps * sizeof (int), progname);
+d276 5
+a280 1
+  if (!times)
+d305 1
+d307 7
+d315 13
+a327 22
+	      /* a time serie */
+	      sprintf (outfname, "%s_%d", var[k], layer[l]);
+	      strcat (outpath, outdir);
+	      strcat (outpath, "/");
+	      strcat (outpath, outfname);
+	      if (verbose)
+		{
+		  sprintf (s, "writing: %s", outpath);
+		  showit (s);
+		}
+	      if (outfile != stdout)
+		if ((outfile = fopen (outpath, "w")) == NULL)
+		  {
+		    Perror (progname, 1, RCSid, "Could not open:", outfname);
+		  }
+	      if (header)
+		{
+		  (void) fprintf (outfile, "%s\n", command);
+		  if (times >1)
+		  	(void) fprintf (outfile,"\n");
+		}
+	      strcpy (outpath, "");
+d329 4
+a332 1
+	  for (i = 0; i < times; i++)	/* do for all times */
+d334 8
+a341 1
+	      sprintf (section, "time_%d", time[i]);
+d350 1
+a350 1
+		  sprintf (outfname, outfstr, time[i], var[k]);
+d373 1
+a373 1
+		    fprintf (outfile, "%f%s%f\n", z[j],COLSAP, outar[j]);
+d379 1
+a379 1
+		  fprintf (outfile, "%d%s%f\n", time[i],COLSAP, outar[layer[l]]);
+d384 1
+d386 2
+d397 2
+d402 3
+d412 4
+d417 1
+a417 2
+showinfo (verb)
+     int verb;
+@
+
+
+1.21
+log
+@added deffile.h
+,
+@
+text
+@d3 1
+a3 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.9/util/RCS/vsel.c,v 1.20 1995/10/23 07:52:03 schj Exp $ */
+d7 1
+a7 1
+ *  $Date: 1995/10/23 07:52:03 $
+d9 4
+d53 1
+a53 1
+"$Id: vsel.c,v 1.20 1995/10/23 07:52:03 schj Exp $";
+d58 3
+a60 3
+#include "../include/vamps.h"
+#include "../include/deffile.h"
+#include "../include/getopt.h"
+d259 1
+a259 1
+      rinmem (inname, 4);
+@
+
+
+1.20
+log
+@*** empty log message ***
+@
+text
+@d3 1
+a3 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/util/RCS/vsel.c,v 1.19 1995/10/01 21:01:56 schj Exp $ */
+d7 1
+a7 1
+ *  $Date: 1995/10/01 21:01:56 $
+d9 3
+d49 1
+a49 1
+"$Id: vsel.c,v 1.19 1995/10/01 21:01:56 schj Exp $";
+d55 1
+d60 1
+d122 1
+a122 1
+  int times=0;
+d183 1
+a183 1
+	      Perror (progname,1, RCSid, "Maximum number of parameters exceeded", "");
+d260 1
+a260 1
+	Perror (progname,1, RCSid, "could not open infile:", inname);
+d268 3
+d273 15
+a287 11
+  if (!times){
+  if ((start =! (-999)) && end == (-999)){
+	times=end-start;
+	for (i=0;i<times;i++)
+		time[i]=start+i;
+  }else{
+	times=steps;
+	for (i=0;i<times;i++)
+		time[i]=i;
+  }
+  }
+d290 1
+a290 1
+	layers++;
+d313 1
+a313 1
+		    Perror (progname,1, RCSid, "Could not open:", outfname);
+a314 1
+	      strcpy (outpath, "");
+d317 3
+a319 1
+		  (void) fprintf (outfile, "# command: %s\n", command);
+d321 1
+d323 1
+a323 1
+	  for (i = 0; i < times; i++)		/* do for all times */
+d327 3
+d346 1
+a346 1
+			Perror (progname,1, RCSid, "Could not open:", outfname);
+d351 1
+a351 1
+		      (void) fprintf (outfile, "# command: %s\n", command);
+a355 2
+		  if (header)
+		    (void) fprintf (outfile, "# time: %d\n", time[i]);
+d357 1
+a357 1
+		    fprintf (outfile, "%f %f\n", z[j], outar[j]);
+d362 2
+a363 2
+		    Perror (progname,1, RCSid, "Layer does not exist", "to large");
+		  fprintf (outfile, "%d %f\n", time[i], outar[layer[l]]);
+d393 1
+a393 1
+  (void) fprintf (stderr, "\tBuild on %s at %s by %s (%s)\n", WHERE, BUILDDATE, WHO,OS);
+@
+
+
+1.19
+log
+@added ()
+@
+text
+@d3 3
+a5 2
+/* $Header: /home/schj/src/prosper/vamps_0.9/util/RCS/vsel.c,v 1.18 1995/09/30 18:01:56 schj Exp $ */
+/*  $RCSfile: vsel.c,v $
+d7 1
+a7 1
+ *  $Date: 1995/09/30 18:01:56 $
+d9 3
+d46 1
+a46 1
+"$Id: vsel.c,v 1.18 1995/09/30 18:01:56 schj Exp $";
+d178 1
+a178 1
+	      Perror (1, RCSid, "Maximum number of parameters exceeded", "");
+d255 1
+a255 1
+	Perror (1, RCSid, "could not open infile:", inname);
+d301 1
+a301 1
+		    Perror (1, RCSid, "Could not open:", outfname);
+d329 1
+a329 1
+			Perror (1, RCSid, "Could not open:", outfname);
+d347 1
+a347 1
+		    Perror (1, RCSid, "Layer does not exist", "to large");
+d378 1
+a378 1
+  (void) fprintf (stderr, "\tBuild on %s at %s by %s\n", WHERE, BUILDDATE, WHO);
+@
+
+
+1.18
+log
+@added multiple time and layer options
+@
+text
+@d3 1
+a3 1
+/* $Header: /home/schj/src/prosper/vamps_0.9/util/RCS/vsel.c,v 1.17 1995/09/26 22:10:54 schj Exp $ */
+d6 1
+a6 1
+ *  $Date: 1995/09/26 22:10:54 $
+d8 3
+d42 1
+a42 1
+"$Id: vsel.c,v 1.17 1995/09/26 22:10:54 schj Exp $";
+d262 1
+a262 1
+  if (start =! (-999) && end == (-999)){
+@
+
+
+1.17
+log
+@added Commentchar; update error message
+@
+text
+@d3 1
+a3 1
+/* $Header: /home/schj/src/prosper/vamps_0.9/util/RCS/vsel.c,v 1.16 1995/09/26 21:20:22 schj Exp $ */
+d6 1
+a6 1
+ *  $Date: 1995/09/26 21:20:22 $
+d8 3
+d39 1
+a39 1
+"$Id: vsel.c,v 1.16 1995/09/26 21:20:22 schj Exp $";
+d68 2
+a69 2
+#define USE "\t[-h][-v][-H][-c][-l][-m][-o outdir][-p parameter]\
+\n\t[-n layer number][-t time][-s starttime][-e endtime] filename"
+d109 5
+a113 3
+  int time = (-999);
+  int layer = (-999);
+  int i, k, pts;
+d130 2
+d134 4
+a137 1
+    var[i] = (char *) ts_memory (NULL, 1024 * sizeof (int), progname);
+d163 1
+a163 1
+	    commchar= *optarg;
+d211 2
+a212 1
+	    layer = atoi (optarg);
+d222 2
+a223 1
+	    time = atoi (optarg);
+d244 6
+a249 4
+    }else{
+    	if (!opendef(inname))
+		Perror(1,RCSid,"could not open infile:",inname);
+	inname=(char *)NULL;
+d256 13
+d270 2
+a271 13
+  if (start == (-999) || end == (-999))
+    {
+      if (time == (-999))
+	{
+	  start = 0;
+	  end = steps;
+	}
+      else
+	{
+	  start = time;
+	  end = time + 1;
+	}
+    }
+d277 3
+a279 7
+      if (layer != (-999))
+	{			/* a time serie */
+	  sprintf (outfname, "%s_%d", var[k], layer);
+	  strcat (outpath, outdir);
+	  strcat (outpath, "/");
+	  strcat (outpath, outfname);
+	  if (verbose)
+d281 2
+a282 23
+	      sprintf (s, "writing: %s", outpath);
+	      showit (s);
+	    }
+	  if (outfile != stdout)
+	    if ((outfile = fopen (outpath, "w")) == NULL)
+	      {
+		Perror (1, RCSid, "Could not open:", outfname);
+	      }
+	  strcpy (outpath, "");
+	  if (header)
+	    {
+	      (void) fprintf (outfile, "# command: %s\n", command);
+	    }
+	}
+      for (i = start; i < end; i++)	/* do for all times */
+	{
+	  sprintf (section, "time_%d", i);
+	  outar = getdefar (section, var[k], NULL, inname, &pts, TRUE);
+	  if (pts == 1)
+	    layer = 0;
+	  if (layer == (-999))
+	    {			/* more than one time */
+	      sprintf (outfname, outfstr, i, var[k]);
+d302 1
+a302 1
+	  if (layer == (-999))
+d304 42
+a345 10
+	      if (header)
+		(void) fprintf (outfile, "# time: %d\n", i);
+	      for (j = 0; j < pts; j++)
+		fprintf (outfile, "%f %f\n", z[j], outar[j]);
+	    }
+	  else
+	    {
+	      if (layer >= pts)
+		Perror (1, RCSid, "Layer does not exist", "to large");
+	      fprintf (outfile, "%d %f\n", i, outar[layer]);
+d347 1
+a347 1
+	  if (layer == (-999))
+a350 3
+      if (layer != (-999))
+	if (outfile != stdout)
+	  fclose (outfile);
+d354 1
+a354 1
+  	(void)closedef();
+@
+
+
+1.16
+log
+@updated options
+@
+text
+@d3 1
+a3 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/util/RCS/vsel.c,v 1.15 1995/09/25 12:54:26 schj Exp $ */
+d6 1
+a6 1
+ *  $Date: 1995/09/25 12:54:26 $
+d8 3
+d36 1
+a36 1
+"$Id: vsel.c,v 1.15 1995/09/25 12:54:26 schj Exp $";
+d80 1
+d84 1
+a84 1
+#define OPTSTR "mo:s:e:t:lcHhvp:n:V"
+d151 5
+d234 1
+a234 1
+		Perror(1,RCSid,"could not open","");
+@
+
+
+1.15
+log
+@updated for use with opendef() and closedef()
+@
+text
+@d3 1
+a3 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/util/RCS/vsel.c,v 1.14 1995/09/23 20:45:12 schj Exp $ */
+d6 1
+a6 1
+ *  $Date: 1995/09/23 20:45:12 $
+d8 3
+d33 1
+a33 1
+"$Id: vsel.c,v 1.14 1995/09/23 20:45:12 schj Exp $";
+d50 1
+a50 1
+  {"memsave", no_argument, 0, 'm'},
+d72 1
+d79 1
+d93 1
+a93 1
+  int memsave = FALSE;
+d167 1
+a167 1
+	    memsave = TRUE;
+d324 2
+a325 2
+  /*if (memsave)
+  	(void)closedef();*/
+@
+
+
+1.14
+log
+@added output all to stdout (-o - )
+@
+text
+@d3 1
+a3 1
+/* $Header: /home/schj/src/prosper/vamps_0.9/util/RCS/vsel.c,v 1.13 1995/09/19 13:42:39 schj Exp $ */
+d6 1
+a6 1
+ *  $Date: 1995/09/19 13:42:39 $
+d8 3
+d30 1
+a30 1
+"$Id: vsel.c,v 1.13 1995/09/19 13:42:39 schj Exp $";
+d218 4
+d318 3
+@
+
+
+1.13
+log
+@updated exitonerror
+@
+text
+@d1 4
+a4 2
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/util/RCS/vsel.c,v 1.12 1995/09/05 09:07:28 schj Exp $ */
+/*- $RCSfile: vsel.c,v $
+d6 1
+a6 1
+ *  $Date: 1995/09/05 09:07:28 $
+d8 3
+a24 1
+/*- vsel.c - extract data from vamps output files */
+d27 1
+a27 1
+"$Id: vsel.c,v 1.12 1995/09/05 09:07:28 schj Exp $";
+d66 1
+a66 1
+\t--outdir dir\t\toutput dir (multiple times)\n\
+d73 4
+a76 4
+char   *progname;
+char    command[1024];
+FILE   *outfile = NULL;
+FILE   *genoutfile = NULL;
+d80 2
+a81 2
+int     argc;
+char   *argv[];
+d83 8
+a90 8
+  int     pars = 0;		/* number of parameters asked */
+  int     header = TRUE;
+  int     memsave = FALSE;
+  char  **var;
+  char    outdir[1024];
+  char    outpath[1024];
+  char    outfname[1024];
+  char    s[1024];
+d93 11
+a103 11
+  int     steps;
+  int     time = (-999);
+  int     layer = (-999);
+  int     i, k, pts;
+  int     j = 0;
+  int     what;
+  char    outfstr[1024];
+  char    section[1024];
+  char   *inname = NULL;
+  int     start = (-999);
+  int     end = (-999);
+d135 2
+d143 2
+a144 2
+	    if (pars==MAXPAR)
+	    	Perror(1,RCSid,"Maximum number of parameters exceeded","");
+d219 2
+a220 2
+  steps = getdefint ("initial", "steps", 0, inname,TRUE);
+  z = getdefar ("initial", "z", NULL, inname, &pts,TRUE);
+d242 1
+a242 1
+	  sprintf (outfname, "%s_%d", var[k],layer);
+d251 5
+a255 4
+	  if ((outfile = fopen (outpath, "w")) == NULL)
+	    {
+	      Perror (1, RCSid, "Could not open:", outfname);
+	    }
+d265 1
+a265 1
+	  outar = getdefar (section, var[k], NULL, inname, &pts,TRUE);
+d279 5
+a283 4
+	      if ((outfile = fopen (outpath, "w")) == NULL)
+		{
+		  Perror (1, RCSid, "Could not open:", outfname);
+		}
+d300 1
+a300 1
+	      	Perror(1,RCSid,"Layer does not exist","to large");
+d304 2
+a305 1
+	    fclose (outfile);
+d308 2
+a309 1
+	fclose (outfile);
+d324 1
+a324 1
+int     verb;
+d326 4
+a329 2
+  (void) fprintf (stderr, "%s - %s\n(%s)\n(c) %s - %s\n", progname, VSELDES, RCSid, AUTHOR, DATE);
+  (void) fprintf (stderr, "usage:\n%s %s\n", progname, USE);
+d332 1
+@
+
+
+1.12
+log
+@added multiple parameters in one run stuff
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/util/RCS/vsel.c,v 1.11 1995/09/04 17:05:29 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/09/04 17:05:29 $
+d6 3
+d23 1
+a23 1
+"$Id: vsel.c,v 1.11 1995/09/04 17:05:29 schj Exp $";
+d32 1
+d63 1
+a63 1
+\t--time char\t\tonly output this time\n\
+d107 2
+a108 1
+  var = (char **) ts_memory (NULL, 50 * sizeof (char *), progname);
+d110 1
+a110 1
+  for (i = 0; i < 50; i++)
+d125 1
+a125 1
+	    end += 1;
+d137 2
+a138 2
+	    if (pars==50)
+	    	Perror(1,RCSid,"Maximum number of parameters exceeded","50");
+d213 2
+a214 3
+  steps = getdefdoub ("initial", "steps", 0, inname);
+  exitonerror = TRUE;
+  z = getdefar ("initial", "z", NULL, inname, &pts);
+d258 1
+a258 1
+	  outar = getdefar (section, var[k], NULL, inname, &pts);
+@
+
+
+1.11
+log
+@added check for header
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/util/RCS/vsel.c,v 1.10 1995/09/04 11:38:34 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/09/04 11:38:34 $
+d6 3
+d20 1
+a20 1
+"$Id: vsel.c,v 1.10 1995/09/04 11:38:34 schj Exp $";
+d48 3
+a50 2
+#define USE "\t[-h][-H][-c][-l][-m][-o outdir][-p parameter][-n layer number][-t time]\n\
+\t[-s starttime][-e endtime] filename"
+d65 4
+a68 4
+char *progname;
+char command[1024];
+FILE *outfile = NULL;
+FILE *genoutfile = NULL;
+d72 2
+a73 2
+     int argc;
+     char *argv[];
+d75 8
+a82 7
+  int header = TRUE;
+  int memsave = FALSE;
+  char var[1024];
+  char outdir[1024];
+  char outpath[1024];
+  char outfname[1024];
+  char s[1024];
+d85 11
+a95 11
+  int steps;
+  int time = (-999);
+  int layer = (-999);
+  int i, pts;
+  int j = 0;
+  int what;
+  char outfstr[1024];
+  char section[1024];
+  char *inname = NULL;
+  int start = (-999);
+  int end = (-999);
+a100 1
+  strcpy (var, "h");
+d102 6
+d130 4
+a133 1
+	    strcpy (var, optarg);
+d191 4
+a194 1
+  strcpy(command,ts_command (argc, argv));
+d228 1
+a228 2
+  outfile = stdout;
+  for (i = start; i < end; i++)	/* do for all times */
+d230 3
+a232 7
+      sprintf (section, "time_%d", i);
+      outar = getdefar (section, var, NULL, inname, &pts);
+      if (pts == 1)
+	layer = 0;
+      if ((start < end - 1) && layer == (-999))
+	{			/* more than one time */
+	  sprintf (outfname, outfstr, i, var);
+d246 4
+d251 1
+a251 4
+	if (header){
+              (void)fprintf (outfile, "# command: %s\n", command);
+	 }
+      if (layer == (-999))
+d253 40
+a292 8
+	if (header)
+	  (void)fprintf (outfile, "# time: %d\n", i);
+	  for (j = 0; j < pts; j++)
+	    fprintf (outfile, "%f %f\n", z[j], outar[j]);
+	}
+      else
+	{
+	  fprintf (outfile, "%d %f\n", i, outar[layer]);
+d294 1
+a294 1
+      if ((start < end - 1) && layer == (-999))		/* more than one time */
+d310 1
+a310 1
+     int verb;
+@
+
+
+1.10
+log
+@added -V debug
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/util/RCS/vsel.c,v 1.9 1995/09/01 11:43:50 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/09/01 11:43:50 $
+d6 3
+d17 1
+a17 1
+"$Id: vsel.c,v 1.9 1995/09/01 11:43:50 schj Exp $";
+d62 1
+d71 1
+d123 5
+d178 1
+d236 3
+a238 1
+
+d241 2
+a242 1
+	  fprintf (outfile, "# time: %d\n", i);
+@
+
+
+1.9
+log
+@updated header
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/util/RCS/vsel.c,v 1.8 1995/09/01 06:09:11 schj Exp $ */
+d4 5
+a8 2
+ *  $Date: 1995/09/01 06:09:11 $
+ *  $Log$
+d14 1
+a14 1
+"$Id: vsel.c,v 1.8 1995/09/01 06:09:11 schj Exp $";
+d57 1
+a57 1
+#define OPTSTR "mo:s:e:t:lcHhvp:n:V:"
+d120 1
+a120 1
+	    verbose = 2;
+d175 1
+a175 1
+	showit ("Reading ini file");
+@
+
+
+1.8
+log
+@now treats 1 point arrays as single values
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/util/RCS/vsel.c,v 1.7 1995/08/29 13:56:44 schj Exp $ */
+d4 2
+a5 1
+ *  $Date: 1995/08/29 13:56:44 $
+d11 1
+a11 1
+"$Id: vsel.c,v 1.7 1995/08/29 13:56:44 schj Exp $";
+@
+
+
+1.7
+log
+@added multiple output file stuff
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/util/RCS/vsel.c,v 1.6 1995/08/24 14:14:24 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/08/24 14:14:24 $
+d9 2
+a10 2
+static  char RCSid[] =
+"$Id: vsel.c,v 1.6 1995/08/24 14:14:24 schj Exp $";
+d26 1
+d38 1
+a38 1
+#define USE "\t[-h][-H][-c][-l][-o outdir][-p parameter][-n layer number][-t time]\n\
+d53 4
+a56 4
+#define OPTSTR "o:s:e:t:lcHhvp:n:V:"
+char   *progname;
+FILE	*outfile=NULL;
+FILE	*genoutfile=NULL;
+d60 2
+a61 2
+int     argc;
+char   *argv[];
+d63 6
+a68 4
+  char	var[1024];
+  char	outdir[1024];
+  char	outpath[1024];
+  char	outfname[1024];
+d71 17
+a87 17
+  int     steps;
+  int     time = (-999);
+  int     layer = (-999);
+  int     i, pts;
+  int     j = 0;
+  int     what;
+  char	  outfstr[1024];
+  char    section[1024];
+  char   *inname = NULL;
+  int     start= (-999);
+  int	  end= (-999);
+  void	disclaim __P(());
+  void	showinfo __P((int verb));
+
+  strcpy(outfstr,"%s_%d");
+  strcpy(outdir,"output/");
+  strcpy(var,"h");
+d101 1
+a101 1
+	    end +=1;
+d106 1
+a106 1
+	    strcpy(outdir,optarg);
+d111 1
+a111 1
+	    strcpy(var,optarg);
+d119 5
+d131 1
+a131 1
+	    disclaim();
+d136 1
+a136 1
+	    disclaim();
+d153 1
+a153 1
+	   }
+d168 9
+a176 1
+  rinmem (inname, 4);
+d195 2
+d200 20
+a219 7
+      if ((start < end-1) && layer == (-999)){ /* more than one time */
+        sprintf(outfname,outfstr,var,i);
+	strcat (outpath,outdir);
+	strcat(outpath,outfname);
+	printf("%s\n",outpath);
+      	if ((outfile=fopen(outpath,"w"))== NULL){
+		Perror(1,RCSid,"Could not open:",outfname);
+d221 10
+a230 1
+	strcpy(outpath,"");
+d232 2
+a233 12
+
+      sprintf (section, "time_%d", i);
+      outar = getdefar (section, var, NULL, inname, &pts);
+      if (layer == (-999)){
+        fprintf(outfile,"# time: %d\n",i);
+        for (j = 0; j < pts; j++)
+	  fprintf (outfile,"%f %f\n", z[j], outar[j]);
+      }else{
+	fprintf (outfile,"%d %f\n", i, outar[layer]);
+      }
+      if ((start < end-1) && layer == (-999)) /* more than one time */
+      	fclose (outfile);
+d243 1
+a243 1
+  exit(0);
+d247 2
+a248 2
+showinfo(verb)
+int	verb;
+d250 5
+a254 5
+      (void) fprintf (stderr, "%s - %s\n(%s)\n(c) %s - %s\n", progname, VSELDES,RCSid,AUTHOR,DATE);
+      (void) fprintf (stderr, "usage:\n%s %s\n", progname, USE);
+      if (verb)
+      	(void) fprintf(stderr,"%s",EXPL);
+      exit (1);
+@
+
+
+1.6
+log
+@RCS
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/util/RCS/vsel.c,v 1.5 1995/08/24 12:47:38 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/08/24 12:47:38 $
+d9 2
+a10 2
+static const char RCSid[] =
+"$Id: vsel.c,v 1.5 1995/08/24 12:47:38 schj Exp $";
+d28 1
+d37 1
+a37 1
+#define USE "\t[-h][-H][-c][-l][-p parameter][-n layer number][-t time]\n\
+d46 1
+d52 1
+a52 1
+#define OPTSTR "s:e:t:lcHhvp:n:V:"
+d54 1
+d62 4
+a65 1
+  char	var[1024] = "h";
+d74 1
+d82 3
+d101 5
+d179 1
+d182 11
+d196 1
+a196 1
+        printf("# time: %d\n",i);
+d198 1
+a198 1
+	  printf ("%f %f\n", z[j], outar[j]);
+d200 1
+a200 1
+	printf ("%d %f\n", i, outar[layer]);
+d202 2
+@
+
+
+1.5
+log
+@include use of perror
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/util/RCS/vsel.c,v 1.4 1995/08/24 12:25:38 schj Beta $ */
+d4 1
+a4 1
+ *  $Date: 1995/08/24 12:25:38 $
+d10 1
+a10 1
+"$Id: vsel.c,v 1.4 1995/08/24 12:25:38 schj Beta $";
+d52 1
+@
+
+
+1.4
+log
+@added RCSid
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/util/RCS/vsel.c,v 1.3 1995/08/24 12:19:54 schj Beta $ */
+d4 1
+a4 1
+ *  $Date: 1995/08/24 12:19:54 $
+d9 2
+a10 2
+static char RCSid[] =
+"$Id$";
+d190 1
+a190 1
+      (void) fprintf (stderr, "%s - %s\n(c) %s - %s\n", progname, VSELDES,AUTHOR,DATE);
+@
+
+
+1.3
+log
+@added description
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/util/RCS/vsel.c,v 1.2 1995/08/24 12:01:05 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/08/24 12:01:05 $
+d8 3
+@
+
+
+1.2
+log
+@added options, and new header
+@
+text
+@d1 2
+a2 4
+/* $Description$ */
+
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/main/RCS/vamps.c,v 0.10 1995/08/23 14:57:06 schj Exp $ */
+/*- $RCSfile: vamps.c,v $
+d4 1
+a4 1
+ *  $Date: 1995/08/23 14:57:06 $
+d7 2
+a64 2
+  char    name[1024];
+  char   *outname = NULL;
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 7
+a7 6
+/*
+  simple program to extract info from vamps output files
+  it uses the vamps common functions from pro_def.c
+  USAGE:
+  vsel fname [-t time] [-s starttime] [-e endtime] [filename]
+*/
+d10 1
+d15 33
+a47 2
+#define USE "[t- time][-s starttime][-e endtime] filename"
+#define OPTSTR "s:e:t:"
+d55 1
+d58 1
+a58 1
+  int	steps;
+d60 2
+a61 1
+  int     i, times, pts;
+d68 4
+d76 1
+a76 2
+      (void) fprintf (stderr, "usage:\n%s %s\n", progname, USE);
+      exit (1);
+d79 1
+a79 1
+  while ((what = getopt (argc, argv, OPTSTR)) != EOF)
+d85 27
+d116 1
+d119 10
+a138 1
+  /*rinmem (argv[optind], 4);*/
+d143 1
+d148 1
+a148 1
+  if (time != (-999))
+d150 10
+a159 4
+      sprintf (section, "time_%d", time);
+      outar = getdefar (section, "h", NULL, inname, &pts);
+      for (j = 0; j < pts; j++)
+	printf ("%f %f\n", z[j], outar[j]);
+d161 2
+a162 1
+  else
+d164 9
+a172 7
+      for (i = 0; i < steps; i++)
+	{
+	  sprintf (section, "time_%d", i);
+	  outar = getdefar (section, "h", NULL, inname, &pts);
+	  for (j = 0; j < pts; j++)
+	    printf ("%f %f\n", z[j], outar[j]);
+	}
+d176 18
+@

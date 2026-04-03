@@ -1,0 +1,737 @@
+head	1.12;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.12
+date	99.01.06.12.13.01;	author schj;	state Alpha;
+branches;
+next	1.11;
+
+1.11
+date	99.01.06.12.07.49;	author schj;	state Alpha;
+branches;
+next	1.10;
+
+1.10
+date	97.09.09.08.39.39;	author schj;	state Exp;
+branches;
+next	1.9;
+
+1.9
+date	97.01.16.15.03.56;	author schj;	state Exp;
+branches;
+next	1.8;
+
+1.8
+date	96.11.19.13.46.10;	author schj;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	96.11.19.12.39.20;	author schj;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	96.11.05.15.00.48;	author schj;	state Alpha;
+branches;
+next	1.5;
+
+1.5
+date	96.10.22.17.53.51;	author schj;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	96.04.09.12.07.54;	author schj;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	96.03.24.11.34.20;	author schj;	state alpha;
+branches;
+next	1.2;
+
+1.2
+date	95.12.17.21.48.02;	author schj;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	95.12.05.03.00.32;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@fill the look up tables
+@
+
+
+1.12
+log
+@Version: 0.99g
+@
+text
+@/* $Header: /home/schj/src/vamps_0.99g/src/soil/RCS/filltab.c,v 1.11 1999/01/06 12:07:49 schj Alpha $ */
+/*  $RCSfile: filltab.c,v $
+ *  $Author: schj $
+ *  $Date: 1999/01/06 12:07:49 $
+ */
+
+
+static char RCSid[] =
+"$Id: filltab.c,v 1.11 1999/01/06 12:07:49 schj Alpha $";
+
+#include "vamps.h"
+#include "swatsoil.h"
+#include   "soils.h"
+#include   "nrutil.h"
+#include <string.h>
+#include <float.h>
+
+int     tablesize=300;
+int	dumptables=0;
+
+/*C:mktblinter
+ *@@ double *mktblinter(int layer,int nrpoints,double min, double max)
+ *
+ * Makes an increasing theta array taking into account the slope of
+ * the theta 2 k relation
+ * Returns: Theta array
+ */
+double *mktblinter(int spnr,int nrpoints,double min, double max)
+{
+	XY *Ktmpxy = NULL;
+	double *Slopes;
+	double inter;
+	double avgslope = 0.0;
+	double *tt;
+	int i; 
+
+	inter = (max - min) / nrpoints;
+	Ktmpxy = (XY *) ts_memory(NULL,nrpoints * sizeof(XY),progname);
+	tt = (double *) ts_memory(NULL,nrpoints * sizeof(double),progname);
+
+	for (i= 0 ; i< nrpoints; i++){
+		Ktmpxy[i].x = i * inter + min;
+		Ktmpxy[i].y = sp[spnr].t2k (spnr,Ktmpxy[i].x);
+	}
+	Slopes = ts_slopes(Ktmpxy,nrpoints);
+
+
+	for (i=0;i<nrpoints; i++){
+		Slopes[i] += 0.1;
+		avgslope += 1.0/Slopes[i];
+	}
+	avgslope /= (double) nrpoints;
+
+	tt[0] = inter / avgslope * 1/Slopes[0] + min;
+	for (i=1;i<nrpoints;i++){
+		tt[i] = inter / avgslope * 1/Slopes[i] + tt[i-1];
+	}
+
+	free(Ktmpxy);
+	free(Slopes);
+	return tt;
+}
+
+/*+Name:filltables
+ *  Prototype: void filltables (int spnr,int layer,int estdmc)
+ *  Description: fills the look-up tables. If estdmc = 1 then
+ *  the differential moisture content is determined using ts_slopes.
+ *
+ *  Returns: nothing+*/
+void
+filltables (int spnr,int layer,int estdmc)
+{
+	int i;
+	XY *tmpxy;double *dmc;
+	double inter;
+	char des[1024];
+	double xtra=0.0005;
+	double *thetaint;
+
+
+	/* fist theta2k */
+	thetaint = mktblinter(spnr,tablesize,sp[spnr].residual_water, sp[spnr].thetas + xtra);
+	sp[spnr].tab = (TBL *) ts_memory (NULL, MAXTBL * sizeof (TBL), progname);
+	for (i=0;i<MAXTBL; i++){
+		switch (i){
+			case T2KTAB:
+				strcpy(des,"t2k");
+				break;
+			case T2HTAB:
+				strcpy (des,"t2h");
+				break;
+			case H2DMCTAB:
+				strcpy (des,"h2dmc");
+				break;
+			case H2TTAB:
+				strcpy(des,"h2t");
+				break;
+			case H2UTAB:
+				strcpy(des,"h2u");
+				break;
+			case H2KTAB:
+				strcpy(des,"h2k");
+				break;
+			case H2DKDPTAB:
+				strcpy(des,"h2dkdp");
+				break;
+		}
+		sp[spnr].tab[i]= *mktable(tablesize,des,verbose);
+	}
+
+	for (i = 0; i < sp[spnr].tab[T2KTAB].points; i++)
+	{
+		sp[spnr].tab[T2KTAB].x[i] = thetaint[i];
+		sp[spnr].tab[T2KTAB].y[i] =
+			sp[spnr].t2k (spnr,sp[spnr].tab[THETA2K].x[i]);
+
+		sp[spnr].tab[T2HTAB].x[i] = sp[spnr].tab[T2KTAB].x[i];
+		sp[spnr].tab[T2HTAB].y[i] = sp[spnr].t2h(spnr,sp[spnr].tab[T2HTAB].x[i],depth[layer]);
+
+		inter =sp[spnr].t2h(spnr,sp[spnr].residual_water, depth[layer])/(double)sp[spnr].tab[T2KTAB].points;
+		sp[spnr].tab[H2TTAB].y[i] = sp[spnr].tab[T2KTAB].x[i];
+		sp[spnr].tab[H2TTAB].x[i]= sp[spnr].tab[T2HTAB].y[i];
+
+		if(!estdmc){
+			sp[spnr].tab[H2DMCTAB].x[i]=
+				sp[spnr].tab[H2TTAB].x[i];
+			sp[spnr].tab[H2DMCTAB].y[i]=
+			     sp[spnr].h2dmc(spnr,sp[spnr].tab[H2DMCTAB].x[i]);
+		}
+		sp[spnr].tab[H2KTAB].y[i] = sp[spnr].tab[T2KTAB].y[i];
+		sp[spnr].tab[H2KTAB].x[i]= sp[spnr].tab[T2HTAB].y[i];
+		sp[spnr].tab[H2UTAB].x[i]= sp[spnr].tab[T2HTAB].y[i];
+		sp[spnr].tab[H2UTAB].y[i]= sp[spnr].h2u(spnr,sp[spnr].tab[T2HTAB].y[i]);
+		sp[spnr].tab[H2DKDPTAB].x[i]= sp[spnr].tab[T2HTAB].y[i];
+		sp[spnr].tab[H2DKDPTAB].y[i]= sp[spnr].h2dkdp(spnr,sp[spnr].tab[T2HTAB].y[i]);
+	}
+	if (estdmc){
+		tmpxy = (XY *) ts_memory(NULL,sp[spnr].tab[T2HTAB].points * sizeof(XY),progname);
+		dmc = dvector(0,sp[spnr].tab[T2HTAB].points);
+		for (i = 0; i< sp[spnr].tab[T2HTAB].points; i++){
+			tmpxy[i].x = sp[spnr].tab[T2HTAB].y[i];	
+			tmpxy[i].y = sp[spnr].tab[T2HTAB].x[i];	
+		}
+		dmc = ts_slopes(tmpxy,sp[spnr].tab[T2HTAB].points);
+		for (i = 0; i< sp[spnr].tab[T2HTAB].points; i++){
+			sp[spnr].tab[H2DMCTAB].x[i]=
+				sp[spnr].tab[H2TTAB].x[i];
+			sp[spnr].tab[H2DMCTAB].y[i]=dmc[i] > DBL_MAX ? 0.0 : dmc[i];
+		}
+		free(tmpxy);
+		free_dvector(dmc,0,sp[spnr].tab[T2HTAB].points);
+	}
+
+
+  
+	if (dumptables)
+		for (i=0;i<MAXTBL;i++){
+			printcom(RCSid);
+			printcom("Dumped look-up tables follow");
+			sprintf(des,"%s_%d_x",sp[spnr].tab[i].des,spnr);
+			printar(des,sp[spnr].tab[i].x,sp[spnr].tab[i].points);
+			sprintf(des,"%s_%d_y",sp[spnr].tab[i].des,spnr);
+			printar(des,sp[spnr].tab[i].y,sp[spnr].tab[i].points);
+		}
+	free(thetaint);
+}
+
+@
+
+
+1.11
+log
+@Version: 0.99g
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99e/src/soil/RCS/filltab.c,v 1.10 1997/09/09 08:39:39 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1997/09/09 08:39:39 $
+d9 1
+a9 1
+"$Id: filltab.c,v 1.10 1997/09/09 08:39:39 schj Exp $";
+@
+
+
+1.10
+log
+@0.99e version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99c/src/soil/RCS/filltab.c,v 1.9 1997/01/16 15:03:56 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1997/01/16 15:03:56 $
+d9 1
+a9 1
+"$Id: filltab.c,v 1.9 1997/01/16 15:03:56 schj Exp $";
+d21 7
+a27 8
+/*+Name:mktblinter
+ *  Prototype: double *mktblinter(int layer,int nrpoints,double min, double max)
+
+ *  Description: Makes an increasing theta array taking into account
+ *  the slope of the theta 2 k relation
+
+ *  Returns: Theta array
++*/
+d83 2
+a84 2
+	sp[spnr].tab = (TBL *) ts_memory (NULL, 4 * sizeof (TBL), progname);
+	for (i=0;i<4; i++){
+d98 9
+d130 6
+d157 1
+a157 1
+		for (i=0;i<4;i++){
+@
+
+
+1.9
+log
+@layout
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.99/src/soil/RCS/filltab.c,v 1.8 1996/11/19 13:46:10 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1996/11/19 13:46:10 $
+d9 1
+a9 1
+"$Id: filltab.c,v 1.8 1996/11/19 13:46:10 schj Exp $";
+d14 1
+d16 1
+d31 32
+a62 32
+  XY *Ktmpxy = NULL;
+  double *Slopes;
+  double inter;
+  double avgslope = 0.0;
+  double *tt;
+  int i; 
+
+  inter = (max - min) / nrpoints;
+  Ktmpxy = (XY *) ts_memory(NULL,nrpoints * sizeof(XY),progname);
+  tt = (double *) ts_memory(NULL,nrpoints * sizeof(double),progname);
+
+  for (i= 0 ; i< nrpoints; i++){
+    Ktmpxy[i].x = i * inter + min;
+    Ktmpxy[i].y = sp[spnr].t2k (spnr,Ktmpxy[i].x);
+  }
+  Slopes = ts_slopes(Ktmpxy,nrpoints);
+  
+  
+  for (i=0;i<nrpoints; i++){
+    Slopes[i] += 0.1;
+    avgslope += 1.0/Slopes[i];
+  }
+  avgslope /= (double) nrpoints;
+  
+  tt[0] = inter / avgslope * 1/Slopes[0] + min;
+  for (i=1;i<nrpoints;i++){
+    tt[i] = inter / avgslope * 1/Slopes[i] + tt[i-1];
+  }
+  
+  free(Ktmpxy);
+  free(Slopes);
+  return tt;
+d66 4
+a69 2
+ *  Prototype: void filltables (int spnr,int layer)
+ *  Description: fills the look-up tables
+d72 1
+a72 1
+filltables (int spnr,int layer)
+d74 78
+a151 56
+  int i;
+  double inter;
+  char des[1024];
+  double xtra=0.0005;
+  double *thetaint;
+ 
+
+  /* fist theta2k */
+  thetaint = mktblinter(spnr,tablesize,sp[spnr].residual_water, sp[spnr].thetas + xtra);
+  sp[spnr].tab = (TBL *) ts_memory (NULL, 4 * sizeof (TBL), progname);
+  for (i=0;i<4; i++){
+    switch (i){
+    case T2KTAB:
+      strcpy(des,"t2k");
+      break;
+    case T2HTAB:
+      strcpy (des,"t2h");
+      break;
+    case H2DMCTAB:
+      strcpy (des,"h2dmc");
+      break;
+    case H2TTAB:
+      strcpy(des,"h2t");
+      break;
+    }
+    sp[spnr].tab[i]= *mktable(tablesize,des,verbose);
+  }
+  
+  for (i = 0; i < sp[spnr].tab[T2KTAB].points; i++)
+    {
+	sp[spnr].tab[T2KTAB].x[i] = thetaint[i];
+	sp[spnr].tab[T2KTAB].y[i] =
+	    sp[spnr].t2k (spnr,sp[spnr].tab[THETA2K].x[i]);
+
+     sp[spnr].tab[T2HTAB].x[i] = sp[spnr].tab[T2KTAB].x[i];
+     sp[spnr].tab[T2HTAB].y[i] = sp[spnr].t2h(spnr,sp[spnr].tab[T2HTAB].x[i],depth[layer]);
+     
+     inter =sp[spnr].t2h(spnr,sp[spnr].residual_water, depth[layer])/(double)sp[spnr].tab[T2KTAB].points;
+      sp[spnr].tab[H2TTAB].y[i] = sp[spnr].tab[T2KTAB].x[i];
+      sp[spnr].tab[H2TTAB].x[i]= sp[spnr].tab[T2HTAB].y[i];
+
+     sp[spnr].tab[H2DMCTAB].x[i]=sp[spnr].tab[H2TTAB].x[i];
+     sp[spnr].tab[H2DMCTAB].y[i]=sp[spnr].h2dmc(spnr,sp[spnr].tab[H2DMCTAB].x[i]);
+    }
+
+  
+  if (dumptables)
+    for (i=0;i<4;i++){
+	    printcom(RCSid);
+	    printcom("Dumped look-up tables follow");
+	    sprintf(des,"%s_%d_x",sp[spnr].tab[i].des,spnr);
+	    printar(des,sp[spnr].tab[i].x,sp[spnr].tab[i].points);
+	    sprintf(des,"%s_%d_y",sp[spnr].tab[i].des,spnr);
+	    printar(des,sp[spnr].tab[i].y,sp[spnr].tab[i].points);
+    }
+  free(thetaint);
+@
+
+
+1.8
+log
+@Seems to work
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.99/src/soil/RCS/filltab.c,v 1.7 1996/11/19 12:39:20 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1996/11/19 12:39:20 $
+d9 1
+a9 1
+"$Id: filltab.c,v 1.7 1996/11/19 12:39:20 schj Exp $";
+d19 9
+a27 7
+/*-
+ * double *mktblinter(int layer,int nrpoints,double min, double max)
+ *
+ * Makes an increasing theta array taking into account the slope
+ * of the theta 2 k relation.
+ */
+double *mktblinter(int layer,int nrpoints,double min, double max)
+d42 1
+a42 1
+    Ktmpxy[i].y = soilparm[layer].theta2kF (layer,Ktmpxy[i].x);
+d63 4
+d68 1
+a68 1
+filltables (int layer)
+d78 2
+a79 2
+  thetaint = mktblinter(layer,tablesize,soilparm[layer].residual_water, soilparm[layer].thetas + xtra);
+  soilparm[layer].tab = (TBL *) ts_memory (NULL, 4 * sizeof (TBL), progname);
+d82 2
+a83 2
+    case THETA2KTAB:
+      strcpy(des,"theta2k");
+d85 2
+a86 2
+    case PRHNODETAB:
+      strcpy (des,"theta2head");
+d88 2
+a89 2
+    case DMCNODETAB:
+      strcpy (des,"head2dmc");
+d91 2
+a92 2
+    case THENODETAB:
+      strcpy(des,"head2theta");
+d95 1
+a95 1
+    soilparm[layer].tab[i]= *mktable(tablesize,des,verbose);
+d98 1
+a98 1
+  for (i = 0; i < soilparm[layer].tab[THETA2KTAB].points; i++)
+d100 3
+a102 3
+      soilparm[layer].tab[THETA2KTAB].x[i] = thetaint[i];
+      soilparm[layer].tab[THETA2KTAB].y[i] =
+	soilparm[layer].theta2kF (layer,soilparm[layer].tab[THETA2K].x[i]);
+d104 2
+a105 2
+     soilparm[layer].tab[PRHNODETAB].x[i] = soilparm[layer].tab[THETA2KTAB].x[i];
+     soilparm[layer].tab[PRHNODETAB].y[i] = soilparm[layer].prhnodeF(layer,soilparm[layer].tab[PRHNODETAB].x[i]);
+d107 3
+a109 3
+     inter =soilparm[layer].prhnodeF(layer,soilparm[layer].residual_water)/(double)soilparm[layer].tab[THETA2KTAB].points;
+      soilparm[layer].tab[THENODETAB].x[i] = soilparm[layer].tab[PRHNODE].y[i];
+      soilparm[layer].tab[THENODETAB].y[i]=soilparm[layer].thenodeF(layer,soilparm[layer].tab[THENODETAB].x[i]);
+d111 2
+a112 2
+     soilparm[layer].tab[DMCNODETAB].x[i]=soilparm[layer].tab[THENODETAB].x[i];
+     soilparm[layer].tab[DMCNODETAB].y[i]=soilparm[layer].dmcnodeF(layer,soilparm[layer].tab[DMCNODETAB].x[i]);
+d120 4
+a123 4
+	    sprintf(des,"%s_%d_x",soilparm[layer].tab[i].des,layer);
+	    printar(des,soilparm[layer].tab[i].x,soilparm[layer].tab[i].points);
+	    sprintf(des,"%s_%d_y",soilparm[layer].tab[i].des,layer);
+	    printar(des,soilparm[layer].tab[i].y,soilparm[layer].tab[i].points);
+@
+
+
+1.7
+log
+@Theta interval now corrected for slope of the theta2k function using
+ts_slope. Seems to work as well as topog tables!
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/soil/RCS/filltab.c,v 1.6 1996/11/05 15:00:48 schj Alpha $ */
+d4 1
+a4 1
+ *  $Date: 1996/11/05 15:00:48 $
+d9 1
+a9 1
+"$Id: filltab.c,v 1.6 1996/11/05 15:00:48 schj Alpha $";
+d27 1
+a27 1
+  XY *tmpxy = NULL;
+d35 1
+a35 1
+  tmpxy = (XY *) ts_memory(NULL,nrpoints * sizeof(XY),progname);
+d37 1
+d39 2
+a40 2
+    tmpxy[i].x = i * inter;
+    tmpxy[i].y = soilparm[layer].theta2kF (layer,tmpxy[i].x);
+d42 2
+a43 1
+  Slopes = ts_slopes(tmpxy,nrpoints);
+d46 1
+a46 1
+    Slopes[i] += 1.0;
+d56 1
+a56 1
+  free(tmpxy);
+d67 1
+a67 1
+  double xtra=0.001;
+a93 1
+      soilparm[layer].tab[THETA2KTAB].x[i] = (i * (inter)) + soilparm[layer].residual_water;*/
+@
+
+
+1.6
+log
+@Updated to Alpha version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/soil/RCS/filltab.c,v 1.5 1996/10/22 17:53:51 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1996/10/22 17:53:51 $
+d9 1
+a9 1
+"$Id: filltab.c,v 1.5 1996/10/22 17:53:51 schj Exp $";
+d19 40
+d65 3
+a67 1
+  double xtra=0.05;
+d70 1
+a70 1
+
+d73 15
+a87 15
+          switch (i){
+		case THETA2KTAB:
+		   strcpy(des,"theta2k");
+		    break;
+		case PRHNODETAB:
+		   strcpy (des,"theta2head");
+		   break;
+		case DMCNODETAB:
+		   strcpy (des,"head2dmc");
+		   break;
+		case THENODETAB:
+		   strcpy(des,"head2theta");
+		   break;
+	  }
+	  soilparm[layer].tab[i]= *mktable(tablesize,des,verbose);
+d89 1
+a89 1
+
+d92 2
+a93 3
+	    /* theta2k */
+      inter = (soilparm[layer].thetas + xtra) / (double) (soilparm[layer].tab[THETA2KTAB].points);
+      soilparm[layer].tab[THETA2KTAB].x[i] = (i * (inter));
+d108 2
+a109 1
+    if (dumptables)
+d118 1
+d120 1
+@
+
+
+1.5
+log
+@removed log in file
+soilparm[].*F points to function
+@
+text
+@d1 1
+a1 1
+/* $Header: /homes/schj/src/vamps_0.98/src/soil/RCS/filltab.c,v 1.4 1996/04/09 12:07:54 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1996/04/09 12:07:54 $
+d9 1
+a9 1
+"$Id: filltab.c,v 1.4 1996/04/09 12:07:54 schj Exp $";
+@
+
+
+1.4
+log
+@minor
+@
+text
+@d1 2
+a2 2
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.98/src/soil/RCS/filltab.c,v 1.3 1996/03/24 11:34:20 schj alpha $ */
+/*- $RCSfile: filltab.c,v $
+d4 1
+a4 11
+ *  $Date: 1996/03/24 11:34:20 $
+ *  $Log: filltab.c,v $
+ *  Revision 1.3  1996/03/24 11:34:20  schj
+ *  changed  to strict ansi
+ *
+ * Revision 1.2  1995/12/17  21:48:02  schj
+ * first working version check _soil in TOPOG
+ *
+ *  Revision 1.1  1995/12/05 03:00:32  schj
+ *  Initial revision
+ *
+d9 1
+a9 1
+"$Id: filltab.c,v 1.3 1996/03/24 11:34:20 schj alpha $";
+d54 1
+a54 1
+	theta2k (layer,soilparm[layer].tab[THETA2K].x[i],soilparm[layer].method);
+d57 1
+a57 1
+     soilparm[layer].tab[PRHNODETAB].y[i] = prhnode(layer,soilparm[layer].tab[PRHNODETAB].x[i],soilparm[layer].method);
+d59 1
+a59 1
+     inter =prhnode(layer,soilparm[layer].residual_water,soilparm[layer].method)/(double)soilparm[layer].tab[THETA2KTAB].points;
+d61 1
+a61 1
+      soilparm[layer].tab[THENODETAB].y[i]=thenode(layer,soilparm[layer].tab[THENODETAB].x[i],soilparm[layer].method);
+d64 1
+a64 1
+     soilparm[layer].tab[DMCNODETAB].y[i]=dmcnode(layer,soilparm[layer].tab[DMCNODETAB].x[i],soilparm[layer].method);
+@
+
+
+1.3
+log
+@changed  to strict ansi
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.97/src/soil/RCS/filltab.c,v 1.2 1995/12/17 21:48:02 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/12/17 21:48:02 $
+d6 3
+d19 1
+a19 1
+"$Id: filltab.c,v 1.2 1995/12/17 21:48:02 schj Exp $";
+@
+
+
+1.2
+log
+@first working version check _soil in TOPOG
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.95/src/soil/RCS/filltab.c,v 1.1 1995/12/05 03:00:32 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/12/05 03:00:32 $
+d6 3
+d16 1
+a16 1
+"$Id: filltab.c,v 1.1 1995/12/05 03:00:32 schj Exp $";
+d21 1
+a21 1
+#include <strings.h>
+d27 1
+a27 2
+filltables (layer)
+     int layer;
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 2
+a2 2
+/* $Header: /home/schj/src/vamps_0.91/soil/RCS/vangenu.c,v 1.3 1995/11/14 20:26:08 schj Exp $ */
+/*- $RCSfile: vangenu.c,v $
+d4 5
+a8 2
+ *  $Date: 1995/11/14 20:26:08 $
+ *  $Log: vangenu.c,v $
+d13 1
+a13 1
+"$Id: vangenu.c,v 1.3 1995/11/14 20:26:08 schj Exp $";
+d20 1
+a20 1
+int     tablesize=250;
+d30 1
+d56 2
+a57 3
+      inter = (soilparm[layer].thetas - soilparm[layer].residual_water) / (double) (soilparm[layer].tab[THETA2KTAB].points);
+      soilparm[layer].tab[THETA2KTAB].x[i] = (i * (inter))
+	+ soilparm[layer].residual_water;
+d74 3
+a76 2
+	    strcpy(des,soilparm[layer].tab[i].des);
+	    strcat(des,"_x");
+d78 1
+a78 2
+	    strcpy(des,soilparm[layer].tab[i].des);
+	    strcat(des,"_y");
+@

@@ -1,0 +1,257 @@
+head	1.5;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.5
+date	99.01.06.12.13.01;	author schj;	state Alpha;
+branches;
+next	1.4;
+
+1.4
+date	97.11.16.16.34.45;	author schj;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	97.09.09.10.28.58;	author schj;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	97.09.09.09.38.08;	author schj;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	97.09.09.08.36.57;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@first version, not working yet
+@
+
+
+1.5
+log
+@Version: 0.99g
+@
+text
+@/* $Header: /home/schj/src/vamps_0.99e/src/main/RCS/tmplist.c,v 1.4 1997/11/16 16:34:45 schj Exp $ 
+ */
+/* 
+ *  $RCSfile: tmplist.c,v $
+ *  $Author: schj $
+ *  $Date: 1997/11/16 16:34:45 $
+ */
+
+static char RCSid[] =
+"$Id: tmplist.c,v 1.4 1997/11/16 16:34:45 schj Exp $";
+#include "vamps.h"
+
+#ifdef HAVE_LIBSLANG
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+static char **tmplist; /*S-Lang interactive mode history */
+
+/* How to manage history list */
+static int tmpl=0;
+
+/*C:addtotmplist
+ *@@ int addtotmplist(char *item)
+ *
+ * adds @@item@@ to the history list
+ **/
+int
+addtotmplist(char *item)
+{
+	if (tmpl == 0){
+		tmplist = (char **) ts_memory (NULL, sizeof (char *), progname);	
+		tmplist[tmpl]=strdup(item);
+		tmpl++;
+		return tmpl-1;
+	}else {
+		tmplist = (char **) ts_memory ((void *)tmplist, (tmpl+1)*sizeof (char *), progname);	
+		tmplist[tmpl]=strdup(item);
+		tmpl++;
+		return tmpl-1;
+	}
+	/* NOTREACHED */
+}
+
+void
+show_tmplist(void)
+{
+	int i;
+	
+	for (i=0;i<tmpl-1;i++){
+		(void)fprintf(stderr,"%d: %s\n",i,tmplist[i]);
+	}
+}
+
+int
+save_tmplist(char *histfname)
+{
+	int i;
+	FILE *hf;
+	
+	if ((hf = fopen(histfname,"w")) == NULL){
+		(void)fprintf(stderr,"Error opening %s\n",histfname);
+		return -1;
+	}else{
+		for (i=0;i<tmpl-1;i++){
+			(void)fprintf(hf,"%s\n",tmplist[i]);
+		}
+		(void)fclose(hf);
+		return 0;
+	}
+	/* NOTREACHED */
+}
+
+/*C:del_tmplist
+ *@@ void del_tmplist(int files)
+ *
+ * Deletes the files in the tmp list if @@files@@ > 0. Otherwise only
+ * the list itself is freed */
+void
+del_tmplist(int files)
+{
+	int i;
+  
+	for (i = tmpl-1; i >=0; i--){
+		if (files)
+			if (remove(tmplist[i]) == -1)
+				Perror(progname,0,1,RCSid,"Could not remove:",tmplist[i]);
+		free((void *)tmplist[i]);
+	}
+
+	free((void *)tmplist);
+	tmpl =0;
+}
+#endif
+@
+
+
+1.4
+log
+@added files check in del_tmplist
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99e/src/main/RCS/tmplist.c,v 1.3 1997/09/09 10:28:58 schj Exp schj $ 
+d6 1
+a6 1
+ *  $Date: 1997/09/09 10:28:58 $
+d10 1
+a10 1
+"$Id: tmplist.c,v 1.3 1997/09/09 10:28:58 schj Exp schj $";
+d87 1
+a87 1
+				Perror(progname,0,RCSid,"Could not remove:",tmplist[i]);
+@
+
+
+1.3
+log
+@del_tmplist now removes files as well. Mem leak corrected
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99e/src/main/RCS/tmplist.c,v 1.2 1997/09/09 09:38:08 schj Exp schj $ 
+d6 1
+a6 1
+ *  $Date: 1997/09/09 09:38:08 $
+d10 1
+a10 1
+"$Id: tmplist.c,v 1.2 1997/09/09 09:38:08 schj Exp schj $";
+d74 5
+d80 1
+a80 1
+del_tmplist(void)
+d85 3
+a87 1
+		(void)remove(tmplist[i]);
+@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99e/src/main/RCS/tmplist.c,v 1.1 1997/09/09 08:36:57 schj Exp schj $ 
+d6 1
+a6 1
+ *  $Date: 1997/09/09 08:36:57 $
+d10 1
+a10 1
+"$Id: tmplist.c,v 1.1 1997/09/09 08:36:57 schj Exp schj $";
+d79 1
+a79 1
+	for (i = tmpl-2; i >=0; i--){
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99c/src/main/RCS/hist.c,v 1.1 1997/01/16 14:58:25 schj Exp $ 
+d4 1
+a4 1
+ *  $RCSfile: hist.c,v $
+d6 1
+a6 1
+ *  $Date: 1997/01/16 14:58:25 $
+d10 1
+a10 1
+"$Id: hist.c,v 1.1 1997/01/16 14:58:25 schj Exp $";
+d21 1
+a21 1
+static int histl=0;
+d31 1
+a31 1
+	if (histl == 0){
+d33 3
+a35 3
+		tmplist[histl]=strdup(item);
+		histl++;
+		return histl-1;
+d37 4
+a40 4
+		tmplist = (char **) ts_memory ((void *)tmplist, (histl+1)*sizeof (char *), progname);	
+		tmplist[histl]=strdup(item);
+		histl++;
+		return histl-1;
+d50 1
+a50 1
+	for (i=0;i<histl-1;i++){
+d65 1
+a65 1
+		for (i=0;i<histl-1;i++){
+d77 1
+a77 1
+  int i;
+d79 4
+a82 3
+  for (i = histl-2; i >=0; i--){
+    free((void *)tmplist[i]);
+  }
+d84 2
+a85 2
+  free((void *)tmplist);
+  histl =0;
+@

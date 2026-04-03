@@ -1,0 +1,81 @@
+head	1.1;
+access;
+symbols;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	95.08.16.13.42.38;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@very old soil module
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include "../include/vamps.h"
+#include "../include/version.h"
+#include "../include/soils.h"
+
+
+int     nr_horizons;		/* NS - Number of soil horizons */
+soilparmt *soilparm;		/* soil parameters see soils.h */
+
+int
+readsoil (infname)
+char   *infname;
+{
+  char    s[128];
+  char    ss[128];
+  int     i, j;
+
+  if ((nr_horizons = getdefint ("soils", "nr_horizons", 0, infname)) == 0)
+    exit (1);
+  /* allocate memory for the layers */
+  soilparm = (soilparmt *) ts_memory ((void *) soilparm, nr_horizons * sizeof (soilparmt), progname);
+
+  for (i = 0; i < nr_horizons; i++)
+    {
+      sprintf (s, "horizon_%d", i + 1);
+      strcpy (soilparm[i].sample_id, getdefstr (s, "sample_id", "No description", infname));
+      if (verbose)
+	showit (soilparm[i].sample_id);
+      soilparm[i].data_points = getdefint (s, "data_points", 0, infname);
+      soilparm[i].output_points = getdefint (s, "output_points", 0, infname);
+      soilparm[i].max_water_cont = getdefdoub (s, "max_water_cont", 0.0, infname);
+      soilparm[i].ksat = getdefdoub (s, "ksat", 0.0, infname);
+      soilparm[i].residual_water = getdefdoub (s, "residual_water", 0.0, infname);
+      soilparm[i].surten = getdefdoub (s, "surten", 0.0, infname);
+      soilparm[i].denwat = getdefdoub (s, "denwat", 0.0, infname);
+      soilparm[i].viswat = getdefdoub (s, "viswat", 0.0, infname);
+      soilparm[i].temp = getdefdoub (s, "temp", 0.0, infname);
+      soilparm[i].gravity = getdefdoub (s, "gravity", 0.0, infname);
+      soilparm[i].exponent = getdefdoub (s, "exponent", 0.0, infname);
+
+      /* allocate memory for theta and dp arrays */
+      soilparm[i].theta = (double *) ts_memory ((void *) NULL, soilparm[i].data_points * sizeof (double), progname);
+      soilparm[i].dp = (double *) ts_memory ((void *) NULL, soilparm[i].data_points * sizeof (double), progname);
+
+      /* fill arrays */
+      for (j = 0; j < soilparm[i].data_points; j++)
+	{
+	  (void) sprintf (ss, "theta_%d", j + 1);
+	  soilparm[i].theta[j] = getdefdoub (s, ss, 0.0, infname);
+	  (void) sprintf (ss, "dp_%d", j + 1);
+	  soilparm[i].dp[j] = getdefdoub (s, ss, 0.0, infname);
+	}
+    }
+  return 0;
+}
+@

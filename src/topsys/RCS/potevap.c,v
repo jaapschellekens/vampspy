@@ -1,0 +1,249 @@
+head	1.1;
+access;
+symbols;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	97.04.07.19.43.25;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@not used
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/* $Header: /home/schj/src/vamps_0.99c/src/environ/RCS/potevap.c,v 1.9 1997/01/16 15:01:59 schj Exp $ */
+/*  $RCSfile: potevap.c,v $
+ *  $Author: schj $
+ *  $Date: 1997/01/16 15:01:59 $ */
+
+static char RCSid[] =
+"$Id: potevap.c,v 1.9 1997/01/16 15:01:59 schj Exp $";
+
+#include <math.h>
+#include "vamps.h"
+#include "deffile.h"
+
+double RadTerm,AerTerm;
+double ea,es; /* for VPD calc */
+double VPD;
+
+/* radiation stuff in w/m^2 */
+
+
+/*-
+ * void CalcDeltaGamma(Td,RH,*Ea,*Es,*Gamma,*Slope,*L,*Cp);
+ * double	Td;  dry Bulb temp 
+ * double	RH;  Rel Humidity *
+ * double	*Ea;
+ * double	*Es;
+ * double *Gamma;
+ * double *Slope;
+ * double *L;
+ * double *Cp
+ */
+void CalcDeltaGamma(double Td,double RH,double *Ea,double *Es,
+	double *Gamma,double *Slope,double *L,double *Cp)
+{
+  double Mw, R, p, TEMP;
+
+  Mw = 18.016;
+  p = 998.0;   /*mb*/
+  R = 8314.3;   /*R=J/(kgK)*/
+  *Cp = 1005.0;   /*J/(kgK)*/
+  TEMP = Td + 273.15;
+
+  /*L=J/kg*/
+  /* From Waterloo thesis: */
+  *L = 4185.5 *(751.78 - (0.5655*Td));
+  /*Bringfelt 1986*/
+  *Es = exp(log(10.0) * (10.79574 * (1 - 273.15 / (TEMP)) -
+	  5.028 * log((TEMP) / 273.15) / log(10.0) +
+	  1.50475e-4 * (1 - exp(log(10.0) * -8.2969 *
+		  ((TEMP) / 273.15 - 1))) + 0.42873e-3 * exp(
+	      log(10.0) * 4.76955 * (1 - 273.15 / (TEMP))) + 0.78614));
+  /*mb*/
+  *Slope = *Es * (10.79574 / 0.4343 * (273.15 / (TEMP * TEMP)) -
+	5.028 / (TEMP) + 1.50475e-4 * 8.2969 / (0.4343 * 0.4343) /
+	    273.15 * exp(log(10.0) * 8.2969 * (1 - (TEMP) / 273.15)) +
+	0.42873e-3 * 4.76955 / (0.4343 * 0.4343) * 273.15 / (TEMP * TEMP) *
+	  exp(log(10.0) * 4.76955 * (1 - 273.15 / (TEMP))));
+  /*mbC*/
+  *Ea = RH * (*Es) / 100;
+  /* From waterloo spreadsheet */
+  /* *Cp = 0.24 *4.1855*(1+0.8*(0.622* *Ea)/(p-(*Ea)));*/
+  *Gamma = (*Cp * p )/ (0.622 * (*L));   /*mbC*/
+  VPD = *Es - *Ea;
+}
+
+/*-
+ * double CalcPenmanEoA(Td,Rs,sunratio,u,Ea,Es,Slope,Gamma,L)
+ *
+ */
+double CalcPenmanEoA(double Td,double Rs,double sunratio,double u,
+	double Ea,double Es,double Slope,double Gamma,double L)
+{
+  double sigma, r, Eaero, T4,Rl,Rnet;
+
+  Ea /= 10;
+  Es /= 10;   /*Van mbar naar kPa*/
+  Slope /= 10;   /*Van mbar naar kPa*/
+  Gamma /= 10;   /*Van mbar naar kPa*/
+  r = 0.06;   /*R=0.06 is albedo for open water*/
+  sigma = 5.67e-8;   /*Sigma is Stefan-Boltzman constant (W/m2K4)*/
+  T4 = exp(log(Td + 273.15) * 4);
+  Rl = 86400L * sigma * T4 * (0.56 - 0.248 * sqrt(Ea)) * (0.1 + 0.9 * sunratio) / L;
+  /*Rl is de langgolvige stralings component*/
+  /*86400 is sec. a day*/
+  Rnet = Rs * 86400L * (1 - r) / L - Rl;   /*Rs as mean daily W/m2*/
+  Eaero = 2.6 * (Es - Ea) * (1 + 0.537 * u);
+      /*Calder, 1990; Evaporation in the Uplands*/
+  /*u=MeanDailyWindrun (m/s); Es=MeanDaily sat.vap.pres. (kPa);*/
+  /*Ea=MeanDaily actual vap.pres. (kPa)*/
+  RadTerm = Slope * Rnet / (Slope + Gamma);
+  AerTerm = Gamma * Eaero / (Slope + Gamma);
+  Rl = Rl * L / 86400L;
+  /*Slope=*/
+  return (Slope * Rnet + Gamma * Eaero) / (Slope + Gamma);
+}
+
+/* -double CalcMakkink(rad,Slope,Gamma)
+ *
+ */
+double CalcMakkink(double rad,double Slope,double Gamma)
+{
+double C1=0.65;
+double C2=0.0;
+/* 0.1 vanwege mbar naar kpa */
+/* 1000 vanwege m naam mm */
+ return 1000* C1 * (Slope)/(Slope+(Gamma*0.1)) * rad +C2;
+}
+
+/*-
+ * double CalcPenmanEoB(Td,Rs,Rs_out,Rnet,u,Ea,Es,Slope,Gamma,L)
+ *
+ */
+double CalcPenmanEoB(double Td,double Rs,double Rs_out,double Rnet,double u,
+	double Ea,double Es,double Slope,double Gamma,double L)
+{
+  double Rnet_open, r, Eaero,Rl;
+
+  Ea /= 10;
+  Es /= 10;   /*Van mbar naar kPa*/
+  Slope /= 10;   /*Van mbar naar kPa*/
+  Gamma /= 10;   /*Van mbar naar kPa*/
+  r = 0.06;   /*R=0.06 is albedo for open water*/
+  Rl = Rs - Rnet - Rs_out;
+  Rnet_open = (Rs * (1 - r) - Rl) * 86400L / L;
+  Eaero = 2.6 * (Es - Ea) * (1 + 0.537 * u);
+      /*Calder, 1990; Evaporation in the Uplands*/
+  return (Slope * Rnet_open + Gamma * Eaero) / (Slope + Gamma);
+}
+
+
+
+
+
+
+/*-
+ *  int DoEvap(int method)
+ *
+ *	front end to the evaporation module. Several methods are available:
+ *	
+ *	0=penmanE0_A
+ *	1=penmanE0_B
+ *	4=makkink
+ */
+
+int
+DoEvap(int method)
+{
+int	i;
+int 	Tset;
+int	points,Radset,windset,RHset,netradset,Rs_outset,sunset;
+XY	*pevaporation=(XY *)NULL;
+double Slope; /* Delta */
+double Gamma;
+double	Ea; /* Actual vapour pressure */
+double RH; /* percent */
+double Es;
+double Rs_out,sunratio,L,Cp;
+double Td; /* Degrees Celcius */
+double Rnet,Rs; /* Rs, incoming solar radiation */
+double u; /* m/sec */
+
+showit("potevap",MESG,"starting evaporation module",3,verbose);
+
+/* The following series must be present */
+get_data(getdefstr("ts","rhumid","rhumid",infilename,TRUE),"rhumid",steps);
+get_data(getdefstr("ts","windspeed","windspeed",infilename,TRUE),"windspeed",steps);
+get_data(getdefstr("ts","temp","temp",infilename,TRUE),"temp",steps);/*T dry*/
+get_data(getdefstr("ts","inrad","inrad",infilename,TRUE),"inrad",steps);
+
+switch (method) {
+ case 0: /* Penman pevaporation using net radiation */
+  get_data(getdefstr("ts","netrad","netrad",infilename,TRUE),"netrad",steps);
+  get_data(getdefstr("ts","refrad","refrad",infilename,TRUE),"refrad",steps);
+  break;
+ case 1: /* Penman pevaporation via sunratio */
+  get_data(getdefstr("ts","sunratio","sunratio",infilename,TRUE),"sunratio",steps);
+  break;
+ case 4: /* Makkink */
+  break;
+ default:
+  Perror(progname,1,RCSid,"Method for potevap not known","FATAL");
+  break;
+}
+
+Tset=getsetbyname("temp"); /*all sets should have same points at moment*/
+Radset=getsetbyname("inrad"); /*all sets should have same points at moment*/
+netradset=getsetbyname("netrad"); /*all sets should have same points at moment*/
+Rs_outset=getsetbyname("refrad"); /*all sets should have same points at moment*/
+RHset=getsetbyname("rhumid"); /*all sets should have same points at moment*/
+windset=getsetbyname("windspeed");
+sunset=getsetbyname("sunratio");
+points=data[Tset].points;
+
+pevaporation= (XY *) ts_memory ((void *) pevaporation, points * sizeof (XY), progname);
+
+for (i=0;i<points;i++){
+  Td=data[Tset].xy[i].y;
+  RH=data[RHset].xy[i].y;
+  u=data[windset].xy[i].y;
+  Rs=data[Radset].xy[i].y;
+  CalcDeltaGamma(Td,RH,&Ea,&Es,&Gamma,&Slope,&L,&Cp);
+  switch (method){
+     case 0:
+  	Rnet=data[netradset].xy[i].y;
+  	Rs_out=data[Rs_outset].xy[i].y;
+	pevaporation[i].y = CalcPenmanEoB(Td,Rs,Rs_out,Rnet,u,Ea,Es,Slope,Gamma,L);
+	break;
+      case 1:
+        sunratio=data[sunset].xy[i].y;
+ 	pevaporation[i].y=CalcPenmanEoA(Td,Rs,sunratio,u,Ea,Es,Slope,Gamma,L);
+	break;
+      case 4:
+  	pevaporation[i].y=CalcMakkink(data[Radset].xy[i].y,Slope,Gamma);
+	break;
+      default:
+      	break;
+  }
+  pevaporation[i].x=data[Tset].xy[i].x;
+}
+
+add_set(pevaporation,"pevaporation",NULL,points,0,0);
+
+showit("potevap",MESG,"Ending evaporation module",2,verbose);
+
+return 0;
+}
+@

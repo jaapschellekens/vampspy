@@ -1,0 +1,176 @@
+head	1.1;
+access;
+symbols;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	96.03.24.11.40.30;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@calculate richards via theta -- from old swatr
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#include <math.h>
+#include <stdlib.h>
+#include "vamps.h"
+#include "swatsoil.h"
+#include "soils.h"
+
+extern double *tar1;
+extern double *tar2;
+/*- void itproc()
+ *
+ */
+void
+itproc ()
+{
+  double  mdhead, dhead;
+  int     i,j, iter, itrtim;
+  int     accu;
+  double  t1, t2;
+  void    calchead ();
+
+  mdhead = dhead = 0.0;
+
+
+  itrtim = 0;
+
+
+  /* First we need to store some values regarding the present state */
+  for (j = 0; j < layers; j++)
+    {
+      tar2[j] = hm1[j];
+      hm1[j] = h[j];
+      thetm1[j] = theta[j];
+    }
+
+  /* Determination of maximum change in h */
+  for (j = 0; j < layers; j++)
+    if (h[j] < 0.0)
+      {
+	t1 = fabs (h[j]) < 1.0E-3 ? 1.0E-3 : fabs (h[j]);
+	t2 = fabs (h[j]) * 0.2 / pow (precis, log10 (t1));
+	mdhead = t2 > 0.1 ? t2 : 0.1;
+      }
+
+  /* Increase number of iterations */
+L_200:
+  itrtim++;
+
+  /* Extrapolate new values */
+  for (j = 0; j < layers - 1; j++)
+    h[j] = hm1[j] + (dt / dtm1) * (hm1[j] - tar2[j]);
+
+  if (lbc != 0 && lbc != 4)
+    h[layers - 1] = hm1[layers - 1] + (dt / dtm1) *
+      (hm1[layers - 1] - tar2[layers - 1]);
+
+  /* Calculate hydraulic conductivities, differential moisture capacities
+     * and geometrical ,mean hydraulic conductivities for each node
+   */
+  ksurf = theta2k (0, hatmd,soilparm[0].method);
+
+
+  for (j = 0; j < layers; j++)
+    {
+      diffmoist[j] = dmcnode (j, hm1[j],soilparm[j].method);
+      k[j] = theta2k (j, 0.5 * (hm1[j] + h[j]),soilparm[j].method);
+      if (j==0)			/* j == 0 */
+	kgeom[j] = 0.5 * (ksurf + k[0]);
+      else
+	kgeom[j] = sqrt (fabs(k[j] * k[j - 1]));
+    }
+
+  kgeom[layers] = k[layers - 1];/*!!!!! THIS IS OUT OF RANGE ?? */
+
+  iter = 0;
+L_300:				/* I hate it, but this will do for now */
+  iter++;
+
+  /* Save old values */
+  for (j = 0; j < layers; j++)
+    tar1[j] = h[j];
+
+
+  /* Run the calchead procedure to find the new pressure heads */
+  calchead ();
+
+  /* Check for suffucient accuracy */
+  accu = TRUE;
+  for (j = 0; j < layers; j++)
+    {
+      if (tar1[j] < 0.0)
+	{
+	  dhead = fabs (h[j] - tar1[j]);
+	  if (dhead > mdhead)
+	    accu = FALSE;
+	}
+    }
+  accu=TRUE;
+  if (!accu)
+    {
+      if (iter < 10)
+	{
+	  /* Calculate hydarulic conductivities, diff moisture cap. and
+	     geometrical mean hydr. conductivities for each layer
+	   */
+	  ksurf = theta2k (0, hatmd,soilparm[0].method);
+	  for (j = 0; j < layers; j++)
+	    {
+	      diffmoist[j] = dmcnode (j, hm1[j],soilparm[j].method);
+	      k[j] = theta2k (j, 0.5 * (hm1[j] + h[j]),soilparm[j].method);
+	      if (j==0)
+		kgeom[j] = sqrt (fabs(k[j] * k[j - 1]));
+	      else
+		kgeom[j] = 0.5 * (ksurf + k[j]);
+	    }
+	  kgeom[layers] = kgeom[layers - 1];	/* This is out of range !!!!! */
+	  goto L_300;
+	}
+      else
+	{
+	  /* Got back to last time and start again with a smaller time step */
+	  if (itrtim < maxtit)
+	    {
+	      dt = 0.1 * dt;
+	      t = tm1 + dt;
+	      if (!fllast)
+		goto L_200;
+	    }
+	  else
+	    {
+	    }
+	}
+    }
+ t+=dt;
+  /* Determine unknown boundary fluxes */
+  if (ftoph)
+    qtop = -kgeom[0] * ((h[0] - pond) / depth[0] + 1);
+
+  if (lbc == 4)
+    qbot = -kgeom[layers - 1] * ((h[layers - 1] - h[layers - 1 - 1]) / depth[layers - 1] + 1);
+  else if (lbc == 0)
+    qbot = 0.0;
+
+  /* Adjust conductivities */
+  k[0] = theta2k (0, theta[0], soilparm[0].method);
+  for (i = 1; i < layers; i++)
+    {
+      k[i] = theta2k (i, theta[i], soilparm[i].method);
+      kgeom[i] = mkkgeom (i);
+    }
+  kgeom[layers] = k[layers - 1];
+
+}
+@

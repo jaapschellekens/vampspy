@@ -1,0 +1,663 @@
+head	1.1;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.1
+date	95.08.16.13.40.31;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@old benr richard version
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/*
+  Uses an explicit scheme (Haverkamp et al 1977)
+*/
+
+#include "../include/prosper.h"
+#include "../include/soils.h"
+#include <math.h>
+#include <stdio.h>
+
+#define nlmax           20
+#define ndmax           800
+#define rowa            998.2
+
+
+
+typedef double *soar;
+
+
+/* Clapp and Hornberger WRR 78 table of psi=psis*W^-b
+	W =theta/thetas */
+
+typedef struct {
+	char description[1024];
+	double clayfrac;
+	double b;
+	double psis;
+	double thetas;
+} clapptab2;
+
+clapptab2 clapp[]={
+"Sand",0.03,4.05,-0.121,0.395,
+"Loamy sand",0.06,4.38,-0.090,0.410,
+"Sandy loam",0.09,4.9,-0.218,0.435,
+"Silt loam",0.14,5.3,-0.786,0.485,
+"Loam",0.19,5.39,-0.478,0.451,
+"Sandy clay loam",0.28,7.12,-0.299,0.420,
+"Silty clay loam",0.34,7.75,-0.356,0.477,
+"Clay loam",0.34,8.52,-0.630,0.476,
+"Sandy clay",0.43,10.4,-0.153,0.426,
+"Silty clay",0.49,10.4,-0.490,0.492,
+"Clay",0.63,11.0,-0.405,0.482};
+
+/* GENERAL */
+
+
+FILE *invoer, *uitvoer, *uitvoer1;
+char invname[25], uitvname[25], invname1[25], uitvname1[25];
+char kar;
+int cntr, dagnr;
+double sink1;
+/* sink per layer in topsoil; used for timestep computation */
+/* sink is positive if water is added */
+double sinkts;
+
+/* TIME DEFINITIONS */
+
+double dtmin;		/* simulation time step (min.) */
+double delta;		/* output interval of simulation results (min) */
+double days;		/* duration of simulation (days) */
+/* minute at begin of simulation */
+double amin;
+
+
+/* SOIL PHYSICAL */
+
+int nlt;		/* number of layers in top soil */
+int nl;			/* number of total layers in soil*/
+/* hour at begin of simulation */
+int hour;
+
+soar theta;		/* initial soil moisture */
+soar kav, psi;		/* soil moisture potential (m) */
+soar ak;			/* soil hydraulic conductivity (m/sec) */
+soar depth;
+
+/* Theta stuff seems to be based on Clapp & Hornb */
+/* Change this with maarten's stuff */
+double bl;		/* exp. psi-theta- rel. Clapp & Hornb. */
+double psis;		/* psi at saturation (m) */
+double psiw;		/* psi at wilting point (m) */
+/* van Genuchten stuff, same defaults as Waterloo */
+double	alpha=0.5;
+double	n=1.5;
+int tmethod =0; /* 0 = Van de griend (Clapp) 1= Waterloo (Van genuchten) */
+
+double smfmod;
+double datime;
+
+/* defines boundary ( flux ) condition:
+   1 = constant soil moisture in bottom layer;
+   2 = zero flux across lower boundary;
+   3 = constant flux set by user;
+   4 = downward flux equal to hydraulic conductivity; */
+int botcon;
+
+double qbot;
+    /*lower boundary moisture flux (m/sec); downward: qbot is positive */
+/* fixed lower layer soil moisture (%) */
+double thefix;
+
+
+
+/* HELP VARIABLES */
+
+int print, newday;
+
+double dd, ddd, lsqr, thetaw, delthe, the, psih, psigra, tijd, vtijd,
+  detijd, dtlim, dtsec, dtsecv;
+
+/* JS Vars */
+int preset;			/* set with (net) precipitation data */
+int evapset;			/*set with evaporation data */
+soilparmt *soilparm;		/* soil parameters see soils.h */
+
+
+void 
+Init ()
+{
+  int i;
+
+  kav = (double *) ts_memory ((void *) NULL, nlmax * sizeof (double),progname);
+  psi = (double *) ts_memory ((void *) NULL, nlmax * sizeof (double),progname);
+  ak = (double *) ts_memory ((void *) NULL, nlmax * sizeof (double),progname);
+  depth = (double *) ts_memory ((void *) NULL, nlmax * sizeof (double),progname);
+
+
+  smfmod = 1.0;
+  bl = 0.0;
+  psis = -0.2;
+  hour = 0;
+  amin = 0.0;
+  datime = 0.0;
+  sinkts = 0.0;
+}
+
+
+void 
+Static_ ()
+{
+  int i, j, FORLIM;
+
+  psiw = -160.0;
+  if (botcon != 3)
+    qbot = 0.0;
+ /* if (thefix > soilparm[i].thetas)
+    thefix = thetas; this van probably go !!*/
+
+  depth[0] = 0.5 * soilparm[0].thickness;	/* COMPUTATION OF DEPTH BELOW SURFACE OF LAYERS */
+  FORLIM = nl;
+  for (i = 2; i <= FORLIM; i++)
+    depth[i - 1] = depth[i - 2] + 0.5 * soilparm[i - 2].thickness + 0.5 * soilparm[i - 1].thickness;
+
+  dd = 0.0;			/* THICKNESS OF TOP SOIL */
+  FORLIM = nlt;
+  for (i = 0; i < FORLIM; i++)
+    dd += soilparm[i].thickness;
+  ddd = dd;
+  FORLIM = nl;
+  for (i = nlt; i < FORLIM; i++)
+    ddd += soilparm[i].thickness;
+  lsqr = ddd * ddd;
+
+  FORLIM = nl;
+  for (j = 0; j < FORLIM; j++)
+    {
+      /* CALCULATION OF INITIAL SOIL MOISTURE PRESSURE PSI[j]
+         AND INITIAL HYDRAULIC CONDUCTIVITY AK[j] OF LAYERS */
+      if (theta[j] >= soilparm[j].thetas)
+	{
+	  psi[j] = 0.0;
+	  ak[j] = soilparm[j].ksat;
+	}
+      else
+	{
+	  psi[j] = soilparm[j].psis * pow (theta[j] / soilparm[j].thetas, -soilparm[j].b);
+	fprintf(stderr,"psi=%f s.psis=%f theta=%f s.thetas=%f\n",psi[j],
+	soilparm[j].psis,theta[j],soilparm[j].thetas);
+	  ak[j] = soilparm[j].ksat * pow (theta[j] / soilparm[j].thetas, 2 * soilparm[j].b + 3);
+	}
+    }
+  thetaw = soilparm[0].thetas * pow (psiw / soilparm[0].psis, -1 / soilparm[0].b);
+  /* theta at wilting point */
+}
+
+
+void 
+Timestep ()
+{
+  int i, FORLIM;
+  double TEMP;
+
+  FORLIM = nl - 2;
+  for (i = 0; i <= FORLIM; i++)
+    {		/* calculation of integration time step (dtmin) */
+      delthe = -0.02;
+      if (theta[i] < 0.10)
+	delthe = 0.02;
+      the = theta[i] + delthe;
+      psih = soilparm[i].psis * pow (the / soilparm[i].thetas, -soilparm[i].b);
+      psigra = fabs ((psi[i] - psih) / delthe);
+      tijd = lsqr / ak[i] / psigra;
+
+      TEMP = soilparm[i].thickness / ddd;
+      detijd = 0.5 * (TEMP * TEMP) * tijd;
+      if (i + 1 == 1)
+	dtlim = detijd;
+      if (detijd < dtlim)
+	dtlim = detijd;
+    }
+  dtsec = dtlim;
+  dtsecv = dtsec;
+  dtmin = dtlim / 60;
+  printf ("Time step = %6.2f\n", dtsecv);
+
+}
+
+
+/*
+void
+newcompute()
+{
+int	i,j,k;
+
+A[0]= (dtsec/C[0])
+
+for (i=0; i< nl; i++){
+  
+}
+}
+*/
+
+void 
+Compute ()
+{
+  int i, j, k, FORLIM;
+
+
+  /* CALCULATION OF WATER BALANCE/ NEW SOIL MOISTURE DISTRIBUTION */
+
+  /* Setting of sink term for new time */
+  if (newday == 1)
+    {
+      /* check this the 1000 if for mm to m*/
+      sinkts = data[preset].xy[dagnr - 1].y / (double) (86400L * 1000);
+      newday = 0;
+    }
+
+  /* if (theta[0] <= 0.03)  watch this !!
+     evapday[dagnr - 1] = 0.0; */
+
+
+  /* computation of hydraulic conductivity of layers */
+
+  k = nlt; 
+  FORLIM = nl;
+  for (i = k - 1; i < FORLIM; i++)
+    {
+      if (theta[i] > soilparm[i].thetas)
+	ak[i] = soilparm[i].ksat;
+      else
+	ak[i] = soilparm[i].ksat * pow (theta[i] / soilparm[i].thetas, 2 * soilparm[i].b + 3);
+    }
+
+  /* computation of hydraulic conductivity of adjacent layers
+     ( kav[j-1]=average for layer j-1 and j ) */
+
+  k = nlt + 1;
+  FORLIM = nl;
+  /* compute kav for layers nlt to nl-1 */
+  for (j = k; j <= FORLIM; j++)
+    kav[j - 2] = (0.5 * soilparm[j - 2].thickness + 0.5 * soilparm[j - 1].thickness) /
+      (0.5 * soilparm[j - 2].thickness / ak[j - 2] + 0.5 * soilparm[j - 1].thickness / ak[j - 1]);
+
+  /* computation of flow and new moisture distribution */
+
+  theta[nlt - 1] += dtsec / dd * kav[nlt - 1] *
+    ((psi[nlt] - psi[nlt - 1]) / (0.5 * soilparm[nlt - 1].thickness + 0.5 * soilparm[nlt].thickness) - 1) +
+    sinkts / dd * dtsec;
+
+  FORLIM = nl;
+  for (j = nlt + 1; j < FORLIM; j++)
+    theta[j - 1] +=
+      dtsec / soilparm[j - 1].thickness *
+      (kav[j - 2] *
+     ((psi[j - 2] - psi[j - 1]) / (0.5 * soilparm[j - 2].thickness + 0.5 * soilparm[j - 1].thickness) + 1) +
+       kav[j - 1] * ((psi[j] - psi[j - 1]) / (0.5 * soilparm[j - 1].thickness + 0.5 * soilparm[j].thickness) - 1));
+
+
+  if (botcon > 0)		/* computation of theta in lower layer */
+    j = nl;
+  else
+    j = 0;
+  switch (botcon)
+    {
+    case 1:			/* const. moisture */
+      theta[j - 1] = thefix;
+      break;
+    case 2:			/* zero flux */
+      theta[j - 1] += dtsec / soilparm[j - 1].thickness * kav[j - 2] *
+	((psi[j - 2] - psi[j - 1]) / (0.5 * soilparm[j - 2].thickness + 0.5 * soilparm[j - 1].thickness) + 1);
+      break;
+    case 3:			/* const. flow ( downward>0 ) */
+      theta[j - 1] += dtsec / soilparm[j - 1].thickness*
+	(kav[j - 2] * ((psi[j - 2] - psi[j - 1]) /
+		       (0.5 * soilparm[j - 2].thickness + 0.5 * soilparm[j - 1].thickness) + 1) - qbot);
+      break;
+    case 4:			/* free drainage (flow=cond.) */
+      theta[j - 1] += dtsec / soilparm[j - 1].thickness *
+	(kav[j - 2] * ((psi[j - 2] - psi[j - 1]) /
+		       (0.5 * soilparm[j - 2].thickness + 0.5 * soilparm[j - 1].thickness) + 1) - ak[j - 1]);
+      break;
+    }
+
+  /* computation of new soil water potential */
+  k = nlt;
+  for (i = k - 1; i < j; i++)
+    {
+      if (theta[i] < 0)
+	theta[i] = 0.01;
+      if (theta[i] >= soilparm[i].thetas)
+	{
+	  theta[i] = soilparm[i].thetas;
+	  psi[i] = 0.0;
+	}
+      else
+	psi[i] = soilparm[i].psis * pow (theta[i] / soilparm[i].thetas, -soilparm[i].b);
+    }
+
+  /* computation of new hydraulic conductivity of soils */
+
+  k = nlt;
+  FORLIM = nl;
+  for (i = k - 1; i < FORLIM; i++)
+    {
+      if (theta[i] >= soilparm[i].thetas)
+	ak[i] = soilparm[i].ksat;
+      else
+	ak[i] = soilparm[i].ksat * pow (theta[i] / soilparm[i].thetas, 2 * soilparm[i].b + 3);
+    }
+
+  FORLIM = nlt - 2;
+  for (i = 0; i <= FORLIM; i++)
+    theta[i] = theta[nlt - 1]; 
+}
+
+
+void 
+Output ()
+{
+  int i, FORLIM;
+  FILE *fo,*foo;
+  char buff[1024];
+
+  if (print != 1)
+    return;
+  cntr++;
+  print = 0;
+  fprintf (stdout,
+	   "\n*************************************************************************\n");
+  fprintf (stdout,
+	   "\n*************************************************************************\n");
+  fprintf (stdout,
+	   "** No vertical moisture transport is assumed in TOPSOIL **\n\n");
+  fprintf (stdout, " Thickness of topsoil = %7.3f m\n", dd);
+  fprintf (stdout,
+	   " Day= %d Hr= %d Min= %1.0f  Time step (sec) = %3.0f\n\n",
+	   dagnr, hour, amin, dtsecv);
+  fprintf (stdout, " Dagnr = %2d\n\n\n", dagnr);
+  fprintf (stdout, "Prec-day (m)\n");
+  fprintf (stdout, "%f\n", data[preset].xy[dagnr - 1].y);
+  /*fprintf(stdout, "Bott.flux (m/sec)= %6.4f\n\n", qbot); */
+  fprintf (stdout, "Layer Thickness Depth   Moisture       Psi       K\n");
+  fprintf (stdout, "         (m)     (m)    (cm3/cm3)      (m)      (m/s)\n");
+  fprintf (stdout,
+	   "-----------------------------------------------------\n\n");
+  FORLIM = nlt - 2;
+
+  sprintf (buff, "%d_moi", dagnr);
+  fo = fopen (buff, "w");
+  sprintf (buff, "%d_psi", dagnr);
+  foo = fopen (buff, "w");
+
+  for (i = 0; i <= FORLIM; i++)
+    {
+      fprintf (stdout, "%3d%10.2f%7.2f%13.8f%12.4f% .5E\n",
+	       i + 1, soilparm[i].thickness, depth[i], theta[i], psi[i], ak[i]);
+      fprintf (fo, "%d\t%f\n", i, theta[i]);
+      fprintf (foo, "%d\t%f\n", i, psi[i]);
+    }
+
+  FORLIM = nlt;
+  for (i = nlt - 1; i < FORLIM; i++)
+    {
+      fprintf (stdout, "%3d%10.2f%7.2f%13.8f%12.4f% .5E",
+	       i + 1, soilparm[i].thickness, depth[i], theta[i], psi[i], ak[i]);
+      fprintf (fo, "%d\t%f\n", i, theta[i]);
+      fprintf (foo, "%d\t%f\n", i, psi[i]);
+    }
+  fprintf (stdout, " (Lowest layer of topsoil)\n\n");
+  FORLIM = nl;
+  for (i = nlt; i < FORLIM; i++)
+    {
+      fprintf (stdout, "%3d%10.2f%7.2f%13.8f%12.4f% .5E\n",
+	       i + 1, soilparm[i].thickness, depth[i], theta[i], psi[i], ak[i]);
+      fprintf (fo, "%d\t%f\n", i, theta[i]);
+      fprintf (foo, "%d\t%f\n", i, psi[i]);
+    }
+  fclose (fo);fclose (foo);
+
+}
+
+
+void 
+Newtimestep ()
+{
+  /* calculation of new integration time step dtmin */
+  int i;
+  double dat, help;
+  int FORLIM;
+  double TEMP;
+
+  FORLIM = nl - 2;
+  for (i = 0; i <= FORLIM; i++)
+    {
+      delthe = -0.02;
+      if (theta[i] < 0.10)
+	delthe = 0.02;
+      the = theta[i] + delthe;
+      psih = soilparm[i].psis * pow (the / soilparm[i].thetas, -soilparm[i].b);
+      psigra = fabs ((psi[i] - psih) / delthe);
+      tijd = lsqr / ak[i] / psigra;
+      TEMP = soilparm[i].thickness / ddd;
+      detijd = 0.5 * (TEMP * TEMP) * tijd;
+      if (i + 1 == 1)
+	dtlim = detijd;
+      if (detijd < dtlim)
+	dtlim = detijd;
+    }
+
+  if (smfmod != 0)
+    {
+      sink1 = sinkts / dd;
+      if (sink1 < 0)
+	{
+	  tijd = fabs (ddd / sink1);
+	  TEMP = soilparm[0].thickness / ddd;
+	  detijd = 0.5 * (TEMP * TEMP) * tijd;
+	  if (detijd < dtlim)
+	    dtlim = detijd;
+	}
+      if (fabs (sink1 * dtlim / soilparm[0].thickness) > 0.01 * theta[0])
+	dtlim = fabs (0.01 * theta[0] * soilparm[0].thickness / sink1);
+
+    }
+
+
+  dtsec = dtlim;
+  dtsecv = dtsec;
+  dtmin = dtlim / 60;
+  dat = datime + dtmin;
+  help = dat / delta;
+  if (help == cntr)
+    print = 1;
+  if (help > cntr)
+    {
+      dtmin = cntr * delta - datime;
+      dtsec = dtmin * 60;
+      print = 1;
+    }
+  amin += dtmin;		/* clock */
+  /* change of time */
+  if (amin >= 60)
+    {
+      hour += (int) (amin / 60);
+      amin -= (int) (amin / 60) * 60;
+      if (hour >= 24)
+	{
+	  dagnr += (int) (hour / 24.0);
+	  hour -= (int) (hour / 24.0) * 24;
+	  newday = 1;
+	}
+    }
+
+  datime += dtmin;
+}
+
+
+void
+dosoil ()
+{
+  int getparams __P ((char *infname));
+
+  fprintf(stderr,"getparams\n");
+  (void)getparams(infilename);
+
+  fprintf(stderr,"init\n");
+  Init ();
+
+  days = data[preset].points;
+  exitonerror = FALSE;
+ dagnr = 1;			/* but still arrays start at 0! */
+  fprintf(stderr,"Static_\n");
+  Static_ ();
+  fprintf(stderr,"TImestep\n");
+  Timestep ();
+  fprintf(stderr,"Ouput\n");
+  Output ();
+  do
+    {
+      Compute ();
+      Output ();
+      Newtimestep ();
+    }
+  while (datime / delta * (delta / 1440) <= days);
+}
+
+void
+detfromtab(i)
+int i;
+{
+int j;
+char s[1024];
+/*
+   if (soilparm[i].clayfrac != -1.0){	
+   }else{*/
+	for (j=0;j<11;j++){
+	if (strcmp(soilparm[i].description,clapp[j].description)==0){
+		soilparm[i].b=clapp[j].b;
+		soilparm[i].psis=clapp[j].psis;
+		soilparm[i].thetas=clapp[j].thetas;
+	if (verbose){
+		sprintf(s,"Clapp b for layer %d = %f",i,soilparm[i].b);
+		showit(s);
+		}
+	}
+	if (j==10 && soilparm[i].b==0.0){
+	(void)fprintf(stderr,"Soiltype %s not in database\n",soilparm[i].description);
+	for (j=0;j<11;j++)
+		(void)fprintf(stderr,"%s\n",clapp[j].description);
+	exit(INPUTERROR);
+	}
+	}
+   /*}*/
+}
+
+int
+getparams (infname)
+     char *infname;
+{
+  char s[1024];
+  int i;
+  int pts;
+  void detfromtab __P ((int i));
+  
+  exitonerror = TRUE;		/* All following parameters are needed */
+  tmethod=getdefint("soil","psi/K",0,infilename); /* get the method for
+					determining K vs psi*/
+  nl = getdefint ("soil", "layers", 0, infilename);/* number of soil layers */
+
+  /* allocate memory for the layers */
+  soilparm = (soilparmt *) ts_memory ((void *) soilparm, nl* sizeof(soilparmt),progname);
+  theta = (double *) ts_memory ((void *) NULL, nl * sizeof (double),progname);
+  
+
+  nlt = getdefint ("soil", "toplayers", 0, infilename);/* number of top layers */
+  delta = getdefint ("soil", "delta", 0, infilename);/* delta Output interval of results (min) */
+  botcon = getdefint ("soil", "bottom", 0, infilename);/* boundary at bottom */
+  if (botcon == 1)
+    thefix = getdefdoub ("soil", "thefix", 0, infilename);/* fixed soil moisture at the bottom */
+  if (botcon == 2)
+    qbot = getdefdoub ("soil", "qbot", 0, infilename);/* fixed flux at the bottom */
+  for (i = 0; i < nl; i++)
+    {
+      sprintf (s, "layer_%d", i);
+      exitonerror=FALSE;
+      strcpy (soilparm[i].description, getdefstr (s, "description", "No description", infname));
+      if (verbose)
+	showit (soilparm[i].description);
+      soilparm[i].output_points = getdefint (s, "output_points", 0.0, infname);
+      soilparm[i].residual_water = getdefdoub (s, "residual_water", 0.01, infname);
+      if (tmethod==0){/* Use clapp & Hornberger stuff */
+	soilparm[i].b = getdefdoub (s, "b", 0.0, infname);
+	if (soilparm[i].b==0.0){
+		soilparm[i].clayfrac = getdefdoub (s, "clayfrac", -1.0, infname);
+ 		detfromtab(i); 
+                         /*determine b from defaults, clayfrac */
+	}
+	if (soilparm[i].clayfrac==-1.0 && soilparm[i].b==0.0){
+		exitonerror=TRUE;
+		strcpy(soilparm[i].description,getdefstr (s, "description", "", infname));
+ 		detfromtab(i); 
+                         /*determine b from defaults,  Soiltype */
+	}
+exitonerror=TRUE;
+      soilparm[i].thetas = getdefdoub (s, "thetas", 0.0, infname);
+      soilparm[i].theta_initial = getdefdoub (s, "theta_initial", 0.0, infname);
+      theta[i]=soilparm[i].theta_initial;
+      soilparm[i].ksat = getdefdoub (s, "ksat", 0.0, infname);
+soilparm[i].thickness = getdefdoub (s,"thickness", 0.0, infilename);
+           }else{
+      exitonerror=TRUE;
+      soilparm[i].thetas = getdefdoub (s, "thetas", 0.0, infname);
+      soilparm[i].theta_initial = getdefdoub (s, "theta_initial", 0.0, infname);
+      theta[i]=soilparm[i].theta_initial;
+      soilparm[i].ksat = getdefdoub (s, "ksat", 0.0, infname);
+      soilparm[i].theta = getdefar(s,"theta",NULL,infname,&pts);
+      soilparm[i].data_points = pts;
+      if (!soilparm[i].output_points)
+      	soilparm[i].output_points = pts;
+      exitonerror =FALSE;
+      soilparm[i].n = getdefdoub (s, "n", 0.0, infname);
+      soilparm[i].alpha = getdefdoub (s, "alpha", 0.0, infname);
+      if (soilparm[i].n == 0 && soilparm[i].alpha == 0){
+        exitonerror =TRUE;
+        soilparm[i].pf =  getdefar(s,"pf",NULL,infname,&pts);
+        soilparm[i].thickness = getdefdoub (s,"thickness", 0.0, infilename);
+      exitonerror =FALSE;
+       }
+      }
+    }
+
+  if ((preset = getsetbyname ("precipitation")) < 0)
+    {
+      get_data (getdefstr ("ts", "precipitation", "nothing", infilename), NULL, "precipitation");
+      preset = getsetbyname ("precipitation");
+    }
+/*
+  if ((evapset = getsetbyname ("evaporation")) < 0)
+    {
+      getdefstr ("soil", "evaporation", "nothing", infilename);
+      evapset = getsetbyname ("evaporation");
+    }
+    */
+
+
+
+ return 0;
+}
+/* End. */
+@

@@ -1,0 +1,349 @@
+head	1.10;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.10
+date	97.01.16.15.08.20;	author schj;	state Exp;
+branches;
+next	1.9;
+
+1.9
+date	96.11.05.14.59.13;	author schj;	state Alpha;
+branches;
+next	1.8;
+
+1.8
+date	96.10.22.17.43.04;	author schj;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	96.03.25.07.56.08;	author schj;	state alpha;
+branches;
+next	1.6;
+
+1.6
+date	96.02.27.11.40.32;	author schj;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	95.12.05.03.07.11;	author schj;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	95.10.30.13.54.33;	author schj;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	95.10.23.07.52.03;	author schj;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	95.10.03.14.06.18;	author schj;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	95.09.04.17.04.18;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@initial version for report generator
+@
+
+
+1.10
+log
+@*** empty log message ***
+@
+text
+@/* $Header: /home/schj/src/vamps_0.99/src/util/RCS/vrep.c,v 1.9 1996/11/05 14:59:13 schj Alpha $ */
+/*
+ *  $RCSfile: vrep.c,v $
+ *  $Author: schj $
+ *  $Date: 1996/11/05 14:59:13 $
+ */
+
+#ifdef DDEBUG
+static char RCSid[] =
+"$Id: vrep.c,v 1.9 1996/11/05 14:59:13 schj Alpha $";
+#endif
+
+#include <stdio.h>
+#include <string.h>
+#include "vamps.h"
+#include "deffile.h"
+#include "getopt.h"
+
+#define OPTSTR "F:f:"
+#define INI 0
+#define TCL 1
+char   *progname;
+FILE *genoutfile=NULL;
+int
+main (int argc,char *argv[])
+{
+  int     what;
+  int     format = INI;
+  char	*outname=NULL; 
+
+
+
+  progname = argv[0];
+  if (argv[1] == NULL)
+    {
+      (void) fprintf (stderr, "usage:\n%s [options] filename [[section name value] section name value]...\n", progname);
+      (void) fprintf(stderr, "\t -f filename_for_output (- is stdout)\n");
+      (void) fprintf(stderr, "\t -F format (t= TCL)\n");
+      exit (1);
+    }
+
+  while ((what = getopt (argc, argv, OPTSTR)) != EOF)
+    {
+      switch (what)
+	{
+	case 'f':
+	  {
+	    outname = optarg;
+	    break;
+	  }
+	case 'F':
+	  {
+	    if (*optarg == 't')
+	      format = TCL;
+	    break;
+	  }
+	default:break;
+	}
+    }
+
+  rinmem (argv[optind]);
+
+ 
+  writememini (NULL, &format, stdout);
+
+  return 0;
+}
+@
+
+
+1.9
+log
+@Updated to Alpha version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/util/RCS/vrep.c,v 1.8 1996/10/22 17:43:04 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1996/10/22 17:43:04 $
+d10 1
+a10 1
+"$Id: vrep.c,v 1.8 1996/10/22 17:43:04 schj Exp $";
+@
+
+
+1.8
+log
+@updated to new writemenini
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.98/src/util/RCS/vrep.c,v 1.7 1996/03/25 07:56:08 schj alpha $ */
+d5 1
+a5 1
+ *  $Date: 1996/03/25 07:56:08 $
+d10 1
+a10 1
+"$Id: vrep.c,v 1.7 1996/03/25 07:56:08 schj alpha $";
+@
+
+
+1.7
+log
+@0.98
+@
+text
+@d1 2
+a2 3
+
+/* $Header: /home/schj/src/vamps_0.975/src/util/RCS/vrep.c,v 1.6 1996/02/27 11:40:32 schj Exp $ */
+/*-
+d5 1
+a5 17
+ *  $Date: 1996/02/27 11:40:32 $
+ *  $Log: vrep.c,v $
+ *  Revision 1.6  1996/02/27 11:40:32  schj
+ *  changed to ansi
+ *
+ * Revision 1.4  1995/10/30  13:54:33  schj
+ * added deffile.h
+ *
+ * Revision 1.2  1995/10/03  14:06:18  schj
+ * removed some vars
+ *
+ * Revision 1.1  1995/09/04  17:04:18  schj
+ * Initial revision
+ *
+ * Revision 1.7  1995/09/01  11:43:50  schj
+ * updated header
+ *
+d10 1
+a10 1
+"$Id: vrep.c,v 1.6 1996/02/27 11:40:32 schj Exp $";
+d29 3
+a31 1
+  char	*outname=NULL;
+d63 2
+a64 1
+  writememini (NULL, 3, stdout);
+@
+
+
+1.6
+log
+@changed to ansi
+@
+text
+@d2 1
+a2 1
+/* $Header: /homes/schj/src/vamps_0.96/src/util/RCS/vrep.c,v 1.5 1995/12/05 03:07:11 schj Exp $ */
+d6 1
+a6 1
+ *  $Date: 1995/12/05 03:07:11 $
+d8 3
+d27 1
+a27 1
+"$Id: vrep.c,v 1.5 1995/12/05 03:07:11 schj Exp $";
+@
+
+
+1.5
+log
+@*** empty log message ***
+@
+text
+@d2 1
+a2 1
+/* $Header: /homes/schj/src/vamps_0.91/RCS/vrep.c,v 1.4 1995/10/30 13:54:33 schj Exp $ */
+d6 1
+a6 1
+ *  $Date: 1995/10/30 13:54:33 $
+a9 4
+ * ,
+ *
+ * Revision 1.3  1995/10/23  07:52:03  schj
+ * *** empty log message ***
+d24 1
+a24 1
+"$Id: vrep.c,v 1.4 1995/10/30 13:54:33 schj Exp $";
+d39 1
+a39 3
+main (argc, argv)
+int     argc;
+char   *argv[];
+@
+
+
+1.4
+log
+@added deffile.h
+,
+@
+text
+@d2 1
+a2 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.9/util/RCS/vrep.c,v 1.3 1995/10/23 07:52:03 schj Exp $ */
+d6 1
+a6 1
+ *  $Date: 1995/10/23 07:52:03 $
+d8 4
+d28 1
+a28 1
+"$Id: vrep.c,v 1.3 1995/10/23 07:52:03 schj Exp $";
+d33 3
+a35 3
+#include "../include/vamps.h"
+#include "../include/deffile.h"
+#include "../include/getopt.h"
+d79 1
+a79 1
+  rinmem (argv[optind], 4);
+@
+
+
+1.3
+log
+@*** empty log message ***
+@
+text
+@d2 1
+a2 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/util/RCS/vrep.c,v 1.2 1995/10/03 14:06:18 schj Exp $ */
+d6 1
+a6 1
+ *  $Date: 1995/10/03 14:06:18 $
+d8 3
+d24 1
+a24 1
+"$Id: vrep.c,v 1.2 1995/10/03 14:06:18 schj Exp $";
+d30 1
+@
+
+
+1.2
+log
+@removed some vars
+@
+text
+@d2 3
+a4 2
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/util/RCS/vrep.c,v 1.1 1995/09/04 17:04:18 schj Exp $ */
+/*- $RCSfile: vrep.c,v $
+d6 1
+a6 1
+ *  $Date: 1995/09/04 17:04:18 $
+d8 3
+d21 1
+a21 1
+"$Id: vrep.c,v 1.1 1995/09/04 17:04:18 schj Exp $";
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d2 2
+a3 2
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/util/RCS/wrini.c,v 1.7 1995/09/01 11:43:50 schj Exp $ */
+/*- $RCSfile: wrini.c,v $
+d5 5
+a9 2
+ *  $Date: 1995/09/01 11:43:50 $
+ *  $Log: wrini.c,v $
+d15 1
+d17 2
+a18 1
+"$Id: wrini.c,v 1.7 1995/09/01 11:43:50 schj Exp $";
+a34 2
+  int     i;
+  int     j = 0;
+a36 2
+  char    section[1024];
+  char    name[1024];
+a37 1
+  char    value[1024];
+@

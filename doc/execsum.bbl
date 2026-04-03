@@ -1,0 +1,111 @@
+\begin{thebibliography}{xx}
+
+\harvarditem[Belmans et al.]{Belmans, Wesseling and
+  Feddes}{1983}{belmans1983272}
+Belmans, C., Wesseling, J. and Feddes, R.  (1983).
+\newblock Simulation model of the water balance of a cropped soil: {SWATRE},
+  {\em {J}ournal of {H}ydrology} {\bf 63}:~271--286.
+
+\harvarditem[Bruijnzeel]{Bruijnzeel}{1983}{bruijnzeel1983T}
+Bruijnzeel, L.  (1983).
+\newblock {\em Hydrological and Biochemical Aspect of Man-Made Forests in
+  {S}outh-central {J}ava, {I}ndonesia}, PhD thesis, {F}aculty of {E}arth
+  {S}ciences, {V}rije {U}niversiteit, Amsterdam.
+
+\harvarditem[Bruijnzeel and Scatena]{Bruijnzeel and
+  Scatena}{1994}{bruijnzeel1994}
+Bruijnzeel, L. and Scatena, F.  (1994).
+\newblock Hydrological modeling in a humid tropical island setting: with
+  special reference to the {L}uquillo {E}xperimental {F}orest, {P}uerto {R}ico,
+  Research proposal, {V}rije {U}niversiteit {A}msterdam, {I}nternational
+  {I}nstitute for {T}ropical {F}orestry.
+
+\harvarditem[Calder]{Calder}{1986}{calder1986171}
+Calder, I.  (1986).
+\newblock The influence of land use on water yield in upland areas of the
+  {U.K.}, {\em {J}ournal of {H}ydrology} {\bf 88}:~201--211.
+
+\harvarditem[Clapp and Hornberger]{Clapp and Hornberger}{1978}{clapp1978263}
+Clapp, R. and Hornberger, G.  (1978).
+\newblock Emperical equations for some soil hydraulic properties, {\em {W}ater
+  {R}esources {R}esearch} {\bf 14}(4):~601--604.
+\newblock from ben, in vd griend model.
+
+\harvarditem[{Commissie Voor Hydrologisch Onderzoek {TNO}}]{{Commissie Voor
+  Hydrologisch Onderzoek {TNO}}}{1988}{commissie1988N}
+{Commissie Voor Hydrologisch Onderzoek {TNO}}  (1988).
+\newblock Van {P}enman naar {M}akkink. {E}en nieuwe berekeninswijze voor
+  klimatologisch verdampingsgetallen, {\em Rapporten en nota's/Commissie voor
+  hydrologisch onderzoek {TNO}~19}, {TNO}, 'S-Gravenhage.
+
+\harvarditem[Davis]{Davis}{1995a}{davis1995283}
+Davis, J.  (1995a).
+\newblock {\em S-{L}ang {C} Programmer's guide}.
+
+\harvarditem[Davis]{Davis}{1995b}{davis1995282}
+Davis, J.  (1995b).
+\newblock {\em S-{L}ang Programmer's guide}.
+\newblock Version 0.1.
+
+\harvarditem[Feddes et al.]{Feddes, Kowalik and Zarasny}{1978}{feddes1978273}
+Feddes, R., Kowalik, P. and Zarasny, H.  (1978).
+\newblock {\em Simulation of field water use and crop yield}, {J}ohn {W}iley \&
+  {S}ons.
+
+\harvarditem[Gash]{Gash}{1979}{gash1979165}
+Gash, J.  (1979).
+\newblock An analytical model of rainfall interception by forests, {\em
+  {Q}uarterly {J}ournal of the {R}oyal {M}eteorological {S}ociety} {\bf
+  105}:~43--55.
+
+\harvarditem[Kernighan and Ritchie]{Kernighan and Ritchie}{1988}{kernighan1988}
+Kernighan, B. and Ritchie, D.  (1988).
+\newblock {\em The {C } programming language}, 2 edn, Prentice {H}all.
+
+\harvarditem[Makkink]{Makkink}{1957}{makkink1957}
+Makkink, G.  (1957).
+\newblock Testing the {P}enman formula by means of lysismeters, {\em {J}ourn.
+  {I}nt. of {W}ater {E}ng.} {\bf 11}:~277--288.
+
+\harvarditem[Makkink]{Makkink}{1961}{makkink1961}
+Makkink, G.  (1961).
+\newblock De verdamping uit vegetaties in verband met de formule van {P}enman,
+  {\em Proceedings and {I}nformations~4}, Comm, {H}ydrol, {R}esearch {TNO}, The
+  {H}ague.
+
+\harvarditem[Monteith]{Monteith}{1965}{monteith1965}
+Monteith, J.  (1965).
+\newblock Evaporation and environment, {\em Symp. {S}oc. {E}xp. {B}iol.} {\bf
+  19}:~206--234.
+
+\harvarditem[Mualem]{Mualem}{1976}{mualem1976261}
+Mualem, Y.  (1976).
+\newblock A new model for predicting the hydraulic conductivity of unsaturated
+  porous media, {\em {W}ater {R}esources {R}esearch} {\bf 12}(3):~513--522.
+
+\harvarditem[Penman]{Penman}{1956}{penman1956N}
+Penman, H.  (1956).
+\newblock Evaporation: an introductory survey, {\em {N}etherlands {J}ournal of
+  {A}gricultural {S}ciences} {\bf 4}:~9--29.
+
+\harvarditem[Rutter et al.]{Rutter, Kershaw, Robins and
+  Morton}{1971}{rutter1971174}
+Rutter, A., Kershaw, K., Robins, P. and Morton, A.  (1971).
+\newblock A predictive model of rainfall interception in forests. 1. a
+  derivation of the model from observations in a plantation of {C}orsican pine,
+  {\em Agricultural {M}eteorology} {\bf 9}:~367--384.
+
+\harvarditem[{{v}an Genuchten}]{{{v}an Genuchten}}{1980}{genuchten1980179}
+{{v}an Genuchten}, M.  (1980).
+\newblock A closed-form equation for predicting the hydraulic conductivity of
+  unsaturated soils, {\em {S}oil {S}cience {S}ociety of {A}merica {J}ournal}
+  {\bf 48}:~892--898.
+
+\harvarditem[Vertessy et al.]{Vertessy, Hatton, O`Shaughnessy and
+  Jayasuriya}{1993}{vertessy1993140}
+Vertessy, R., Hatton, T., O`Shaughnessy, P. and Jayasuriya, M.  (1993).
+\newblock Predicting water yield from a montain ash forest catchment using a
+  terrain analysis based catchment model, {\em {J}ournal of {H}ydrology} {\bf
+  150}:~665--700.
+
+\end{thebibliography}

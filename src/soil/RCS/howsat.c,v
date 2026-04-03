@@ -1,0 +1,106 @@
+head	1.3;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.3
+date	96.04.09.12.07.54;	author schj;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	96.03.24.11.35.49;	author schj;	state alpha;
+branches;
+next	1.1;
+
+1.1
+date	96.02.15.10.23.07;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@Determine saturation (0 to 1)
+@
+
+
+1.3
+log
+@minor
+@
+text
+@/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.98/src/soil/RCS/howsat.c,v 1.2 1996/03/24 11:35:49 schj alpha $ */
+/*- $RCSfile: howsat.c,v $
+ *  $Author: schj $
+ *  $Date: 1996/03/24 11:35:49 $
+ *  $Log: howsat.c,v $
+ *  Revision 1.2  1996/03/24 11:35:49  schj
+ *  cosmetic changes
+ *
+ * Revision 1.1  1996/02/15  10:23:07  schj
+ * Initial revision
+ *
+ */
+
+#ifdef DDEBUG
+static  char RCSid[] =
+"$Id: howsat.c,v 1.2 1996/03/24 11:35:49 schj alpha $";
+#endif
+
+#include "swatsoil.h"
+
+/*-
+ * void dethowsat
+ *
+ *	Determines relative saturation
+ */
+void
+dethowsat()
+{
+int	i;
+
+for (i=0; i < layers; i++){
+	howsat[i]=1-(soilparm[i].thetas-theta[i]);
+}
+}
+@
+
+
+1.2
+log
+@cosmetic changes
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.97/src/soil/RCS/howsat.c,v 1.1 1996/02/15 10:23:07 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1996/02/15 10:23:07 $
+d6 3
+d16 1
+a16 1
+"$Id: howsat.c,v 1.1 1996/02/15 10:23:07 schj Exp $";
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 2
+a2 2
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.97/src/soil/RCS/fluxes.c,v 1.8 1995/11/14 20:29:16 schj Exp $ */
+/*- $RCSfile: fluxes.c,v $
+d4 5
+a8 2
+ *  $Date: 1995/11/14 20:29:16 $
+ *  $Log: fluxes.c,v $
+d13 1
+a13 1
+"$Id: fluxes.c,v 1.8 1995/11/14 20:29:16 schj Exp $";
+d18 5
+@

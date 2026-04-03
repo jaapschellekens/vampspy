@@ -1,0 +1,203 @@
+head	1.4;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.4
+date	99.01.06.12.13.01;	author schj;	state Alpha;
+branches;
+next	1.3;
+
+1.3
+date	99.01.06.12.07.49;	author schj;	state Alpha;
+branches;
+next	1.2;
+
+1.2
+date	97.09.09.08.36.57;	author schj;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	97.01.16.14.58.25;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@History fro interactive mode
+@
+
+
+1.4
+log
+@Version: 0.99g
+@
+text
+@/* $Header: /home/schj/src/vamps_0.99g/src/main/RCS/hist.c,v 1.3 1999/01/06 12:07:49 schj Alpha $ 
+ */
+/* 
+ *  $RCSfile: hist.c,v $
+ *  $Author: schj $
+ *  $Date: 1999/01/06 12:07:49 $
+ */
+
+static char RCSid[] =
+"$Id: hist.c,v 1.3 1999/01/06 12:07:49 schj Alpha $";
+#include "vamps.h"
+
+#ifdef HAVE_LIBSLANG
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+static char **history; /*S-Lang interactive mode history */
+
+/* How to manage history list */
+static int histl=0;
+
+/*C:addtohist
+ *@@ int addtohist(char *item)
+ *
+ * adds @@item@@ to the history list
+ **/
+int
+addtohist(char *item)
+{
+	if (histl == 0){
+		history = (char **) ts_memory (NULL, sizeof (char *), progname);	
+		/*history[histl] = (char *) ts_memory (NULL, (strlen(item)+1) * sizeof (char), progname);	
+		 strcpy(history[histl],item);*/
+		if((history[histl]=strdup(item)) == NULL)
+			perror(RCSid);
+		histl++;
+		return histl-1;
+	}else {
+		history = (char **) ts_memory ((void *)history, (histl+1)*sizeof (char *), progname);	
+		/* history[histl] = (char *) ts_memory (NULL, strlen(item)* sizeof (char), progname);
+		   strcpy(history[histl],item); */
+		if((history[histl]=strdup(item)) == NULL)
+			perror(RCSid);
+		histl++;
+		return histl-1;
+	}
+	/* NOTREACHED */
+}
+
+void
+show_history(void)
+{
+	int i;
+	
+	for (i=0;i<histl-1;i++){
+		(void)fprintf(stderr,"%d: %s\n",i,history[i]);
+	}
+}
+
+int
+save_history(char *histfname)
+{
+	int i;
+	FILE *hf;
+	
+	if ((hf = fopen(histfname,"w")) == NULL){
+		(void)fprintf(stderr,"Error opening %s\n",histfname);
+		return -1;
+	}else{
+		for (i=0;i<histl-1;i++){
+			(void)fprintf(hf,"%s\n",history[i]);
+		}
+		(void)fclose(hf);
+		return 0;
+	}
+	/* NOTREACHED */
+}
+
+void
+del_history(void)
+{
+  int i;
+  
+  for (i = histl-2; i >=0; i--){
+    free((void *)history[i]);
+  }
+
+  free((void *)history);
+  histl =0;
+}
+#endif
+@
+
+
+1.3
+log
+@Version: 0.99g
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99e/src/main/RCS/hist.c,v 1.2 1997/09/09 08:36:57 schj Exp $ 
+d6 1
+a6 1
+ *  $Date: 1997/09/09 08:36:57 $
+d10 1
+a10 1
+"$Id: hist.c,v 1.2 1997/09/09 08:36:57 schj Exp $";
+@
+
+
+1.2
+log
+@0.99e version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99c/src/main/RCS/hist.c,v 1.1 1997/01/16 14:58:25 schj Exp $ 
+d6 1
+a6 1
+ *  $Date: 1997/01/16 14:58:25 $
+d10 1
+a10 1
+"$Id: hist.c,v 1.1 1997/01/16 14:58:25 schj Exp $";
+d35 2
+a36 1
+		history[histl]=strdup(item);
+d43 2
+a44 1
+		history[histl]=strdup(item);
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.99/src/main/RCS/init_s.c,v 1.6 1996/11/19 13:48:11 schj Exp $ 
+d4 1
+a4 1
+ *  $RCSfile: init_s.c,v $
+d6 1
+a6 1
+ *  $Date: 1996/11/19 13:48:11 $
+d10 1
+a10 1
+"$Id: init_s.c,v 1.6 1996/11/19 13:48:11 schj Exp $";
+d12 2
+d18 1
+a18 1
+char **history; /*S-Lang interactive mode history */
+d22 6
+d41 1
+a41 1
+		 strcpy(history[histl],item); */
+d72 1
+a72 1
+		fclose(hf);
+d90 1
+@

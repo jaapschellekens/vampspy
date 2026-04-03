@@ -1,0 +1,104 @@
+#!/home/hkl/hydro/promo/geomil/bin/vamps -I 
+
+% demo.slx: demo of some of the scription possibillities of vamps
+% in order to run this example you should have gnuplot 3.6 (beta)
+% installed and you must be running X11.
+
+% run it using: "vamps -I demo.slx" 
+
+variable demo_infile = "fiji.inp";
+variable demo_outfile = "fiji.out";
+variable demo_mesdat = mread("volact.prn",-1);
+variable demo_pause = 6;
+variable plt_mat;
+variable v_volact_old = 0.0;
+
+plot; % initialize the plotting system
+
+define vamps_progress () 
+{
+	variable strs = "-\\|/";
+	variable len = strlen(strs);
+	variable i,tp;
+
+	tp =  v_thisstep - (int(v_thisstep/len) * len);
+	fprintf(stderr,"%c\r",strs[tp],1);
+};
+
+define at_start()
+{
+	plt_mat = matrix(v_steps,2);
+	set_plotsys_byname("gnu_m_plot");
+	plt("set nokey");
+} 
+
+define at_end()
+{
+	v_printsum;
+}
+
+define each_step()
+{
+	plt_mat[v_thisstep,0] = v_thisstep;
+	plt_mat[v_thisstep,1] = v_volact;
+	subplot(2,1,1);
+	plt(sprintf("set xrange [%f:%f]", 33056, 33056 + v_steps + 1,2));
+	plt(sprintf("set yrange [%f:%f]", 40,85,2));
+	f_plot("volact",demo_outfile,0,1);
+	plt("plot @demo_mesdat@ with points");
+	if (v_thisstep / 8 != (v_thisstep - 1) / 8 ) {
+		endsubplot();
+		subplot(2,1,1);
+		f_plot("volact",demo_outfile,0,1);
+	}
+	plt(sprintf("set xrange [0.55:1.0]",0));
+	plt(sprintf("set yrange [-160:0]",0));
+	subplot(2,1,2);
+	p_plot("howsat",demo_outfile,v_thisstep);
+}
+
+if (strcmp(getenv("DISPLAY"),"") == 0){
+	fprintf(stderr,"%s: the DISPLAY variable is not set\n",arg0,1);
+	exit;
+}
+
+() = system("cat vlogo");
+echo("Welcome to the Vamps demo!");
+fprintf(stderr,"This demo is based on the %s input file,\n",demo_infile,1);
+fprintf(stderr,"results are stored in %s\n",demo_outfile,1);
+
+fprintf(stderr,"\nThese are the input time series...\n",0);
+evalfile("iplot.sl");
+pause(-1);
+% first run other occurrance of Vamps to get soil tables. This is a hack but
+% it works. ;-)
+fprintf(stderr,"Generating soil tables needed for plotting, please wait...",0);
+() = system(sprintf("vamps -S\'time steps 1\' -o soiltab %s",demo_infile,1));
+endsubplot;
+plt("clear\n\n\n\n\n");
+evalfile("soilgr.sl");
+echo("done.");
+echo("soil moisture retension plots of all soil layers...");
+allsoilplots("soiltab");
+pause(-1);
+plt("set nologscale");
+plt("set autoscale");
+
+
+% Now run the actual model
+echo("\n\nNow for a model run with graphical progress display...");
+pause(-1);
+v_run(demo_infile);
+% Switch to interactive mode
+endsubplot;
+plt("set autoscale");
+
+echo("\n\nNow for a fitting example...(this might take a while)");
+pause(-1);
+fit; % Initialize the fitting ssystem
+evalfile("vfit.sl");
+pause(-1);
+%interpreter(0);
+echo("Cleaning up files...");
+() = system("make clean");
+echo("Thats all.");

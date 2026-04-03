@@ -1,0 +1,358 @@
+head	1.9;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.9
+date	99.01.06.12.13.01;	author schj;	state Alpha;
+branches;
+next	1.8;
+
+1.8
+date	99.01.06.12.07.49;	author schj;	state Alpha;
+branches;
+next	1.7;
+
+1.7
+date	97.09.09.08.39.10;	author schj;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	97.01.16.15.08.27;	author schj;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	96.11.05.14.59.13;	author schj;	state Alpha;
+branches;
+next	1.4;
+
+1.4
+date	96.10.22.17.44.22;	author schj;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	96.03.25.07.56.37;	author schj;	state alpha;
+branches;
+next	1.2;
+
+1.2
+date	96.02.27.11.41.20;	author schj;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	96.02.16.13.44.21;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@Extra output in columns
+@
+
+
+1.9
+log
+@Version: 0.99g
+@
+text
+@/* $Header: /home/schj/src/vamps_0.99g/src/util/RCS/xtraout.c,v 1.8 1999/01/06 12:07:49 schj Alpha $ */
+/* $RCSfile: xtraout.c,v $
+ *  $Author: schj $
+ *  $Date: 1999/01/06 12:07:49 $
+ */
+
+static char RCSid[] =
+"$Id: xtraout.c,v 1.8 1999/01/06 12:07:49 schj Alpha $";
+
+#include "vamps.h"
+#include "swatsoil.h"
+#define  VALFORM "%.7f "
+
+extern FILE *xoutfile;
+int xopen = 0;
+
+/*- void xtraout(int tstep)
+ * 	columnunar type output per timestep
+ */
+void
+xtraout(int tstep)
+{
+#ifdef HAVE_SLANG
+   if(!noslang){
+      if (!SLang_execute_function("Sxtraout")){
+      fprintf(stderr,"Error: Sxtraout not defined\n");
+	 exit(88);
+      }
+   }else
+#endif
+     fprintf(xoutfile,"%g %g %g %g %g\n",t,volact,qtop,qbot,prec);
+}
+
+/*- void xopenout()
+ *
+ */
+void
+xopenout ()
+{
+#ifdef HAVE_SLANG
+  if(!noslang){
+     SLang_push_string(xtraoutfn);
+     if (!SLang_execute_function("Sopenxtraout")){
+	fprintf(stderr,"Error: Sopenxtraout not defined\n");
+     }
+  }else
+#endif
+  {
+     if (!xoutfile)
+       xoutfile = stdout;
+     xopen = 1;
+     fprintf(xoutfile,"#%s\n#t,volact,qtop,qbot,prec\n",RCSid);
+  }
+}
+
+/*-
+ * void xcloseout()
+ *
+ */
+void
+xcloseout ()
+{
+#ifdef HAVE_LIBSLANG
+   if(!noslang){
+      if (!SLang_execute_function("Sclosextraout"))
+	fprintf(stderr,"Error: Sclosextraout not defined\n");
+   }else
+#endif
+   {
+     if (xoutfile != stdout && xopen == 1){
+	(void) fclose (xoutfile);
+	xopen = 0;
+     }
+   }
+}
+
+@
+
+
+1.8
+log
+@Version: 0.99g
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99e/src/util/RCS/xtraout.c,v 1.7 1997/09/09 08:39:10 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1997/09/09 08:39:10 $
+d8 1
+a8 1
+"$Id: xtraout.c,v 1.7 1997/09/09 08:39:10 schj Exp $";
+@
+
+
+1.7
+log
+@0.99e version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99c/src/util/RCS/xtraout.c,v 1.6 1997/01/16 15:08:27 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1997/01/16 15:08:27 $
+d8 1
+a8 1
+"$Id: xtraout.c,v 1.6 1997/01/16 15:08:27 schj Exp $";
+d15 1
+d51 1
+d70 1
+a70 1
+     if (xoutfile != stdout)
+d72 2
+@
+
+
+1.6
+log
+@layout + stuff
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/util/RCS/xtraout.c,v 1.5 1996/11/05 14:59:13 schj Alpha $ */
+d4 1
+a4 1
+ *  $Date: 1996/11/05 14:59:13 $
+d8 1
+a8 1
+"$Id: xtraout.c,v 1.5 1996/11/05 14:59:13 schj Alpha $";
+a10 1
+#include "canopy.h"
+d22 1
+a22 1
+#ifndef NOSLANG
+d39 1
+a39 1
+#ifndef NOSLANG
+d61 1
+d65 3
+a67 1
+   }else{
+@
+
+
+1.5
+log
+@Updated to Alpha version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/util/RCS/xtraout.c,v 1.4 1996/10/22 17:44:22 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1996/10/22 17:44:22 $
+d8 1
+a8 1
+"$Id: xtraout.c,v 1.4 1996/10/22 17:44:22 schj Exp $";
+d24 2
+a25 2
+ if(!noslang){
+ if (!SLang_execute_function("Sxtraout")){
+d27 3
+a29 3
+      exit(88);
+    }
+  }else
+d31 1
+a31 1
+ fprintf(xoutfile,"%g %g %g %g %g\n",t,volact,qtop,qbot,prec);
+d42 4
+a45 4
+ SLang_push_string(xtraoutfn);
+ if (!SLang_execute_function("Sopenxtraout")){
+      fprintf(stderr,"Error: Sopenxtraout not defined\n");
+    }
+d49 3
+a51 3
+  if (!xoutfile)
+    xoutfile = stdout;
+  fprintf(xoutfile,"#%s\n#t,volact,qtop,qbot,prec\n",RCSid);
+d62 7
+a68 2
+ if (xoutfile != stdout)
+	 fclose (xoutfile);
+@
+
+
+1.4
+log
+@add S-Lang stuff
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.99/src/util/RCS/xtraout.c,v 1.3 1996/03/25 07:56:37 schj alpha $ */
+d4 1
+a4 12
+ *  $Date: 1996/03/25 07:56:37 $
+ *  $Log: xtraout.c,v $
+ *  Revision 1.3  1996/03/25 07:56:37  schj
+ *  cosmetic changes
+ *
+ *  Revision 1.2  1996/02/27 11:41:20  schj
+ *  changed to ansi
+ *  added header
+ *
+ * Revision 1.1  1996/02/16  13:44:21  schj
+ * Initial revision
+ *
+d8 1
+a8 1
+"$Id: xtraout.c,v 1.3 1996/03/25 07:56:37 schj alpha $";
+@
+
+
+1.3
+log
+@cosmetic changes
+@
+text
+@d1 2
+a2 2
+/* $Header: /home/schj/src/vamps_0.975/src/util/RCS/xtraout.c,v 1.2 1996/02/27 11:41:20 schj Exp $ */
+/*- $RCSfile: xtraout.c,v $
+d4 1
+a4 1
+ *  $Date: 1996/02/27 11:41:20 $
+d6 3
+d19 1
+a19 1
+"$Id: xtraout.c,v 1.2 1996/02/27 11:41:20 schj Exp $";
+d34 8
+d51 9
+d63 1
+@
+
+
+1.2
+log
+@changed to ansi
+added header
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.97/src/util/RCS/xtraout.c,v 1.1 1996/02/16 13:44:21 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1996/02/16 13:44:21 $
+d6 4
+d16 1
+a16 1
+"$Id: xtraout.c,v 1.1 1996/02/16 13:44:21 schj Exp $";
+d42 1
+a42 1
+  fprintf(xoutfile,"#t,volact,qtop,qbot,prec\n");
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 2
+a2 2
+/* $Header: /homes/schj/src/vamps_0.96/src/util/RCS/utout.c,v 1.4 1996/01/25 15:05:11 schj Exp $ */
+/*- $RCSfile: utout.c,v $
+d4 5
+a8 2
+ *  $Date: 1996/01/25 15:05:11 $
+ *  $Log: utout.c,v $
+d12 1
+a12 1
+"$Id: utout.c,v 1.4 1996/01/25 15:05:11 schj Exp $";
+d19 1
+a19 1
+FILE *xoutfile;
+d25 1
+a25 2
+xtraout(tstep)
+int     tstep;
+d27 1
+a27 1
+ fprintf(xoutfile,"%g %g\n",t,volact);
+d38 1
+d48 2
+a49 1
+ fclose (xoutfile);
+@

@@ -1,0 +1,142 @@
+head	1.4;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.4
+date	99.01.06.12.13.01;	author schj;	state Alpha;
+branches;
+next	1.3;
+
+1.3
+date	99.01.06.12.07.49;	author schj;	state Alpha;
+branches;
+next	1.2;
+
+1.2
+date	97.09.09.08.40.34;	author schj;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	97.04.07.19.43.25;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@topsystem with all fluxes pre_calculated
+@
+
+
+1.4
+log
+@Version: 0.99g
+@
+text
+@/* $Header: /home/schj/src/vamps_0.99g/src/topsys/RCS/pre_can.c,v 1.3 1999/01/06 12:07:49 schj Alpha $ */
+
+/* $RCSfile: pre_can.c,v $
+ * $Author: schj $
+ * $Date: 1999/01/06 12:07:49 $ */
+#include "topsys.h"
+#include "vamps.h"
+#include "deffile.h"
+
+/* */
+void
+tstep_top_pre_canop(int tstep, double *precipitation, double *interception,
+		double *transpiration, double *soilevaporation)
+{
+	*precipitation = data[id.pre].xy[tstep].y;
+	*interception = data[id.inr].xy[tstep].y;
+	*transpiration = data[id.ptr].xy[tstep].y;
+	*soilevaporation = data[id.spe].xy[tstep].y;
+}
+
+
+void
+pre_top_pre_canop()
+{
+	/* read ptr, spe and inr sets if these are not already determined...*/
+
+	/* read transpiration...*/
+	(void)get_data(getdefstr("ts","ptr","NON",infilename,TRUE),"ptr",0);
+	id.ptr = getsetbyname("ptr");
+	/* read soil evaporation...*/
+	(void)get_data(getdefstr("ts","spe","NON",infilename,TRUE),"spe",0);
+	id.spe = getsetbyname("spe");
+	/* read interception...*/
+	(void)get_data(getdefstr("ts","inr","NON",infilename,TRUE),"inr",0);
+	id.inr = getsetbyname("inr");
+}
+
+void
+post_top_pre_canop()
+{
+}
+@
+
+
+1.3
+log
+@Version: 0.99g
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99e/src/topsys/RCS/pre_can.c,v 1.2 1997/09/09 08:40:34 schj Exp $ */
+d5 1
+a5 1
+ * $Date: 1997/09/09 08:40:34 $ */
+@
+
+
+1.2
+log
+@0.99e version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99c/src/topsys/RCS/pre_can.c,v 1.1 1997/04/07 19:43:25 schj Exp $ */
+d5 1
+a5 1
+ * $Date: 1997/04/07 19:43:25 $ */
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99c/src/topsys/script.c,v 1.1 1997/04/02 06:44:49 schj Exp $ */
+d3 1
+a3 1
+/* $RCSfile: script.c,v $
+d5 1
+a5 1
+ * $Date: 1997/04/02 06:44:49 $ */
+d28 1
+a28 2
+	if ((id.ptr = getsetbyname("ptr")) == -1)
+		(void)get_data(getdefstr("ts","ptr","NON",infilename,TRUE),"ptr",0);
+d31 1
+a31 2
+	if ((id.spe = getsetbyname("spe")) == -1)
+		(void)get_data(getdefstr("ts","spe","NON",infilename,TRUE),"spe",0);
+d34 1
+a34 2
+	if ((id.inr = getsetbyname("inr")) == -1)
+		(void)get_data(getdefstr("ts","inr","NON",infilename,TRUE),"inr",0);
+a35 4
+
+#ifdef TRY_TOPSYS
+	fprintf(stderr,"spe = %d, pre = %d, inr = %d\n",id.spe,id.pre,id.inr);
+#endif	
+@

@@ -1,0 +1,40 @@
+SHELL = /bin/sh
+
+CC	= @CC@
+CFLAGS	= @CFLAGS@
+MOBJ	= @MOBJ@
+top_srcdir 	= @top_srcdir@
+srcdir 		= @srcdir@
+prefix 		= @prefix@
+exec_prefix 	= @exec_prefix@
+BINDIR 		= @bindir@
+LIBDIR 		= @libdir@
+VPATH 		= @srcdir@
+OBJDIR 		= @top_srcdir@/objs@OS@
+RM 	= rm -f
+VAMPSLIBDIR	= @datadir@/vamps@VERSION@
+INC	= -I$(top_srcdir)/include -I$(top_srcdir)
+PYINC	= @PYINC@
+GNUPLOT	= @GNUPLOT@
+DEFS	= @DEFS@ -DHAVE_LIBPYTHON -DVAMPSLIB=\"${VAMPSLIBDIR}\" -DGNUPLOT=\"${GNUPLOT}\"
+
+all: ${MOBJ}
+
+${OBJDIR}/vamps.o: vamps.c
+	${CC} $(CFLAGS) $(INC) -c ${DEFS} -o $@ vamps.c
+
+${OBJDIR}/plot.o: plot.c
+	${CC} $(CFLAGS) $(INC) -c ${DEFS} -o $@ plot.c
+
+${OBJDIR}/sigs.o: sigs.c
+	${CC} $(CFLAGS) $(INC) -c ${DEFS} -o $@ sigs.c
+
+${OBJDIR}/init_py.o: init_py.c
+	${CC} $(CFLAGS) $(INC) $(PYINC) -c ${DEFS} -o $@ init_py.c
+
+doc: 0main.tex
+
+0main.tex: *.c
+	echo "\\documentclass{article}\\usepackage{makeidx}\\makeindex\\begin{document}\\printindex" > 0main.tex
+	echo "\\section{main}" >> 0main.tex
+	echo "\\end{document}" >> 0main.tex

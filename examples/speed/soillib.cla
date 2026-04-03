@@ -1,0 +1,112 @@
+# This file contains a library of soil types and theta/phi/k relations
+# for both the clapp/horberger and the van Genuchten method. I took
+# the parameters from the original source and converted them to the
+# format that vamps uses. I cannot garantue they are correct!  To use
+# them copy the soiltype you want to use to your input file and make a
+# reference to it in your layer_n sections
+
+
+
+#--------------------- Clap/Horberger (Campbell  1974) -------------------------
+# These are soiltype sections with representative values for hydraulic
+# parameters as presented by Clapp, 1978.
+
+[Sand]
+description = clapp/hornberger (1978) Sand
+b =  4.05 
+psisat = -12.2 
+thetas =  0.395 
+ksat = 1520.64 
+method = 0
+theta_residual = 0.01
+
+[Loamy sand]
+description = clapp/hornberger (1978) Loamy sand
+b =  4.38 
+psisat = -9.0 
+thetas =  0.410 
+ksat = 1350.72 
+method = 0
+theta_residual = 0.01
+
+[Sandy loam]
+description = clapp/hornberger (1978) Sandy loam
+b =  4.90 
+psisat = -21.8 
+thetas =  0.435 
+ksat = 299.52 
+method = 0
+theta_residual = 0.01
+
+[Silt loam]
+description = clapp/hornberger (1978) Silt loam
+b =  5.3 
+psisat = -78.6 
+thetas =  0.485 
+ksat = 62.21 
+method = 0
+theta_residual = 0.01
+
+[Loam]
+description = clapp/hornberger (1978) Loam
+b =  5.39 
+psisat = -47.8 
+thetas =  0.451 
+ksat = 60.05 
+method = 0
+theta_residual = 0.01
+
+[Sandy clay loam]
+description = clapp/hornberger (1978) Sandy clay loam
+b =  7.12 
+psisat = -29.9 
+thetas =  0.420 
+ksat = 54.43 
+method = 0
+theta_residual = 0.01
+
+[Silty clay loam] 
+description = clapp/hornberger (1978) Silty clay loam
+b =  7.75 
+psisat = -35.6 
+thetas =  0.477 
+ksat = 14.69 
+method = 0
+theta_residual = 0.01
+
+[Clay loam]
+description = clapp/hornberger (1978) Clay loam
+b =  8.52 
+psisat = -63.0 
+thetas =  0.476 
+ksat = 21.17 
+method = 0
+theta_residual = 0.01
+
+[Sandy clay]
+description = clapp/hornberger (1978) Sandy clay
+b =  10.4 
+psisat = -15.3 
+thetas =  0.426 
+ksat = 18.72 
+method = 0
+theta_residual = 0.01
+
+[Silty clay]
+description = clapp/hornberger (1978) Silty clay
+b =  10.4 
+psisat = -49.0 
+thetas =  0.492 
+ksat = 8.93 
+method = 0
+theta_residual = 0.01
+
+[Clay]
+description = clapp/hornberger (1978) Clay
+b =  11.4 
+psisat = -40.5 
+thetas =  0.482 
+ksat = 11.09
+method = 0
+theta_residual = 0.01
+

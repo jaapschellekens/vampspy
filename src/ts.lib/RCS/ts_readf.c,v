@@ -1,0 +1,312 @@
+head	1.7;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.7
+date	99.01.06.12.13.01;	author schj;	state Alpha;
+branches;
+next	1.6;
+
+1.6
+date	99.01.06.12.07.49;	author schj;	state Alpha;
+branches;
+next	1.5;
+
+1.5
+date	97.09.09.08.42.25;	author schj;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	97.04.10.08.51.24;	author schj;	state Sta;
+branches;
+next	1.3;
+
+1.3
+date	97.04.09.20.37.32;	author schj;	state Sta;
+branches;
+next	1.2;
+
+1.2
+date	96.11.05.15.05.04;	author schj;	state Beta;
+branches;
+next	1.1;
+
+1.1
+date	95.12.17.22.00.49;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@reads an entire ts file
+@
+
+
+1.7
+log
+@Version: 0.99g
+@
+text
+@/* $Header: /home/schj/src/vamps_0.99g/src/ts.lib/RCS/ts_readf.c,v 1.6 1999/01/06 12:07:49 schj Alpha $ */
+
+/*  $RCSfile: ts_readf.c,v $
+ *  $Author: schj $
+ *  $Date: 1999/01/06 12:07:49 $
+ */
+
+#include "ts.h"
+#include <stdlib.h>
+#include <stdio.h>
+
+static char RCSid[] =
+"$Id: ts_readf.c,v 1.6 1999/01/06 12:07:49 schj Alpha $";
+
+/*C:ts_readf
+ *@@XY *ts_readf(int *points, FILE *datfile, char *prgname, int xcol,
+ *@@		int ycol, int verbose)
+ *
+ * @@ts_readf@@ reads an ts datafile and returns a pointer to an XY structure.
+ * This may be passed to @@free()@@ to free the allocated memory.
+ * To support multicolumn files xcol and xcol can be specified.
+ * @@points@@ will contain the number of points read. If verbose > 0 
+ * comments in the datafile will be send to stderr. If verbose > 1
+ * some file statistics will be printed as well. If verbose > 2
+ * even more will be printed.
+ */
+
+XY 
+*ts_readf(int *points,FILE *datfile,char *prgname,int xcol, int ycol,
+		int verbose)
+{
+	XY	*xy=(XY *)NULL;
+	XY	*ttxy;
+	int	ret;
+	int	done=0;
+	int	step=1024;
+	char	s[1024];
+	int	i=0;
+	int	j=0;
+
+	while ((ret = ts_getinput (datfile, s)) != EOF){
+		j++; /* Total nr of lines, including comments */
+		if (ret == INP_OTHER){
+			i++;
+			if (i == 1){
+				xy = (XY *) ts_memory ((void *) xy, step * (sizeof (XY)),prgname);
+				done = step;
+			}else if (i > done){
+				xy = (XY *) ts_memory ((void *) xy, (step + done) * sizeof (XY),prgname);
+				done = done + step;
+			}
+			if ((ttxy = ts_getxy (s, (XY *) NULL,xcol,ycol))==(XY *)NULL){
+				(void)fprintf(stderr,"%s: Error in input, line %d\n",prgname,j);
+				free(xy);
+				exit(1);
+			}else{
+				xy[i - 1].y =  ttxy->y;
+				xy[i - 1].x =  ttxy->x;
+			}
+		}else{
+			if (verbose>1) /* Copy comments to screen */{
+				(void)fprintf(stderr,"comment: %s\n", s);
+			}
+		}
+	}
+
+	*points=i; /* actual data points */
+	if (verbose)
+		(void)fprintf(stderr,"%s: read %d points\n",RCSid,i);
+
+	/* realloc xy... */
+	xy = (XY *) ts_memory ((void *) xy, i * (sizeof (XY)),prgname);
+
+	return xy;
+}
+@
+
+
+1.6
+log
+@Version: 0.99g
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99e/src/ts.lib/RCS/ts_readf.c,v 1.5 1997/09/09 08:42:25 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1997/09/09 08:42:25 $
+d13 1
+a13 1
+"$Id: ts_readf.c,v 1.5 1997/09/09 08:42:25 schj Exp $";
+@
+
+
+1.5
+log
+@0.99e version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99c/src/ts/RCS/ts_readf.c,v 1.4 1997/04/10 08:51:24 schj Sta $ */
+d5 1
+a5 1
+ *  $Date: 1997/04/10 08:51:24 $
+d13 1
+a13 1
+"$Id: ts_readf.c,v 1.4 1997/04/10 08:51:24 schj Sta $";
+@
+
+
+1.4
+log
+@added RCSid
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99c/src/ts/RCS/ts_readf.c,v 1.3 1997/04/09 20:37:32 schj Sta $ */
+d5 1
+a5 1
+ *  $Date: 1997/04/09 20:37:32 $
+d9 1
+a9 1
+#include <malloc.h>
+d13 1
+a13 1
+"$Id: ts_time.c,v 1.2 1997/04/09 20:38:06 schj Sta $";
+@
+
+
+1.3
+log
+@updated comment
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/ts/RCS/ts_time.c,v 1.1 1996/11/05 15:04:34 schj Alpha $ */
+d3 1
+a3 1
+/*  $RCSfile: ts_time.c,v $
+d5 1
+a5 1
+ *  $Date: 1996/11/05 15:04:34 $
+d12 3
+d69 1
+a69 1
+		fprintf(stderr,"ts_readf.c: read %d points\n",i);
+@
+
+
+1.2
+log
+@Updated to Alpha version
+@
+text
+@d1 7
+d12 3
+a14 2
+/*-
+ * XY *ts_readf(int *points, FILE *datfile, char *prgname, int verbose)
+d16 7
+a22 5
+ *	ts_readf reads a ts datafile and returns a pointer to an XY structure.
+ *	Points will contain the number of points read. If verbose >0 
+ *	comments in the datafile will be send to stderr. If verbose >1
+ *	some file statistics will be printed as well. If verbose > 2
+ *	even more will be printed.
+d26 2
+a27 1
+*ts_readf(int *points,FILE *datfile,char *prgname,int verbose)
+d29 32
+a60 19
+XY	*xy=(XY *)NULL;
+XY	*ttxy;
+int	ret;
+int	done=0;
+int	step=1024;
+char	s[1024];
+int	i=0;
+int	j=0;
+
+      while ((ret = ts_getinput (datfile, s)) != EOF)
+	{
+	  j++; /* Total nr of lines, including comments */
+	  if (ret == INP_OTHER)
+	    {
+	      i++;
+	      if (i == 1)
+		{
+		  xy = (XY *) ts_memory ((void *) xy, step * (sizeof (XY)),prgname);
+		  done = step;
+a61 21
+	      else if (i > done)
+		{
+		  xy = (XY *) ts_memory ((void *) xy, (step + done) * sizeof (XY),prgname);
+		  done = done + step;
+		}
+	      if ((ttxy = ts_getxy (s, (XY *) NULL))==(XY *)NULL){
+		(void)fprintf(stderr,"%s: Error in input, line %d\n",prgname,j);
+		free(xy);
+		exit(1);
+	      }else{
+	         xy[i - 1].y =  ttxy->y;
+	         xy[i - 1].x =  ttxy->x;
+	     }
+	    }
+	  else
+	    {
+	      if (verbose>1) /* Copy comments to screen */
+		{
+		  (void)fprintf(stderr,"comment: %s\n", s);
+		}
+	    }
+d64 6
+a69 3
+      *points=i; /* actual data points */
+      if (verbose)
+	      fprintf(stderr,"ts_readf.c: read %d points\n",i);
+d71 1
+a71 1
+      return xy;
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 1
+a1 1
+#include "../include/ts.h"
+d6 1
+a6 1
+ *	XY *ts_readf(int *points, FILE *datfile, char *prgname, int verbose)
+d16 1
+a16 5
+*ts_readf(points,datfile,prgname,verbose)
+int	*points;
+FILE	*datfile;
+char	*prgname;
+int	verbose;
+d22 1
+a22 1
+int	step=528;
+d47 4
+a50 2
+	      }else
+	         xy[i - 1] =  *ttxy;
+d54 1
+a54 1
+	      if (verbose) /* Copy comments to screen */
+d62 1
+a62 1
+      if (verbose >1)
+@

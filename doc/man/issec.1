@@ -1,0 +1,106 @@
+.TH issec 1 "Version VERSION"
+.ds -- \-\^\-
+.ds b[ \fR[\|\fP
+.ds b] \fR\|]\fP
+
+.SH NAME
+issec \- test for existance of a section in an vamps input/output file
+
+.SH SYNOPSIS
+.B issec
+.B \*(b[\*(--help\*(b]
+.B \*(b[\*(--Header\*(b]
+.B \*(b[\*(--copyright\*(b]
+.B \*(b[\*(--license\*(b]
+.BI \*(b[\*(--section\   section\*(b]
+.BI \*(b[\*(--Comment\   commentchar\*(b]
+.B \*(b[\*(--exit\*(b]
+.I filename
+
+.SH DESCRIPION
+.B issec
+can be used to test the existance of a section in a 
+.B vamps
+input/output file.
+.B issec
+output a singe '1' if a section is not found and a '0' if
+the section is found.
+
+Input is read from either 
+.I filename
+or standard input. If
+.I filename
+is specified as a single dash
+.RB `` \- '',
+it is taken from standard input. Output is written to the standard
+output. 
+
+
+.SH OPTIONS
+Options may be given as either standard
+one-letter options, or GNU style long options. Long options start with
+two dashes
+.RB `` \*(-- ''
+and may be truncated to any unambiguous abbreviation.
+
+.TP
+.B \*(--copyright
+Show copyright information and exit
+
+.TP
+.B \*(--Header
+Omit header from the output.
+
+.TP
+.B \*(--license
+Print license information and exit.
+
+.TP
+.B \*(--help
+Print help text and exit.
+
+.TP
+.BI \*(--section\   section
+Specify the name of the section to search for. 
+
+.TP
+.BI \*(--Comment\   commentchar
+Set the commentchar to char
+.I commentchar.
+
+.TP
+.B \*(--exit
+Don't produce any output but set the exitlevel (for use in scrips etc.).
+The level is set to 1 if
+.I section
+is not found.
+If the section is found, the exitlevel is set to 0.
+
+
+
+.SH EXAMPLES
+To check for the existance of the section vamps in the file veluwe.inp:
+.br
+.B issec \-s vamps veluwe.inp
+
+The following example uses the 
+.B \-e
+option and the && operator (unix csh) top print a message if the section time
+does exists in the file test.inp:
+.br
+.B issec \-e time test.inp && echo "Section time exists in file test.inp"
+
+    
+.SH SEE ALSO
+.BR vamps (5),
+.BR getstr (1).
+
+
+.SH AUTHOR
+J. Schellekens
+.br
+schj@geo.vu.nl
+
+
+.SH BUGS
+;-)

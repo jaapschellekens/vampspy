@@ -1,0 +1,280 @@
+head	1.7;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.7
+date	99.01.06.12.13.01;	author schj;	state Alpha;
+branches;
+next	1.6;
+
+1.6
+date	99.01.06.12.07.49;	author schj;	state Alpha;
+branches;
+next	1.5;
+
+1.5
+date	97.09.09.08.42.25;	author schj;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	97.04.10.08.51.24;	author schj;	state Sta;
+branches;
+next	1.3;
+
+1.3
+date	97.04.09.20.37.32;	author schj;	state Sta;
+branches;
+next	1.2;
+
+1.2
+date	96.11.05.15.05.04;	author schj;	state Beta;
+branches;
+next	1.1;
+
+1.1
+date	95.12.17.22.00.49;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@input stuff
+@
+
+
+1.7
+log
+@Version: 0.99g
+@
+text
+@/* $Header: /home/schj/src/vamps_0.99g/src/ts.lib/RCS/ts_input.c,v 1.6 1999/01/06 12:07:49 schj Alpha $ */
+
+/*  $RCSfile: ts_input.c,v $
+ *  $Author: schj $
+ *  $Date: 1999/01/06 12:07:49 $
+ */
+
+static char RCSid[] =
+"$Id: ts_input.c,v 1.6 1999/01/06 12:07:49 schj Alpha $";
+
+/*C:ts_getinput
+ *@@int ts_getinput(FILE *fp, char buf[])
+ *
+ * Reads line from @@fp@@ into @@buf@@ which is expected at least
+ * @@BUFSIZ@@ large. A possible terminating newline is replaced
+ * by a @@NUL@@ character.
+ * Ret: Retval depends on first character in input line:
+ *@@	INP_COMMENT	'#' comment line
+ *@@	INP_OTHER	any other (data) line
+ *@@	EOF		on end of file;
+ */
+#include <stdlib.h>
+#include "ts.h"
+
+int
+ts_getinput(FILE *fp,char *buf)
+{
+	char	*cp;
+
+	if(fgets(buf, BUFSIZ, fp) == (char *)NULL)
+		return(EOF);
+
+	for(cp = buf; *cp; cp++)
+		if(*cp == '\n')
+			*cp = '\0';
+
+	if(buf[0] == '#')
+		return(INP_COMMENT);
+
+	return(INP_OTHER);
+}
+
+/*C:ts_getxy
+ *@@ XY *ts_getxy(char buf[], XY *xy,int xcol, int ycol)
+ *
+ * Scans the NUL terminated string @@buf@@ for @@xy@@ data values.
+ * If @@*xy != NULL@@, the result is stored at the location it
+ * points to.
+ * Ret: Pointer to type XY holding the result or NULL on error.
+ * Note: Retval points to static memory overwritten at each call.
+ * Current implementation does not check errno.
+ */
+extern double strtod(const char *nptr, char **endptr);
+XY *
+ts_getxy(char *buf,XY *xy,int xcol,int ycol)
+{
+	char	*ept = NULL;
+	static XY	res;
+	int col = 0;
+	double dm;
+
+	ept = buf;
+	do {
+		buf = ept;
+		dm = strtod (buf, &ept);
+		if (col == xcol)
+			res.x = dm;
+		if (col == ycol)
+			res.y = dm;
+		col++;
+	}
+	while (buf != ept);
+
+
+	if(xy) {
+		xy->x = res.x;
+		xy->y = res.y;
+	}
+
+	return(&res);
+}
+@
+
+
+1.6
+log
+@Version: 0.99g
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99e/src/ts.lib/RCS/ts_input.c,v 1.5 1997/09/09 08:42:25 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1997/09/09 08:42:25 $
+d9 1
+a9 1
+"$Id: ts_input.c,v 1.5 1997/09/09 08:42:25 schj Exp $";
+@
+
+
+1.5
+log
+@0.99e version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99c/src/ts/RCS/ts_input.c,v 1.4 1997/04/10 08:51:24 schj Sta $ */
+d5 1
+a5 1
+ *  $Date: 1997/04/10 08:51:24 $
+d9 1
+a9 1
+"$Id: ts_input.c,v 1.4 1997/04/10 08:51:24 schj Sta $";
+@
+
+
+1.4
+log
+@added RCSid
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99c/src/ts/RCS/ts_input.c,v 1.3 1997/04/09 20:37:32 schj Sta $ */
+d5 1
+a5 1
+ *  $Date: 1997/04/09 20:37:32 $
+d9 1
+a9 1
+"$Id: ts_time.c,v 1.2 1997/04/09 20:38:06 schj Sta $";
+@
+
+
+1.3
+log
+@updated comment
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/ts/RCS/ts_time.c,v 1.1 1996/11/05 15:04:34 schj Alpha $ */
+d3 1
+a3 1
+/*  $RCSfile: ts_time.c,v $
+d5 1
+a5 1
+ *  $Date: 1996/11/05 15:04:34 $
+d7 3
+@
+
+
+1.2
+log
+@Updated to Alpha version
+@
+text
+@d1 17
+a17 10
+/* ts_input.c */
+/*-
+ * int ts_getinput(FILE *fp, char buf[])
+ *		Reads line from fp into buf which is expected at least
+ *		BUFSIZ large. A possible terminating newline is replaced
+ *		by a NUL character.
+ *	Ret:	Retval depends on first character in input line:
+ *			INP_COMMENT	'#' comment line
+ *			INP_OTHER	any other (data) line
+ *			EOF		on end of file;
+d40 9
+a48 11
+#ifdef sun
+extern  double strtod(const char *str,const char **ptr);
+#endif
+/*-
+ *	XY *ts_getxy(char buf[], XY *xy)
+ *		Scans the NUL terminated string buf for xy data values.
+ *		If *xy != NULL, the result is stored at the location it
+ *		points to.
+ *	Ret:	Pointer to type XY holding the result or NULL on error.
+ *	Note:	Retval points to static memory overwritten at each call.
+ *		Current implementation does not check errno.
+d50 1
+a50 1
+
+d52 1
+a52 3
+ts_getxy(buf, xy)
+char	*buf;
+XY	*xy;
+d54 1
+a54 1
+	char	*rp;
+d56 14
+a70 8
+	res.x = strtod(buf, &rp);
+	if(rp == buf)
+		return((XY *)NULL);
+
+	buf = rp;
+	res.y = strtod(buf, &rp);
+	if(rp == buf)
+		return((XY *)NULL);
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d3 1
+a3 1
+ *	int ts_getinput(FILE *fp, char buf[])
+d12 2
+a13 1
+#include "../include/ts.h"
+d16 1
+a16 3
+ts_getinput(fp, buf)
+FILE	*fp;
+char	*buf;
+d33 3
+a52 1
+	extern double	strtod();
+@

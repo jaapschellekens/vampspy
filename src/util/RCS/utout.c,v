@@ -1,0 +1,690 @@
+head	1.12;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.12
+date	99.01.06.12.13.01;	author schj;	state Alpha;
+branches;
+next	1.11;
+
+1.11
+date	99.01.06.12.07.49;	author schj;	state Alpha;
+branches;
+next	1.10;
+
+1.10
+date	97.09.09.08.39.10;	author schj;	state Exp;
+branches;
+next	1.9;
+
+1.9
+date	97.01.16.15.08.10;	author schj;	state Exp;
+branches;
+next	1.8;
+
+1.8
+date	96.11.05.14.59.13;	author schj;	state Alpha;
+branches;
+next	1.7;
+
+1.7
+date	96.10.22.17.42.47;	author schj;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	96.03.25.07.55.53;	author schj;	state alpha;
+branches;
+next	1.5;
+
+1.5
+date	96.02.27.11.40.14;	author schj;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	96.01.25.15.05.11;	author schj;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	95.12.17.21.55.05;	author schj;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	95.12.05.03.07.11;	author schj;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	95.10.23.07.52.03;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@output for util stuff
+@
+
+
+1.12
+log
+@Version: 0.99g
+@
+text
+@/* $Header: /home/schj/src/vamps_0.99g/src/util/RCS/utout.c,v 1.11 1999/01/06 12:07:49 schj Alpha $ */
+/* $RCSfile: utout.c,v $
+ *  $Author: schj $
+ *  $Date: 1999/01/06 12:07:49 $
+ */
+
+
+static char RCSid[] =
+"$Id: utout.c,v 1.11 1999/01/06 12:07:49 schj Alpha $";
+
+#include "vamps.h"
+#include "swatsoil.h"
+#include "deffile.h"
+#define  GENOUT "%.6f "
+
+extern double volini;
+
+/*C:utout 
+ *@@void utout(int *tstep)
+ *
+ * Initialize ini type output per timestep
+ */
+void
+utout (int *tstep)
+{
+  (void)fprintf (genoutfile, "[t_%d]\n", *tstep);
+  printfl ("t", data[id.pre].xy[*tstep].x);
+  printfl ("tstep", thiststep);
+  printfl ("precipitation", data[id.pre].xy[*tstep].y);
+  fprintf(genoutfile,"ftoph = %d\n",ftoph);
+}
+
+/*C:printfl 
+ *@@void printfl(const char *des,double fl)
+ *
+ * Prints the double variable @@fl@@ with description @@des@@ 
+ * to the output file
+ */
+void
+printfl (const char *des,double fl)
+{
+  (void)fprintf (genoutfile, "%s=", des);
+  (void)fprintf (genoutfile, GENOUT, fl);
+  (void)fprintf (genoutfile, "\n");
+}
+
+/*C:printint 
+ * void printint(const char *des,int intje)
+ *
+ * Prints the integer variable @@intje@@ with description @@des@@ 
+ * to the output file
+ */
+void
+printint (const char *des,int intje)
+{
+  (void)fprintf (genoutfile, "%s=%d\n", des, intje);
+}
+
+/*C:printcom 
+ *@@void printcom (const char *des)
+ *
+ * prints the comment string @@des@@ to the output file
+ */
+void
+printcom(const char *des)
+{
+  (void)fprintf(genoutfile,"%c%s\n",commchar[0],des);
+}
+
+/*C:printstr
+ *@@void printstr(const char *des,const char *str)
+ *
+ * prints the string @@str@@ with description @@des@@ to the
+ * output file
+ * */
+void
+printstr(const char *des,const char *str)
+{
+  (void)fprintf(genoutfile,"%s=%s\n",des,str);
+}
+
+/*C:printar 
+ *@@void printar(const char *des,double *ar, int pts)
+ *
+ * prints the double array @@ar@@ containing @@pts@@ points with
+ * description @@des@@ to the output file
+ */
+void
+printar (const char *des,double *ar,int pts)
+{
+  int     i;
+
+  (void)fprintf (genoutfile, "%s=", des);
+  for (i = 0; i < pts; i++)
+    {
+      if (!fprintf (genoutfile, GENOUT, ar[i]))
+	Perror (progname,1,1, RCSid, "Could not write to genoutfile", "printar()");
+      if (i % 6 == 0 && i < pts - 1 && i != 0)
+	if (!fprintf (genoutfile, "\\\n"))
+	  Perror (progname,1,1, RCSid, "Could not write to genoutfile", "printar()");
+    }
+  if (!fprintf (genoutfile, "\n"))
+    Perror (progname,1,1, RCSid, "Could not write to genoutfile", "printar()");
+}
+
+/*- 
+ * void openout()
+ *
+ */
+void
+openout ()
+{
+  if (!genoutfile)
+    genoutfile = stdout;
+
+  printstr ("infilename", infilename);
+  (void)fprintf (genoutfile, "\n[initial]\n");
+  printcom("number of steps in modelling");
+  printint ("steps", steps);
+}
+
+/*-
+ * void closeout()
+ *
+ */
+void
+closeout ()
+{
+  if (!fprintf (genoutfile, "\n[final]\n"))
+    Perror (progname,1,1, RCSid, "Could not write to genoutfile", "closeout()");
+  printcom("Summary of water balance:");
+  printfl("precipitation",cumprec);
+  printfl("transpiration",cumtra);
+  printfl("rootextract",rootextract);
+  printfl("interception",cumintc);
+  printfl("est-drainage",cumbot);
+  printfl("drainage",cqbot);
+  printfl("cumtop",cumtop);
+  printfl("lateral_drainage",cumdra);
+  printfl("soilevaporation",cumeva);
+  printfl("initial_storage",volini);
+  printfl("final_storage",volact);
+  printfl("delta_storage",volini-volact);
+  printfl("surface_runoff",surface_runoff);
+  printfl("mass_balance",masbal);
+  printfl("timestep_calls",(double)nrcalls);
+  printfl("nr_it",(double)nr_itter);
+  printfl("nr_tri",(double)nr_tri);
+  printfl("nr_band",(double)nr_band);
+  printfl("nr_hitt",(double)nr_hitt);
+  printfl("nr_sat",(double)nr_sat);
+  printfl("rtime",(double)(endtime-starttime));
+  fflush(genoutfile);
+}
+
+void
+printsum(FILE *thef)
+{
+  fprintf(thef,"Number of calls to timestep: %ld\n",nrcalls);
+  fprintf(thef,"Number of itterations in headcalc: %ld\n",nr_itter);
+  fprintf(thef,"+---------------------------------------------------------------------+\n");
+  fprintf(thef,"Summary:\n");
+  fprintf(thef,"timesteps\t\t\t%d\n",steps);
+  fprintf(thef,"precipitation\t\t\t%g\n",cumprec);
+  fprintf(thef,"potential_transpiration\t\t%g\n",cumtra);
+  fprintf(thef,"rootextract\t\t\t%g\n",rootextract);
+  fprintf(thef,"interception\t\t\t%g\n",cumintc);
+  /*fprintf(thef,"drainage (cumbot)\t\t%g\n",cumbot);*/
+  fprintf(thef,"drainage (cumbot)\t\t%g\n",cumbot);
+  fprintf(thef,"flow through top (cumtop)\t%g\n",cumtop);
+  fprintf(thef,"lateral_drainage\t\t%g\n",cumdra);
+  fprintf(thef,"soilevaporation\t\t\t%g\n",cumeva);
+  fprintf(thef,"initial_storage\t\t\t%g\n",volini);
+  fprintf(thef,"final_storage\t\t\t%g\n",volact);
+  fprintf(thef,"delta_storage\t\t\t%g\n",volini-volact);
+  fprintf(thef,"surface_runoff\t\t\t%g\n",surface_runoff);
+  fprintf(thef,"mass-balance\t\t\t%g\n",masbal);
+  fprintf(thef,"+---------------------------------------------------------------------+\n");
+}
+@
+
+
+1.11
+log
+@Version: 0.99g
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99e/src/util/RCS/utout.c,v 1.10 1997/09/09 08:39:10 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1997/09/09 08:39:10 $
+d9 1
+a9 1
+"$Id: utout.c,v 1.10 1997/09/09 08:39:10 schj Exp $";
+@
+
+
+1.10
+log
+@0.99e version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99c/src/util/RCS/utout.c,v 1.9 1997/01/16 15:08:10 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1997/01/16 15:08:10 $
+d9 1
+a9 1
+"$Id: utout.c,v 1.9 1997/01/16 15:08:10 schj Exp $";
+d97 1
+a97 1
+	Perror (progname,1, RCSid, "Could not write to genoutfile", "printar()");
+d100 1
+a100 1
+	  Perror (progname,1, RCSid, "Could not write to genoutfile", "printar()");
+d103 1
+a103 1
+    Perror (progname,1, RCSid, "Could not write to genoutfile", "printar()");
+d130 1
+a130 1
+    Perror (progname,1, RCSid, "Could not write to genoutfile", "closeout()");
+@
+
+
+1.9
+log
+@layout + stuff
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/util/RCS/utout.c,v 1.8 1996/11/05 14:59:13 schj Alpha $ */
+d4 1
+a4 1
+ *  $Date: 1996/11/05 14:59:13 $
+d7 1
+d9 1
+a9 1
+"$Id: utout.c,v 1.8 1996/11/05 14:59:13 schj Alpha $";
+a11 1
+#include "canopy.h"
+d13 1
+d18 4
+a21 3
+/*- 
+ * void utout(int *tstep)
+ * 	ini type output per timestep
+d27 1
+a27 1
+  printfl ("t", data[preset].xy[*tstep].x);
+d29 1
+d33 2
+a34 2
+/*- 
+ * void printfl(const char *des,double fl)
+d36 2
+d47 1
+a47 1
+/*- 
+d50 2
+d59 2
+a60 2
+/*- 
+ * void printcom (const char *des)
+d62 1
+d67 1
+a67 1
+  (void)fprintf(genoutfile,"%c %s\n",commchar,des);
+d70 6
+d82 2
+a83 2
+/*- 
+ * void printar(const char *des,double *ar, int pts)
+d85 2
+d116 1
+d150 1
+a179 19
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@
+
+
+1.8
+log
+@Updated to Alpha version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/util/RCS/utout.c,v 1.7 1996/10/22 17:42:47 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1996/10/22 17:42:47 $
+d8 1
+a8 1
+"$Id: utout.c,v 1.7 1996/10/22 17:42:47 schj Exp $";
+d62 5
+d119 3
+a121 1
+  printfl("drainage",cumbot);
+d145 2
+a146 2
+  fprintf(thef,"timesteps\t\t%d\n",steps);
+  fprintf(thef,"precipitation\t\t%g\n",cumprec);
+d148 3
+a150 2
+  fprintf(thef,"rootextract\t\t%g\n",rootextract);
+  fprintf(thef,"interception\t\t%g\n",cumintc);
+d152 1
+a152 1
+  /*fprintf(thef,"drainage (cqbot)\t\t%g\n",cqbot);*/
+d154 6
+a159 6
+  fprintf(thef,"soilevaporation\t\t%g\n",cumeva);
+  fprintf(thef,"initial_storage\t\t%g\n",volini);
+  fprintf(thef,"final_storage\t\t%g\n",volact);
+  fprintf(thef,"delta_storage\t\t%g\n",volini-volact);
+  fprintf(thef,"surface_runoff\t\t%g\n",surface_runoff);
+  fprintf(thef,"mass-balance\t\t%g\n",masbal);
+@
+
+
+1.7
+log
+@added some vars to outlist
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.98/src/util/RCS/utout.c,v 1.6 1996/03/25 07:55:53 schj alpha $ */
+d4 1
+a4 1
+ *  $Date: 1996/03/25 07:55:53 $
+d8 1
+a8 1
+"$Id: utout.c,v 1.6 1996/03/25 07:55:53 schj alpha $";
+d13 1
+a13 1
+#define  GENOUT "%.7f "
+d24 1
+a24 1
+ (void)fprintf (genoutfile, "[time_%d]\n", *tstep);
+@
+
+
+1.6
+log
+@added some vars
+@
+text
+@d1 2
+a2 2
+/* $Header: /home/schj/src/vamps_0.975/src/util/RCS/utout.c,v 1.5 1996/02/27 11:40:14 schj Exp $ */
+/*- $RCSfile: utout.c,v $
+d4 1
+a4 30
+ *  $Date: 1996/02/27 11:40:14 $
+ *  $Log: utout.c,v $
+ *  Revision 1.5  1996/02/27 11:40:14  schj
+ *  updated printsum
+ *  changed to ansi
+ *
+ * Revision 1.4  1996/01/25  15:05:11  schj
+ * changed rounots to surface_runoff
+ *
+ *  Revision 1.3  1995/12/17 21:55:05  schj
+ *  added summary stuff
+ *
+ * Revision 1.1  1995/10/23  07:52:03  schj
+ * Initial revision
+ *
+ * Revision 1.17  1995/10/19  13:05:57  schj
+ * seems to work now
+ *
+ * Revision 1.16  1995/10/03  14:06:53  schj
+ * added ifdef DDEBUG
+ *
+ * Revision 1.15  1995/09/23  20:46:22  schj
+ * added ifdef DDEBUG
+ *
+ * Revision 1.14  1995/09/19  13:41:58  schj
+ * added printint
+ *
+ * Revision 1.13  1995/09/04  11:40:29  schj
+ * added log in RCS header
+ *
+d8 1
+a8 1
+"$Id: utout.c,v 1.5 1996/02/27 11:40:14 schj Exp $";
+d17 2
+a18 1
+/*- void utout(int tstep)
+d22 1
+a22 1
+utout (int tstep)
+d24 2
+a25 3
+  printcom(RCSid);
+  (void)fprintf (genoutfile, "[time_%d]\n", tstep);
+  printfl ("t", data[preset].xy[tstep].x);
+d30 2
+a31 1
+/*- void printfl(char *des,double fl)
+d35 1
+a35 1
+printfl (char *des,double fl)
+d42 2
+a43 1
+/*- void printint(char *des,int intje)
+d47 1
+a47 1
+printint (char *des,int intje)
+d52 2
+a53 1
+/*- void printcom (char *des)
+d57 1
+a57 1
+printcom(char *des)
+d63 2
+a64 1
+/*- void printar(char *des,double *ar, int pts)
+d68 1
+a68 1
+printar (char *des,double *ar,int pts)
+d85 2
+a86 1
+/*- void openout()
+d107 1
+a107 1
+  if (!fprintf (genoutfile, "[final]\n"))
+d115 1
+d123 6
+a128 1
+  printfl("itterations",(double)nr_itter);
+d144 2
+a145 1
+  fprintf(thef,"drainage (cqbot)\t\t%g\n",cqbot);
+d154 19
+@
+
+
+1.5
+log
+@updated printsum
+changed to ansi
+@
+text
+@d1 1
+a1 1
+/* $Header: /homes/schj/src/vamps_0.96/src/util/RCS/utout.c,v 1.4 1996/01/25 15:05:11 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1996/01/25 15:05:11 $
+d6 4
+d37 1
+a37 1
+"$Id: utout.c,v 1.4 1996/01/25 15:05:11 schj Exp $";
+d143 4
+a146 1
+  printfl("surface_runoff",runots);
+d154 1
+a154 1
+  fprintf(thef,"+------------------------------------------------------------------+\n");
+d169 1
+a169 1
+  fprintf(thef,"+------------------------------------------------------------------+\n");
+@
+
+
+1.4
+log
+@changed rounots to surface_runoff
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.96/src/util/RCS/utout.c,v 1.3 1995/12/17 21:55:05 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/12/17 21:55:05 $
+d6 3
+a11 3
+ *  Revision 1.2  1995/12/05 03:07:11  schj
+ *  *** empty log message ***
+ *
+d33 1
+a33 1
+"$Id: utout.c,v 1.3 1995/12/17 21:55:05 schj Exp $";
+d46 1
+a46 2
+utout (tstep)
+int     tstep;
+d50 3
+a52 1
+  printfl ("t", t);
+d59 1
+a59 3
+printfl (des, fl)
+char   *des;
+double  fl;
+d70 1
+a70 3
+printint (des, intje)
+char   *des;
+int     intje;
+d79 1
+a79 2
+printcom(des)
+char *des;
+d89 1
+a89 4
+printar (des, ar, pts)
+char   *des;
+double *ar;
+int     pts;
+d143 1
+a143 2
+printsum(thef)
+FILE *thef;
+d145 3
+d154 2
+a155 2
+  fprintf(thef,"drainage\t\t%g\n",cumbot);
+  fprintf(thef,"drainage\t\t%g\n",cqbot);
+d161 2
+@
+
+
+1.3
+log
+@added summary stuff
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.95/src/util/RCS/utout.c,v 1.2 1995/12/05 03:07:11 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/12/05 03:07:11 $
+d6 3
+d33 1
+a33 1
+"$Id: utout.c,v 1.2 1995/12/05 03:07:11 schj Exp $";
+d165 1
+a165 1
+  fprintf(thef,"surface_runoff\t\t%g\n",runots);
+@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@d1 1
+a1 1
+/* $Header: /homes/schj/src/vamps_0.91/RCS/utout.c,v 1.1 1995/10/23 07:52:03 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/10/23 07:52:03 $
+d6 3
+d30 1
+a30 1
+"$Id: utout.c,v 1.1 1995/10/23 07:52:03 schj Exp $";
+d37 1
+d133 30
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 2
+a2 2
+/* $Header: /home/schj/src/vamps_0.9/soil/RCS/soilout.c,v 1.17 1995/10/19 13:05:57 schj Exp $ */
+/*- $RCSfile: soilout.c,v $
+d4 5
+a8 2
+ *  $Date: 1995/10/19 13:05:57 $
+ *  $Log: soilout.c,v $
+d27 1
+a27 1
+"$Id: soilout.c,v 1.17 1995/10/19 13:05:57 schj Exp $";
+d29 3
+a31 3
+#include "../include/vamps.h"
+#include "../include/canopy.h"
+#include "../include/swatsoil.h"
+@

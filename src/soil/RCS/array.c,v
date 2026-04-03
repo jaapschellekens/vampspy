@@ -1,0 +1,276 @@
+head	1.6;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.6
+date	99.01.06.12.13.01;	author schj;	state Alpha;
+branches;
+next	1.5;
+
+1.5
+date	99.01.06.12.07.49;	author schj;	state Alpha;
+branches;
+next	1.4;
+
+1.4
+date	97.09.09.08.39.39;	author schj;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	97.01.16.15.03.09;	author schj;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	96.11.05.15.01.23;	author schj;	state Alpha;
+branches;
+next	1.1;
+
+1.1
+date	96.10.22.17.52.52;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@initialize soil arrays for use with S-Lang
+@
+
+
+1.6
+log
+@Version: 0.99g
+@
+text
+@/* $Header: /home/schj/src/vamps_0.99g/src/soil/RCS/array.c,v 1.5 1999/01/06 12:07:49 schj Alpha $ */
+/*  $RCSfile: array.c,v $
+ *  $Author: schj $
+ *  $Date: 1999/01/06 12:07:49 $
+ */
+
+static char RCSid[] =
+"$Id: array.c,v 1.5 1999/01/06 12:07:49 schj Alpha $";
+
+#include <math.h>
+#include <stdlib.h>
+#include "vamps.h"
+#include "deffile.h"
+#include "swatsoil.h"
+#include "marquard.h"
+#include "soils.h"
+
+#ifdef HAVE_LIBSLANG
+static int done=0;
+
+/*+
+  Name:make_Slang_soil_arrays
+  Prototype: void make_Slang_soil_arrays(void)
+  Description: Make soil arrays visable within S-Lang
+  Returns: nothing
++*/
+void
+make_Slang_soil_arrays(void)
+{
+
+	if (!done && !noslang){
+		if ((NULL == SLang_add_array ("k",   /* slang name */
+					      (long *)k,   /* location of the array */
+					      1,      /* number of dimensions */
+					      layers,    /* number of elements in X direction */
+					      0, 0,   /* Number in Y and Z directions */
+					      'f',    /* FLoating point array */
+					      SLANG_IVARIABLE)))   /* Read/Write array */
+			Perror(progname,1,0,RCSid,"Failed to add array","k");
+		if ((NULL == SLang_add_array ("h",   /* slang name */
+					      (long *)h,   /* location of the array */
+					      1,      /* number of dimensions */
+					      layers,    /* number of elements in X direction */
+					      0, 0,   /* Number in Y and Z directions */
+					      'f',    /* FLoating point array */
+					      SLANG_IVARIABLE)))   /* Read/Write array */
+			Perror(progname,1,0,RCSid,"Failed to add array","h");
+		if ((NULL == SLang_add_array ("theta",   /* slang name */
+					      (long *)theta,   /* location of the array */
+					      1,      /* number of dimensions */
+					      layers,    /* number of elements in X direction */
+					      0, 0,   /* Number in Y and Z directions */
+					      'f',    /* FLoating point array */
+					      SLANG_IVARIABLE)))   /* Read/Write array */
+			Perror(progname,1,0,RCSid,"Failed to add array","theta");
+		if ((NULL == SLang_add_array ("diffmoist",   /* slang name */
+					      (long *)diffmoist,   /* location of the array */
+					      1,      /* number of dimensions */
+					      layers,    /* number of elements in X direction */
+					      0, 0,   /* Number in Y and Z directions */
+					      'f',    /* FLoating point array */
+					      SLANG_IVARIABLE)))   /* Read/Write array */
+			Perror(progname,1,0,RCSid,"Failed to add array","diffmoist");
+		if ((NULL == SLang_add_array ("depth",   /* slang name */
+					      (long *)z,   /* location of the array */
+					      1,      /* number of dimensions */
+					      layers,    /* number of elements in X direction */
+					      0, 0,   /* Number in Y and Z directions */
+					      'f',    /* FLoating point array */
+					      SLANG_IVARIABLE)))   /* Read/Write array */
+			Perror(progname,1,0,RCSid,"Failed to add array","depth");
+	}
+	done++;
+}
+#endif
+@
+
+
+1.5
+log
+@Version: 0.99g
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99e/src/soil/RCS/array.c,v 1.4 1997/09/09 08:39:39 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1997/09/09 08:39:39 $
+d8 1
+a8 1
+"$Id: array.c,v 1.4 1997/09/09 08:39:39 schj Exp $";
+@
+
+
+1.4
+log
+@0.99e version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99c/src/soil/RCS/array.c,v 1.3 1997/01/16 15:03:09 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1997/01/16 15:03:09 $
+d8 1
+a8 1
+"$Id: array.c,v 1.3 1997/01/16 15:03:09 schj Exp $";
+d39 1
+a39 1
+			Perror(progname,1,RCSid,"Failed to add array","k");
+d47 1
+a47 1
+			Perror(progname,1,RCSid,"Failed to add array","h");
+d55 1
+a55 1
+			Perror(progname,1,RCSid,"Failed to add array","theta");
+d63 1
+a63 1
+			Perror(progname,1,RCSid,"Failed to add array","diffmoist");
+d71 1
+a71 1
+			Perror(progname,1,RCSid,"Failed to add array","depth");
+@
+
+
+1.3
+log
+@added comments
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/soil/RCS/array.c,v 1.2 1996/11/05 15:01:23 schj Alpha $ */
+d4 1
+a4 1
+ *  $Date: 1996/11/05 15:01:23 $
+d8 1
+a8 1
+"$Id: array.c,v 1.2 1996/11/05 15:01:23 schj Alpha $";
+a10 1
+#include <malloc.h>
+d18 1
+a18 1
+#ifndef NOSLANG
+d31 43
+a73 43
+if (!done && !noslang){
+if ((NULL == SLang_add_array ("k",   /* slang name */
+                                 (long *)k,   /* location of the array */
+                                 1,      /* number of dimensions */
+                                 layers,    /* number of elements in X direction */
+                                 0, 0,   /* Number in Y and Z directions */
+                                 'f',    /* FLoating point array */
+                                 SLANG_IVARIABLE)))   /* Read/Write array */
+  Perror(progname,1,RCSid,"Failed to add array","k");
+if ((NULL == SLang_add_array ("h",   /* slang name */
+                                 (long *)h,   /* location of the array */
+                                 1,      /* number of dimensions */
+                                 layers,    /* number of elements in X direction */
+                                 0, 0,   /* Number in Y and Z directions */
+                                 'f',    /* FLoating point array */
+                                 SLANG_IVARIABLE)))   /* Read/Write array */
+  Perror(progname,1,RCSid,"Failed to add array","h");
+if ((NULL == SLang_add_array ("theta",   /* slang name */
+			      (long *)theta,   /* location of the array */
+			      1,      /* number of dimensions */
+			      layers,    /* number of elements in X direction */
+			      0, 0,   /* Number in Y and Z directions */
+			      'f',    /* FLoating point array */
+			      SLANG_IVARIABLE)))   /* Read/Write array */
+  Perror(progname,1,RCSid,"Failed to add array","theta");
+if ((NULL == SLang_add_array ("diffmoist",   /* slang name */
+			      (long *)diffmoist,   /* location of the array */
+			      1,      /* number of dimensions */
+			      layers,    /* number of elements in X direction */
+			      0, 0,   /* Number in Y and Z directions */
+			      'f',    /* FLoating point array */
+			      SLANG_IVARIABLE)))   /* Read/Write array */
+  Perror(progname,1,RCSid,"Failed to add array","diffmoist");
+if ((NULL == SLang_add_array ("depth",   /* slang name */
+			      (long *)z,   /* location of the array */
+			      1,      /* number of dimensions */
+			      layers,    /* number of elements in X direction */
+			      0, 0,   /* Number in Y and Z directions */
+			      'f',    /* FLoating point array */
+			      SLANG_IVARIABLE)))   /* Read/Write array */
+  Perror(progname,1,RCSid,"Failed to add array","depth");
+  }
+  done++;
+@
+
+
+1.2
+log
+@Updated to Alpha version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/soil/RCS/array.c,v 1.1 1996/10/22 17:52:52 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1996/10/22 17:52:52 $
+d8 1
+a8 1
+"$Id: array.c,v 1.1 1996/10/22 17:52:52 schj Exp $";
+d22 6
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 2
+a2 2
+/* $Header: /homes/schj/src/vamps_0.98/src/soil/RCS/swatsoil.c,v 1.25 1996/04/09 12:08:16 schj Exp $ */
+/*  $RCSfile: swatsoil.c,v $
+d4 1
+a4 1
+ *  $Date: 1996/04/09 12:08:16 $
+d8 1
+a8 1
+"$Id: swatsoil.c,v 1.25 1996/04/09 12:08:16 schj Exp $";
+@

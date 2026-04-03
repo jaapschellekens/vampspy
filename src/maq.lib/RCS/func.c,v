@@ -1,0 +1,328 @@
+head	1.6;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.6
+date	99.01.06.12.13.01;	author schj;	state Alpha;
+branches;
+next	1.5;
+
+1.5
+date	99.01.06.12.07.49;	author schj;	state Alpha;
+branches;
+next	1.4;
+
+1.4
+date	97.09.09.08.42.42;	author schj;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	96.11.05.15.07.59;	author schj;	state Alpha;
+branches;
+next	1.2;
+
+1.2
+date	95.11.14.20.37.35;	author schj;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	95.11.14.20.30.14;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@Function stuff and interface
+@
+
+
+1.6
+log
+@Version: 0.99g
+@
+text
+@/* $Header: /home/schj/src/vamps_0.99g/src/maq.lib/RCS/func.c,v 1.5 1999/01/06 12:07:49 schj Alpha $ */
+/*
+ *  $RCSfile: func.c,v $
+ *  $Author: schj $
+ *  $Date: 1999/01/06 12:07:49 $
+ */
+/*
+ * The function should set rv[1..mm] according to:
+ *	rv[n] = Ycol-(how to get Ycol)
+ *	examp:  rv[i] = data[1]-(data[0]*par[1]+par[2])
+ *	which is a straight line. with x values in col0 and y
+ *	values in col1.
+ *	The parameters (par[1]..par[n]) are optimized in the fitting procedure
+ */
+
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include "marquard.h"
+
+
+int  (*allfunc) (double par[],int mmm, int nnn) = NULL;	/* This should point to your own function */
+int func_error = 0;
+
+int
+Funct (int m,int  n,double  par[],double  *rv)
+{
+  /* This is default, here the user supplies the *rv array */
+  if (allfunc != NULL)
+	  return  allfunc(par, m, n);
+  else
+	  return -1;
+}
+
+#ifdef HAVE_LIBSLANG
+int sluser(double *npar, int mmm, int nnn)
+{
+  int ret = -99;
+
+  SLang_push_user_object((SLuser_Object_Type *)SLcreate_array((char *)npar, 1, nnn + 1, 0, 0, 'f', 0));
+  SLang_push_integer(mmm);
+  SLang_push_integer(nnn);
+  if (!SLang_execute_function("fitf")){
+    fprintf(stderr,"Error: Function fitf not defined\n");
+    return -1;
+  }
+  
+  if (SLang_pop_integer(&ret) == 0)
+	  return ret;
+  else{
+    	  fprintf(stderr,"Error: empty stack: %d\n",ret);
+	  return -1;
+  }
+}
+#endif
+@
+
+
+1.5
+log
+@Version: 0.99g
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99e/src/maq.lib/RCS/func.c,v 1.4 1997/09/09 08:42:42 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1997/09/09 08:42:42 $
+@
+
+
+1.4
+log
+@0.99e version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/maq/RCS/func.c,v 1.3 1996/11/05 15:07:59 schj Alpha $ */
+d5 1
+a5 1
+ *  $Date: 1996/11/05 15:07:59 $
+a39 1
+  /*SLang_push_user_object(SLcreate_array((char *)npar, 1, mmm + 1, 0, 0, 'f', 0));*/
+@
+
+
+1.3
+log
+@Updated to Alpha version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.96/src/maq/RCS/func.c,v 1.2 1995/11/14 20:37:35 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1995/11/14 20:37:35 $
+d8 3
+a10 7
+ * This file contains the function that marquardt should fit. Either
+ * a hard coded one,  a pointer to a function (set (*func)() to your
+ * own function), or a string, which will then be processed by
+ * the function parser.
+ * The function should have the following form:
+ *	Ycol-(how to get Ycol)
+ *	examp:  data[1]-(data[0]*par[1]+par[2])
+a14 14
+/*
+example of a user defined function:
+
+double ttf(int i,double **par)
+{
+  return (double)(maqdata[i][2]- ((maqdata[i][1]* (*par[1]))+(*par[2])));
+}
+ In your program you simply assign func to your own function
+
+main()
+{
+func=ttf;
+}
+*/
+d22 1
+a22 2
+double  (*func) (int i, double par[]) = NULL;	/* This should point to your own function */
+double  (*allfunc) (double par[]) = NULL;	/* This should point to your own function */
+d25 1
+a25 1
+boolean
+a27 3
+  boolean Result;
+  int     i;
+
+d30 1
+a30 13
+    {
+      allfunc(par);
+    }
+  else if (func != NULL)
+    {
+      for (i = 1; i <= m; i++)
+	{
+	  rv[i] = (double) (*func) ((int) i, par);
+	}
+    }
+ 
+  if (func_error)
+  Result = false;
+d32 1
+a32 3
+  Result = true;
+
+  return Result;
+d35 4
+d40 17
+a56 9
+
+
+
+
+
+
+
+
+
+@
+
+
+1.2
+log
+@added RCS header
+@
+text
+@d1 3
+a3 2
+/* $Header: /homes/schj/src/vamps_0.91/RCS/vamps.c,v 0.20 1995/10/30 13:59:49 schj Exp $ */
+/*- $RCSfile: vamps.c,v $
+d5 1
+a5 2
+ *  $Date: 1995/10/30 13:59:49 $
+ *  $Log: vamps.c,v $
+d22 1
+a22 3
+double ttf(i,par)
+int i;
+double *par;
+d24 1
+a24 1
+  return (double)(maqdata[i][2]- ((maqdata[i][1]*par[1])+par[2]));
+a38 1
+#define PARSER "calc"
+d40 2
+a41 1
+double  (*func) __P ((int i, double *par)) = NULL;	/* This should point to your own function */
+d45 1
+a45 4
+Funct (m, n, par, rv)
+int     m, n;
+double *par;
+double *rv;
+a48 4
+  char   *prepstr __P ((int col, int n, int m, char *funcstr));
+  FILE   *parserin;
+  double  ans;
+  char 	s[1024];
+d50 6
+a55 2
+
+  if (func != NULL)
+a61 27
+  else if (strcmp (funcstr, "nothing") == 0)
+    {				/* use hardcoded function*/
+      for (i = 1; i <= m; i++)
+	rv[i] = maqdata[i][2] - ((maqdata[i][1] * par[1]) + par[2]);
+    }
+  else
+    {				/* use user defined function (parse)*/
+      if ((parserin = popen (PARSER, "rw")) == NULL)
+	{
+	  fprintf (stderr, "Could not %s\n", PARSER);
+	  exit (1);
+	}
+      else
+	{
+	  for (i = 1; i <= m; i++)
+	    {
+	      strcpy(s,prepstr (2, n, i, funcstr));
+	      fprintf(stderr,"%s\n",s);
+	      fprintf (parserin, "%s\n", s);
+	      fgets(s,1024,parserin);
+	      fprintf(stderr,"%s\n",s);
+	      ans = atof (s);
+	      rv[i] = ans;
+	    }
+	  pclose (parserin);
+	}
+    }
+a70 10
+char
+*prepstr (cols, n, pt, s)
+int     cols, n, pt;
+char   *s;
+{
+  int     i;
+  char    tt[1024];
+  char    ttt[1024];
+  char    *ss;
+  char   *strrep __P ((char *s, char *rep, char *with));
+a71 2
+  ss = (char *) memory (NULL,strlen(s)*sizeof(int),"func.c");
+  strcpy (ss, s);
+a72 6
+  for (i = 1; i <= n; i++)
+    {
+      sprintf (tt, "par[%d]", i);
+      sprintf (ttt, "%f", par[i]);
+      strcpy (ss, strrep (ss, tt, ttt));
+    }
+a73 6
+  for (i = 1; i <= cols; i++)
+    {
+      sprintf (tt, "maqdata[%d]", i);
+      sprintf (ttt, "%f", maqdata[pt][i]);
+      strcpy (ss, strrep (ss, tt, ttt));
+    }
+d75 6
+a80 2
+  return ss;
+}
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 6
+@

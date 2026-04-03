@@ -1,0 +1,237 @@
+head	1.1;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.1
+date	97.04.07.19.43.25;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@meteo utils to calc e_s etc..
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/* $Header: /home/schjpriv/schj/src/vamps_0.99c/src/topsys/script.c,v 1.1 1997/04/02 06:44:49 schj Exp $ */
+
+/* $RCSfile: script.c,v $
+ * $Author: schj $
+ * $Date: 1997/04/02 06:44:49 $ */
+
+/* metut.c Assorted meteorological functions to estimate
+ * evapo(trans)piration.  Most have been
+ * translated from Pascal (provided by Arnoud F) to C
+ *
+ * Jaap Schellekens */
+
+#include <math.h>
+#include <float.h>
+#include "metut.h"
+
+#define TOCM 8640.0
+
+/*C:eaes
+ *@@void  eaes(double td,double rh,double *ea, double *es)
+ *
+ * Determines saturation vapour pressure (ea) and actual vapour
+ * presssure (ea) from relative humidity and dry bulb temperature. es
+ * is calculated according to Bringfeld 1986. Relative humidity should
+ * be in % and dry bulb temp in degrees Celcius.  */
+void
+eaes(double td,double rh,double *ea, double *es)
+{
+	double tkel;
+
+	tkel = td + 273.15;     /* T in degrees Kelvin*/
+
+	/* es according to Bringfelt 1986 */
+        *es = exp(log(10.0) * (10.79574 * (1 - 273.15 / (tkel)) -
+          5.028 * log((tkel) / 273.15) / log(10.0) +
+          1.50475e-4 * (1 - exp(log(10.0) * -8.2969 *
+                  ((tkel) / 273.15 - 1))) + 0.42873e-3 * exp(
+              log(10.0) * 4.76955 * (1 - 273.15 / (tkel))) + 0.78614));
+
+	/* now calculate ea from rh in % */
+	*ea = rh * (*es) / 100.0;
+}
+
+
+/*C:vslope
+ *@@double vslope(double Td,double es);
+ *
+ * Calculates the slope of the saturation vapour pressure curve from es
+ * (vapour pressure at saturation) and dry bulb temp for use in Penman
+ * Eo and Penman-Montheith.  Required input: Td (dry bulb temp [oC]), es
+ *
+ * Returns: slope of the vapour pressure curve
+ */
+double 
+vslope(double Td,double es)
+{
+	double tkev;
+
+	tkev = Td + 273.15;     /* T in  Kelvin */
+
+	/* return Slope in mb */
+  	return  (es * (10.79574 / 0.4343 * (273.15 / (tkev * tkev)) -
+	5.028 / (tkev) + 1.50475e-4 * 8.2969 / (0.4343 * 0.4343) /
+	    273.15 * exp(log(10.0) * 8.2969 * (1 - (tkev) / 273.15)) +
+	0.42873e-3 * 4.76955 / (0.4343 * 0.4343) * 273.15 / (tkev * tkev) *
+	  exp(log(10.0) * 4.76955 * (1 - 273.15 / (tkev)))));
+}
+
+/*C:gamma
+ *@@double gamma(double td, double lambda)
+ *
+ * Calculates the psychometric constant ([$mbar/{}^o K$]) It assumes
+ * an air pressure of 998mb. Cp is estimated at 1005.0 J/kgK.
+ * Returns: psychrometric constant. See Waterloo 1994 for details.
+ */
+double 
+gamma(double td, double lambda)
+{
+	double p, cp, tkev;
+	
+  	p = 998.0;  		/* pressure in mb */
+  	cp = 1005.0;   		/* J/(kgK) */
+  	tkev = td + 273.15;	/* T in degrees Kelvin */
+	
+  	return  (cp * p)/(0.622 * lambda);   /* mbC*/
+}
+
+/*C:lambda
+ *@@double lambda(double Td)
+ *
+ * Calculates lambda (J/kg) from dry bulb temperature using:
+ *@@ 	lambda = 418.5 * (751.0 - (0.5655 * Td))
+ * Returns lambda @@[J/kg]@@
+ */
+double
+lambda (double Td)
+{
+	return  418.5 * (751.0 - (0.5655 * Td));
+}
+
+/*C:earo
+ *@@double earo(double ea, double es, double u)
+ *
+ * Determines Eearo. See calder1990284 for details
+ * u = mean daily windspeed at 2 m
+ */
+double 
+earo(double ea, double es, double u)
+{
+	return 2.6 * (es - ea) * (1 + 0.537 * u);
+}
+
+/*C:e0a 
+ *@@ double e0a(double Td,double Rs,double sunratio,double
+ *@@ u,double Ea, double Es,double Slope,double Gamma,double L, double earo)
+ *
+ * Calculates pemman e0. This version uses incoming radiation and
+ * sunratio to determine net radiation
+ *
+ * Returns: e0 in mm/day (i think) */
+double 
+e0a(double Td,double Rs,double sunratio,double u,double Ea,double Es,
+    double Slope,double Gamma,double L,double earo)
+{
+	double sigma, r, T4,Rl,Rnet,RadTerm,AerTerm;
+
+	Ea = Ea * 0.1;
+	Es = Es * 0.1;   /* From Mbar To Kpa*/
+	Slope = Slope * 0.1;   
+	Gamma = Gamma * 0.1; 
+	r = 0.06;  /* r=0.06 Is Open Water Albedo */
+	sigma = 5.67e-8;   /* Sigma Is Stefan-Boltzman Constant (W/M2k4)*/
+	T4 = exp(log(Td + 273.15) * 4);
+	Rl = 86400 * sigma * T4 * (0.56 - 0.248 * sqrt(Ea)) * (0.1 + 0.9 * sunratio) / L;
+	/* Rl Is De Langgolvige Stralings Component*/
+	/* 86400 Is Sec. A Day*/
+	Rnet = Rs * 86400 * (1 - r) / L - Rl;   /* Rs As Mean Daily W/M2*/
+	/* Calder, 1990; Evaporation In The Uplands
+	   U=Meandailywindrun (M/S); Es=Meandaily Sat.Vap.Pres. (Kpa);
+	   Ea=Meandaily Actual Vap.Pres. (Kpa)*/
+	RadTerm = Slope * Rnet / (Slope + Gamma);
+	AerTerm = Gamma * earo / (Slope + Gamma);
+	Rl = Rl * L / 86400;
+	/* Slope=*/
+
+	return (Slope * Rnet + Gamma * earo) / (Slope + Gamma);
+}
+
+/*C:I:makkink
+ *@@double makkink(double rad,double Slope,double Gamma)
+ *
+ * calculates reference evaporation according to Makkink
+ * The C1 constant is taken as 0.65 and C2 0.0
+ *
+ * Returns: makkink reference evaporation in mm*/
+double makkink(double rad,double Slope,double Gamma)
+{
+	double C1 = 0.65;
+	double C2 = 0.0;
+	/* 0.1 to calculate mbar to kpa */
+	/* 1000 to calculate m to mm */
+ 	return 1.0/TOCM * (1000 * C1 * (Slope)/(Slope + (Gamma * 0.1)) * rad + C2);
+}
+
+/*C:e0b
+ *@@double e0b(double Td,double Rs,double Rsout,double Rnet,double u,
+ *@@double Ea,double Es,double Slope,double Gamma,double L, double earo)
+ *
+ * Calculates penman open water evaporation using net radiation.
+ * Use ttoher functions to get Gamma, Slope,  L and earo
+ *
+ * Returns: e0 in mm (i think) */
+double
+e0b(double Td, double Rs, double Rsout, double Rnet, double u, double Ea, 
+    double Es, double Slope, double Gamma, double L, double earo)
+{
+	double Rnetopen, r, Rl;
+
+  	Ea = Ea * 0.10;
+  	Es = Ea * 0.10;   	/* from mbar to kPa*/
+  	Slope = Slope * 0.10; 	/* from mbar to kPa*/
+  	Gamma = Gamma * 0.10;  
+  	r = 0.06;   	/* R=0.06 is open water albedo */
+  	Rl = Rs - Rnet - Rsout;
+  	Rnetopen = (Rs * (1 - r) - Rl) * 86400 / L;
+
+  	return (Slope * Rnetopen + Gamma * earo) / (Slope + Gamma);
+}
+
+
+/*C:ra
+ *@@double ra (double z, double z0, double d, double u)
+ *
+ * Calculates ra (aerodynamic resistance) according to:
+ *@@	ra = [ln((z-d)/z0)]^2 /(k^2u)
+ *@@	Where:
+ *@@		d  = displacement height
+ *@@		z  = height of the wind speed measurements
+ *@@		u  = windspeed 
+ *@@		z0 = roughness length
+ *@@		k  = von Karman constant
+ *
+ * Returns: ra */
+double 
+ra (double z, double z0, double d, double u)
+{
+	double k2 = 0.1681;		/* (von Karman constant)^2 */
+	double tt;
+
+	tt = log ((z - d) / z0);
+
+	return ((tt * tt) / k2)/u;
+}
+@

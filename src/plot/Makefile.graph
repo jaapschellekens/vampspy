@@ -1,0 +1,36 @@
+PROG	= graph
+BINDIR	= ${HOME}/bin
+MAN1DIR	= ${HOME}/man/man1
+INSTALL	= install -cs
+
+CC	= cc -O -DTS_HACK
+CFLAGS	= -I../include 
+LDFLAGS	= -L../libplot -lplot -lm 
+RM	= /bin/rm -f
+
+OBJS	= graph.o\
+	getinput.o\
+	getrange.o\
+	scale1.o\
+	matrix.o\
+	draw_frame.o\
+	draw_graph.o\
+	draw_histo.o\
+	ts_time.o\
+	getopt.o
+
+all: ${PROG}
+
+${PROG}: ${OBJS}
+	${CC} ${OBJS} ${LDFLAGS} -o $@
+
+install: ${PROG}
+	${INSTALL} ${PROG} ${BINDIR}
+
+maninstall:
+	cp ${PROG}.1 ${MAN1DIR}
+
+clean:
+	${RM} *.o core *.core ${PROG}
+
+${OBJS}: graph.h

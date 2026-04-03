@@ -1,0 +1,132 @@
+
+
+
+SLDOC(1L)                 USER COMMANDS                 SLDOC(1L)
+
+
+NNAAMMEE
+       sldoc - C/S-Lang command file documentation facility
+
+SSYYNNOOPPSSIISS
+       ssllddoocc --cc _f_i_l_e _._._.
+       ssllddoocc --ii _f_i_l_e _._._.
+       ssllddoocc [--ll|--tt] _n_a_m_e _._._.
+
+
+DDEESSCCRRIIPPTTIIOONN
+       ssllddoocc  is an executable vvaammppss(1L) script which facilitates
+       documentation for  S-Lang  command  (and  C  source  code)
+       files.   Documentation  text is extracted from comments in
+       the command files, which are  usually  placed  in  library
+       directories. All output is printed on standard output.
+
+       The  first  form extracts documentation text from C source
+       code files. If the output is saved in a  file,  that  file
+       can be used by the other forms.
+
+       The second form above builds an index table for use by the
+       third form from the named S-Lang _f_i_l_es (by convention suf-
+       fixed  with  ``..ssll'')  and/or  files  created  with the --cc
+       option. Index files need to be (re)created whenever  docu-
+       mentation  entries (see below) are added to, removed from,
+       or renamed in library files by redirecting the final  out-
+       put to a file named ssllddoocc..iiddxx.
+
+       The third form above prints the documentation text for all
+       _n_a_m_es on standard output, using the index  information  in
+       the  file  ssllddoocc..iiddxx.   A _n_a_m_e is either an S-Lang library
+       command name or the name of a library file, for which  all
+       entries  are then printed. If invoked without options, raw
+       ascii mode is used. The --ll option formats output  for  use
+       with  LLaaTTeeXX;  the  --tt option formats output for use by the
+       ggrrooffff, nnrrooffff and/or ttrrooffff typesetting programs.
+
+   DDooccuummeennttaattiioonn FFoorrmmaatt
+       Documentation text is contained within comment  blocks  in
+       the  appropriate  S-Lang  command  files and follows a few
+       simple conventions outlined below.  See for  examples  the
+       files in the ssllaasshh default library directory.
+
+       ++oo      All  lines in the documentation text contain a per-
+              cent (%%) character at the first position.
+
+       ++oo      The first line specifies the index name in the form
+              %%II::_n_a_m_e and should not contain whitespaces or other
+              text; multiple names in a single entry are  permit-
+              ted.
+
+       ++oo      Initial  space and TAB characters after the percent
+              character are stripped.
+
+
+
+
+sldoc 1.00                   Dec 1996                           1
+
+
+
+
+
+SLDOC(1L)                 USER COMMANDS                 SLDOC(1L)
+
+
+       ++oo      Lines starting with %%@@ are copied verbatim  without
+              adjustment or line filling. Depending on the output
+              mode, typeface may be changed. Initial  spaces  are
+              stripped, but TAB characters are not.
+
+       ++oo      Words  placed inside matching @@ character pairs are
+              printed in the verbatim mode typeface.
+
+       ++oo      A new paragraph is started  by  a  line  containing
+              only  the  percent  character.  Line  space is also
+              inserted before and after verbatim text.
+
+       Documentation text in C source code file is similarly con-
+       tained  in  C comment blocks, except that the percents are
+       replaced by asterikses and the name id is prefixed with  a
+       slash.
+
+FFIILLEESS
+       ssllddoocc..iiddxx  function/file index table
+
+EEXXAAMMPPLLEESS
+       The  following  command  creates  an alphabetically sorted
+       index for all S-Lang command files in the current  working
+       directory:
+
+              sldoc -i *.sl | sort > sldoc.idx
+
+       To  extract  all  documentation  contained in a file named
+       mmyy__lliibb..ssll and format into TeX commands, use:
+
+              sldoc -l my_lib.sl
+
+
+SSEEEE AALLSSOO
+       LLaaTTeeXX, ggrrooffff(1L), nnrrooffff(1), ssllaasshh(1L), vvaammppss(1L), ssoorrtt(1),
+       ttrrooffff(1)
+
+AAUUTTHHOORRSS
+       Raymond Venneker and Jaap Schellekens.
+       This is free software with NO WARRANTY.
+
+BBUUGGSS
+       If  the VAMPSLIB path is not properly set the command will
+       fail.  Otherwise invocation has to be done from within the
+       appropriate library directories.
+
+
+
+
+
+
+
+
+
+
+
+
+sldoc 1.00                   Dec 1996                           2
+
+

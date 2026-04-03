@@ -1,0 +1,8422 @@
+%!PS-Adobe-2.0 EPSF-1.2
+%%Creator: idraw
+%%DocumentFonts: Helvetica
+%%Pages: 1
+%%BoundingBox: 65 114 512 660
+%%EndComments
+
+%%BeginIdrawPrologue
+/arrowhead {
+0 begin
+transform originalCTM itransform
+/taily exch def
+/tailx exch def
+transform originalCTM itransform
+/tipy exch def
+/tipx exch def
+/dy tipy taily sub def
+/dx tipx tailx sub def
+/angle dx 0 ne dy 0 ne or { dy dx atan } { 90 } ifelse def
+gsave
+originalCTM setmatrix
+tipx tipy translate
+angle rotate
+newpath
+arrowHeight neg arrowWidth 2 div moveto
+0 0 lineto
+arrowHeight neg arrowWidth 2 div neg lineto
+patternNone not {
+originalCTM setmatrix
+/padtip arrowHeight 2 exp 0.25 arrowWidth 2 exp mul add sqrt brushWidth mul
+arrowWidth div def
+/padtail brushWidth 2 div def
+tipx tipy translate
+angle rotate
+padtip 0 translate
+arrowHeight padtip add padtail add arrowHeight div dup scale
+arrowheadpath
+ifill
+} if
+brushNone not {
+originalCTM setmatrix
+tipx tipy translate
+angle rotate
+arrowheadpath
+istroke
+} if
+grestore
+end
+} dup 0 9 dict put def
+
+/arrowheadpath {
+newpath
+arrowHeight neg arrowWidth 2 div moveto
+0 0 lineto
+arrowHeight neg arrowWidth 2 div neg lineto
+} def
+
+/leftarrow {
+0 begin
+y exch get /taily exch def
+x exch get /tailx exch def
+y exch get /tipy exch def
+x exch get /tipx exch def
+brushLeftArrow { tipx tipy tailx taily arrowhead } if
+end
+} dup 0 4 dict put def
+
+/rightarrow {
+0 begin
+y exch get /tipy exch def
+x exch get /tipx exch def
+y exch get /taily exch def
+x exch get /tailx exch def
+brushRightArrow { tipx tipy tailx taily arrowhead } if
+end
+} dup 0 4 dict put def
+
+%%EndIdrawPrologue
+
+/arrowHeight 8 def
+/arrowWidth 4 def
+
+/IdrawDict 51 dict def
+IdrawDict begin
+
+/reencodeISO {
+dup dup findfont dup length dict begin
+{ 1 index /FID ne { def }{ pop pop } ifelse } forall
+/Encoding ISOLatin1Encoding def
+currentdict end definefont
+} def
+
+/ISOLatin1Encoding [
+/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef
+/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef
+/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef
+/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef
+/space/exclam/quotedbl/numbersign/dollar/percent/ampersand/quoteright
+/parenleft/parenright/asterisk/plus/comma/minus/period/slash
+/zero/one/two/three/four/five/six/seven/eight/nine/colon/semicolon
+/less/equal/greater/question/at/A/B/C/D/E/F/G/H/I/J/K/L/M/N
+/O/P/Q/R/S/T/U/V/W/X/Y/Z/bracketleft/backslash/bracketright
+/asciicircum/underscore/quoteleft/a/b/c/d/e/f/g/h/i/j/k/l/m
+/n/o/p/q/r/s/t/u/v/w/x/y/z/braceleft/bar/braceright/asciitilde
+/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef
+/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef
+/.notdef/dotlessi/grave/acute/circumflex/tilde/macron/breve
+/dotaccent/dieresis/.notdef/ring/cedilla/.notdef/hungarumlaut
+/ogonek/caron/space/exclamdown/cent/sterling/currency/yen/brokenbar
+/section/dieresis/copyright/ordfeminine/guillemotleft/logicalnot
+/hyphen/registered/macron/degree/plusminus/twosuperior/threesuperior
+/acute/mu/paragraph/periodcentered/cedilla/onesuperior/ordmasculine
+/guillemotright/onequarter/onehalf/threequarters/questiondown
+/Agrave/Aacute/Acircumflex/Atilde/Adieresis/Aring/AE/Ccedilla
+/Egrave/Eacute/Ecircumflex/Edieresis/Igrave/Iacute/Icircumflex
+/Idieresis/Eth/Ntilde/Ograve/Oacute/Ocircumflex/Otilde/Odieresis
+/multiply/Oslash/Ugrave/Uacute/Ucircumflex/Udieresis/Yacute
+/Thorn/germandbls/agrave/aacute/acircumflex/atilde/adieresis
+/aring/ae/ccedilla/egrave/eacute/ecircumflex/edieresis/igrave
+/iacute/icircumflex/idieresis/eth/ntilde/ograve/oacute/ocircumflex
+/otilde/odieresis/divide/oslash/ugrave/uacute/ucircumflex/udieresis
+/yacute/thorn/ydieresis
+] def
+/Helvetica reencodeISO def
+
+/none null def
+/numGraphicParameters 17 def
+/stringLimit 65535 def
+
+/Begin {
+save
+numGraphicParameters dict begin
+} def
+
+/End {
+end
+restore
+} def
+
+/SetB {
+dup type /nulltype eq {
+pop
+false /brushRightArrow idef
+false /brushLeftArrow idef
+true /brushNone idef
+} {
+/brushDashOffset idef
+/brushDashArray idef
+0 ne /brushRightArrow idef
+0 ne /brushLeftArrow idef
+/brushWidth idef
+false /brushNone idef
+} ifelse
+} def
+
+/SetCFg {
+/fgblue idef
+/fggreen idef
+/fgred idef
+} def
+
+/SetCBg {
+/bgblue idef
+/bggreen idef
+/bgred idef
+} def
+
+/SetF {
+/printSize idef
+/printFont idef
+} def
+
+/SetP {
+dup type /nulltype eq {
+pop true /patternNone idef
+} {
+dup -1 eq {
+/patternGrayLevel idef
+/patternString idef
+} {
+/patternGrayLevel idef
+} ifelse
+false /patternNone idef
+} ifelse
+} def
+
+/BSpl {
+0 begin
+storexyn
+newpath
+n 1 gt {
+0 0 0 0 0 0 1 1 true subspline
+n 2 gt {
+0 0 0 0 1 1 2 2 false subspline
+1 1 n 3 sub {
+/i exch def
+i 1 sub dup i dup i 1 add dup i 2 add dup false subspline
+} for
+n 3 sub dup n 2 sub dup n 1 sub dup 2 copy false subspline
+} if
+n 2 sub dup n 1 sub dup 2 copy 2 copy false subspline
+patternNone not brushLeftArrow not brushRightArrow not and and { ifill } if
+brushNone not { istroke } if
+0 0 1 1 leftarrow
+n 2 sub dup n 1 sub dup rightarrow
+} if
+end
+} dup 0 4 dict put def
+
+/Circ {
+newpath
+0 360 arc
+patternNone not { ifill } if
+brushNone not { istroke } if
+} def
+
+/CBSpl {
+0 begin
+dup 2 gt {
+storexyn
+newpath
+n 1 sub dup 0 0 1 1 2 2 true subspline
+1 1 n 3 sub {
+/i exch def
+i 1 sub dup i dup i 1 add dup i 2 add dup false subspline
+} for
+n 3 sub dup n 2 sub dup n 1 sub dup 0 0 false subspline
+n 2 sub dup n 1 sub dup 0 0 1 1 false subspline
+patternNone not { ifill } if
+brushNone not { istroke } if
+} {
+Poly
+} ifelse
+end
+} dup 0 4 dict put def
+
+/Elli {
+0 begin
+newpath
+4 2 roll
+translate
+scale
+0 0 1 0 360 arc
+patternNone not { ifill } if
+brushNone not { istroke } if
+end
+} dup 0 1 dict put def
+
+/Line {
+0 begin
+2 storexyn
+newpath
+x 0 get y 0 get moveto
+x 1 get y 1 get lineto
+brushNone not { istroke } if
+0 0 1 1 leftarrow
+0 0 1 1 rightarrow
+end
+} dup 0 4 dict put def
+
+/MLine {
+0 begin
+storexyn
+newpath
+n 1 gt {
+x 0 get y 0 get moveto
+1 1 n 1 sub {
+/i exch def
+x i get y i get lineto
+} for
+patternNone not brushLeftArrow not brushRightArrow not and and { ifill } if
+brushNone not { istroke } if
+0 0 1 1 leftarrow
+n 2 sub dup n 1 sub dup rightarrow
+} if
+end
+} dup 0 4 dict put def
+
+/Poly {
+3 1 roll
+newpath
+moveto
+-1 add
+{ lineto } repeat
+closepath
+patternNone not { ifill } if
+brushNone not { istroke } if
+} def
+
+/Rect {
+0 begin
+/t exch def
+/r exch def
+/b exch def
+/l exch def
+newpath
+l b moveto
+l t lineto
+r t lineto
+r b lineto
+closepath
+patternNone not { ifill } if
+brushNone not { istroke } if
+end
+} dup 0 4 dict put def
+
+/Text {
+ishow
+} def
+
+/idef {
+dup where { pop pop pop } { exch def } ifelse
+} def
+
+/ifill {
+0 begin
+gsave
+patternGrayLevel -1 ne {
+fgred bgred fgred sub patternGrayLevel mul add
+fggreen bggreen fggreen sub patternGrayLevel mul add
+fgblue bgblue fgblue sub patternGrayLevel mul add setrgbcolor
+eofill
+} {
+eoclip
+originalCTM setmatrix
+pathbbox /t exch def /r exch def /b exch def /l exch def
+/w r l sub ceiling cvi def
+/h t b sub ceiling cvi def
+/imageByteWidth w 8 div ceiling cvi def
+/imageHeight h def
+bgred bggreen bgblue setrgbcolor
+eofill
+fgred fggreen fgblue setrgbcolor
+w 0 gt h 0 gt and {
+l w add b translate w neg h scale
+w h true [w 0 0 h neg 0 h] { patternproc } imagemask
+} if
+} ifelse
+grestore
+end
+} dup 0 8 dict put def
+
+/istroke {
+gsave
+brushDashOffset -1 eq {
+[] 0 setdash
+1 setgray
+} {
+brushDashArray brushDashOffset setdash
+fgred fggreen fgblue setrgbcolor
+} ifelse
+brushWidth setlinewidth
+originalCTM setmatrix
+stroke
+grestore
+} def
+
+/ishow {
+0 begin
+gsave
+fgred fggreen fgblue setrgbcolor
+/fontDict printFont printSize scalefont dup setfont def
+/descender fontDict begin 0 [FontBBox] 1 get FontMatrix end
+transform exch pop def
+/vertoffset 1 printSize sub descender sub def {
+0 vertoffset moveto show
+/vertoffset vertoffset printSize sub def
+} forall
+grestore
+end
+} dup 0 3 dict put def
+/patternproc {
+0 begin
+/patternByteLength patternString length def
+/patternHeight patternByteLength 8 mul sqrt cvi def
+/patternWidth patternHeight def
+/patternByteWidth patternWidth 8 idiv def
+/imageByteMaxLength imageByteWidth imageHeight mul
+stringLimit patternByteWidth sub min def
+/imageMaxHeight imageByteMaxLength imageByteWidth idiv patternHeight idiv
+patternHeight mul patternHeight max def
+/imageHeight imageHeight imageMaxHeight sub store
+/imageString imageByteWidth imageMaxHeight mul patternByteWidth add string def
+0 1 imageMaxHeight 1 sub {
+/y exch def
+/patternRow y patternByteWidth mul patternByteLength mod def
+/patternRowString patternString patternRow patternByteWidth getinterval def
+/imageRow y imageByteWidth mul def
+0 patternByteWidth imageByteWidth 1 sub {
+/x exch def
+imageString imageRow x add patternRowString putinterval
+} for
+} for
+imageString
+end
+} dup 0 12 dict put def
+
+/min {
+dup 3 2 roll dup 4 3 roll lt { exch } if pop
+} def
+
+/max {
+dup 3 2 roll dup 4 3 roll gt { exch } if pop
+} def
+
+/midpoint {
+0 begin
+/y1 exch def
+/x1 exch def
+/y0 exch def
+/x0 exch def
+x0 x1 add 2 div
+y0 y1 add 2 div
+end
+} dup 0 4 dict put def
+
+/thirdpoint {
+0 begin
+/y1 exch def
+/x1 exch def
+/y0 exch def
+/x0 exch def
+x0 2 mul x1 add 3 div
+y0 2 mul y1 add 3 div
+end
+} dup 0 4 dict put def
+
+/subspline {
+0 begin
+/movetoNeeded exch def
+y exch get /y3 exch def
+x exch get /x3 exch def
+y exch get /y2 exch def
+x exch get /x2 exch def
+y exch get /y1 exch def
+x exch get /x1 exch def
+y exch get /y0 exch def
+x exch get /x0 exch def
+x1 y1 x2 y2 thirdpoint
+/p1y exch def
+/p1x exch def
+x2 y2 x1 y1 thirdpoint
+/p2y exch def
+/p2x exch def
+x1 y1 x0 y0 thirdpoint
+p1x p1y midpoint
+/p0y exch def
+/p0x exch def
+x2 y2 x3 y3 thirdpoint
+p2x p2y midpoint
+/p3y exch def
+/p3x exch def
+movetoNeeded { p0x p0y moveto } if
+p1x p1y p2x p2y p3x p3y curveto
+end
+} dup 0 17 dict put def
+
+/storexyn {
+/n exch def
+/y n array def
+/x n array def
+n 1 sub -1 0 {
+/i exch def
+y i 3 2 roll put
+x i 3 2 roll put
+} for
+} def
+
+/SSten {
+fgred fggreen fgblue setrgbcolor
+dup true exch 1 0 0 -1 0 6 -1 roll matrix astore
+} def
+
+/FSten {
+dup 3 -1 roll dup 4 1 roll exch
+newpath
+0 0 moveto
+dup 0 exch lineto
+exch dup 3 1 roll exch lineto
+0 lineto
+closepath
+bgred bggreen bgblue setrgbcolor
+eofill
+SSten
+} def
+
+/Rast {
+exch dup 3 1 roll 1 0 0 -1 0 6 -1 roll matrix astore
+} def
+
+%%EndProlog
+
+%I Idraw 10 Grid 3.87522e-34 -1.99973 
+
+%%Page: 1 1
+
+Begin
+%I b u
+%I cfg u
+%I cbg u
+%I f u
+%I p u
+%I t
+[ 0.8 0 0 0.8 0 0 ] concat
+/originalCTM matrix currentmatrix def
+
+Begin %I Text
+%I cfg Black
+0 0 0 SetCFg
+%I f *helvetica-medium-r*-14-*
+Helvetica 14 SetF
+%I t
+[ 1 0 0 1 155.044 360.331 ] concat
+%I
+[
+(Transpiration)
+] Text
+End
+
+Begin %I Text
+%I cfg Black
+0 0 0 SetCFg
+%I f *helvetica-medium-r*-14-*
+Helvetica 14 SetF
+%I t
+[ 1 0 0 1 125.719 181.104 ] concat
+%I
+[
+(06/18/90)
+] Text
+End
+
+Begin %I MLine
+%I b 34952
+1 0 0 [1 3 1 3 1 3 1 3] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 2
+819 410
+819 1229
+2 MLine
+%I 1
+End
+
+Begin %I Text
+%I cfg Black
+0 0 0 SetCFg
+%I f *helvetica-medium-r*-14-*
+Helvetica 14 SetF
+%I t
+[ 1 0 0 1 240.581 181.104 ] concat
+%I
+[
+(07/08/90)
+] Text
+End
+
+Begin %I MLine
+%I b 34952
+1 0 0 [1 3 1 3 1 3 1 3] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 2
+1434 410
+1434 1229
+2 MLine
+%I 1
+End
+
+Begin %I Text
+%I cfg Black
+0 0 0 SetCFg
+%I f *helvetica-medium-r*-14-*
+Helvetica 14 SetF
+%I t
+[ 1 0 0 1 355.256 181.104 ] concat
+%I
+[
+(07/28/90)
+] Text
+End
+
+Begin %I MLine
+%I b 34952
+1 0 0 [1 3 1 3 1 3 1 3] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 2
+2048 410
+2048 1229
+2 MLine
+%I 1
+End
+
+Begin %I Text
+%I cfg Black
+0 0 0 SetCFg
+%I f *helvetica-medium-r*-14-*
+Helvetica 14 SetF
+%I t
+[ 1 0 0 1 469.931 181.104 ] concat
+%I
+[
+(08/17/90)
+] Text
+End
+
+Begin %I MLine
+%I b 34952
+1 0 0 [1 3 1 3 1 3 1 3] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 2
+2662 410
+2662 1229
+2 MLine
+%I 1
+End
+
+Begin %I Text
+%I cfg Black
+0 0 0 SetCFg
+%I f *helvetica-medium-r*-14-*
+Helvetica 14 SetF
+%I t
+[ 1 0 0 1 584.793 181.104 ] concat
+%I
+[
+(09/06/90)
+] Text
+End
+
+Begin %I MLine
+%I b 34952
+1 0 0 [1 3 1 3 1 3 1 3] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 2
+3277 410
+3277 1229
+2 MLine
+%I 1
+End
+
+Begin %I Text
+%I cfg Black
+0 0 0 SetCFg
+%I f *helvetica-medium-r*-14-*
+Helvetica 14 SetF
+%I t
+[ 1 0 0 1 137.708 195.575 ] concat
+%I
+[
+(0)
+] Text
+End
+
+Begin %I MLine
+%I b 34952
+1 0 0 [1 3 1 3 1 3 1 3] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 2
+819 410
+3277 410
+2 MLine
+%I 1
+End
+
+Begin %I Text
+%I cfg Black
+0 0 0 SetCFg
+%I f *helvetica-medium-r*-14-*
+Helvetica 14 SetF
+%I t
+[ 1 0 0 1 126.032 217.427 ] concat
+%I
+[
+(0.5)
+] Text
+End
+
+Begin %I MLine
+%I b 34952
+1 0 0 [1 3 1 3 1 3 1 3] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 2
+819 527
+3277 527
+2 MLine
+%I 1
+End
+
+Begin %I Text
+%I cfg Black
+0 0 0 SetCFg
+%I f *helvetica-medium-r*-14-*
+Helvetica 14 SetF
+%I t
+[ 1 0 0 1 137.708 239.278 ] concat
+%I
+[
+(1)
+] Text
+End
+
+Begin %I MLine
+%I b 34952
+1 0 0 [1 3 1 3 1 3 1 3] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 2
+819 644
+3277 644
+2 MLine
+%I 1
+End
+
+Begin %I Text
+%I cfg Black
+0 0 0 SetCFg
+%I f *helvetica-medium-r*-14-*
+Helvetica 14 SetF
+%I t
+[ 1 0 0 1 126.032 261.13 ] concat
+%I
+[
+(1.5)
+] Text
+End
+
+Begin %I MLine
+%I b 34952
+1 0 0 [1 3 1 3 1 3 1 3] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 2
+819 761
+3277 761
+2 MLine
+%I 1
+End
+
+Begin %I Text
+%I cfg Black
+0 0 0 SetCFg
+%I f *helvetica-medium-r*-14-*
+Helvetica 14 SetF
+%I t
+[ 1 0 0 1 137.708 282.982 ] concat
+%I
+[
+(2)
+] Text
+End
+
+Begin %I MLine
+%I b 34952
+1 0 0 [1 3 1 3 1 3 1 3] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 2
+819 878
+3277 878
+2 MLine
+%I 1
+End
+
+Begin %I Text
+%I cfg Black
+0 0 0 SetCFg
+%I f *helvetica-medium-r*-14-*
+Helvetica 14 SetF
+%I t
+[ 1 0 0 1 126.032 304.834 ] concat
+%I
+[
+(2.5)
+] Text
+End
+
+Begin %I MLine
+%I b 34952
+1 0 0 [1 3 1 3 1 3 1 3] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 2
+819 995
+3277 995
+2 MLine
+%I 1
+End
+
+Begin %I Text
+%I cfg Black
+0 0 0 SetCFg
+%I f *helvetica-medium-r*-14-*
+Helvetica 14 SetF
+%I t
+[ 1 0 0 1 137.708 326.686 ] concat
+%I
+[
+(3)
+] Text
+End
+
+Begin %I MLine
+%I b 34952
+1 0 0 [1 3 1 3 1 3 1 3] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 2
+819 1112
+3277 1112
+2 MLine
+%I 1
+End
+
+Begin %I Text
+%I cfg Black
+0 0 0 SetCFg
+%I f *helvetica-medium-r*-14-*
+Helvetica 14 SetF
+%I t
+[ 1 0 0 1 126.032 348.537 ] concat
+%I
+[
+(3.5)
+] Text
+End
+
+Begin %I MLine
+%I b 34952
+1 0 0 [1 3 1 3 1 3 1 3] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 2
+819 1229
+3277 1229
+2 MLine
+%I 1
+End
+
+Begin %I Rect
+%I b 65535
+1 0 0 [] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I
+819 410 3277 1229 Rect
+End
+
+Begin %I MLine
+%I b 65535
+1 0 0 [] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 200
+1249 410
+1281 410
+1282 410
+1283 410
+1284 410
+1285 410
+1286 410
+1287 410
+1288 410
+1289 410
+1290 414
+1290 415
+1291 426
+1292 529
+1292 519
+1293 534
+1293 568
+1294 588
+1295 586
+1295 598
+1296 599
+1297 555
+1297 573
+1298 644
+1299 620
+1299 612
+1300 581
+1300 466
+1301 440
+1302 427
+1302 422
+1303 410
+1304 410
+1305 410
+1306 410
+1307 410
+1308 410
+1309 410
+1310 410
+1311 410
+1312 410
+1313 410
+1314 410
+1315 410
+1316 410
+1317 410
+1318 410
+1319 410
+1320 410
+1320 414
+1321 429
+1322 515
+1322 539
+1323 526
+1324 500
+1324 558
+1325 523
+1325 572
+1326 668
+1327 713
+1327 648
+1328 685
+1329 585
+1329 626
+1330 610
+1331 583
+1331 561
+1332 541
+1332 433
+1333 421
+1334 410
+1335 410
+1336 410
+1337 410
+1338 410
+1339 410
+1340 410
+1341 410
+1342 410
+1343 410
+1344 410
+1345 410
+1346 410
+1347 410
+1348 410
+1349 410
+1350 410
+1351 414
+1352 421
+1352 500
+1353 535
+1354 574
+1354 620
+1355 636
+1356 669
+1356 694
+1357 708
+1357 700
+1358 711
+1359 708
+1359 686
+1360 691
+1361 671
+1361 615
+1362 575
+1363 565
+1363 439
+1364 424
+1364 410
+1365 410
+1366 410
+1367 410
+1368 410
+1369 410
+1370 410
+1371 410
+1372 410
+1373 410
+1374 410
+1375 410
+1376 410
+1377 410
+1378 410
+1379 410
+1380 410
+1381 410
+1382 413
+1382 419
+1383 520
+1384 569
+1384 612
+1385 687
+1386 700
+1386 694
+1387 717
+1388 743
+1388 790
+1389 738
+1389 753
+1390 641
+1391 619
+1391 588
+1392 607
+1393 575
+1393 434
+1394 425
+1395 410
+1396 410
+1397 410
+1398 410
+1399 410
+1400 410
+1401 410
+1402 410
+1403 410
+1404 410
+1405 410
+1406 410
+1407 410
+1408 410
+1409 410
+1410 410
+1411 410
+1412 410
+1412 414
+1413 418
+1414 501
+1414 546
+1415 546
+1416 658
+1416 718
+1417 786
+1418 736
+1418 686
+1419 616
+1420 683
+1420 592
+1421 720
+1421 686
+1422 648
+1423 626
+1423 611
+1424 436
+1425 421
+1425 419
+1426 410
+1427 410
+1428 410
+1429 410
+1430 410
+1431 410
+1432 410
+1433 410
+1434 410
+1435 410
+1436 410
+1437 410
+1438 410
+1439 410
+1440 410
+200 MLine
+%I 1
+End
+
+Begin %I MLine
+%I b 65535
+1 0 0 [] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 200
+1440 410
+1441 410
+1442 410
+1443 410
+1443 412
+1444 418
+1444 475
+1445 522
+1446 564
+1446 599
+1447 592
+1448 607
+1448 582
+1449 671
+1450 523
+1450 535
+1451 525
+1452 560
+1452 521
+1453 547
+1453 581
+1454 531
+1455 446
+1455 431
+1456 418
+1457 410
+1458 410
+1459 410
+1460 410
+1461 410
+1462 410
+1463 410
+1464 410
+1465 410
+1466 410
+1467 410
+1468 410
+1469 410
+1470 410
+1471 410
+1472 410
+1473 410
+1474 412
+1475 414
+1475 478
+1476 541
+1476 592
+1477 625
+1478 671
+1478 668
+1479 603
+1480 732
+1480 781
+1481 733
+1482 588
+1482 578
+1483 567
+1484 571
+1484 613
+1485 563
+1485 555
+1486 437
+1487 420
+1487 410
+1488 410
+1489 410
+1490 410
+1491 410
+1492 410
+1493 410
+1494 410
+1495 410
+1496 410
+1497 410
+1498 410
+1499 410
+1500 410
+1501 410
+1502 410
+1503 410
+1504 410
+1505 413
+1505 414
+1506 422
+1507 580
+1507 628
+1508 520
+1508 559
+1509 663
+1510 722
+1510 609
+1511 619
+1512 618
+1512 653
+1513 616
+1514 642
+1514 625
+1515 577
+1516 550
+1516 568
+1517 454
+1517 427
+1518 410
+1519 410
+1520 410
+1521 410
+1522 410
+1523 410
+1524 410
+1525 410
+1526 410
+1527 410
+1528 410
+1529 410
+1530 410
+1531 410
+1532 410
+1533 410
+1534 410
+1535 410
+1535 414
+1536 425
+1537 525
+1537 545
+1538 575
+1539 612
+1539 637
+1540 665
+1540 705
+1541 675
+1542 678
+1542 572
+1543 595
+1544 620
+1544 622
+1545 595
+1546 579
+1546 568
+1547 552
+1548 462
+1548 426
+1549 410
+1550 410
+1551 410
+1552 410
+1553 410
+1554 410
+1555 410
+1556 410
+1557 410
+1558 410
+1559 410
+1560 410
+1561 410
+1562 410
+1563 410
+1564 410
+1565 410
+1566 419
+1567 432
+1567 547
+1568 585
+1569 602
+1569 619
+1570 643
+1571 662
+1571 694
+1572 678
+1572 662
+1573 732
+1574 647
+1574 687
+1575 614
+1576 572
+1576 569
+1577 556
+1578 430
+1578 425
+1579 410
+1580 410
+1581 410
+1582 410
+1583 410
+1584 410
+1585 410
+1586 410
+1587 410
+1588 410
+1589 410
+1590 410
+1591 410
+1592 410
+1593 410
+1594 410
+1595 410
+1596 410
+1597 413
+1597 416
+1598 563
+1599 609
+200 MLine
+%I 1
+End
+
+Begin %I MLine
+%I b 65535
+1 0 0 [] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 200
+1599 609
+1599 683
+1600 708
+1601 747
+1601 755
+1602 797
+1603 756
+1603 741
+1604 711
+1604 641
+1605 680
+1606 656
+1606 634
+1607 612
+1608 602
+1608 583
+1609 455
+1610 425
+1610 410
+1611 410
+1612 410
+1613 410
+1614 410
+1615 410
+1616 410
+1617 410
+1618 410
+1619 410
+1620 410
+1621 410
+1622 410
+1623 410
+1624 410
+1625 410
+1626 410
+1627 410
+1628 412
+1628 421
+1629 525
+1629 580
+1630 630
+1631 644
+1631 658
+1632 645
+1633 627
+1633 590
+1634 559
+1635 539
+1635 538
+1636 447
+1636 528
+1637 542
+1638 439
+1638 541
+1639 429
+1640 423
+1640 420
+1641 410
+1642 410
+1643 410
+1644 410
+1645 410
+1646 410
+1647 410
+1648 410
+1649 410
+1650 410
+1651 410
+1652 410
+1653 410
+1654 410
+1655 410
+1656 410
+1657 410
+1658 410
+1658 413
+1659 416
+1660 431
+1660 535
+1661 566
+1661 561
+1662 557
+1663 671
+1663 707
+1664 628
+1665 711
+1665 759
+1666 671
+1667 646
+1667 623
+1668 602
+1668 569
+1669 559
+1670 542
+1670 443
+1671 421
+1672 410
+1673 410
+1674 410
+1675 410
+1676 410
+1677 410
+1678 410
+1679 410
+1680 410
+1681 410
+1682 410
+1683 410
+1684 410
+1685 410
+1686 410
+1687 410
+1688 410
+1689 415
+1690 431
+1690 551
+1691 574
+1692 602
+1692 616
+1693 679
+1693 691
+1694 606
+1695 633
+1695 600
+1696 569
+1697 607
+1697 653
+1698 616
+1699 531
+1699 426
+1700 420
+1700 424
+1701 417
+1702 415
+1702 410
+1703 410
+1704 410
+1705 410
+1706 410
+1707 410
+1708 410
+1709 410
+1710 410
+1711 410
+1712 410
+1713 410
+1714 410
+1715 410
+1716 410
+1717 410
+1718 410
+1719 410
+1720 410
+1720 413
+1721 413
+1722 410
+1723 418
+1724 418
+1724 410
+1725 410
+1726 410
+1727 410
+1728 410
+1729 410
+1730 410
+1731 410
+1732 410
+1733 410
+1734 410
+1735 410
+1736 410
+1737 410
+1738 410
+1739 410
+1740 410
+1741 410
+1742 410
+1743 410
+1744 410
+1745 410
+1746 410
+1747 410
+1748 410
+1749 410
+1750 410
+1750 413
+1751 418
+1752 420
+1752 566
+1753 552
+1754 444
+1754 429
+1755 428
+1756 421
+1756 433
+1757 542
+1757 554
+1758 551
+1759 554
+1759 522
+200 MLine
+%I 1
+End
+
+Begin %I MLine
+%I b 65535
+1 0 0 [] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 200
+1759 522
+1760 421
+1761 410
+1762 410
+1763 410
+1764 410
+1765 410
+1766 410
+1767 410
+1768 410
+1769 410
+1770 410
+1771 410
+1772 410
+1773 410
+1774 411
+1775 410
+1776 410
+1777 410
+1778 410
+1779 410
+1780 410
+1781 410
+1782 411
+1782 412
+1783 417
+1784 425
+1784 511
+1785 530
+1786 423
+1786 481
+1787 492
+1788 410
+1788 500
+1789 504
+1789 544
+1790 506
+1791 427
+1791 508
+1792 554
+1793 437
+1793 431
+1794 410
+1795 410
+1796 410
+1797 410
+1798 410
+1799 410
+1800 410
+1801 410
+1802 410
+1803 410
+1804 410
+1805 410
+1806 410
+1807 410
+1808 410
+1809 410
+1810 410
+1811 410
+1812 411
+1812 415
+1813 415
+1814 538
+1814 419
+1815 410
+1816 410
+1816 534
+1817 502
+1818 637
+1818 613
+1819 526
+1820 586
+1820 573
+1821 601
+1821 587
+1822 518
+1823 523
+1823 436
+1824 421
+1825 417
+1825 410
+1826 410
+1827 410
+1828 410
+1829 410
+1830 410
+1831 410
+1832 410
+1833 410
+1834 410
+1835 410
+1836 410
+1837 410
+1838 410
+1839 410
+1840 410
+1841 410
+1842 410
+1843 413
+1843 420
+1844 493
+1844 528
+1845 562
+1846 603
+1846 625
+1847 695
+1848 709
+1848 688
+1849 720
+1850 655
+1850 683
+1851 694
+1852 655
+1852 619
+1853 597
+1853 572
+1854 547
+1855 438
+1855 410
+1856 410
+1857 410
+1858 410
+1859 410
+1860 410
+1861 410
+1862 410
+1863 410
+1864 410
+1865 410
+1866 410
+1867 410
+1868 410
+1869 410
+1870 410
+1871 410
+1872 410
+1873 410
+1874 420
+1875 521
+1875 561
+1876 588
+1876 606
+1877 630
+1878 654
+1878 687
+1879 715
+1880 723
+1880 718
+1881 700
+1882 681
+1882 663
+1883 637
+1884 614
+1884 589
+1885 482
+1885 434
+1886 410
+1887 410
+1888 410
+1889 410
+1890 410
+1891 410
+1892 410
+1893 410
+1894 410
+1895 410
+1896 410
+1897 410
+1898 410
+1899 410
+1900 410
+1901 410
+1902 410
+1903 410
+1904 410
+1905 417
+1905 524
+1906 553
+1907 583
+1907 599
+1908 624
+1908 651
+1909 588
+1910 609
+1910 666
+1911 758
+1912 616
+1912 612
+1913 617
+1914 559
+1914 590
+1915 562
+1916 446
+1916 432
+1917 424
+1917 410
+1918 410
+1919 410
+1920 410
+200 MLine
+%I 1
+End
+
+Begin %I MLine
+%I b 65535
+1 0 0 [] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 200
+1920 410
+1921 410
+1922 410
+1923 410
+1924 410
+1925 410
+1926 410
+1927 410
+1928 410
+1929 410
+1930 410
+1931 410
+1932 410
+1933 410
+1934 410
+1935 410
+1935 417
+1936 425
+1937 519
+1937 540
+1938 605
+1939 616
+1939 618
+1940 659
+1940 660
+1941 625
+1942 592
+1942 582
+1943 631
+1944 614
+1944 613
+1945 584
+1946 577
+1946 467
+1947 443
+1948 425
+1948 410
+1949 410
+1950 410
+1951 410
+1952 410
+1953 410
+1954 410
+1955 410
+1956 410
+1957 410
+1958 410
+1959 410
+1960 410
+1961 410
+1962 410
+1963 410
+1964 410
+1965 410
+1965 412
+1966 426
+1967 560
+1967 536
+1968 689
+1969 717
+1969 644
+1970 681
+1971 627
+1971 766
+1972 739
+1972 582
+1973 544
+1974 442
+1974 436
+1975 597
+1976 604
+1976 445
+1977 435
+1978 556
+1978 422
+1979 410
+1980 410
+1981 410
+1982 410
+1983 410
+1984 410
+1985 410
+1986 410
+1987 410
+1988 410
+1989 410
+1990 410
+1991 410
+1992 410
+1993 410
+1994 410
+1995 410
+1996 410
+1996 411
+1997 419
+1997 502
+1998 554
+1999 622
+1999 565
+2000 568
+2001 681
+2001 695
+2002 664
+2003 680
+2003 692
+2004 713
+2004 634
+2005 546
+2006 618
+2006 645
+2007 540
+2008 561
+2008 442
+2009 420
+2010 410
+2011 410
+2012 410
+2013 410
+2014 410
+2015 410
+2016 410
+2017 410
+2018 410
+2019 410
+2020 410
+2021 410
+2022 410
+2023 410
+2024 410
+2025 410
+2026 410
+2026 411
+2027 411
+2028 412
+2028 410
+2029 410
+2030 410
+2031 469
+2031 467
+2032 522
+2033 516
+2033 574
+2034 410
+2035 591
+2035 595
+2036 611
+2036 581
+2037 580
+2038 540
+2038 422
+2039 410
+2040 413
+2040 410
+2041 410
+2042 410
+2043 410
+2044 410
+2045 410
+2046 410
+2047 410
+2048 410
+2049 410
+2050 410
+2051 410
+2052 410
+2053 410
+2054 410
+2055 410
+2056 410
+2057 410
+2058 410
+2058 424
+2059 530
+2060 553
+2060 579
+2061 606
+2061 634
+2062 653
+2063 647
+2063 699
+2064 675
+2065 667
+2065 653
+2066 659
+2067 583
+2067 570
+2068 545
+2068 561
+2069 555
+2070 461
+2070 410
+2071 410
+2072 410
+2073 410
+2074 410
+2075 410
+2076 410
+2077 410
+2078 410
+2079 410
+200 MLine
+%I 1
+End
+
+Begin %I MLine
+%I b 65535
+1 0 0 [] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 200
+2079 410
+2080 410
+2081 410
+2082 410
+2083 410
+2084 410
+2085 410
+2086 410
+2087 410
+2088 410
+2089 419
+2090 522
+2090 543
+2091 541
+2092 597
+2092 690
+2093 768
+2093 633
+2094 654
+2095 726
+2095 653
+2096 742
+2097 645
+2097 604
+2098 630
+2099 558
+2099 566
+2100 567
+2100 447
+2101 410
+2102 410
+2103 410
+2104 410
+2105 410
+2106 410
+2107 410
+2108 410
+2109 410
+2110 410
+2111 410
+2112 410
+2113 410
+2114 410
+2115 410
+2116 410
+2117 410
+2118 410
+2119 420
+2120 426
+2120 547
+2121 605
+2122 600
+2122 617
+2123 648
+2124 675
+2124 710
+2125 728
+2125 754
+2126 749
+2127 717
+2127 695
+2128 638
+2129 612
+2129 595
+2130 568
+2131 558
+2131 433
+2132 410
+2133 410
+2134 410
+2135 410
+2136 410
+2137 410
+2138 410
+2139 410
+2140 410
+2141 410
+2142 410
+2143 410
+2144 410
+2145 410
+2146 410
+2147 410
+2148 410
+2149 410
+2150 410
+2150 422
+2151 536
+2152 556
+2152 572
+2153 633
+2154 707
+2154 608
+2155 567
+2156 550
+2156 608
+2157 635
+2157 579
+2158 630
+2159 587
+2159 616
+2160 567
+2161 572
+2161 439
+2162 428
+2163 425
+2163 410
+2164 410
+2165 410
+2166 410
+2167 410
+2168 410
+2169 410
+2170 410
+2171 410
+2172 410
+2173 410
+2174 410
+2175 410
+2176 410
+2177 410
+2178 410
+2179 410
+2180 410
+2180 413
+2181 415
+2182 433
+2182 493
+2183 506
+2184 558
+2184 635
+2185 722
+2186 730
+2186 691
+2187 727
+2188 695
+2188 689
+2189 714
+2189 654
+2190 626
+2191 603
+2191 581
+2192 565
+2193 450
+2193 410
+2194 410
+2195 410
+2196 410
+2197 410
+2198 410
+2199 410
+2200 410
+2201 410
+2202 410
+2203 410
+2204 410
+2205 410
+2206 410
+2207 410
+2208 410
+2209 410
+2210 410
+2211 410
+2211 412
+2212 416
+2212 471
+2213 515
+2214 552
+2214 658
+2215 547
+2216 779
+2216 683
+2217 686
+2218 617
+2218 679
+2219 672
+2220 692
+2220 693
+2221 608
+2221 619
+2222 582
+2223 557
+2223 441
+2224 410
+2225 410
+2226 410
+2227 410
+2228 410
+2229 410
+2230 410
+2231 410
+2232 410
+2233 410
+2234 410
+2235 410
+2236 410
+2237 410
+2238 410
+2239 410
+2240 410
+200 MLine
+%I 1
+End
+
+Begin %I MLine
+%I b 65535
+1 0 0 [] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 200
+2240 410
+2241 410
+2242 412
+2243 419
+2243 421
+2244 420
+2244 431
+2245 569
+2246 410
+2246 569
+2247 586
+2248 722
+2248 629
+2249 615
+2250 655
+2250 646
+2251 599
+2252 614
+2252 588
+2253 578
+2253 564
+2254 452
+2255 410
+2256 410
+2257 410
+2258 410
+2259 410
+2260 410
+2261 410
+2262 410
+2263 410
+2264 410
+2265 410
+2266 410
+2267 410
+2268 410
+2269 410
+2270 410
+2271 410
+2272 410
+2273 410
+2273 447
+2274 532
+2275 585
+2275 552
+2276 562
+2276 592
+2277 572
+2278 587
+2278 577
+2279 563
+2280 589
+2280 566
+2281 573
+2282 610
+2282 597
+2283 578
+2284 581
+2284 485
+2285 477
+2285 410
+2286 410
+2287 410
+2288 410
+2289 410
+2290 410
+2291 410
+2292 410
+2293 410
+2294 410
+2295 410
+2296 410
+2297 410
+2298 410
+2299 410
+2300 410
+2301 410
+2302 410
+2303 410
+2303 418
+2304 422
+2305 542
+2305 564
+2306 586
+2307 599
+2307 595
+2308 620
+2308 582
+2309 754
+2310 730
+2310 614
+2311 631
+2312 653
+2312 577
+2313 562
+2314 557
+2315 447
+2316 434
+2316 429
+2317 410
+2318 410
+2319 410
+2320 410
+2321 410
+2322 410
+2323 410
+2324 410
+2325 410
+2326 410
+2327 410
+2328 410
+2329 410
+2330 410
+2331 410
+2332 410
+2333 410
+2334 418
+2335 419
+2335 510
+2336 567
+2337 600
+2337 661
+2338 701
+2339 680
+2339 646
+2340 687
+2340 701
+2341 562
+2342 537
+2342 539
+2343 433
+2344 545
+2344 567
+2345 432
+2346 582
+2346 439
+2347 427
+2348 410
+2349 410
+2350 410
+2351 410
+2352 410
+2353 410
+2354 410
+2355 410
+2356 410
+2357 410
+2358 410
+2359 410
+2360 410
+2361 410
+2362 410
+2363 410
+2364 410
+2365 412
+2365 420
+2366 506
+2367 557
+2367 614
+2368 612
+2369 631
+2369 652
+2370 680
+2371 697
+2371 708
+2372 702
+2372 597
+2373 661
+2374 627
+2374 550
+2375 549
+2376 589
+2376 558
+2377 437
+2378 424
+2378 410
+2379 410
+2380 410
+2381 410
+2382 410
+2383 410
+2384 410
+2385 410
+2386 410
+2387 410
+2388 410
+2389 410
+2390 410
+2391 410
+2392 410
+2393 410
+2394 410
+2395 410
+2396 413
+2396 424
+2397 534
+2397 564
+2398 601
+2399 631
+2399 641
+200 MLine
+%I 1
+End
+
+Begin %I MLine
+%I b 65535
+1 0 0 [] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 200
+2399 641
+2400 677
+2401 711
+2401 742
+2402 702
+2403 649
+2403 668
+2404 539
+2404 525
+2405 583
+2406 546
+2406 598
+2407 557
+2408 427
+2408 423
+2409 410
+2410 410
+2411 410
+2412 410
+2413 410
+2414 410
+2415 410
+2416 410
+2417 410
+2418 410
+2419 410
+2420 410
+2421 410
+2422 410
+2423 410
+2424 410
+2425 410
+2426 410
+2426 412
+2427 422
+2428 503
+2428 548
+2429 600
+2429 622
+2430 637
+2431 689
+2431 759
+2432 671
+2433 584
+2433 655
+2434 604
+2435 592
+2435 703
+2436 630
+2436 587
+2437 449
+2438 431
+2438 426
+2439 422
+2440 410
+2441 410
+2442 410
+2443 410
+2444 410
+2445 410
+2446 410
+2447 410
+2448 410
+2449 410
+2450 410
+2451 410
+2452 410
+2453 410
+2454 410
+2455 410
+2456 410
+2457 412
+2458 419
+2458 512
+2459 548
+2460 576
+2460 626
+2461 674
+2461 699
+2462 684
+2463 665
+2463 554
+2464 624
+2465 689
+2465 613
+2466 579
+2467 627
+2467 610
+2468 580
+2468 564
+2469 442
+2470 424
+2470 410
+2471 410
+2472 410
+2473 410
+2474 410
+2475 410
+2476 410
+2477 410
+2478 410
+2479 410
+2480 410
+2481 410
+2482 410
+2483 410
+2484 410
+2485 410
+2486 410
+2487 410
+2488 412
+2488 413
+2489 418
+2490 502
+2490 535
+2491 578
+2492 611
+2492 714
+2493 410
+2493 616
+2494 658
+2495 725
+2495 715
+2496 642
+2497 600
+2497 567
+2498 578
+2499 538
+2499 526
+2500 442
+2500 421
+2501 410
+2502 410
+2503 410
+2504 410
+2505 410
+2506 410
+2507 410
+2508 410
+2509 410
+2510 410
+2511 410
+2512 410
+2513 410
+2514 410
+2515 410
+2516 410
+2517 410
+2518 410
+2518 415
+2519 425
+2520 546
+2520 565
+2521 585
+2522 622
+2522 664
+2523 715
+2524 723
+2524 696
+2525 624
+2525 566
+2526 590
+2527 646
+2527 593
+2528 531
+2529 567
+2529 580
+2530 562
+2531 439
+2531 410
+2532 410
+2533 410
+2534 410
+2535 410
+2536 410
+2537 410
+2538 410
+2539 410
+2540 410
+2541 410
+2542 410
+2543 410
+2544 410
+2545 410
+2546 410
+2547 410
+2548 410
+2549 414
+2550 484
+2550 532
+2551 547
+2552 567
+2552 591
+2553 655
+2554 745
+2554 653
+2555 575
+2556 595
+2556 625
+2557 623
+200 MLine
+%I 1
+End
+
+Begin %I MLine
+%I b 65535
+1 0 0 [] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 200
+2557 623
+2557 539
+2558 427
+2559 527
+2559 426
+2560 423
+2561 538
+2561 425
+2562 420
+2563 410
+2564 410
+2565 410
+2566 410
+2567 410
+2568 410
+2569 410
+2570 410
+2571 410
+2572 410
+2573 410
+2574 410
+2575 410
+2576 410
+2577 410
+2578 410
+2579 410
+2580 416
+2580 500
+2581 523
+2582 618
+2582 621
+2583 623
+2584 648
+2584 643
+2585 718
+2586 621
+2586 671
+2587 722
+2588 727
+2588 642
+2589 623
+2589 641
+2590 606
+2591 594
+2591 563
+2592 442
+2593 427
+2593 410
+2594 410
+2595 410
+2596 410
+2597 410
+2598 410
+2599 410
+2600 410
+2601 410
+2602 410
+2603 410
+2604 410
+2605 410
+2606 410
+2607 410
+2608 410
+2609 410
+2610 410
+2611 415
+2611 426
+2612 545
+2612 575
+2613 617
+2614 677
+2614 705
+2615 718
+2616 710
+2616 735
+2617 722
+2618 709
+2618 693
+2619 683
+2620 658
+2620 638
+2621 611
+2621 596
+2622 585
+2623 564
+2623 422
+2624 410
+2625 410
+2626 410
+2627 410
+2628 410
+2629 410
+2630 410
+2631 410
+2632 410
+2633 410
+2634 410
+2635 410
+2636 410
+2637 410
+2638 410
+2639 410
+2640 410
+2641 410
+2641 414
+2642 487
+2643 541
+2643 567
+2644 616
+2644 696
+2645 740
+2646 631
+2646 591
+2647 640
+2648 660
+2648 591
+2649 513
+2650 560
+2650 690
+2651 545
+2652 523
+2652 525
+2653 538
+2653 424
+2654 418
+2655 410
+2656 410
+2657 410
+2658 410
+2659 410
+2660 410
+2661 410
+2662 410
+2663 410
+2664 410
+2665 410
+2666 410
+2667 410
+2668 410
+2669 410
+2670 410
+2671 410
+2672 411
+2673 413
+2673 500
+2674 532
+2675 583
+2675 630
+2676 710
+2676 780
+2677 622
+2678 624
+2678 783
+2679 727
+2680 462
+2680 625
+2681 690
+2682 649
+2682 618
+2683 593
+2684 576
+2684 444
+2685 424
+2685 410
+2686 410
+2687 410
+2688 410
+2689 410
+2690 410
+2691 410
+2692 410
+2693 410
+2694 410
+2695 410
+2696 410
+2697 410
+2698 410
+2699 410
+2700 410
+2701 410
+2702 410
+2703 412
+2703 473
+2704 507
+2705 563
+2705 621
+2706 648
+2707 685
+2707 740
+2708 703
+2708 811
+2709 779
+2710 795
+2710 625
+2711 572
+2712 438
+2712 430
+2713 438
+2714 437
+2714 551
+200 MLine
+%I 1
+End
+
+Begin %I MLine
+%I b 65535
+1 0 0 [] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 200
+2714 551
+2715 426
+2716 427
+2716 420
+2717 410
+2718 410
+2719 410
+2720 410
+2721 410
+2722 410
+2723 410
+2724 410
+2725 410
+2726 410
+2727 410
+2728 410
+2729 410
+2730 410
+2731 410
+2732 410
+2733 410
+2733 413
+2734 474
+2735 525
+2735 565
+2736 617
+2737 638
+2737 661
+2738 700
+2739 734
+2739 715
+2740 714
+2740 709
+2741 699
+2742 671
+2742 650
+2743 628
+2744 607
+2744 588
+2745 568
+2746 455
+2746 427
+2747 410
+2748 410
+2749 410
+2750 410
+2751 410
+2752 410
+2753 410
+2754 410
+2755 410
+2756 410
+2757 410
+2758 410
+2759 410
+2760 410
+2761 410
+2762 410
+2763 410
+2764 410
+2764 417
+2765 429
+2765 549
+2766 563
+2767 600
+2767 649
+2768 633
+2769 701
+2769 694
+2770 708
+2771 700
+2771 709
+2772 709
+2772 695
+2773 662
+2774 581
+2774 560
+2775 576
+2776 561
+2776 457
+2777 426
+2778 410
+2779 410
+2780 410
+2781 410
+2782 410
+2783 410
+2784 410
+2785 410
+2786 410
+2787 410
+2788 410
+2789 410
+2790 410
+2791 410
+2792 410
+2793 410
+2794 410
+2795 413
+2796 414
+2796 415
+2797 422
+2797 504
+2798 549
+2799 568
+2799 581
+2800 578
+2801 544
+2801 541
+2802 532
+2803 445
+2803 435
+2804 422
+2804 417
+2805 410
+2806 416
+2806 410
+2807 410
+2808 410
+2809 410
+2810 410
+2811 410
+2812 410
+2813 410
+2814 410
+2815 410
+2816 410
+2817 410
+2818 410
+2819 410
+2820 410
+2821 410
+2822 410
+2823 410
+2824 410
+2825 410
+2826 410
+2827 410
+2828 410
+2829 410
+2830 410
+2831 410
+2832 410
+2833 410
+2834 410
+2835 410
+2836 410
+2837 410
+2838 410
+2839 410
+2840 410
+2841 410
+2842 410
+2843 410
+2844 410
+2845 410
+2846 410
+2847 410
+2848 410
+2849 410
+2850 410
+2851 410
+2852 410
+2853 410
+2854 410
+2855 410
+2856 410
+2856 411
+2857 416
+2858 419
+2858 492
+2859 530
+2860 545
+2860 557
+2861 582
+2861 410
+2862 687
+2863 642
+2863 703
+2864 734
+2865 715
+2865 698
+2866 666
+2867 643
+2867 618
+2868 592
+2868 435
+2869 427
+2870 410
+2871 410
+2872 410
+2873 410
+2874 410
+2875 410
+2876 410
+2877 410
+2878 410
+2879 410
+2880 410
+2881 410
+200 MLine
+%I 1
+End
+
+Begin %I MLine
+%I b 65535
+1 0 0 [] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 200
+2881 410
+2882 410
+2883 410
+2884 410
+2885 410
+2886 410
+2886 413
+2887 416
+2888 429
+2888 591
+2889 583
+2890 668
+2890 691
+2891 713
+2892 818
+2892 820
+2893 851
+2893 785
+2894 645
+2895 932
+2895 736
+2896 736
+2897 653
+2897 624
+2898 598
+2899 592
+2899 424
+2900 420
+2900 410
+2901 410
+2902 410
+2903 410
+2904 410
+2905 410
+2906 410
+2907 410
+2908 410
+2909 410
+2910 410
+2911 410
+2912 410
+2913 410
+2914 410
+2915 410
+2916 410
+2917 411
+2918 415
+2918 492
+2919 561
+2920 627
+2920 645
+2921 696
+2922 781
+2922 979
+2923 654
+2924 701
+2924 620
+2925 658
+2925 571
+2926 542
+2927 544
+2927 554
+2928 602
+2929 569
+2929 529
+2930 423
+2931 419
+2931 410
+2932 410
+2933 410
+2934 410
+2935 410
+2936 410
+2937 410
+2938 410
+2939 410
+2940 410
+2941 410
+2942 410
+2943 410
+2944 410
+2945 410
+2946 410
+2947 410
+2948 411
+2949 414
+2950 425
+2950 504
+2951 489
+2952 610
+2952 708
+2953 715
+2954 727
+2954 698
+2955 621
+2956 579
+2956 559
+2957 524
+2957 505
+2958 418
+2959 410
+2959 417
+2960 416
+2961 410
+2962 410
+2963 410
+2964 410
+2965 410
+2966 410
+2967 410
+2968 410
+2969 410
+2970 410
+2971 410
+2972 410
+2973 410
+2974 410
+2975 410
+2976 410
+2977 410
+2978 410
+2979 410
+2979 413
+2980 413
+2980 420
+2981 517
+2982 410
+2983 640
+2984 584
+2984 522
+2985 510
+2986 410
+2987 424
+2988 410
+2988 551
+2989 585
+2989 573
+2990 560
+2991 565
+2991 436
+2992 422
+2993 410
+2994 410
+2995 410
+2996 410
+2997 410
+2998 410
+2999 410
+3000 410
+3001 410
+3002 410
+3003 410
+3004 410
+3005 410
+3006 410
+3007 410
+3008 410
+3009 410
+3009 413
+3010 415
+3011 427
+3011 425
+3012 440
+3012 546
+3013 583
+3014 628
+3014 779
+3015 1192
+3016 995
+3016 733
+3017 555
+3018 646
+3018 528
+3019 423
+3020 410
+3021 410
+3021 414
+3022 410
+3023 410
+3024 410
+3025 410
+3026 410
+3027 410
+3028 410
+3029 410
+3030 410
+3031 410
+3032 410
+3033 410
+3034 410
+3035 410
+3036 410
+3037 410
+3038 410
+3039 410
+3040 410
+3041 413
+3041 415
+3042 522
+3043 660
+200 MLine
+%I 1
+End
+
+Begin %I MLine
+%I b 65535
+1 0 0 [] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 145
+3043 660
+3043 743
+3044 858
+3044 779
+3045 842
+3046 621
+3046 1012
+3047 689
+3048 956
+3048 660
+3049 543
+3050 545
+3050 549
+3051 436
+3052 513
+3052 429
+3053 415
+3053 413
+3054 410
+3055 410
+3056 410
+3057 410
+3058 410
+3059 410
+3060 410
+3061 410
+3062 410
+3063 410
+3064 410
+3065 410
+3066 410
+3067 410
+3068 410
+3069 410
+3070 410
+3071 411
+3071 415
+3072 475
+3073 519
+3073 638
+3074 680
+3075 830
+3075 988
+3076 737
+3076 572
+3077 558
+3078 536
+3078 518
+3079 433
+3080 561
+3080 618
+3081 422
+3082 498
+3082 417
+3083 431
+3084 419
+3084 418
+3085 413
+3085 410
+3086 410
+3087 410
+3088 410
+3089 410
+3090 410
+3091 410
+3092 410
+3093 410
+3094 410
+3095 410
+3096 410
+3097 410
+3098 410
+3099 410
+3100 410
+3101 410
+3102 410
+3103 410
+3103 414
+3104 456
+3105 490
+3105 485
+3106 485
+3107 496
+3107 488
+3108 423
+3108 410
+3109 525
+3110 479
+3110 410
+3111 410
+3112 524
+3112 522
+3113 512
+3114 417
+3114 415
+3115 413
+3116 412
+3116 410
+3117 410
+3118 410
+3119 410
+3120 410
+3121 410
+3122 410
+3123 410
+3124 410
+3125 410
+3126 410
+3127 410
+3128 410
+3129 410
+3130 410
+3131 410
+3132 410
+3132 411
+3133 411
+3133 410
+3134 410
+3135 419
+3135 410
+3136 481
+3137 410
+3138 410
+3139 410
+3139 714
+3140 611
+3140 712
+3141 578
+3142 547
+3142 537
+3143 517
+3144 421
+3144 410
+3145 415
+3146 413
+3146 412
+3147 410
+3148 410
+3149 410
+3150 410
+3151 410
+3152 410
+3153 410
+3154 410
+3155 410
+145 MLine
+%I 1
+End
+
+Begin %I Text
+%I cfg Black
+0 0 0 SetCFg
+%I f *helvetica-medium-r*-14-*
+Helvetica 14 SetF
+%I t
+[ 1 0 0 1 155.725 821.611 ] concat
+%I
+[
+(Interception)
+] Text
+End
+
+Begin %I Text
+%I cfg Black
+0 0 0 SetCFg
+%I f *helvetica-medium-r*-14-*
+Helvetica 14 SetF
+%I t
+[ 1 0 0 1 83.7407 803.099 ] concat
+%I
+[
+(cm/day)
+] Text
+End
+
+Begin %I MLine
+%I b 34952
+1 0 0 [1 3 1 3 1 3 1 3] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 2
+819 2867
+819 3686
+2 MLine
+%I 1
+End
+
+Begin %I MLine
+%I b 34952
+1 0 0 [1 3 1 3 1 3 1 3] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 2
+1434 2867
+1434 3686
+2 MLine
+%I 1
+End
+
+Begin %I MLine
+%I b 34952
+1 0 0 [1 3 1 3 1 3 1 3] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 2
+2048 2867
+2048 3686
+2 MLine
+%I 1
+End
+
+Begin %I MLine
+%I b 34952
+1 0 0 [1 3 1 3 1 3 1 3] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 2
+2662 2867
+2662 3686
+2 MLine
+%I 1
+End
+
+Begin %I MLine
+%I b 34952
+1 0 0 [1 3 1 3 1 3 1 3] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 2
+3277 2867
+3277 3686
+2 MLine
+%I 1
+End
+
+Begin %I Text
+%I cfg Black
+0 0 0 SetCFg
+%I f *helvetica-medium-r*-14-*
+Helvetica 14 SetF
+%I t
+[ 1 0 0 1 137.708 654.463 ] concat
+%I
+[
+(0)
+] Text
+End
+
+Begin %I MLine
+%I b 34952
+1 0 0 [1 3 1 3 1 3 1 3] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 2
+819 2867
+3277 2867
+2 MLine
+%I 1
+End
+
+Begin %I Text
+%I cfg Black
+0 0 0 SetCFg
+%I f *helvetica-medium-r*-14-*
+Helvetica 14 SetF
+%I t
+[ 1 0 0 1 137.708 680.05 ] concat
+%I
+[
+(2)
+] Text
+End
+
+Begin %I MLine
+%I b 34952
+1 0 0 [1 3 1 3 1 3 1 3] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 2
+819 3004
+3277 3004
+2 MLine
+%I 1
+End
+
+Begin %I Text
+%I cfg Black
+0 0 0 SetCFg
+%I f *helvetica-medium-r*-14-*
+Helvetica 14 SetF
+%I t
+[ 1 0 0 1 137.708 705.45 ] concat
+%I
+[
+(4)
+] Text
+End
+
+Begin %I MLine
+%I b 34952
+1 0 0 [1 3 1 3 1 3 1 3] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 2
+819 3140
+3277 3140
+2 MLine
+%I 1
+End
+
+Begin %I Text
+%I cfg Black
+0 0 0 SetCFg
+%I f *helvetica-medium-r*-14-*
+Helvetica 14 SetF
+%I t
+[ 1 0 0 1 137.708 731.037 ] concat
+%I
+[
+(6)
+] Text
+End
+
+Begin %I MLine
+%I b 34952
+1 0 0 [1 3 1 3 1 3 1 3] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 2
+819 3277
+3277 3277
+2 MLine
+%I 1
+End
+
+Begin %I Text
+%I cfg Black
+0 0 0 SetCFg
+%I f *helvetica-medium-r*-14-*
+Helvetica 14 SetF
+%I t
+[ 1 0 0 1 137.708 756.438 ] concat
+%I
+[
+(8)
+] Text
+End
+
+Begin %I MLine
+%I b 34952
+1 0 0 [1 3 1 3 1 3 1 3] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 2
+819 3413
+3277 3413
+2 MLine
+%I 1
+End
+
+Begin %I Text
+%I cfg Black
+0 0 0 SetCFg
+%I f *helvetica-medium-r*-14-*
+Helvetica 14 SetF
+%I t
+[ 1 0 0 1 129.924 782.025 ] concat
+%I
+[
+(10)
+] Text
+End
+
+Begin %I MLine
+%I b 34952
+1 0 0 [1 3 1 3 1 3 1 3] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 2
+819 3550
+3277 3550
+2 MLine
+%I 1
+End
+
+Begin %I Text
+%I cfg Black
+0 0 0 SetCFg
+%I f *helvetica-medium-r*-14-*
+Helvetica 14 SetF
+%I t
+[ 1 0 0 1 129.924 807.425 ] concat
+%I
+[
+(12)
+] Text
+End
+
+Begin %I MLine
+%I b 34952
+1 0 0 [1 3 1 3 1 3 1 3] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 2
+819 3686
+3277 3686
+2 MLine
+%I 1
+End
+
+Begin %I Rect
+%I b 65535
+1 0 0 [] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I
+819 2867 3277 3686 Rect
+End
+
+Begin %I MLine
+%I b 65535
+1 0 0 [] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 200
+1249 2867
+1281 2867
+1282 2867
+1283 2867
+1284 2867
+1285 2867
+1286 2867
+1287 2867
+1288 2867
+1289 2867
+1290 2867
+1291 2867
+1292 2867
+1293 2867
+1294 2867
+1295 2867
+1296 2867
+1297 2867
+1298 2867
+1299 2867
+1300 2867
+1301 2867
+1302 2867
+1303 2867
+1304 2867
+1305 2867
+1306 2867
+1307 2867
+1308 2867
+1309 2867
+1310 2867
+1311 2867
+1312 2867
+1313 2867
+1314 2867
+1315 2867
+1316 2867
+1317 2867
+1318 2867
+1319 2867
+1320 2867
+1321 2867
+1322 2867
+1323 2867
+1324 2867
+1325 2867
+1326 2867
+1327 2867
+1328 2867
+1329 2867
+1330 2867
+1331 2867
+1332 2867
+1333 2867
+1334 2867
+1335 2867
+1336 2867
+1337 2867
+1338 2867
+1339 2867
+1340 2867
+1341 2867
+1342 2867
+1343 2867
+1344 2867
+1345 2867
+1346 2867
+1347 2867
+1348 2867
+1349 2867
+1350 2867
+1351 2867
+1352 2867
+1353 2867
+1354 2867
+1355 2867
+1356 2867
+1357 2867
+1358 2867
+1359 2867
+1360 2867
+1361 2867
+1362 2867
+1363 2867
+1364 2867
+1365 2867
+1366 2867
+1367 2867
+1368 2867
+1369 2867
+1370 2867
+1371 2867
+1372 2867
+1373 2867
+1374 2867
+1375 2867
+1376 2867
+1377 2867
+1378 2867
+1379 2867
+1380 2867
+1381 2867
+1382 2867
+1383 2867
+1384 2867
+1385 2867
+1386 2867
+1387 2867
+1388 2867
+1389 2867
+1390 2867
+1391 2867
+1392 2867
+1393 2867
+1394 2867
+1395 2867
+1396 2867
+1397 2867
+1398 2867
+1399 2867
+1400 2867
+1401 2867
+1402 2867
+1403 2867
+1404 2867
+1405 2867
+1406 2867
+1407 2867
+1408 2867
+1409 2867
+1409 2892
+1410 2867
+1411 2867
+1412 2867
+1413 2867
+1414 2867
+1415 2867
+1416 2867
+1417 2867
+1418 2867
+1419 2867
+1420 2867
+1421 2867
+1422 2867
+1423 2867
+1424 2867
+1425 2867
+1426 2867
+1427 2867
+1427 3044
+1428 2943
+1428 2875
+1429 2867
+1430 2867
+1431 2867
+1432 2867
+1433 2867
+1434 2867
+1435 2867
+1436 2867
+1437 2867
+1438 2867
+1439 2867
+1440 2867
+1441 2867
+1442 2867
+1443 2867
+1444 2867
+1445 2867
+1446 2867
+1447 2867
+1448 2867
+1449 2867
+1450 2867
+1451 2867
+1452 2867
+1453 2867
+1454 2867
+1455 2867
+1456 2867
+1457 2867
+1458 2867
+1459 2867
+1460 2867
+1461 2867
+1462 2867
+1463 2867
+1464 2867
+1465 2867
+1466 2867
+1467 2867
+1468 2867
+1469 2867
+1470 2867
+1471 2867
+1472 2867
+1473 2867
+1474 2867
+1475 2867
+1476 2867
+200 MLine
+%I 1
+End
+
+Begin %I MLine
+%I b 65535
+1 0 0 [] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 200
+1476 2867
+1477 2867
+1478 2867
+1479 2867
+1480 2867
+1481 2867
+1482 2867
+1483 2867
+1484 2867
+1485 2867
+1486 2867
+1487 2867
+1488 2867
+1489 2867
+1490 2867
+1491 2867
+1492 2867
+1493 2867
+1494 2867
+1495 2867
+1496 2867
+1497 2867
+1498 2867
+1499 2867
+1500 2867
+1501 2867
+1502 2867
+1503 2867
+1503 2892
+1504 2867
+1505 2867
+1506 2867
+1507 2867
+1508 2867
+1509 2867
+1510 2867
+1511 2867
+1512 2867
+1513 2867
+1514 2867
+1515 2867
+1516 2867
+1517 2867
+1518 2867
+1519 2867
+1520 2867
+1521 2867
+1522 2867
+1523 2867
+1524 2867
+1525 2867
+1526 2867
+1527 2867
+1528 2867
+1529 2867
+1530 2867
+1531 2867
+1532 2867
+1533 2867
+1534 2867
+1535 2867
+1536 2867
+1537 2867
+1538 2867
+1539 2867
+1540 2867
+1541 2867
+1542 2867
+1543 2867
+1544 2867
+1545 2867
+1546 2867
+1547 2867
+1548 2867
+1549 2867
+1550 2867
+1551 2867
+1552 2867
+1553 2867
+1554 2867
+1555 2867
+1556 2867
+1557 2867
+1558 2867
+1559 2867
+1560 2867
+1561 2867
+1562 2867
+1563 2867
+1564 2867
+1565 2867
+1566 2867
+1567 2867
+1568 2867
+1569 2867
+1570 2867
+1571 2867
+1572 2867
+1573 2867
+1574 2867
+1575 2867
+1576 2867
+1577 2867
+1578 2867
+1579 2867
+1580 2867
+1581 2867
+1582 2867
+1583 2867
+1584 2867
+1585 2867
+1586 2867
+1587 2867
+1588 2867
+1589 2867
+1590 2867
+1591 2867
+1592 2867
+1593 2867
+1594 2867
+1595 2867
+1596 2867
+1597 2867
+1598 2867
+1599 2867
+1600 2867
+1601 2867
+1602 2867
+1603 2867
+1604 2867
+1605 2867
+1606 2867
+1607 2867
+1608 2867
+1609 2867
+1610 2867
+1611 2867
+1612 2867
+1613 2867
+1614 2867
+1615 2867
+1616 2867
+1617 2867
+1618 2867
+1619 2867
+1620 2867
+1621 2867
+1622 2867
+1623 2867
+1624 2867
+1625 2867
+1626 2867
+1627 2867
+1628 2867
+1629 2867
+1630 2867
+1631 2867
+1632 2867
+1633 2867
+1634 2867
+1635 2867
+1636 2867
+1637 2867
+1638 2867
+1639 2867
+1640 2867
+1641 2867
+1642 2867
+1643 2867
+1644 2867
+1645 2867
+1646 2867
+1647 2867
+1648 2867
+1649 2867
+1650 2867
+1651 2867
+1652 2867
+1653 2867
+1654 2867
+1655 2867
+1656 2867
+1657 2867
+1658 2867
+1659 2867
+1660 2867
+1661 2867
+1662 2867
+1663 2867
+1664 2867
+1665 2867
+1666 2867
+1667 2867
+1668 2867
+1669 2867
+1670 2867
+1671 2867
+1672 2867
+1673 2867
+1674 2867
+200 MLine
+%I 1
+End
+
+Begin %I MLine
+%I b 65535
+1 0 0 [] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 200
+1674 2867
+1675 2867
+1676 2867
+1677 2867
+1678 2867
+1679 2867
+1680 2867
+1681 2867
+1682 2867
+1683 2867
+1684 2867
+1685 2867
+1686 2867
+1687 2867
+1688 2867
+1689 2867
+1690 2867
+1691 2867
+1692 2867
+1693 2867
+1694 2867
+1695 2867
+1696 2867
+1697 2867
+1698 2867
+1699 2867
+1700 2867
+1701 2867
+1702 2867
+1703 2867
+1704 2867
+1705 2867
+1706 2867
+1707 2867
+1708 2867
+1709 2867
+1710 2867
+1711 2867
+1712 2867
+1713 2867
+1714 2867
+1715 2867
+1716 2867
+1717 2867
+1718 2867
+1719 2867
+1720 2867
+1721 2867
+1722 2892
+1723 2867
+1724 2867
+1724 2892
+1725 2892
+1725 2918
+1726 2968
+1727 2943
+1727 3044
+1728 2988
+1729 2943
+1729 3003
+1730 2993
+1731 3019
+1731 2968
+1732 2892
+1733 2892
+1734 2867
+1734 2892
+1735 2892
+1736 2867
+1737 2867
+1738 2867
+1739 2867
+1740 2867
+1741 2867
+1742 2867
+1743 2867
+1744 2867
+1745 2867
+1746 2867
+1747 2867
+1748 2867
+1749 2867
+1750 2867
+1751 2867
+1752 2867
+1753 2867
+1754 2867
+1755 2867
+1756 2867
+1757 2867
+1758 2867
+1759 2867
+1760 2867
+1761 2892
+1761 3044
+1762 3216
+1763 2918
+1763 2892
+1764 2918
+1764 2972
+1765 3051
+1766 3022
+1766 2954
+1767 2964
+1768 2964
+1768 2945
+1769 2935
+1770 2916
+1770 2877
+1771 2887
+1772 2906
+1772 2887
+1773 2896
+1773 2891
+1774 2867
+1775 2877
+1776 2867
+1777 2877
+1777 2867
+1778 2867
+1779 2867
+1780 2867
+1781 2867
+1782 2867
+1783 2867
+1784 2867
+1785 2867
+1786 2867
+1787 2867
+1788 2968
+1788 2867
+1789 2867
+1790 2867
+1791 2867
+1792 2867
+1793 2867
+1794 2867
+1795 2867
+1796 2867
+1797 2867
+1798 2867
+1799 2867
+1800 2867
+1801 2867
+1802 2867
+1803 2867
+1804 2867
+1805 2867
+1806 2892
+1807 2867
+1807 2892
+1808 3019
+1809 2945
+1809 2877
+1810 2942
+1811 2867
+1812 2867
+1813 2867
+1814 2867
+1815 2892
+1816 2892
+1816 2867
+1817 2867
+1818 2867
+1819 2867
+1820 2867
+1821 2867
+1822 2867
+1823 2867
+1824 2867
+1825 2867
+1826 2867
+1827 2867
+1828 2867
+1829 2867
+1830 2867
+1831 2867
+1832 2867
+1833 2867
+1834 2867
+1835 2867
+1836 2867
+1837 2867
+1838 2918
+1839 2867
+1840 2867
+1841 2867
+1842 2867
+1843 2867
+1844 2867
+1845 2867
+1846 2867
+1847 2867
+1848 2867
+1849 2867
+1850 2867
+1851 2867
+1852 2867
+1853 2867
+1854 2867
+200 MLine
+%I 1
+End
+
+Begin %I MLine
+%I b 65535
+1 0 0 [] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 200
+1854 2867
+1855 2867
+1856 2867
+1857 2867
+1858 2867
+1859 2867
+1860 2867
+1861 2867
+1862 2867
+1863 2867
+1864 2867
+1865 2867
+1866 2867
+1867 2867
+1868 2867
+1869 2867
+1870 2867
+1871 2867
+1872 2867
+1873 2867
+1874 2867
+1875 2867
+1876 2867
+1877 2867
+1878 2867
+1879 2867
+1880 2867
+1881 2867
+1882 2867
+1883 2867
+1884 2867
+1885 2867
+1886 2867
+1887 2867
+1888 2867
+1889 2867
+1890 2867
+1891 2867
+1892 2867
+1893 2867
+1894 2867
+1895 2867
+1896 2867
+1897 2867
+1898 2867
+1899 2867
+1900 2867
+1901 2867
+1902 2867
+1903 2867
+1904 2867
+1905 2867
+1906 2867
+1907 2867
+1908 2867
+1909 2867
+1910 2867
+1911 2867
+1912 2867
+1913 2867
+1914 2867
+1915 2867
+1916 2867
+1917 2867
+1918 2867
+1919 2867
+1920 2867
+1921 2867
+1922 2867
+1923 2867
+1924 2867
+1925 2867
+1926 2867
+1927 2867
+1928 2867
+1929 2867
+1930 2867
+1931 2867
+1932 2867
+1933 2867
+1934 2867
+1935 2867
+1936 2867
+1937 2867
+1938 2867
+1939 2867
+1940 2867
+1941 2867
+1942 2867
+1943 2867
+1944 2867
+1945 2867
+1946 2867
+1947 2867
+1948 2867
+1949 2867
+1950 2867
+1951 2867
+1952 2867
+1953 2867
+1954 2867
+1955 2867
+1956 2867
+1957 2867
+1958 2867
+1959 2867
+1960 2867
+1961 2867
+1962 2867
+1963 2867
+1964 2867
+1965 2867
+1966 2867
+1967 2867
+1968 2867
+1969 2867
+1970 2867
+1971 2867
+1972 2867
+1973 2867
+1974 2867
+1975 2867
+1976 2867
+1977 2867
+1978 2867
+1979 2867
+1980 2867
+1981 2867
+1982 2867
+1983 2867
+1984 2867
+1985 2867
+1986 2867
+1987 2867
+1988 2867
+1989 2867
+1990 2867
+1991 2867
+1992 2867
+1993 2867
+1994 2867
+1995 2867
+1996 2867
+1997 2867
+1998 2867
+1999 2867
+2000 2867
+2001 2867
+2002 2867
+2003 2867
+2004 2867
+2005 2867
+2006 2867
+2007 2867
+2008 2867
+2009 2867
+2010 2867
+2011 2867
+2012 2867
+2013 2867
+2013 2892
+2014 2892
+2015 2867
+2016 2867
+2017 2867
+2018 2867
+2019 2867
+2020 2867
+2021 2867
+2022 2867
+2023 2867
+2024 2867
+2024 2892
+2025 2867
+2026 2867
+2027 2867
+2028 2867
+2028 2892
+2029 3044
+2029 3090
+2030 2943
+2031 2867
+2032 2867
+2033 2867
+2034 2892
+2035 2867
+2036 2867
+2037 2867
+2038 2867
+2039 2892
+2040 2867
+2041 2867
+2042 2867
+2043 2867
+2044 2867
+2045 2867
+2046 2867
+2047 2867
+2048 2867
+2049 2918
+200 MLine
+%I 1
+End
+
+Begin %I MLine
+%I b 65535
+1 0 0 [] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 200
+2049 2918
+2049 2867
+2050 2867
+2051 2867
+2052 2867
+2053 2892
+2054 2867
+2055 2867
+2056 2867
+2057 2867
+2058 2867
+2059 2867
+2060 2867
+2061 2867
+2062 2867
+2063 2867
+2064 2867
+2065 2867
+2066 2867
+2067 2867
+2068 2867
+2069 2867
+2070 2867
+2071 2867
+2072 2867
+2073 2867
+2074 2867
+2075 2867
+2076 2867
+2077 2867
+2078 2867
+2079 2867
+2080 2867
+2081 2867
+2082 2867
+2083 2867
+2083 2892
+2084 2867
+2084 2892
+2085 2867
+2086 2918
+2086 2867
+2087 2867
+2088 2867
+2089 2867
+2090 2867
+2091 2867
+2092 2867
+2093 2867
+2094 2867
+2095 2867
+2096 2867
+2097 2867
+2098 2867
+2099 2867
+2100 2867
+2101 2867
+2102 2867
+2103 2867
+2104 2867
+2105 2867
+2106 2867
+2107 2867
+2108 2867
+2109 2867
+2110 2867
+2111 2867
+2112 2867
+2113 2867
+2114 2867
+2115 2867
+2116 2867
+2117 2867
+2118 2867
+2119 2867
+2120 2867
+2121 2867
+2122 2867
+2123 2867
+2124 2867
+2125 2867
+2126 2867
+2127 2867
+2128 2867
+2129 2867
+2130 2867
+2131 2867
+2132 2867
+2133 2867
+2134 2867
+2135 2867
+2136 2867
+2137 2867
+2138 2867
+2139 2867
+2140 2867
+2141 2867
+2142 2867
+2143 2867
+2144 2867
+2145 2867
+2146 2867
+2147 2867
+2148 2867
+2149 2867
+2150 2867
+2151 2867
+2152 2867
+2153 2867
+2154 2867
+2155 2867
+2156 2867
+2157 2867
+2158 2867
+2159 2867
+2160 2867
+2161 2867
+2162 2867
+2163 2867
+2164 2867
+2165 2867
+2166 2867
+2167 2867
+2168 2867
+2169 2867
+2170 2867
+2171 2867
+2172 2867
+2173 2867
+2174 2867
+2175 2867
+2176 2867
+2177 2867
+2178 2867
+2179 2867
+2180 2867
+2181 2867
+2182 2867
+2183 2867
+2184 2867
+2185 2867
+2186 2867
+2187 2867
+2188 2867
+2189 2867
+2190 2867
+2191 2867
+2192 2867
+2193 2867
+2194 2867
+2195 2867
+2196 2867
+2197 2867
+2198 2867
+2199 2892
+2200 2943
+2200 3069
+2201 2867
+2202 2867
+2203 2867
+2204 2877
+2204 2867
+2205 2867
+2206 2867
+2207 2867
+2208 2877
+2209 2867
+2210 2867
+2211 2867
+2212 2867
+2213 2867
+2214 2867
+2215 2867
+2216 2867
+2217 2867
+2218 2867
+2219 2867
+2220 2867
+2221 2867
+2222 2867
+2223 2867
+2224 2867
+2225 2867
+2226 2867
+2227 2867
+2228 2867
+2229 2867
+2230 2867
+2231 2867
+2232 2867
+2233 2867
+2234 2867
+2235 2867
+2236 2867
+2237 2867
+2238 2867
+2239 2867
+2240 2867
+2241 2867
+2242 2867
+200 MLine
+%I 1
+End
+
+Begin %I MLine
+%I b 65535
+1 0 0 [] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 200
+2242 2867
+2243 2867
+2244 2867
+2245 2867
+2246 2892
+2246 2867
+2247 2867
+2248 2867
+2249 2867
+2250 2867
+2251 2867
+2252 2867
+2253 2867
+2254 2867
+2255 2867
+2256 2867
+2257 2867
+2258 2867
+2259 2867
+2260 2867
+2261 2867
+2262 2867
+2263 2867
+2264 2867
+2265 2867
+2266 2867
+2267 2867
+2268 2867
+2269 2867
+2270 2867
+2271 2867
+2272 2867
+2273 2867
+2274 2867
+2275 2867
+2276 2867
+2277 2867
+2278 2867
+2279 2867
+2280 2867
+2281 2867
+2282 2867
+2283 2867
+2284 2867
+2285 2867
+2286 2867
+2287 2867
+2288 2867
+2289 2867
+2290 2867
+2291 2867
+2292 2867
+2293 2867
+2294 2867
+2295 2867
+2296 2867
+2297 2867
+2298 2867
+2299 2867
+2300 2867
+2301 2867
+2302 2867
+2303 2867
+2304 2867
+2305 2867
+2306 2867
+2307 2867
+2308 2867
+2309 2867
+2310 2867
+2311 2867
+2312 2867
+2313 2867
+2314 2867
+2315 2867
+2316 2867
+2317 2867
+2318 2867
+2319 2867
+2320 2867
+2321 2867
+2322 2867
+2323 2867
+2324 2867
+2325 2867
+2326 2867
+2327 2867
+2328 2867
+2329 2867
+2330 2867
+2331 2867
+2332 2867
+2333 2867
+2334 2867
+2335 2867
+2336 2867
+2337 2867
+2338 2867
+2339 2867
+2340 2867
+2341 2867
+2342 2867
+2343 2867
+2344 2867
+2345 2867
+2346 2867
+2347 2867
+2348 2867
+2349 2867
+2350 2867
+2351 2867
+2352 2867
+2353 2867
+2354 2867
+2355 2867
+2356 2867
+2357 2867
+2358 2867
+2359 2867
+2360 2867
+2361 2867
+2362 2867
+2363 2867
+2364 2867
+2365 2867
+2366 2867
+2367 2867
+2368 2867
+2369 2867
+2370 2867
+2371 2867
+2372 2867
+2373 2867
+2374 2867
+2375 2867
+2376 2867
+2377 2867
+2378 2867
+2379 2867
+2380 2867
+2381 2867
+2382 2867
+2383 2867
+2384 2867
+2385 2867
+2386 2867
+2387 2867
+2388 2867
+2389 2867
+2390 2867
+2391 2867
+2392 2867
+2393 2867
+2394 2867
+2395 2867
+2396 2867
+2397 2867
+2398 2867
+2399 2867
+2400 2867
+2401 2867
+2402 2867
+2403 2867
+2404 2867
+2405 2867
+2406 2867
+2407 2867
+2408 2867
+2409 2867
+2410 2867
+2411 2867
+2412 2867
+2413 2867
+2414 2867
+2415 2867
+2416 2867
+2417 2867
+2418 2867
+2419 2867
+2420 2867
+2421 2867
+2422 2867
+2423 2867
+2424 2867
+2425 2867
+2426 2867
+2427 2867
+2428 2867
+2429 2867
+2430 2867
+2431 2867
+2432 2867
+2433 2867
+2434 2867
+2435 2867
+2436 2867
+2437 2867
+2438 2867
+2439 2867
+2440 2867
+200 MLine
+%I 1
+End
+
+Begin %I MLine
+%I b 65535
+1 0 0 [] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 200
+2440 2867
+2441 2867
+2442 2867
+2443 2867
+2444 2867
+2445 2867
+2446 2867
+2447 2867
+2448 2867
+2449 2867
+2450 2867
+2451 2867
+2452 2867
+2453 2867
+2454 2867
+2455 2867
+2456 2867
+2457 2867
+2458 2867
+2459 2867
+2460 2867
+2461 2867
+2462 2867
+2463 2867
+2464 2867
+2465 2867
+2466 2867
+2467 2867
+2468 2867
+2469 2867
+2470 2867
+2471 2867
+2472 2867
+2473 2867
+2474 2867
+2475 2867
+2476 2867
+2477 2867
+2478 2867
+2479 2867
+2480 2867
+2481 2867
+2482 2867
+2483 2867
+2484 2867
+2485 2867
+2486 2867
+2487 2867
+2488 2867
+2489 2867
+2490 2867
+2491 2867
+2492 2867
+2493 2892
+2493 2867
+2494 2867
+2495 2867
+2496 2867
+2497 2867
+2498 2867
+2499 2867
+2500 2867
+2501 2867
+2502 2867
+2503 2867
+2504 2867
+2505 2867
+2506 2867
+2507 2867
+2508 2867
+2509 2867
+2510 2867
+2511 2867
+2512 2867
+2513 2867
+2514 2867
+2515 2867
+2516 2867
+2517 2867
+2518 2867
+2519 2867
+2520 2867
+2521 2867
+2522 2867
+2523 2867
+2524 2867
+2525 2867
+2526 2867
+2527 2867
+2528 2867
+2529 2867
+2530 2867
+2531 2867
+2532 2867
+2533 2867
+2534 2867
+2535 2867
+2536 2867
+2537 2867
+2538 2867
+2539 2867
+2540 2867
+2541 2867
+2542 2867
+2543 2867
+2544 2867
+2545 2867
+2546 2867
+2547 2867
+2548 2867
+2549 2867
+2550 2867
+2551 2867
+2552 2867
+2553 2867
+2554 2867
+2555 2867
+2556 2867
+2557 2867
+2558 2867
+2559 2867
+2560 2867
+2561 2867
+2562 2867
+2563 2867
+2564 2867
+2565 2867
+2566 2867
+2567 2867
+2568 2867
+2569 2867
+2570 2867
+2571 2867
+2572 2867
+2573 2867
+2574 2867
+2575 2867
+2576 2867
+2577 2867
+2578 2867
+2579 2867
+2580 2867
+2581 2867
+2582 2867
+2583 2867
+2584 2867
+2585 2867
+2586 2867
+2587 2867
+2588 2867
+2589 2867
+2590 2867
+2591 2867
+2592 2867
+2593 2867
+2594 2867
+2595 2867
+2596 2867
+2597 2867
+2598 2867
+2599 2867
+2600 2867
+2601 2867
+2602 2867
+2603 2867
+2604 2867
+2605 2867
+2606 2867
+2607 2867
+2608 2867
+2609 2867
+2610 2867
+2611 2867
+2612 2867
+2613 2867
+2614 2867
+2615 2867
+2616 2867
+2617 2867
+2618 2867
+2619 2867
+2620 2867
+2621 2867
+2622 2867
+2623 2867
+2624 2867
+2625 2867
+2626 2867
+2627 2867
+2628 2867
+2629 2867
+2630 2867
+2631 2867
+2632 2867
+2633 2867
+2634 2867
+2635 2867
+2636 2867
+2637 2867
+2638 2867
+200 MLine
+%I 1
+End
+
+Begin %I MLine
+%I b 65535
+1 0 0 [] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 200
+2638 2867
+2639 2867
+2640 2867
+2641 2867
+2642 2867
+2643 2867
+2644 2867
+2645 2867
+2646 2867
+2647 2867
+2648 2867
+2649 2867
+2650 2867
+2651 2867
+2652 2867
+2653 2867
+2654 2867
+2655 2867
+2656 2867
+2657 2867
+2658 2867
+2659 2867
+2660 2867
+2661 2867
+2662 2867
+2663 2867
+2664 2867
+2665 2867
+2666 2867
+2667 2867
+2668 2867
+2669 2867
+2670 2867
+2671 2867
+2671 2892
+2672 2867
+2673 2867
+2674 2867
+2675 2867
+2676 2867
+2677 2867
+2678 2867
+2679 2867
+2680 2867
+2681 2867
+2682 2867
+2683 2867
+2684 2867
+2685 2867
+2686 2867
+2687 2867
+2688 2867
+2689 2867
+2690 2867
+2691 2867
+2692 2867
+2693 2867
+2694 2867
+2695 2867
+2696 2867
+2697 2867
+2698 2867
+2699 2867
+2700 2867
+2701 2867
+2702 2892
+2703 2867
+2704 2867
+2705 2867
+2706 2867
+2707 2867
+2708 2867
+2709 2867
+2710 2867
+2711 2867
+2712 2867
+2713 2867
+2714 2867
+2715 2867
+2716 2867
+2717 2867
+2718 2867
+2719 2867
+2720 2867
+2721 2867
+2722 2867
+2723 2867
+2724 2867
+2725 2867
+2726 2867
+2727 2867
+2728 2867
+2729 2867
+2730 2867
+2731 2867
+2732 2867
+2732 2892
+2733 2867
+2734 2867
+2735 2867
+2736 2867
+2737 2867
+2738 2867
+2739 2867
+2740 2867
+2741 2867
+2742 2867
+2743 2867
+2744 2867
+2745 2867
+2746 2867
+2747 2867
+2748 2867
+2749 2867
+2750 2867
+2751 2867
+2752 2867
+2753 2867
+2754 2867
+2755 2867
+2756 2867
+2757 2867
+2758 2867
+2759 2867
+2760 2867
+2761 2867
+2762 2867
+2763 2867
+2764 2867
+2765 2867
+2766 2867
+2767 2867
+2768 2867
+2769 2867
+2770 2867
+2771 2867
+2772 2867
+2773 2867
+2774 2867
+2775 2867
+2776 2867
+2777 2867
+2778 2867
+2779 2867
+2780 2867
+2781 2867
+2782 2867
+2783 2867
+2784 2867
+2785 2867
+2786 2867
+2787 2867
+2788 2867
+2789 2867
+2790 2867
+2791 2867
+2792 2867
+2793 2867
+2794 2867
+2795 2867
+2796 2867
+2797 2867
+2798 2867
+2799 2867
+2800 2867
+2801 2867
+2802 2867
+2803 2867
+2804 2867
+2805 2892
+2806 2867
+2806 2892
+2807 2968
+2808 2968
+2808 2938
+2809 3071
+2810 2906
+2810 2867
+2811 2867
+2812 2887
+2812 2877
+2813 2896
+2814 2877
+2815 2974
+2815 3090
+2816 2983
+2817 2974
+2817 2954
+2818 3148
+2819 2974
+2819 2877
+2820 2877
+2820 2925
+2821 2964
+2822 2935
+2822 2983
+2823 2954
+2824 2906
+2824 2877
+2825 2974
+200 MLine
+%I 1
+End
+
+Begin %I MLine
+%I b 65535
+1 0 0 [] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 200
+2825 2974
+2826 2952
+2826 2955
+2827 2910
+2828 2917
+2828 2918
+2829 2892
+2829 3069
+2830 3008
+2831 2984
+2831 3079
+2832 3218
+2833 2943
+2833 3018
+2834 2993
+2835 3006
+2835 3117
+2836 3014
+2836 3030
+2837 2968
+2838 2918
+2838 2993
+2839 2890
+2840 2887
+2840 2896
+2841 2916
+2842 2916
+2842 2906
+2843 2906
+2844 2896
+2845 2896
+2845 2887
+2846 2887
+2847 2887
+2847 2916
+2848 2906
+2849 2877
+2850 2887
+2851 2877
+2851 2867
+2852 2867
+2853 2867
+2854 2867
+2855 2867
+2856 2867
+2857 2867
+2858 2867
+2859 2867
+2860 2867
+2861 2867
+2861 2892
+2862 2867
+2863 2867
+2864 2867
+2865 2867
+2866 2867
+2867 2867
+2868 2867
+2869 2867
+2870 2867
+2871 2867
+2872 2867
+2873 2867
+2874 2867
+2875 2867
+2876 2867
+2877 2867
+2878 2867
+2879 2867
+2880 2867
+2881 2867
+2882 2867
+2883 2867
+2884 2867
+2885 2867
+2886 2867
+2887 2867
+2888 2867
+2889 2867
+2890 2867
+2891 2867
+2892 2867
+2893 2867
+2894 2867
+2895 2867
+2896 2867
+2897 2867
+2898 2867
+2899 2867
+2900 2867
+2901 2867
+2902 2867
+2903 2867
+2904 2867
+2905 2867
+2906 2867
+2907 2867
+2908 2867
+2909 2867
+2910 2867
+2911 2867
+2912 2867
+2913 2867
+2914 2867
+2915 2867
+2916 2867
+2917 2867
+2918 2867
+2919 2867
+2920 2867
+2921 2867
+2922 2867
+2923 2867
+2924 2867
+2925 2867
+2926 2867
+2927 2867
+2928 2867
+2929 2867
+2930 2867
+2931 2867
+2932 2867
+2933 2867
+2934 2867
+2935 2867
+2936 2867
+2937 2867
+2938 2867
+2939 2867
+2940 2867
+2941 2867
+2942 2892
+2943 2892
+2944 2867
+2945 2892
+2945 2867
+2946 2867
+2947 2867
+2947 2892
+2948 2867
+2949 2867
+2950 2867
+2951 2867
+2952 2867
+2953 2867
+2954 2867
+2955 2867
+2956 2867
+2957 2867
+2958 2867
+2959 2993
+2959 2867
+2960 2867
+2961 2892
+2961 2943
+2962 2918
+2963 3045
+2963 2887
+2964 2935
+2964 2896
+2965 2867
+2966 2896
+2966 2974
+2967 3303
+2968 3138
+2968 2877
+2969 2867
+2970 2896
+2970 2906
+2971 2867
+2972 2867
+2972 2906
+2973 2867
+2973 2887
+2974 2867
+2975 2867
+2976 2867
+2977 2867
+2978 2867
+2979 2867
+2980 2867
+2981 2867
+2982 2918
+2982 2943
+2983 2867
+2984 2867
+2985 2867
+2986 2918
+2986 2943
+2987 2867
+2988 2892
+2988 2867
+2989 2867
+2990 2867
+2991 2867
+2992 2867
+2993 2867
+2994 2867
+2995 2867
+2996 2867
+200 MLine
+%I 1
+End
+
+Begin %I MLine
+%I b 65535
+1 0 0 [] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 185
+2996 2867
+2997 2867
+2998 2867
+2999 2867
+3000 2892
+3000 2867
+3001 2867
+3002 2867
+3003 2867
+3004 2867
+3005 2867
+3006 2867
+3007 2867
+3008 2867
+3009 2867
+3010 2867
+3011 2867
+3012 2867
+3013 2867
+3014 2867
+3015 2867
+3016 2867
+3017 2867
+3018 2867
+3019 2867
+3020 2918
+3020 2892
+3021 2943
+3021 2867
+3022 3080
+3023 3063
+3023 2892
+3024 2867
+3025 2867
+3026 2867
+3027 2867
+3028 2867
+3029 2867
+3030 2867
+3031 2867
+3032 2867
+3033 2867
+3034 2867
+3035 2867
+3036 2867
+3037 2867
+3038 2867
+3039 2867
+3040 2867
+3041 2867
+3042 2867
+3043 2867
+3044 2867
+3045 2867
+3046 2867
+3047 2867
+3048 2867
+3049 2867
+3050 2867
+3051 2867
+3052 2867
+3053 2867
+3054 2867
+3055 2867
+3056 2867
+3057 2867
+3058 2867
+3059 2867
+3060 2867
+3061 2943
+3062 2968
+3062 2867
+3063 2867
+3064 2867
+3065 2867
+3066 2867
+3067 2867
+3068 2867
+3069 2867
+3070 2867
+3071 2867
+3072 2867
+3073 2867
+3074 2867
+3075 2867
+3076 2867
+3077 2867
+3078 2867
+3079 2867
+3080 2867
+3081 2867
+3082 2867
+3083 2867
+3084 2867
+3085 2867
+3086 2867
+3087 2867
+3088 2867
+3089 2867
+3090 2867
+3091 2867
+3091 2892
+3092 3019
+3092 3119
+3093 3564
+3094 3187
+3094 2983
+3095 3196
+3096 2867
+3097 2867
+3098 2954
+3098 3003
+3099 3119
+3100 2906
+3100 2916
+3101 2906
+3101 2899
+3102 2892
+3103 2892
+3103 2867
+3104 2867
+3105 2867
+3106 2867
+3107 2867
+3108 2867
+3108 2918
+3109 2867
+3110 2867
+3110 2892
+3111 2892
+3112 2867
+3113 2867
+3114 2867
+3115 2867
+3116 2867
+3117 2867
+3118 2892
+3119 2950
+3119 2983
+3120 3061
+3121 2935
+3121 2867
+3122 2877
+3123 2867
+3124 2867
+3124 2877
+3125 2867
+3126 2867
+3126 2877
+3127 2867
+3128 2867
+3129 2877
+3130 2867
+3131 2867
+3132 2877
+3132 2867
+3133 2867
+3133 2892
+3134 2892
+3135 2867
+3135 2892
+3136 2867
+3137 2968
+3137 2943
+3138 2918
+3139 3044
+3139 2867
+3140 2867
+3141 2867
+3142 2867
+3143 2867
+3144 2867
+3144 2892
+3145 2867
+3146 2867
+3147 2867
+3148 2892
+3148 2867
+3149 2867
+3150 2867
+3151 2867
+3152 2867
+3153 2867
+3154 2867
+3155 2867
+185 MLine
+%I 1
+End
+
+Begin %I Text
+%I cfg Black
+0 0 0 SetCFg
+%I f *helvetica-medium-r*-14-*
+Helvetica 14 SetF
+%I t
+[ 1 0 0 1 154.983 589.868 ] concat
+%I
+[
+(Precipitation)
+] Text
+End
+
+Begin %I MLine
+%I b 34952
+1 0 0 [1 3 1 3 1 3 1 3] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 2
+819 1638
+819 2458
+2 MLine
+%I 1
+End
+
+Begin %I MLine
+%I b 34952
+1 0 0 [1 3 1 3 1 3 1 3] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 2
+1434 1638
+1434 2458
+2 MLine
+%I 1
+End
+
+Begin %I MLine
+%I b 34952
+1 0 0 [1 3 1 3 1 3 1 3] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 2
+2048 1638
+2048 2458
+2 MLine
+%I 1
+End
+
+Begin %I MLine
+%I b 34952
+1 0 0 [1 3 1 3 1 3 1 3] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 2
+2662 1638
+2662 2458
+2 MLine
+%I 1
+End
+
+Begin %I MLine
+%I b 34952
+1 0 0 [1 3 1 3 1 3 1 3] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 2
+3277 1638
+3277 2458
+2 MLine
+%I 1
+End
+
+Begin %I Text
+%I cfg Black
+0 0 0 SetCFg
+%I f *helvetica-medium-r*-14-*
+Helvetica 14 SetF
+%I t
+[ 1 0 0 1 137.708 424.925 ] concat
+%I
+[
+(0)
+] Text
+End
+
+Begin %I MLine
+%I b 34952
+1 0 0 [1 3 1 3 1 3 1 3] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 2
+819 1638
+3277 1638
+2 MLine
+%I 1
+End
+
+Begin %I Text
+%I cfg Black
+0 0 0 SetCFg
+%I f *helvetica-medium-r*-14-*
+Helvetica 14 SetF
+%I t
+[ 1 0 0 1 129.924 446.777 ] concat
+%I
+[
+(10)
+] Text
+End
+
+Begin %I MLine
+%I b 34952
+1 0 0 [1 3 1 3 1 3 1 3] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 2
+819 1755
+3277 1755
+2 MLine
+%I 1
+End
+
+Begin %I Text
+%I cfg Black
+0 0 0 SetCFg
+%I f *helvetica-medium-r*-14-*
+Helvetica 14 SetF
+%I t
+[ 1 0 0 1 129.924 468.629 ] concat
+%I
+[
+(20)
+] Text
+End
+
+Begin %I MLine
+%I b 34952
+1 0 0 [1 3 1 3 1 3 1 3] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 2
+819 1872
+3277 1872
+2 MLine
+%I 1
+End
+
+Begin %I Text
+%I cfg Black
+0 0 0 SetCFg
+%I f *helvetica-medium-r*-14-*
+Helvetica 14 SetF
+%I t
+[ 1 0 0 1 129.924 490.481 ] concat
+%I
+[
+(30)
+] Text
+End
+
+Begin %I MLine
+%I b 34952
+1 0 0 [1 3 1 3 1 3 1 3] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 2
+819 1989
+3277 1989
+2 MLine
+%I 1
+End
+
+Begin %I Text
+%I cfg Black
+0 0 0 SetCFg
+%I f *helvetica-medium-r*-14-*
+Helvetica 14 SetF
+%I t
+[ 1 0 0 1 129.924 512.519 ] concat
+%I
+[
+(40)
+] Text
+End
+
+Begin %I MLine
+%I b 34952
+1 0 0 [1 3 1 3 1 3 1 3] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 2
+819 2107
+3277 2107
+2 MLine
+%I 1
+End
+
+Begin %I Text
+%I cfg Black
+0 0 0 SetCFg
+%I f *helvetica-medium-r*-14-*
+Helvetica 14 SetF
+%I t
+[ 1 0 0 1 129.924 534.371 ] concat
+%I
+[
+(50)
+] Text
+End
+
+Begin %I MLine
+%I b 34952
+1 0 0 [1 3 1 3 1 3 1 3] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 2
+819 2224
+3277 2224
+2 MLine
+%I 1
+End
+
+Begin %I Text
+%I cfg Black
+0 0 0 SetCFg
+%I f *helvetica-medium-r*-14-*
+Helvetica 14 SetF
+%I t
+[ 1 0 0 1 129.924 556.223 ] concat
+%I
+[
+(60)
+] Text
+End
+
+Begin %I MLine
+%I b 34952
+1 0 0 [1 3 1 3 1 3 1 3] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 2
+819 2341
+3277 2341
+2 MLine
+%I 1
+End
+
+Begin %I Text
+%I cfg Black
+0 0 0 SetCFg
+%I f *helvetica-medium-r*-14-*
+Helvetica 14 SetF
+%I t
+[ 1 0 0 1 129.924 578.075 ] concat
+%I
+[
+(70)
+] Text
+End
+
+Begin %I MLine
+%I b 34952
+1 0 0 [1 3 1 3 1 3 1 3] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 2
+819 2458
+3277 2458
+2 MLine
+%I 1
+End
+
+Begin %I Rect
+%I b 65535
+1 0 0 [] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I
+819 1638 3277 2458 Rect
+End
+
+Begin %I MLine
+%I b 65535
+1 0 0 [] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 200
+1249 1638
+1281 1638
+1282 1638
+1283 1638
+1284 1638
+1285 1638
+1286 1638
+1287 1638
+1288 1638
+1289 1638
+1290 1638
+1291 1638
+1292 1638
+1293 1638
+1294 1638
+1295 1638
+1296 1638
+1297 1638
+1298 1638
+1299 1638
+1300 1638
+1301 1638
+1302 1638
+1303 1638
+1304 1638
+1305 1638
+1306 1638
+1307 1638
+1308 1638
+1309 1638
+1310 1638
+1311 1638
+1312 1638
+1313 1638
+1314 1638
+1315 1638
+1316 1638
+1317 1638
+1318 1638
+1319 1638
+1320 1638
+1321 1638
+1322 1638
+1323 1638
+1324 1638
+1325 1638
+1326 1638
+1327 1638
+1328 1638
+1329 1638
+1330 1638
+1331 1638
+1332 1638
+1333 1638
+1334 1638
+1335 1638
+1336 1638
+1337 1638
+1338 1638
+1339 1638
+1340 1638
+1341 1638
+1342 1638
+1343 1638
+1344 1638
+1345 1638
+1346 1638
+1347 1638
+1348 1638
+1349 1638
+1350 1638
+1351 1638
+1352 1638
+1353 1638
+1354 1638
+1355 1638
+1356 1638
+1357 1638
+1358 1638
+1359 1638
+1360 1638
+1361 1638
+1362 1638
+1363 1638
+1364 1638
+1365 1638
+1366 1638
+1367 1638
+1368 1638
+1369 1638
+1370 1638
+1371 1638
+1372 1638
+1373 1638
+1374 1638
+1375 1638
+1376 1638
+1377 1638
+1378 1638
+1379 1638
+1380 1638
+1381 1638
+1382 1638
+1383 1638
+1384 1638
+1385 1638
+1386 1638
+1387 1638
+1388 1638
+1389 1638
+1390 1638
+1391 1638
+1392 1638
+1393 1638
+1394 1638
+1395 1638
+1396 1638
+1397 1638
+1398 1638
+1399 1638
+1400 1638
+1401 1638
+1402 1638
+1403 1638
+1404 1638
+1405 1638
+1406 1638
+1407 1638
+1408 1638
+1409 1638
+1409 1650
+1410 1638
+1411 1638
+1412 1638
+1413 1638
+1414 1638
+1415 1638
+1416 1638
+1417 1638
+1418 1638
+1419 1638
+1420 1638
+1421 1638
+1422 1638
+1423 1638
+1424 1638
+1425 1638
+1426 1638
+1427 1638
+1427 1717
+1428 1672
+1428 1650
+1429 1638
+1430 1638
+1431 1638
+1432 1638
+1433 1638
+1434 1638
+1435 1638
+1436 1638
+1437 1638
+1438 1638
+1439 1638
+1440 1638
+1441 1638
+1442 1638
+1443 1638
+1444 1638
+1445 1638
+1446 1638
+1447 1638
+1448 1638
+1449 1638
+1450 1638
+1451 1638
+1452 1638
+1453 1638
+1454 1638
+1455 1638
+1456 1638
+1457 1638
+1458 1638
+1459 1638
+1460 1638
+1461 1638
+1462 1638
+1463 1638
+1464 1638
+1465 1638
+1466 1638
+1467 1638
+1468 1638
+1469 1638
+1470 1638
+1471 1638
+1472 1638
+1473 1638
+1474 1638
+1475 1638
+1476 1638
+200 MLine
+%I 1
+End
+
+Begin %I MLine
+%I b 65535
+1 0 0 [] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 200
+1476 1638
+1477 1638
+1478 1638
+1479 1638
+1480 1638
+1481 1638
+1482 1638
+1483 1638
+1484 1638
+1485 1638
+1486 1638
+1487 1638
+1488 1638
+1489 1638
+1490 1638
+1491 1638
+1492 1638
+1493 1638
+1494 1638
+1495 1638
+1496 1638
+1497 1638
+1498 1638
+1499 1638
+1500 1638
+1501 1638
+1502 1638
+1503 1638
+1503 1650
+1504 1638
+1505 1638
+1506 1638
+1507 1638
+1508 1638
+1509 1638
+1510 1638
+1511 1638
+1512 1638
+1513 1638
+1514 1638
+1515 1638
+1516 1638
+1517 1638
+1518 1638
+1519 1638
+1520 1638
+1521 1638
+1522 1638
+1523 1638
+1524 1638
+1525 1638
+1526 1638
+1527 1638
+1528 1638
+1529 1638
+1530 1638
+1531 1638
+1532 1638
+1533 1638
+1534 1638
+1535 1638
+1536 1638
+1537 1638
+1538 1638
+1539 1638
+1540 1638
+1541 1638
+1542 1638
+1543 1638
+1544 1638
+1545 1638
+1546 1638
+1547 1638
+1548 1638
+1549 1638
+1550 1638
+1551 1638
+1552 1638
+1553 1638
+1554 1638
+1555 1638
+1556 1638
+1557 1638
+1558 1638
+1559 1638
+1560 1638
+1561 1638
+1562 1638
+1563 1638
+1564 1638
+1565 1638
+1566 1638
+1567 1638
+1568 1638
+1569 1638
+1570 1638
+1571 1638
+1572 1638
+1573 1638
+1574 1638
+1575 1638
+1576 1638
+1577 1638
+1578 1638
+1579 1638
+1580 1638
+1581 1638
+1582 1638
+1583 1638
+1584 1638
+1585 1638
+1586 1638
+1587 1638
+1588 1638
+1589 1638
+1590 1638
+1591 1638
+1592 1638
+1593 1638
+1594 1638
+1595 1638
+1596 1638
+1597 1638
+1598 1638
+1599 1638
+1600 1638
+1601 1638
+1602 1638
+1603 1638
+1604 1638
+1605 1638
+1606 1638
+1607 1638
+1608 1638
+1609 1638
+1610 1638
+1611 1638
+1612 1638
+1613 1638
+1614 1638
+1615 1638
+1616 1638
+1617 1638
+1618 1638
+1619 1638
+1620 1638
+1621 1638
+1622 1638
+1623 1638
+1624 1638
+1625 1638
+1626 1638
+1627 1638
+1628 1638
+1629 1638
+1630 1638
+1631 1638
+1632 1638
+1633 1638
+1634 1638
+1635 1638
+1636 1638
+1637 1638
+1638 1638
+1639 1638
+1640 1638
+1641 1638
+1642 1638
+1643 1638
+1644 1638
+1645 1638
+1646 1638
+1647 1638
+1648 1638
+1649 1638
+1650 1638
+1651 1638
+1652 1638
+1653 1638
+1654 1638
+1655 1638
+1656 1638
+1657 1638
+1658 1638
+1659 1638
+1660 1638
+1661 1638
+1662 1638
+1663 1638
+1664 1638
+1665 1638
+1666 1638
+1667 1638
+1668 1638
+1669 1638
+1670 1638
+1671 1638
+1672 1638
+1673 1638
+1674 1638
+200 MLine
+%I 1
+End
+
+Begin %I MLine
+%I b 65535
+1 0 0 [] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 200
+1674 1638
+1675 1638
+1676 1638
+1677 1638
+1678 1638
+1679 1638
+1680 1638
+1681 1638
+1682 1638
+1683 1638
+1684 1638
+1685 1638
+1686 1638
+1687 1638
+1688 1638
+1689 1638
+1690 1638
+1691 1638
+1692 1638
+1693 1638
+1694 1638
+1695 1638
+1696 1638
+1697 1638
+1698 1638
+1699 1638
+1700 1638
+1701 1638
+1702 1638
+1703 1638
+1704 1638
+1705 1638
+1706 1638
+1707 1638
+1708 1638
+1709 1638
+1710 1638
+1711 1638
+1712 1638
+1713 1638
+1714 1638
+1715 1638
+1716 1638
+1717 1638
+1718 1638
+1719 1638
+1720 1638
+1721 1638
+1722 1650
+1723 1638
+1724 1638
+1724 1650
+1725 1650
+1725 1661
+1726 1684
+1727 1672
+1727 1717
+1728 1717
+1729 1672
+1729 1740
+1730 1695
+1731 1706
+1731 1684
+1732 1650
+1733 1650
+1734 1638
+1734 1650
+1735 1650
+1736 1638
+1737 1638
+1738 1638
+1739 1638
+1740 1638
+1741 1638
+1742 1638
+1743 1638
+1744 1638
+1745 1638
+1746 1638
+1747 1638
+1748 1638
+1749 1638
+1750 1638
+1751 1638
+1752 1638
+1753 1638
+1754 1638
+1755 1638
+1756 1638
+1757 1638
+1758 1638
+1759 1638
+1760 1638
+1761 1650
+1761 1717
+1762 1808
+1763 1661
+1763 1650
+1764 1661
+1764 1796
+1765 1853
+1766 1819
+1766 1740
+1767 1751
+1768 1751
+1768 1729
+1769 1717
+1770 1695
+1770 1650
+1771 1661
+1772 1684
+1772 1661
+1773 1672
+1773 1650
+1774 1638
+1775 1650
+1776 1638
+1777 1650
+1777 1638
+1778 1638
+1779 1638
+1780 1638
+1781 1638
+1782 1638
+1783 1638
+1784 1638
+1785 1638
+1786 1638
+1787 1638
+1788 1684
+1788 1638
+1789 1638
+1790 1638
+1791 1638
+1792 1638
+1793 1638
+1794 1638
+1795 1638
+1796 1638
+1797 1638
+1798 1638
+1799 1638
+1800 1638
+1801 1638
+1802 1638
+1803 1638
+1804 1638
+1805 1638
+1806 1650
+1807 1638
+1807 1650
+1808 1706
+1809 1717
+1809 1650
+1810 1684
+1811 1638
+1812 1638
+1813 1638
+1814 1638
+1815 1650
+1816 1650
+1816 1638
+1817 1638
+1818 1638
+1819 1638
+1820 1638
+1821 1638
+1822 1638
+1823 1638
+1824 1638
+1825 1638
+1826 1638
+1827 1638
+1828 1638
+1829 1638
+1830 1638
+1831 1638
+1832 1638
+1833 1638
+1834 1638
+1835 1638
+1836 1638
+1837 1638
+1838 1661
+1839 1638
+1840 1638
+1841 1638
+1842 1638
+1843 1638
+1844 1638
+1845 1638
+1846 1638
+1847 1638
+1848 1638
+1849 1638
+1850 1638
+1851 1638
+1852 1638
+1853 1638
+1854 1638
+200 MLine
+%I 1
+End
+
+Begin %I MLine
+%I b 65535
+1 0 0 [] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 200
+1854 1638
+1855 1638
+1856 1638
+1857 1638
+1858 1638
+1859 1638
+1860 1638
+1861 1638
+1862 1638
+1863 1638
+1864 1638
+1865 1638
+1866 1638
+1867 1638
+1868 1638
+1869 1638
+1870 1638
+1871 1638
+1872 1638
+1873 1638
+1874 1638
+1875 1638
+1876 1638
+1877 1638
+1878 1638
+1879 1638
+1880 1638
+1881 1638
+1882 1638
+1883 1638
+1884 1638
+1885 1638
+1886 1638
+1887 1638
+1888 1638
+1889 1638
+1890 1638
+1891 1638
+1892 1638
+1893 1638
+1894 1638
+1895 1638
+1896 1638
+1897 1638
+1898 1638
+1899 1638
+1900 1638
+1901 1638
+1902 1638
+1903 1638
+1904 1638
+1905 1638
+1906 1638
+1907 1638
+1908 1638
+1909 1638
+1910 1638
+1911 1638
+1912 1638
+1913 1638
+1914 1638
+1915 1638
+1916 1638
+1917 1638
+1918 1638
+1919 1638
+1920 1638
+1921 1638
+1922 1638
+1923 1638
+1924 1638
+1925 1638
+1926 1638
+1927 1638
+1928 1638
+1929 1638
+1930 1638
+1931 1638
+1932 1638
+1933 1638
+1934 1638
+1935 1638
+1936 1638
+1937 1638
+1938 1638
+1939 1638
+1940 1638
+1941 1638
+1942 1638
+1943 1638
+1944 1638
+1945 1638
+1946 1638
+1947 1638
+1948 1638
+1949 1638
+1950 1638
+1951 1638
+1952 1638
+1953 1638
+1954 1638
+1955 1638
+1956 1638
+1957 1638
+1958 1638
+1959 1638
+1960 1638
+1961 1638
+1962 1638
+1963 1638
+1964 1638
+1965 1638
+1966 1638
+1967 1638
+1968 1638
+1969 1638
+1970 1638
+1971 1638
+1972 1638
+1973 1638
+1974 1638
+1975 1638
+1976 1638
+1977 1638
+1978 1638
+1979 1638
+1980 1638
+1981 1638
+1982 1638
+1983 1638
+1984 1638
+1985 1638
+1986 1638
+1987 1638
+1988 1638
+1989 1638
+1990 1638
+1991 1638
+1992 1638
+1993 1638
+1994 1638
+1995 1638
+1996 1638
+1997 1638
+1998 1638
+1999 1638
+2000 1638
+2001 1638
+2002 1638
+2003 1638
+2004 1638
+2005 1638
+2006 1638
+2007 1638
+2008 1638
+2009 1638
+2010 1638
+2011 1638
+2012 1638
+2013 1638
+2013 1650
+2014 1650
+2015 1638
+2016 1638
+2017 1638
+2018 1638
+2019 1638
+2020 1638
+2021 1638
+2022 1638
+2023 1638
+2024 1638
+2024 1650
+2025 1638
+2026 1638
+2027 1638
+2028 1638
+2028 1650
+2029 1717
+2029 1864
+2030 1672
+2031 1638
+2032 1638
+2033 1638
+2034 1650
+2035 1638
+2036 1638
+2037 1638
+2038 1638
+2039 1650
+2040 1638
+2041 1638
+2042 1638
+2043 1638
+2044 1638
+2045 1638
+2046 1638
+2047 1638
+2048 1638
+2049 1661
+200 MLine
+%I 1
+End
+
+Begin %I MLine
+%I b 65535
+1 0 0 [] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 200
+2049 1661
+2049 1638
+2050 1638
+2051 1638
+2052 1638
+2053 1650
+2054 1638
+2055 1638
+2056 1638
+2057 1638
+2058 1638
+2059 1638
+2060 1638
+2061 1638
+2062 1638
+2063 1638
+2064 1638
+2065 1638
+2066 1638
+2067 1638
+2068 1638
+2069 1638
+2070 1638
+2071 1638
+2072 1638
+2073 1638
+2074 1638
+2075 1638
+2076 1638
+2077 1638
+2078 1638
+2079 1638
+2080 1638
+2081 1638
+2082 1638
+2083 1638
+2083 1650
+2084 1638
+2084 1650
+2085 1638
+2086 1661
+2086 1638
+2087 1638
+2088 1638
+2089 1638
+2090 1638
+2091 1638
+2092 1638
+2093 1638
+2094 1638
+2095 1638
+2096 1638
+2097 1638
+2098 1638
+2099 1638
+2100 1638
+2101 1638
+2102 1638
+2103 1638
+2104 1638
+2105 1638
+2106 1638
+2107 1638
+2108 1638
+2109 1638
+2110 1638
+2111 1638
+2112 1638
+2113 1638
+2114 1638
+2115 1638
+2116 1638
+2117 1638
+2118 1638
+2119 1638
+2120 1638
+2121 1638
+2122 1638
+2123 1638
+2124 1638
+2125 1638
+2126 1638
+2127 1638
+2128 1638
+2129 1638
+2130 1638
+2131 1638
+2132 1638
+2133 1638
+2134 1638
+2135 1638
+2136 1638
+2137 1638
+2138 1638
+2139 1638
+2140 1638
+2141 1638
+2142 1638
+2143 1638
+2144 1638
+2145 1638
+2146 1638
+2147 1638
+2148 1638
+2149 1638
+2150 1638
+2151 1638
+2152 1638
+2153 1638
+2154 1638
+2155 1638
+2156 1638
+2157 1638
+2158 1638
+2159 1638
+2160 1638
+2161 1638
+2162 1638
+2163 1638
+2164 1638
+2165 1638
+2166 1638
+2167 1638
+2168 1638
+2169 1638
+2170 1638
+2171 1638
+2172 1638
+2173 1638
+2174 1638
+2175 1638
+2176 1638
+2177 1638
+2178 1638
+2179 1638
+2180 1638
+2181 1638
+2182 1638
+2183 1638
+2184 1638
+2185 1638
+2186 1638
+2187 1638
+2188 1638
+2189 1638
+2190 1638
+2191 1638
+2192 1638
+2193 1638
+2194 1638
+2195 1638
+2196 1638
+2197 1638
+2198 1638
+2199 1650
+2200 1672
+2200 1729
+2201 1638
+2202 1638
+2203 1638
+2204 1650
+2204 1638
+2205 1638
+2206 1638
+2207 1638
+2208 1650
+2209 1638
+2210 1638
+2211 1638
+2212 1638
+2213 1638
+2214 1638
+2215 1638
+2216 1638
+2217 1638
+2218 1638
+2219 1638
+2220 1638
+2221 1638
+2222 1638
+2223 1638
+2224 1638
+2225 1638
+2226 1638
+2227 1638
+2228 1638
+2229 1638
+2230 1638
+2231 1638
+2232 1638
+2233 1638
+2234 1638
+2235 1638
+2236 1638
+2237 1638
+2238 1638
+2239 1638
+2240 1638
+2241 1638
+2242 1638
+200 MLine
+%I 1
+End
+
+Begin %I MLine
+%I b 65535
+1 0 0 [] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 200
+2242 1638
+2243 1638
+2244 1638
+2245 1638
+2246 1650
+2246 1638
+2247 1638
+2248 1638
+2249 1638
+2250 1638
+2251 1638
+2252 1638
+2253 1638
+2254 1638
+2255 1638
+2256 1638
+2257 1638
+2258 1638
+2259 1638
+2260 1638
+2261 1638
+2262 1638
+2263 1638
+2264 1638
+2265 1638
+2266 1638
+2267 1638
+2268 1638
+2269 1638
+2270 1638
+2271 1638
+2272 1638
+2273 1638
+2274 1638
+2275 1638
+2276 1638
+2277 1638
+2278 1638
+2279 1638
+2280 1638
+2281 1638
+2282 1638
+2283 1638
+2284 1638
+2285 1638
+2286 1638
+2287 1638
+2288 1638
+2289 1638
+2290 1638
+2291 1638
+2292 1638
+2293 1638
+2294 1638
+2295 1638
+2296 1638
+2297 1638
+2298 1638
+2299 1638
+2300 1638
+2301 1638
+2302 1638
+2303 1638
+2304 1638
+2305 1638
+2306 1638
+2307 1638
+2308 1638
+2309 1638
+2310 1638
+2311 1638
+2312 1638
+2313 1638
+2314 1638
+2315 1638
+2316 1638
+2317 1638
+2318 1638
+2319 1638
+2320 1638
+2321 1638
+2322 1638
+2323 1638
+2324 1638
+2325 1638
+2326 1638
+2327 1638
+2328 1638
+2329 1638
+2330 1638
+2331 1638
+2332 1638
+2333 1638
+2334 1638
+2335 1638
+2336 1638
+2337 1638
+2338 1638
+2339 1638
+2340 1638
+2341 1638
+2342 1638
+2343 1638
+2344 1638
+2345 1638
+2346 1638
+2347 1638
+2348 1638
+2349 1638
+2350 1638
+2351 1638
+2352 1638
+2353 1638
+2354 1638
+2355 1638
+2356 1638
+2357 1638
+2358 1638
+2359 1638
+2360 1638
+2361 1638
+2362 1638
+2363 1638
+2364 1638
+2365 1638
+2366 1638
+2367 1638
+2368 1638
+2369 1638
+2370 1638
+2371 1638
+2372 1638
+2373 1638
+2374 1638
+2375 1638
+2376 1638
+2377 1638
+2378 1638
+2379 1638
+2380 1638
+2381 1638
+2382 1638
+2383 1638
+2384 1638
+2385 1638
+2386 1638
+2387 1638
+2388 1638
+2389 1638
+2390 1638
+2391 1638
+2392 1638
+2393 1638
+2394 1638
+2395 1638
+2396 1638
+2397 1638
+2398 1638
+2399 1638
+2400 1638
+2401 1638
+2402 1638
+2403 1638
+2404 1638
+2405 1638
+2406 1638
+2407 1638
+2408 1638
+2409 1638
+2410 1638
+2411 1638
+2412 1638
+2413 1638
+2414 1638
+2415 1638
+2416 1638
+2417 1638
+2418 1638
+2419 1638
+2420 1638
+2421 1638
+2422 1638
+2423 1638
+2424 1638
+2425 1638
+2426 1638
+2427 1638
+2428 1638
+2429 1638
+2430 1638
+2431 1638
+2432 1638
+2433 1638
+2434 1638
+2435 1638
+2436 1638
+2437 1638
+2438 1638
+2439 1638
+2440 1638
+200 MLine
+%I 1
+End
+
+Begin %I MLine
+%I b 65535
+1 0 0 [] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 200
+2440 1638
+2441 1638
+2442 1638
+2443 1638
+2444 1638
+2445 1638
+2446 1638
+2447 1638
+2448 1638
+2449 1638
+2450 1638
+2451 1638
+2452 1638
+2453 1638
+2454 1638
+2455 1638
+2456 1638
+2457 1638
+2458 1638
+2459 1638
+2460 1638
+2461 1638
+2462 1638
+2463 1638
+2464 1638
+2465 1638
+2466 1638
+2467 1638
+2468 1638
+2469 1638
+2470 1638
+2471 1638
+2472 1638
+2473 1638
+2474 1638
+2475 1638
+2476 1638
+2477 1638
+2478 1638
+2479 1638
+2480 1638
+2481 1638
+2482 1638
+2483 1638
+2484 1638
+2485 1638
+2486 1638
+2487 1638
+2488 1638
+2489 1638
+2490 1638
+2491 1638
+2492 1638
+2493 1650
+2493 1638
+2494 1638
+2495 1638
+2496 1638
+2497 1638
+2498 1638
+2499 1638
+2500 1638
+2501 1638
+2502 1638
+2503 1638
+2504 1638
+2505 1638
+2506 1638
+2507 1638
+2508 1638
+2509 1638
+2510 1638
+2511 1638
+2512 1638
+2513 1638
+2514 1638
+2515 1638
+2516 1638
+2517 1638
+2518 1638
+2519 1638
+2520 1638
+2521 1638
+2522 1638
+2523 1638
+2524 1638
+2525 1638
+2526 1638
+2527 1638
+2528 1638
+2529 1638
+2530 1638
+2531 1638
+2532 1638
+2533 1638
+2534 1638
+2535 1638
+2536 1638
+2537 1638
+2538 1638
+2539 1638
+2540 1638
+2541 1638
+2542 1638
+2543 1638
+2544 1638
+2545 1638
+2546 1638
+2547 1638
+2548 1638
+2549 1638
+2550 1638
+2551 1638
+2552 1638
+2553 1638
+2554 1638
+2555 1638
+2556 1638
+2557 1638
+2558 1638
+2559 1638
+2560 1638
+2561 1638
+2562 1638
+2563 1638
+2564 1638
+2565 1638
+2566 1638
+2567 1638
+2568 1638
+2569 1638
+2570 1638
+2571 1638
+2572 1638
+2573 1638
+2574 1638
+2575 1638
+2576 1638
+2577 1638
+2578 1638
+2579 1638
+2580 1638
+2581 1638
+2582 1638
+2583 1638
+2584 1638
+2585 1638
+2586 1638
+2587 1638
+2588 1638
+2589 1638
+2590 1638
+2591 1638
+2592 1638
+2593 1638
+2594 1638
+2595 1638
+2596 1638
+2597 1638
+2598 1638
+2599 1638
+2600 1638
+2601 1638
+2602 1638
+2603 1638
+2604 1638
+2605 1638
+2606 1638
+2607 1638
+2608 1638
+2609 1638
+2610 1638
+2611 1638
+2612 1638
+2613 1638
+2614 1638
+2615 1638
+2616 1638
+2617 1638
+2618 1638
+2619 1638
+2620 1638
+2621 1638
+2622 1638
+2623 1638
+2624 1638
+2625 1638
+2626 1638
+2627 1638
+2628 1638
+2629 1638
+2630 1638
+2631 1638
+2632 1638
+2633 1638
+2634 1638
+2635 1638
+2636 1638
+2637 1638
+2638 1638
+200 MLine
+%I 1
+End
+
+Begin %I MLine
+%I b 65535
+1 0 0 [] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 200
+2638 1638
+2639 1638
+2640 1638
+2641 1638
+2642 1638
+2643 1638
+2644 1638
+2645 1638
+2646 1638
+2647 1638
+2648 1638
+2649 1638
+2650 1638
+2651 1638
+2652 1638
+2653 1638
+2654 1638
+2655 1638
+2656 1638
+2657 1638
+2658 1638
+2659 1638
+2660 1638
+2661 1638
+2662 1638
+2663 1638
+2664 1638
+2665 1638
+2666 1638
+2667 1638
+2668 1638
+2669 1638
+2670 1638
+2671 1638
+2671 1650
+2672 1638
+2673 1638
+2674 1638
+2675 1638
+2676 1638
+2677 1638
+2678 1638
+2679 1638
+2680 1638
+2681 1638
+2682 1638
+2683 1638
+2684 1638
+2685 1638
+2686 1638
+2687 1638
+2688 1638
+2689 1638
+2690 1638
+2691 1638
+2692 1638
+2693 1638
+2694 1638
+2695 1638
+2696 1638
+2697 1638
+2698 1638
+2699 1638
+2700 1638
+2701 1638
+2702 1650
+2703 1638
+2704 1638
+2705 1638
+2706 1638
+2707 1638
+2708 1638
+2709 1638
+2710 1638
+2711 1638
+2712 1638
+2713 1638
+2714 1638
+2715 1638
+2716 1638
+2717 1638
+2718 1638
+2719 1638
+2720 1638
+2721 1638
+2722 1638
+2723 1638
+2724 1638
+2725 1638
+2726 1638
+2727 1638
+2728 1638
+2729 1638
+2730 1638
+2731 1638
+2732 1638
+2732 1650
+2733 1638
+2734 1638
+2735 1638
+2736 1638
+2737 1638
+2738 1638
+2739 1638
+2740 1638
+2741 1638
+2742 1638
+2743 1638
+2744 1638
+2745 1638
+2746 1638
+2747 1638
+2748 1638
+2749 1638
+2750 1638
+2751 1638
+2752 1638
+2753 1638
+2754 1638
+2755 1638
+2756 1638
+2757 1638
+2758 1638
+2759 1638
+2760 1638
+2761 1638
+2762 1638
+2763 1638
+2764 1638
+2765 1638
+2766 1638
+2767 1638
+2768 1638
+2769 1638
+2770 1638
+2771 1638
+2772 1638
+2773 1638
+2774 1638
+2775 1638
+2776 1638
+2777 1638
+2778 1638
+2779 1638
+2780 1638
+2781 1638
+2782 1638
+2783 1638
+2784 1638
+2785 1638
+2786 1638
+2787 1638
+2788 1638
+2789 1638
+2790 1638
+2791 1638
+2792 1638
+2793 1638
+2794 1638
+2795 1638
+2796 1638
+2797 1638
+2798 1638
+2799 1638
+2800 1638
+2801 1638
+2802 1638
+2803 1638
+2804 1638
+2805 1650
+2806 1638
+2806 1650
+2807 1684
+2808 1684
+2808 1763
+2809 1876
+2810 1684
+2810 1638
+2811 1638
+2812 1661
+2812 1650
+2813 1672
+2814 1650
+2815 1763
+2815 1898
+2816 1774
+2817 1763
+2817 1740
+2818 1966
+2819 1763
+2819 1650
+2820 1650
+2820 1706
+2821 1751
+2822 1717
+2822 1774
+2823 1740
+2824 1684
+2824 1650
+2825 1763
+200 MLine
+%I 1
+End
+
+Begin %I MLine
+%I b 65535
+1 0 0 [] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 200
+2825 1763
+2826 1717
+2827 1661
+2828 1661
+2829 1650
+2829 1729
+2830 1717
+2831 1706
+2831 1819
+2832 1977
+2833 1672
+2833 1717
+2834 1695
+2835 1729
+2835 1853
+2836 1729
+2837 1684
+2838 1661
+2838 1695
+2839 1672
+2840 1661
+2840 1672
+2841 1695
+2842 1695
+2842 1684
+2843 1684
+2844 1672
+2845 1672
+2845 1661
+2846 1661
+2847 1661
+2847 1695
+2848 1684
+2849 1650
+2850 1661
+2851 1650
+2851 1638
+2852 1638
+2853 1638
+2854 1638
+2855 1638
+2856 1638
+2857 1638
+2858 1638
+2859 1638
+2860 1638
+2861 1638
+2861 1650
+2862 1638
+2863 1638
+2864 1638
+2865 1638
+2866 1638
+2867 1638
+2868 1638
+2869 1638
+2870 1638
+2871 1638
+2872 1638
+2873 1638
+2874 1638
+2875 1638
+2876 1638
+2877 1638
+2878 1638
+2879 1638
+2880 1638
+2881 1638
+2882 1638
+2883 1638
+2884 1638
+2885 1638
+2886 1638
+2887 1638
+2888 1638
+2889 1638
+2890 1638
+2891 1638
+2892 1638
+2893 1638
+2894 1638
+2895 1638
+2896 1638
+2897 1638
+2898 1638
+2899 1638
+2900 1638
+2901 1638
+2902 1638
+2903 1638
+2904 1638
+2905 1638
+2906 1638
+2907 1638
+2908 1638
+2909 1638
+2910 1638
+2911 1638
+2912 1638
+2913 1638
+2914 1638
+2915 1638
+2916 1638
+2917 1638
+2918 1638
+2919 1638
+2920 1638
+2921 1638
+2922 1638
+2923 1638
+2924 1638
+2925 1638
+2926 1638
+2927 1638
+2928 1638
+2929 1638
+2930 1638
+2931 1638
+2932 1638
+2933 1638
+2934 1638
+2935 1638
+2936 1638
+2937 1638
+2938 1638
+2939 1638
+2940 1638
+2941 1638
+2942 1650
+2943 1650
+2944 1638
+2945 1650
+2945 1638
+2946 1638
+2947 1638
+2947 1650
+2948 1638
+2949 1638
+2950 1638
+2951 1638
+2952 1638
+2953 1638
+2954 1638
+2955 1638
+2956 1638
+2957 1638
+2958 1638
+2959 1695
+2959 1638
+2960 1638
+2961 1650
+2961 1672
+2962 1661
+2963 1876
+2963 1661
+2964 1717
+2964 1672
+2965 1638
+2966 1672
+2966 1763
+2967 2146
+2968 1955
+2968 1650
+2969 1638
+2970 1672
+2970 1684
+2971 1638
+2972 1638
+2972 1684
+2973 1638
+2973 1661
+2974 1638
+2975 1638
+2976 1638
+2977 1638
+2978 1638
+2979 1638
+2980 1638
+2981 1638
+2982 1661
+2982 1672
+2983 1638
+2984 1638
+2985 1638
+2986 1661
+2986 1672
+2987 1638
+2988 1650
+2988 1638
+2989 1638
+2990 1638
+2991 1638
+2992 1638
+2993 1638
+2994 1638
+2995 1638
+2996 1638
+2997 1638
+2998 1638
+2999 1638
+200 MLine
+%I 1
+End
+
+Begin %I MLine
+%I b 65535
+1 0 0 [] 0 SetB
+%I cfg Black
+0 0 0 SetCFg
+%I cbg White
+1 1 1 SetCBg
+none SetP %I p n
+%I t
+[ 0.186768 0 0 0.186768 0 112 ] concat
+%I 182
+2999 1638
+3000 1650
+3000 1638
+3001 1638
+3002 1638
+3003 1638
+3004 1638
+3005 1638
+3006 1638
+3007 1638
+3008 1638
+3009 1638
+3010 1638
+3011 1638
+3012 1638
+3013 1638
+3014 1638
+3015 1638
+3016 1638
+3017 1638
+3018 1638
+3019 1638
+3020 1661
+3020 1650
+3021 1672
+3021 1638
+3022 1842
+3023 1763
+3023 1650
+3024 1638
+3025 1638
+3026 1638
+3027 1638
+3028 1638
+3029 1638
+3030 1638
+3031 1638
+3032 1638
+3033 1638
+3034 1638
+3035 1638
+3036 1638
+3037 1638
+3038 1638
+3039 1638
+3040 1638
+3041 1638
+3042 1638
+3043 1638
+3044 1638
+3045 1638
+3046 1638
+3047 1638
+3048 1638
+3049 1638
+3050 1638
+3051 1638
+3052 1638
+3053 1638
+3054 1638
+3055 1638
+3056 1638
+3057 1638
+3058 1638
+3059 1638
+3060 1638
+3061 1672
+3062 1684
+3062 1638
+3063 1638
+3064 1638
+3065 1638
+3066 1638
+3067 1638
+3068 1638
+3069 1638
+3070 1638
+3071 1638
+3072 1638
+3073 1638
+3074 1638
+3075 1638
+3076 1638
+3077 1638
+3078 1638
+3079 1638
+3080 1638
+3081 1638
+3082 1638
+3083 1638
+3084 1638
+3085 1638
+3086 1638
+3087 1638
+3088 1638
+3089 1638
+3090 1638
+3091 1638
+3091 1650
+3092 1706
+3092 1955
+3093 2451
+3094 2011
+3094 1774
+3095 2022
+3096 1638
+3097 1638
+3098 1740
+3098 1796
+3099 1932
+3100 1684
+3100 1695
+3101 1684
+3101 1661
+3102 1650
+3103 1650
+3103 1638
+3104 1638
+3105 1638
+3106 1638
+3107 1638
+3108 1638
+3108 1661
+3109 1638
+3110 1638
+3110 1650
+3111 1650
+3112 1638
+3113 1638
+3114 1638
+3115 1638
+3116 1638
+3117 1638
+3118 1650
+3119 1796
+3119 1774
+3120 1864
+3121 1717
+3121 1638
+3122 1650
+3123 1638
+3124 1638
+3124 1650
+3125 1638
+3126 1638
+3126 1650
+3127 1638
+3128 1638
+3129 1650
+3130 1638
+3131 1638
+3132 1650
+3132 1638
+3133 1638
+3133 1650
+3134 1650
+3135 1638
+3135 1650
+3136 1638
+3137 1684
+3137 1672
+3138 1661
+3139 1717
+3139 1638
+3140 1638
+3141 1638
+3142 1638
+3143 1638
+3144 1638
+3144 1650
+3145 1638
+3146 1638
+3147 1638
+3148 1650
+3148 1638
+3149 1638
+3150 1638
+3151 1638
+3152 1638
+3153 1638
+3154 1638
+3155 1638
+182 MLine
+%I 1
+End
+
+Begin %I Text
+%I cfg Black
+0 0 0 SetCFg
+%I f *helvetica-medium-r*-14-*
+Helvetica 14 SetF
+%I t
+[ 1 0 0 1 539.146 157.287 ] concat
+%I
+[
+(Date)
+] Text
+End
+
+End %I eop
+
+showpage
+
+%%Trailer
+
+end

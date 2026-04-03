@@ -1,0 +1,268 @@
+.TH vamps 1 "Version VERSION"
+.ds -- \-\^\-
+.ds b[ \fR[\|\fP
+.ds b] \fR\|]\fP
+.SH NAME
+vamps \- A model of Vegetation-AtMosPhere-Soil water flow
+.SH SYNOPSIS
+.B vamps
+.B \*(b[\*(--help\*(b]
+.B \*(b[\*(--Header\*(b]
+.B \*(b[\*(--copyright\*(b]
+.B \*(b[\*(--license\*(b]
+.B \*(b[\*(--verbose\*(b]
+.B \*(b[\*(--showdef\*(b]
+.B \*(b[\*(--fit\*(b]
+.B \*(b[\*(--noinputdump\*(b]
+.B \*(b[\*(--Interpret\*(b]
+.BI \*(b[\*(--Comment\  commentchar\*(b]
+.BI \*(b[\*(--Output\  setname\*(b]
+.BI \*(b[\*(--Determine\  variable\*(b]
+.BI \*(b[\*(--output\  filename\*(b]
+.BI \*(b[\*(--Logfile\  filename\*(b]
+.BI \*(b[\*(--Setvar\  section\ name\ value\*(b]
+.BI \*(b[\*(--Interpret\  filename\*(b]
+.BI \*(b[\*(--spEed\  speed\*(b]
+.B \*(b[\*(--interFace\*(b]
+.I filename
+
+.SH DESCRIPTION
+.B vamps
+is a one-dimensional model for describing the flow of water through a
+forested ecosystem.
+.B vamps
+has been designed to be flexible and fast. Flexibility allows users to
+adapt the program either by changing parameters in the input file, or
+change S-Lang based functions. Alternatively you can change the source
+code and recompile the program. It is designed to be as fast as I
+could make it without sacrificing reliability because scientist tend
+to solve tomorrows problems with yesterdays hardware. Because I used
+.B vamps
+at the same time as the
+.B TOPOG
+model (a physically based distributed catchment model) 
+.B vamps
+is able to share some of it's input files with
+.BR TOPOG ,
+notable soil tables (see vamps(5) for a description).
+
+As
+.B vamps
+is a complicated model, it needs rather complicated input files.  The
+layout of these files is described in
+.BR vamps (5)
+and in the full manual. Also 
+.B vamps
+contains a S-Lang interpreter and an interface to 
+.B vamps
+specific variables which allows to user to redefine certain functions
+and generally change 
+.B vamps
+behaviour. The S-Lang library and documentation can be found at:
+ftp://space.mit.edu/pub/davis/slang
+
+This manual page describes the 
+.B vamps
+command line options and -- shortly -- the
+.B vamps
+interactive interface. A full manual including a description of the
+principles behind the
+.B vamps
+model is available in LaTeX and postscript format.
+
+Input is read from either 
+.IR filename ,
+or standard input. If 
+.I filename
+is specified as a single dash
+.RB `` \- '',
+it is taken from standard input. Output is written to the standard
+output or
+.I filename
+if the 
+.B \-o
+option is used. 
+
+.B vamps
+intercepts some signals (like keyboard interrupts) and ignores them
+MAXSIG times. This means that if you want to stop 
+.B vamps 
+using  ^C you must use this MAXSIG (usually 5) times. MAXSIG is defined
+in vamps.c.
+
+
+.SH USAGE
+.B vamps
+basically runs in two modes. In one mode
+.B vamps 
+is started with command line options, runs and exits when it is
+finished. 
+.B vamps
+also has an interactive mode in which 
+.B vamps 
+accepts S-Lang commands and executes each as the user enters
+them via the keyboard. In both modes
+.B vamps 
+needs an input file to perform most actions.
+
+
+.SH OPTIONS
+Options may be given as either standard one-letter options, or GNU
+style long options. Long options start with two dashes
+.RB `` \*(-- ''
+and may be truncated to any unambiguous abbreviation.  
+Short options can be found by taking the first letter of
+the long option or (if one is present) the first capitalized
+letter of the long option. This means that
+you can specify \-h in stead of \*(--help and \-F instead
+of \*(--interFace.
+
+.TP
+.B \*(--Header
+Omit the headers in output.
+
+.TP
+.B \*(--copyright
+Show copyright information and exit
+
+.TP
+.B \*(--license
+Print license information and exit.
+
+.TP
+.B \*(--help
+Print help text and exit.
+
+.TP
+.B \*(--verbose
+Enter verbose mode, program progress is displayed on stderr.  Default
+is silent.
+
+.TP
+.B \*(--noinputdump
+By default the contents of the input-file is also included in the
+output. Use this option to alter this behaviour.
+
+.TP
+.BI \*(--spEed\  speed
+Set calculation speed to speed. See 
+.BR vamps (5)
+for information on settings.
+Speed ranges from 1 (slow) to 6 (fastest).
+
+.TP
+.B \*(--fit
+Fit data to settings in fit section. See 
+.BR vamps (5)
+for more information.
+
+.TP
+.B \*(--Interpret
+Interpret the last argument on the command line as a S-Lang file. 
+.B vamps
+reads and interprets the file and than exits.
+
+.TP
+.BI \*(--Output\  setname
+Dump the specified 
+.I setname
+to a separate file in
+.BR ts (5)
+format. See
+.BR vamps (5)
+for a list of allowed setnames.
+
+.TP
+.BI \*(--Determine\  variable
+Determine variable (can be a single variable or a time series).  See
+.BR vamps (5)
+for a list of allowed variables. This is normally set in the input
+file.  Multiple options are allowed.
+
+.TP
+.BI \*(--Logfile\  filename
+Log this session to the file
+.IR filename .
+
+.TP
+.BI \*(--Setvar\  section\ name\ value
+Set the value of variable
+.I name
+in section
+.I section
+to value
+.IR value .
+This overrides the setting in the input file.
+
+.TP
+.BI \*(--Comment\  commentchar
+Set the commentchar to char
+.I commentchar.
+Don't change this unless you have a very good reason to do so.
+
+.TP
+.B \*(--showdef
+Send program defaults to stdout. This can be used to create a defaults
+file from scratch.
+
+
+.TP
+.BI \*(--output\  filename
+Send output to 
+.I filename
+in stead of stdout.
+
+.TP
+.BI \*(--Interpret\  filename
+Interpret (execute) 
+.I filename
+as an S-Lang file. If the file is not found in the current dir
+the VAMPSLIB dir is tried.
+
+.TP
+.B \*(--interFace
+Start the 
+.B vamps
+interactive interface. This option 
+.I must
+be the last option on the command line (before
+.I filename
+if any)
+
+.TP
+.I filename
+Read input from
+.IR filename .
+
+.SH USAGE
+If the verbose option is set via the command line or the input file
+.B vamps
+show the progress of the calculations on stderr. On UNIX systems that
+support the
+.BR popen (3)
+call with
+X11 and 
+.BR gnuplot (1)
+installed progress information can also be displayed graphically.
+This can be done by setting the showgraph variable to 1 and the
+graphcommand variable to the name of the gnuplot executable.  Both
+should be in the
+.B [vamps]
+section of your default or input file. See
+.BR vamps (5)
+for more information. This option slows down calculations!
+
+
+.SH INTRINSICS
+These are the documented S-Lang intrinsics added by 
+.BR vamps .
+They can be used in the
+.B vamps
+interactive mode and in any of the scripts that 
+.B vamps
+processes.
+
+A lot of general utilities come from the
+.B slash
+package written by R. Venneker. 
+

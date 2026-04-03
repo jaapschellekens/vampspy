@@ -1,0 +1,70 @@
+\contentsline {chapter}{\numberline {1}Introduction}{11}
+\contentsline {part}{I\hspace {1em}Model description}{17}
+\contentsline {chapter}{\numberline {2}Introduction}{19}
+\contentsline {chapter}{\numberline {3}The modules}{21}
+\contentsline {section}{\numberline {3.1}Introduction}{21}
+\contentsline {section}{\numberline {3.2}The atmosphere}{21}
+\contentsline {subsection}{\numberline {3.2.1}Potential evaporation}{21}
+\contentsline {subsection}{\numberline {3.2.2}Actual evapotranspiration}{23}
+\contentsline {section}{\numberline {3.3}Plants and trees}{23}
+\contentsline {subsection}{\numberline {3.3.1}Interception}{24}
+\contentsline {paragraph}{Introduction}{24}
+\contentsline {paragraph}{Gash's method}{25}
+\contentsline {paragraph}{Calder regression model}{26}
+\contentsline {paragraph}{Interception as a fraction of LAI}{26}
+\contentsline {paragraph}{Rutter's model}{26}
+\contentsline {section}{\numberline {3.4}The soil}{27}
+\contentsline {subsection}{\numberline {3.4.1}Introduction}{27}
+\contentsline {subsection}{\numberline {3.4.2}Solving Richard's equation}{27}
+\contentsline {subsection}{\numberline {3.4.3}Relation between Theta, $\psi $ and $K_{unsat}$}{28}
+\contentsline {paragraph}{Van Genuchten}{30}
+\contentsline {paragraph}{Clapp/Hornberger}{30}
+\contentsline {subsection}{\numberline {3.4.4}Bottom boundary conditions}{31}
+\contentsline {part}{II\hspace {1em}User's guide}{33}
+\contentsline {chapter}{\numberline {4}Installation of {\sf Vamps}}{35}
+\contentsline {chapter}{\numberline {5}Program organization}{37}
+\contentsline {section}{\numberline {5.1}Introduction}{37}
+\contentsline {section}{\numberline {5.2}System requirements}{37}
+\contentsline {section}{\numberline {5.3}Defaults file}{38}
+\contentsline {section}{\numberline {5.4}Time series and time steps}{38}
+\contentsline {section}{\numberline {5.5}The principle of layers in the soil section}{39}
+\contentsline {chapter}{\numberline {6}The input file}{41}
+\contentsline {section}{\numberline {6.1}introduction}{41}
+\contentsline {section}{\numberline {6.2}Input file format}{41}
+\contentsline {section}{\numberline {6.3}Available sections and variables}{42}
+\contentsline {subsection}{\numberline {6.3.1}[vamps]}{42}
+\contentsline {subsection}{\numberline {6.3.2}[time]}{43}
+\contentsline {subsection}{\numberline {6.3.3}[run]}{43}
+\contentsline {subsection}{\numberline {6.3.4}[xout]}{43}
+\contentsline {subsection}{\numberline {6.3.5}[determine]}{43}
+\contentsline {subsection}{\numberline {6.3.6}[pevaporation]}{44}
+\contentsline {subsection}{\numberline {6.3.7}[evaporation]}{44}
+\contentsline {subsection}{\numberline {6.3.8}[interception]}{44}
+\contentsline {subsection}{\numberline {6.3.9}[canopy]}{44}
+\contentsline {subsection}{\numberline {6.3.10}[roots]}{45}
+\contentsline {subsection}{\numberline {6.3.11}[ts]}{46}
+\contentsline {subsection}{\numberline {6.3.12}[soil]}{47}
+\contentsline {subsection}{\numberline {6.3.13}[drainage]}{49}
+\contentsline {subsection}{\numberline {6.3.14}[{\em soilsectionname}]}{50}
+\contentsline {subsection}{\numberline {6.3.15}[layer\_{\em n}]}{51}
+\contentsline {subsection}{\numberline {6.3.16}[fit]}{51}
+\contentsline {subsection}{\numberline {6.3.17}Valid datasets}{52}
+\contentsline {section}{\numberline {6.4}Interception}{53}
+\contentsline {chapter}{\numberline {7}Running {\sf Vamps}}{55}
+\contentsline {section}{\numberline {7.1}Command line options}{55}
+\contentsline {section}{\numberline {7.2}Manipulation of time series}{56}
+\contentsline {section}{\numberline {7.3}graphically displaying {\sf Vamps}\ results}{56}
+\contentsline {section}{\numberline {7.4}Troubles..}{56}
+\contentsline {subsection}{\numberline {7.4.1}Variable missing}{56}
+\contentsline {subsection}{\numberline {7.4.2}Mass-balance error warning}{56}
+\contentsline {chapter}{\numberline {8}Using {\bf S-Lang}{} with {\sf Vamps}{}}{57}
+\contentsline {section}{\numberline {8.1}Introduction}{57}
+\contentsline {section}{\numberline {8.2}How {\sf Vamps}{} interfaces with {\bf S-Lang}{}}{57}
+\contentsline {chapter}{\numberline {9}{\sf Vamps}\ specific functions and variables}{59}
+\contentsline {section}{\numberline {9.1}Intrinsic functions (programmed in C)}{59}
+\contentsline {section}{\numberline {9.2}User defined functions (written in {\bf S-Lang}{})}{59}
+\contentsline {part}{III\hspace {1em}Case studies}{61}
+\contentsline {chapter}{\numberline {10}Introduction}{63}
+\contentsline {chapter}{\numberline {11}A {\em Pinus caribaea} plantation forest}{65}
+\contentsline {section}{\numberline {11.1}Introduction}{65}
+\contentsline {section}{\numberline {11.2}Results}{65}

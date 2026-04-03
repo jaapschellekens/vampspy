@@ -1,0 +1,122 @@
+[vamps]
+showgraph = 0
+xtrasl = topsys.sl
+
+
+[time]
+steps = 171
+
+
+[run]
+outputfile = lys.out
+
+
+[determine]
+soilmoisture = true
+canopy = 1
+
+
+[top]
+system = 4
+
+
+[interception]
+method = 1
+p_tr = 0.08
+p_f = 0.1
+S = 0.07
+
+
+[canopy]
+layers = 1
+transpiration = 3
+rnet_absorb = 0.98
+
+
+[roots]
+depth = 30
+swsink = 1
+swhypr = 0
+swupfu = 0
+hlim1 = -0.1
+hlim2u = -1.0
+hlim2l = -1.0
+hlim3 = -10000.0
+hlim3h = -9000.0
+hlim3l = -11000.0
+hlim4 = -15000.0
+
+
+[ts]
+pev = zit.in
+spe = penman.in
+ptr = 1365eth.in
+inr = inter.in
+pre = rain.in
+
+
+[soil]
+verbose = 1
+#dtmin = 0.001
+dtmax = 0.0003
+mbck = 1
+#mbalerr = 1.0E-4
+initprof = 0
+swredu = 0
+bottom = 6
+layers = 10
+pondmx = 0
+#mktable = 1
+#dumptables = 1
+theta_initial = 0.4 0.4 0.4 0.4 0.4 0.4 0.4 0.4 0.4 0.4
+
+
+[layer_0]
+soilsection = st_0
+thickness = 5.0
+
+
+[layer_2]
+soilsection = st_1
+thickness = 7.5
+
+
+[layer_9]
+thickness = 7.5
+soilsection = st_2
+
+
+[st_0]
+method = 4
+tablefile = st0.soi
+description = topsoil
+ksat = 630.0
+thetas = 0.67
+theta_residual = 0.348
+alpha = 0.35
+n = 1.4
+l = 0.5
+
+
+[st_1]
+method = 4
+tablefile = st1.soi
+description = subsoil
+ksat = 630.0
+thetas = 0.67
+theta_residual = 0.386
+alpha = 0.5
+n = 1.4
+l = 0.5
+
+
+[st_2]
+method = 4
+tablefile = st2.soi
+description = drainlayer
+ksat = 630
+thetas = 0.54
+theta_residual = 0.297
+alpha = 0.6
+n = 1.3
+l = 1.5

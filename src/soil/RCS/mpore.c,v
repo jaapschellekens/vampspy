@@ -1,0 +1,97 @@
+head	1.2;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.2
+date	97.01.16.15.04.37;	author schj;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	96.11.29.09.25.37;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@macro-pore flow routines
+@
+
+
+1.2
+log
+@layout + stuff
+@
+text
+@/* $Header: /home/schjpriv/src/vamps_0.99/src/soil/RCS/mpore.c,v 1.1 1996/11/29 09:25:37 schj Exp $ */
+/*  
+ *  $RCSfile: mpore.c,v $
+ *  $Author: schj $
+ *  $Date: 1996/11/29 09:25:37 $
+ */
+
+#ifdef DDEBUG
+static  char RCSid[] =
+"$Id: mpore.c,v 1.1 1996/11/29 09:25:37 schj Exp $";
+#endif
+
+#include "swatsoil.h"
+
+#ifdef MPORE
+/* 
+
+macropore/bypass flow in vamps some thoughts on setup
+
+
+1) fraction mpore of total porosity in each node
+
+2) fraction conducting pores in hor and vert dir
+
+3) some kind of flow resistance factor (k_mpore) in hor and vert dir.
+   - simple resistance given by user
+   - calculated from mpore dimensions?
+
+4) diminish matrix porosity with mpore fraction?
+
+5) deal with diffusion from mpore into matrix. 2 completely seperate
+   systems seems unrealistic. mp_res calculated from average k_mpore
+   and K(un)sat in matrix. Assuming less mpores with depth a certain
+   fraction of the pores can drain but a fraction (difference between
+   nodes) can only flow into the matrix.
+   
+
+*/
+#endif 
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/soil/RCS/mpore.c,v 1.4 1996/11/05 15:00:48 schj Alpha $ */
+d5 1
+a5 1
+ *  $Date: 1996/11/05 15:00:48 $
+d10 1
+a10 1
+"$Id: mpore.c,v 1.4 1996/11/05 15:00:48 schj Alpha $";
+d16 3
+a18 1
+/* macropore/bypass flow in vamps
+d22 1
+d24 1
+d28 1
+d30 1
+d33 3
+a35 3
+   and K(un)sat in matrix. Assuming less mpores with depth  a certain fraction
+   of the pores can drain but a fraction (difference between nodes) can only
+   flow into the matrix.
+@

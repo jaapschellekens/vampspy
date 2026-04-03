@@ -1,0 +1,69 @@
+#table?	System	Cpu	Mhz	Cpu		OS	Time 		It/sec
+#				Manufac.	name	sec
+#-----------------------------------------------------------------------------
+#Vamps version 0.99d -- May 1997 [Jun 28 1997] (linux)
+1,	ASUS,	5x86-75,160,	AMD,		linux,	93.810000,	3197.95
+#Vamps version 0.99d -- May 1997 [Jun 28 1997] (linux)
+0,	ASUS,	5x86-75,160,	AMD,		linux,	201.850000,	1486.25
+#Vamps version 0.99d -- May 1997 [Jun 28 1997] (linux)
+1,	INTEL-EISA,486,	33,	INTEL,		linux,	475.970000,	630.29
+#Vamps version 0.99d -- May 1997 [Jun 28 1997] (linux)
+0,	INTEL-EISA,486,	33,	INTEL,		linux,	991.090000,	302.70
+#Vamps version 0.99d -- May 1997 [Jun 30 1997] (linux)
+1,	GA-586AP,Pentium,100,	INTEL,		linux,	86.940000,	3450.66
+#Vamps version 0.99d -- May 1997 [Jun 30 1997] (linux)
+0,	GA_586AP,Pentium,100,	INTEL,		linux,	141.380000,	2121.94
+#Vamps version 0.99d -- May 1997 [Jun 30 1997] (solaris)
+1,	SPARCstation-5,Sparc5,70,SUN,	solaris,	122.690000,	2445.19
+#Vamps version 0.99d -- May 1997 [Jun 30 1997] (solaris)
+0,	SPARCstation-5,Sparc5,70,SUN,	solaris,	342.730000,	875.32
+#Vamps version 0.99d -- May 1997 [Jun 30 1997] (solaris)
+1,	SPARCstation,Ultra-1,170,SUN,	solaris,	30.360000,	9881.42
+#Vamps version 0.99d -- May 1997 [Jun 30 1997] (solaris)
+0,	SPARCstation,Ultra-1,170,SUN,	solaris,	91.510000,	3278.33
+#Vamps version 0.99e -- Aug 1997 [Nov 12 1997] (FreeBSD)
+1,	noname,Pentium,	166,Intel,	FreeBSD,	59.726562,	5022.89
+#Vamps version 0.99e -- Aug 1997 [Nov 12 1997] (FreeBSD)
+0,	noname,Pentium,	166,Intel,	FreeBSD,	144.085938,	2082.09
+#Vamps version 0.99f -- Nov 1997 [Dec 14 1997] (Linux_alpha)
+1,	XL300,Alpha 21164,300,DEC,	Linux_alpha,	16.765728,	17893.65
+#Vamps version 0.99f -- Nov 1997 [Dec 14 1997] (Linux_alpha)
+0,	XL300,Alpha 21164,300,DEC,	Linux_alpha,	100.696848,	2979.24
+#Vamps version 0.99f -- Nov 1997 [Dec 15 1997] (Linux_i586)
+1,	GA-586AP,Pentium,100,Intel,	Linux_i586,	66.210000,	4531.04
+#Vamps version 0.99f -- Nov 1997 [Dec 15 1997] (Linux_i586)
+0,	GA-586AP,Pentium,100,Intel,	Linux_i586,	171.320000,	1751.11
+#Vamps version 0.99e -- Aug 1997 [Nov 18 1997] (SunOS)
+1,	Sparc-5,Sparc,70,	SUN,		SunOS,	160.410000,	1870.21
+#Vamps version 0.99e -- Aug 1997 [Nov 18 1997] (SunOS)
+0,	Sparc-5,Sparc,70,	SUN,		SunOS,	341.850000,	877.58
+#Vamps version 0.99f -- Nov 1997 [Jul 22 1998] (Linux_i586)
+1,	ASUS,	PentiumMMX,	233,	Intel,		Linux_i586,	19.160000,	15657.62
+#Vamps version 0.99f -- Nov 1997 [Jul 22 1998] (Linux_i586)
+0,	ASUS,	PentiumMMX,	233,	Intel,		Linux_i586,	37.410000,	8019.25
+#Vamps version 0.99h -- Nov 1997 [May 10 2001] (SunOS_sun4u)
+1,	as,	as,	400,	Sun,		SunOS_sun4u,	9.770000,	30706.24
+#Vamps version 0.99i -- Nov 2001 [Jun  4 2003] (CYGWIN_NT-5.1_i686)
+1,	ASUS,	Athlon XP,	1800,	AMD,		CYGWIN_NT-5.1_i686,	1.859000,	161377.08
+#Vamps version 0.99i -- Nov 2001 [Nov 13 2017] (Linux_x86_64)
+1,	tf7600,	Xeon,	2.5,	Intel,		Linux_x86_64,	0.503202,	596182.05
+# Python run on MacBook-Air-van-Jaap.local
+Darwin	arm	0.076	3951163.62
+# Python run on MacBook-Air-van-Jaap.local
+Darwin	arm	0.080	3764351.59
+#Vamps 1.0 (Python) [macOS-26.3.1-arm64-arm-64bit-Mach-O]
+1,	MacBook-Air-van-Jaap.local,	arm,	?,	Apple,		Darwin_arm64,	0.076196,	3937214.55
+#Vamps 1.0 (Python) [macOS-26.3.1-arm64-arm-64bit-Mach-O]
+1,	MacBook-Air-van-Jaap.local,	arm,	?,	Apple,		Darwin_arm64,	0.071843,	4175772.17
+#Vamps 1.0 (Python) [macOS-26.3.1-arm64-arm-64bit-Mach-O]
+1,	MacBook-Air-van-Jaap.local,	arm,	4,	Apple,		Darwin_arm64,	0.098655,	3040900.11
+#Vamps 1.0 (Python) [macOS-26.4-arm64-arm-64bit-Mach-O]
+1,	edr-a-81.deltares.nl.88.231.136.in-addr.arpa,	arm,	?,	Apple,		Darwin_arm64,	0.071501,	4195745.51
+#Vamps 1.0 (Python) [macOS-26.4-arm64-arm-64bit-Mach-O]
+1,	edr-a-81.deltares.nl.88.231.136.in-addr.arpa,	arm,	?,	Apple,		Darwin_arm64,	0.070542,	4252785.57
+#Vamps 1.0 (Python) [macOS-26.4-arm64-arm-64bit-Mach-O]
+1,	edr-a-81.deltares.nl.88.231.136.in-addr.arpa,	arm,	?,	Apple,		Darwin_arm64,	0.071168,	4215377.70
+#Vamps 1.0 (Python) [macOS-26.4-arm64-arm-64bit-Mach-O]
+1,	edr-a-81.deltares.nl.88.231.136.in-addr.arpa,	arm,	?,	Apple,		Darwin_arm64,	0.075933,	3950851.41
+#Vamps 1.0 (Python) [macOS-26.4-arm64-arm-64bit-Mach-O]
+1,	edr-a-81.deltares.nl.88.231.136.in-addr.arpa,	arm,	?,	Apple,		Darwin_arm64,	0.072224,	4153743.91

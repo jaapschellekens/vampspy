@@ -1,0 +1,8 @@
+TODO/WISH list for libdef
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Apply multiple files stuff to index list as well
+- Add optional list with valid sets and variables. This
+  list should be expandable at run time. Work in progress
+  in getnextvar and isdefitem
+- do all logging stuf via log.c (in new libnru)

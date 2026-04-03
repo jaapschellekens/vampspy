@@ -1,0 +1,1124 @@
+head	1.24;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.24
+date	99.01.06.12.13.01;	author schj;	state Alpha;
+branches;
+next	1.23;
+
+1.23
+date	99.01.06.12.07.49;	author schj;	state Alpha;
+branches;
+next	1.22;
+
+1.22
+date	97.11.03.20.26.07;	author schj;	state Exp;
+branches;
+next	1.21;
+
+1.21
+date	97.09.09.08.39.39;	author schj;	state Exp;
+branches;
+next	1.20;
+
+1.20
+date	97.01.16.15.05.38;	author schj;	state Exp;
+branches;
+next	1.19;
+
+1.19
+date	96.11.05.15.00.48;	author schj;	state Alpha;
+branches;
+next	1.18;
+
+1.18
+date	96.10.22.17.57.14;	author schj;	state Exp;
+branches;
+next	1.17;
+
+1.17
+date	96.10.06.16.19.50;	author schj;	state Exp;
+branches;
+next	1.16;
+
+1.16
+date	96.04.09.12.08.16;	author schj;	state Exp;
+branches;
+next	1.15;
+
+1.15
+date	96.03.25.07.51.14;	author schj;	state alpha;
+branches;
+next	1.14;
+
+1.14
+date	96.03.24.11.41.32;	author schj;	state Exp;
+branches;
+next	1.13;
+
+1.13
+date	96.02.08.08.19.20;	author schj;	state Exp;
+branches;
+next	1.12;
+
+1.12
+date	96.01.25.15.08.34;	author schj;	state Exp;
+branches;
+next	1.11;
+
+1.11
+date	95.12.17.21.46.16;	author schj;	state Exp;
+branches;
+next	1.10;
+
+1.10
+date	95.12.05.03.04.43;	author schj;	state Exp;
+branches;
+next	1.9;
+
+1.9
+date	95.11.14.20.29.16;	author schj;	state Exp;
+branches;
+next	1.8;
+
+1.8
+date	95.09.23.20.47.36;	author schj;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	95.09.20.06.40.30;	author schj;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	95.08.28.13.43.40;	author schj;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	95.08.24.12.54.26;	author schj;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	95.08.23.07.20.25;	author schj;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	95.08.16.14.11.36;	author schj;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	95.08.16.14.08.25;	author schj;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	95.08.16.13.42.21;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@timestep module
+@
+
+
+1.24
+log
+@Version: 0.99g
+@
+text
+@/* $Header: /home/schj/src/vamps_0.99g/src/soil/RCS/timestep.c,v 1.23 1999/01/06 12:07:49 schj Alpha $ */
+
+/*  $RCSfile: timestep.c,v $
+ *  $Author: schj $
+ *  $Date: 1999/01/06 12:07:49 $
+ */
+
+#ifdef DEBUG
+static char RCSid[] =
+"$Id: timestep.c,v 1.23 1999/01/06 12:07:49 schj Alpha $";
+#endif
+
+
+#include "swatsoil.h"
+#include <math.h>
+#include <float.h>
+
+/* Timestep at saturation */
+double dtsat = 0.1;
+double thetol = 0.00001;
+/*C:thetol
+ *@@ double thetol 
+ *
+ * Maximum allowed change of theta at this dt, default = 0.00001
+ */
+
+double dtmax = 0.1; 
+/*C:dtmax
+ *@@ double dtmax 
+ * 
+ * Description: maximum allowed dt, default = 0.1
+ */
+
+double dtmin = 0.000001; 
+/*C:dtmin 
+ *@@double tmin
+ * Description: minimum allowed dt
+ */
+
+double dt = 1.0E-2; 
+/*C:dt
+ *@@double dt
+ * Description: current dt
+ */
+
+double dtm1 = 1.0E-2;
+/*C:dtm1
+ *@@ double dtm1 
+ * Description: previous dt
+ */
+
+double t=0.0; 
+/*C:t
+ *@@ double t 
+ *
+ * Description: current time
+ */
+
+double tm1=0.0;
+/*C:tm1
+ *@@double tm1
+ * Description: previous time
+ */
+double tm_mult = 5.0; 
+
+static double dtheta;
+static double mdtheta;
+long int nrcalls=0; /* Number of calls to the timestep procedure */
+
+/*C:timestep
+ *@@ double timestep(double t, double e_t, double *dt, double *dtm1)
+ *
+ *  Description: Calculation of timestep (@@dt@@) depending on theta
+ *  changes and actual time (t). Step is synchronized to @@e_t@@ (end
+ *  of timestep.
+ *
+ *  Return: new timestep (dt)*/
+double
+timestep (double t, double e_t, double *dt, double *dtm1)
+{
+	register int i;
+
+	/* Count number of calls */
+	nrcalls++;
+   
+	/* Store previous values */
+	*dtm1 = *dt;
+
+	if ((volsat - volact) <= DBL_EPSILON)
+		*dt = dtsat;
+	else{
+		/* dt as determined by water transport */
+		*dt = dtmax;
+		
+		mdtheta = fabs (thetm1[0] - theta[0]);
+		for (i = 0; i < layers; i++){
+			dtheta = fabs (thetm1[i] - theta[i]);
+			mdtheta = mdtheta < dtheta ? dtheta : mdtheta;
+		}
+    
+		if (mdtheta < DBL_EPSILON)
+			*dt = dtmax;
+		else
+			*dt = tm_mult * thetol * (*dtm1) / mdtheta;
+		
+		/* Limit to dtmin and dtmax */
+    		*dt = *dt >= dtmin ? *dt : dtmin;
+		*dt = *dt <= dtmax ? *dt : dtmax;
+	}
+  
+	/* Testing on time-record in precip ts so dt might be smaller than
+	 * dtmin after all. */
+	if (t + *dt - e_t >= 0.0){
+		*dt = e_t - t;
+		flendd= TRUE;
+	}
+
+	return *dt;
+}
+@
+
+
+1.23
+log
+@Version: 0.99g
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99e/src/soil/RCS/timestep.c,v 1.22 1997/11/03 20:26:07 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1997/11/03 20:26:07 $
+d10 1
+a10 1
+"$Id: timestep.c,v 1.22 1997/11/03 20:26:07 schj Exp $";
+@
+
+
+1.22
+log
+@Chnaged var doc
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99e/src/soil/RCS/timestep.c,v 1.21 1997/09/09 08:39:39 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1997/09/09 08:39:39 $
+d10 1
+a10 1
+"$Id: timestep.c,v 1.21 1997/09/09 08:39:39 schj Exp $";
+@
+
+
+1.21
+log
+@0.99e version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99c/src/soil/RCS/timestep.c,v 1.20 1997/01/16 15:05:38 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1997/01/16 15:05:38 $
+d10 1
+a10 1
+"$Id: timestep.c,v 1.20 1997/01/16 15:05:38 schj Exp $";
+d24 1
+a24 1
+ * Maximum allowed change of theta at this dt
+d31 1
+a31 1
+ * Description: maximum allowed dt
+d35 5
+a39 3
+/*+
+Name: dtmin Prototype: double tmin Description: minimum allowed dt
++*/
+d41 5
+a45 3
+/*+
+Name: dt Prototype: double dt Description: current dt
++*/
+d47 5
+a51 3
+/*+
+Name: dtm1 Prototype: double dtm1 Description: previous dt
++*/
+d53 6
+a58 3
+/*+
+Name: t Prototype: double t Description: current time
++*/
+d60 4
+a63 3
+/*+
+Name: tm1 Prototype: double tm1 Description: previous time
++*/
+d71 1
+a71 1
+ *@@  double timestep(double t, double e_t, double *dt, double *dtm1)
+d77 1
+a77 1
+ *  Returns: new timestep (dt)+*/
+@
+
+
+1.20
+log
+@uses less global vars
+@
+text
+@d1 3
+a3 3
+/* $Header: /home/schj/src/vamps_0.99/src/soil/RCS/timestep.c,v 1.19 1996/11/05 15:00:48 schj Alpha $ */
+/*
+ *  $RCSfile: timestep.c,v $
+d5 1
+a5 1
+ *  $Date: 1996/11/05 15:00:48 $
+d10 1
+a10 1
+"$Id: timestep.c,v 1.19 1996/11/05 15:00:48 schj Alpha $";
+d16 10
+d27 8
+a34 9
+double thetol = 0.00005; 
+/*+
+Name: thetol Prototype: double thetol Description: maximum allowed change of theta at this dt
++*/
+double dtmax = 0.5; 
+/*+
+Name: dtmax Prototype: double dtmax Description: maximum allowed dt
++*/
+double dtmin = 0.00005; 
+d38 1
+a38 1
+double dt = 1.0E-1; 
+d42 1
+a42 1
+double dtm1 = 1.0E-1;
+d60 2
+a61 3
+/*+ Name: timestep
+ *  
+ *  Prototype: double timestep(int step, double *dt, double *dtm1)
+d63 3
+a65 2
+ *  Description: Calculation of timestep (dt) depending on theta
+ *  changes and new time (t)
+d69 1
+a69 1
+timestep (int step, double *dt, double *dtm1)
+d71 1
+a71 1
+  int i;
+d73 2
+a74 2
+  /* Register number of calls */
+  nrcalls++;
+d76 14
+a89 23
+  /* Store previous values */
+  tm1 = t;
+  *dtm1 = *dt;
+
+  if (volact == volsat){
+    *dt = dtmax * 0.1;
+  }else{
+    /* dt as determined by water transport for SWNUMS =1 */
+    *dt = dtmax;
+    
+    mdtheta = fabs (thetm1[0] - theta[0]);
+    for (i = 0; i < layers; i++)
+      {
+	dtheta = fabs (thetm1[i] - theta[i]);
+	mdtheta = mdtheta < dtheta ? dtheta : mdtheta;
+      }
+    
+    if (mdtheta < 1.0E-9)
+      *dt = dtmax;
+    else
+      {
+	*dt = tm_mult * thetol * (*dtm1) / mdtheta;
+      }
+d91 9
+a99 3
+    *dt = *dt > dtmin ? *dt : dtmin;
+    *dt = *dt < dtmax ? *dt : dtmax;
+  }
+d101 6
+a106 5
+  /* Testing on time-record in precip ts*/
+  if (t + *dt - data[preset].xy[step].x >= 0.0){
+    *dt = data[preset].xy[step].x - t;
+    flendd= TRUE;
+  }
+d108 1
+a108 1
+return *dt;
+@
+
+
+1.19
+log
+@Updated to Alpha version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/soil/RCS/timestep.c,v 1.18 1996/10/22 17:57:14 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1996/10/22 17:57:14 $
+d10 1
+a10 1
+"$Id: timestep.c,v 1.18 1996/10/22 17:57:14 schj Exp $";
+d18 7
+a24 1
+double dtmax = 0.5;
+d26 7
+a32 1
+double dt = 1.0E-1;
+d34 7
+a40 1
+double t=0.0;
+d42 4
+a45 1
+double tm_mult = 5.0;
+d51 3
+a53 2
+/*-
+ * void timestep(int step)
+d55 4
+a58 3
+ * Calculation of timestep (dt) depending on theta  changes
+ * and new time (t)
+ */
+d60 1
+a60 1
+timestep (int step)
+d69 1
+a69 21
+  dtm1 = dt;
+
+  /* dt as determined by water transport for SWNUMS =1 */
+  dt = dtmax;
+
+  mdtheta = fabs (thetm1[0] - theta[0]);
+  for (i = 0; i < layers; i++)
+    {
+      dtheta = fabs (thetm1[i] - theta[i]);
+      mdtheta = mdtheta < dtheta ? dtheta : mdtheta;
+    }
+
+  if (mdtheta < 1.0E-9)
+    dt = dtmax;
+  else
+    {
+      dt = tm_mult * thetol * dtm1 / mdtheta;
+    }
+
+  dt = dt > dtmin ? dt : dtmin;
+  dt = dt < dtmax ? dt : dtmax;
+d71 24
+d96 2
+a97 2
+  if (t + dt - data[preset].xy[step].x >= 0.0){
+    dt = data[preset].xy[step].x - t;
+d101 1
+a101 1
+return dt;
+@
+
+
+1.18
+log
+@removed log in file
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/soil/RCS/timestep.c,v 1.17 1996/10/06 16:19:50 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1996/10/06 16:19:50 $
+d10 1
+a10 1
+"$Id: timestep.c,v 1.17 1996/10/06 16:19:50 schj Exp $";
+@
+
+
+1.17
+log
+@added tm_mult
+@
+text
+@d1 2
+a2 2
+/* $Header: /homes/schj/src/vamps_0.98/src/soil/RCS/timestep.c,v 1.16 1996/04/09 12:08:16 schj Exp $ */
+/*-
+d5 2
+a6 44
+ *  $Date: 1996/04/09 12:08:16 $
+ *  $Log: timestep.c,v $
+ *  Revision 1.16  1996/04/09 12:08:16  schj
+ *  minor
+ *
+ * Revision 1.15  1996/03/25 07:51:14  schj
+ * remove TRY_SUBDAY
+ *
+ * Revision 1.14  1996/03/24 11:41:32  schj
+ * cosmetic changes
+ *
+ * Revision 1.13  1996/02/08  08:19:20  schj
+ * added subdaily stuff
+ *
+ * Revision 1.12  1996/01/25  15:08:34  schj
+ * changed dtmin and convergence crit.
+ *
+ * Revision 1.11  1995/12/17 21:46:16  schj
+ * optimized for speed
+ *
+ * Revision 1.10  1995/12/05 03:04:43  schj
+ * minior stuff
+ *
+ * Revision 1.9  1995/11/14 20:29:16  schj
+ * changed include
+ *
+ * Revision 1.8  1995/09/23  20:47:36  schj
+ * added ifdef DDEBUG
+ *
+ * Revision 1.7  1995/09/20  06:40:30  schj
+ * removed swnums check (allways 1)
+ *
+ * Revision 1.6  1995/08/28  13:43:40  schj
+ * fixed small typo's
+ *
+ * Revision 1.5  1995/08/24  12:54:26  schj
+ * added RCSid
+ *
+ * Revision 1.4  1995/08/23  07:20:25  schj
+ * updated to theta controlled
+ *
+ * Revision 1.3  1995/08/16  14:11:36  schj
+ * added RCS header
+ * */
+d10 1
+a10 1
+"$Id: timestep.c,v 1.16 1996/04/09 12:08:16 schj Exp $";
+d31 4
+a34 3
+ *	void timestep(int step)
+ *	Calculation of timestep (dt) depending on theta  changes
+ *	and new time (t)
+@
+
+
+1.16
+log
+@minor
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.98/src/soil/RCS/timestep.c,v 1.15 1996/03/25 07:51:14 schj alpha $ */
+d3 1
+a3 1
+ *  $RCSfile: vangenu.c,v $
+d5 1
+a5 1
+ *  $Date: 1996/03/25 07:51:14 $
+d7 3
+d52 1
+a52 1
+"$Id: timestep.c,v 1.15 1996/03/25 07:51:14 schj alpha $";
+d59 1
+a59 1
+double thetol = 0.0001; 
+d61 1
+a61 1
+double dtmin = 0.0001; 
+d66 1
+d75 1
+a75 1
+ *	and new time (t) This is the 94
+d82 1
+a82 1
+  /* Registrate number of calls */
+d84 1
+a91 1
+  /* This new version should work faster */
+d99 1
+a99 1
+  if (mdtheta < 1.0E-6)
+d103 1
+a103 1
+      dt = 10.0 * thetol * dtm1 / mdtheta;
+@
+
+
+1.15
+log
+@remove TRY_SUBDAY
+@
+text
+@d1 9
+a9 3
+/* $Header: /home/schj/src/vamps_0.98/src/soil/RCS/timestep.c,v 1.14 1996/03/24 11:41:32 schj Exp $ */
+/*
+ * $Log: timestep.c,v $
+d49 1
+a49 1
+"$Id: timestep.c,v 1.14 1996/03/24 11:41:32 schj Exp $";
+d56 1
+a56 1
+double thetol = 0.00002; /* This is very strict, but better */
+d94 1
+d104 2
+a105 1
+  /* Testing system base on time-record in precip ts*/
+@
+
+
+1.14
+log
+@cosmetic changes
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.97/src/soil/RCS/timestep.c,v 1.13 1996/02/08 08:19:20 schj Exp $ */
+d4 3
+d43 1
+a43 1
+"$Id: timestep.c,v 1.13 1996/02/08 08:19:20 schj Exp $";
+a94 1
+#ifdef TRY_SUBDAY
+a101 13
+#else
+  /* Synchronize step if last timestep of day (interval) */
+  if ((t + 1.2 * dt) > (int) (t + 1.0))
+    {
+      dt = ((int) (t + 1.0)) - t;
+    }
+#endif
+
+#ifndef TRY_SUBDAY
+  /* limit dt at lower  and upper boundary */
+  dt = dt > dtmin ? dt : dtmin;
+  dt = dt < dtmax ? dt : dtmax;
+#endif
+a102 8
+#ifndef TRY_SUBDAY
+  if ((int) (t + dt + 0.9 * dtmin) == daynr)
+    flendd = TRUE;
+#else
+/*
+    if ( dt + t >= data[preset].xy[step].x)
+      flendd = TRUE;*/
+#endif
+a104 4
+
+
+
+
+@
+
+
+1.13
+log
+@added subdaily stuff
+@
+text
+@d1 1
+a1 1
+/* $Header: /homes/schj/src/vamps_0.96/src/soil/RCS/timestep.c,v 1.12 1996/01/25 15:08:34 schj Exp $ */
+d4 3
+d38 1
+d40 2
+a41 1
+"$Id: timestep.c,v 1.12 1996/01/25 15:08:34 schj Exp $";
+d47 1
+a47 1
+double thetol = 0.00004; /* This is very strict, but better */
+d49 1
+a49 1
+double dtmin = 0.0001388; /* 0.5 sec */
+d57 1
+d64 2
+a65 3
+void
+timestep (step)
+int step;
+d69 2
+a76 16
+  /* this is the old version
+     for (i = 0; i < layers; i++)
+     {
+     if (h[i] <= 0.0)
+     {
+     dtheta = fabs (thetm1[i] - theta[i]);
+     if (dtheta < 1.0E-6)
+     dt = dt < dtmax ? dt : dtmax;
+     else
+     {
+     t1 = 10.0 * thetol * dtm1 / dtheta;
+     dt = dt < t1 ? dt : t1;
+     }
+     }
+     }
+   */
+d80 1
+a80 1
+  for (i = 1; i < layers; i++)
+d89 1
+a89 2
+      /*dt = 10.0 * thetol * dtm1 / mdtheta;*/
+      dt = 15.0 * thetol * dtm1 / mdtheta;
+d96 1
+a96 1
+  if (t + dt - data[preset].xy[step].x > 0.0){
+d122 1
+a123 26
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@
+
+
+1.12
+log
+@changed dtmin and convergence crit.
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.96/src/soil/RCS/timestep.c,v 1.11 1995/12/17 21:46:16 schj Exp $ */
+d4 3
+a34 1
+#ifdef DDEBUG
+d36 1
+a36 2
+"$Id: timestep.c,v 1.11 1995/12/17 21:46:16 schj Exp $";
+#endif
+d42 1
+a42 1
+double thetol = 0.0001;
+d47 2
+a48 1
+double t, tm1;
+d54 1
+a54 1
+ *	void timestep()
+d59 2
+a60 1
+timestep ()
+d102 9
+a114 1
+      /* flendd = TRUE; */
+d116 1
+d118 1
+d122 1
+d124 1
+d127 5
+d133 30
+@
+
+
+1.11
+log
+@optimized for speed
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.95/src/soil/RCS/timestep.c,v 1.10 1995/12/05 03:04:43 schj Exp $ */
+d4 3
+d34 1
+a34 1
+"$Id: timestep.c,v 1.10 1995/12/05 03:04:43 schj Exp $";
+d43 1
+a43 1
+double dtmin = 0.002;
+d95 2
+a96 1
+      dt = 10.0 * thetol * dtm1 / mdtheta;
+@
+
+
+1.10
+log
+@minior stuff
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.91/soil/RCS/timestep.c,v 1.9 1995/11/14 20:29:16 schj Exp $ */
+d4 3
+d31 1
+a31 1
+"$Id: timestep.c,v 1.9 1995/11/14 20:29:16 schj Exp $";
+d38 3
+a40 3
+double thetol=0.0001;
+double dtmax = 0.6;
+double dtmin = 1.0E-4;
+d42 1
+a42 1
+double dtm1 = 1.0E-1;;
+a43 1
+double dtheta;
+d45 2
+a46 1
+double t1, t2, t3;
+d64 27
+a90 1
+  for (i = 0; i < layers; i++)
+d92 1
+a92 11
+      if (h[i] <= 0.0)
+	{
+	  dtheta = fabs (thetm1[i] - theta[i]);
+	  if (dtheta < 1.0E-6)
+	    dt = dt < dtmax ? dt : dtmax;
+	  else
+	    {
+	      t1 = 10.0 * thetol * dtm1 / dtheta;
+	      dt = dt < t1 ? dt : t1;
+	    }
+	}
+d103 1
+a103 1
+  dt = dt > dtmin ? dt : dtmin;	/* dt = max(dt,1.0E-3 */
+@
+
+
+1.9
+log
+@changed include
+@
+text
+@d1 6
+a6 2
+/* $Header: /homes/schj/src/vamps_0.91/RCS/timestep.c,v 1.8 1995/09/23 20:47:36 schj Exp $ */
+/* $Log: timestep.c,v $
+d28 1
+a28 1
+"$Id: timestep.c,v 1.8 1995/09/23 20:47:36 schj Exp $";
+d36 2
+a37 2
+double dtmax = 0.2;
+double dtmin = 1.0E-3;
+@
+
+
+1.8
+log
+@added ifdef DDEBUG
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/prosper/vamps_0.9/soil/RCS/timestep.c,v 1.7 1995/09/20 06:40:30 schj Exp $ */
+d3 3
+d24 1
+a24 1
+"$Id: timestep.c,v 1.7 1995/09/20 06:40:30 schj Exp $";
+d28 1
+a28 1
+#include "../include/swatsoil.h"
+@
+
+
+1.7
+log
+@removed swnums check (allways 1)
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/soil/RCS/timestep.c,v 1.6 1995/08/28 13:43:40 schj Exp $ */
+d3 3
+d19 1
+a19 1
+
+d21 2
+a22 1
+"$Id: timestep.c,v 1.6 1995/08/28 13:43:40 schj Exp $";
+d28 1
+a28 1
+extern double thetol;
+@
+
+
+1.6
+log
+@fixed small typo's
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/soil/RCS/timestep.c,v 1.5 1995/08/24 12:54:26 schj Exp $ */
+d3 3
+d18 1
+a18 1
+"$Id: timestep.c,v 1.5 1995/08/24 12:54:26 schj Exp $";
+d25 6
+a30 6
+double  dtmax = 0.2;
+double  dtmin = 1.0E-3;
+double  dt = 1.0E-1;
+double  dtm1 = 1.0E-1;;
+double  t, tm1;
+double  dtheta;
+d32 1
+a32 1
+double  t1, t2, t3;
+d42 1
+a42 1
+  int     i;
+d50 3
+a52 20
+  if (swnums == 1)
+    for (i = 0; i < layers; i++)
+      {
+	if (h[i] <= 0.0)
+	  {
+	    dtheta = fabs(thetm1[i] - theta[i]);
+	    if (dtheta < 1.0E-6)
+	      dt = dt < dtmax ? dt : dtmax;
+	    else
+	      {
+		t1 = 10.0 * thetol * dtm1/dtheta; 
+		dt = dt < t1 ? dt : t1;
+	      }
+	  }
+	else
+	  dt = dt < dtmax ? dt : dtmax;
+      }
+  else
+    {				/* SWNUMS == 2 */
+      if (numbit < maxitrlo)
+d54 3
+a56 2
+	  if (qtop > 0.0)
+	    dt = dt * 1.5;
+d58 4
+a61 1
+	    dt = dt * 1.25;
+a62 2
+      else if (numbit > maxitrhi)
+	dt *= 0.6666666666667;	/* dt = dt/1.5 */
+d65 1
+a65 2
+
+  /* Synchronize step if last timestep of day (interval)*/
+d69 1
+a69 1
+     /* flendd = TRUE;*/
+d76 1
+a76 1
+  if ((int)(t+dt+0.9*dtmin) == daynr)
+@
+
+
+1.5
+log
+@added RCSid
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/soil/RCS/timestep.c,v 1.4 1995/08/23 07:20:25 schj Exp $ */
+d3 3
+d14 2
+a15 2
+static const char RCSid[] =
+"$Id: vsel.c,v 1.5 1995/08/24 12:47:38 schj Exp $";
+@
+
+
+1.4
+log
+@updated to theta controlled
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/soil/RCS/timestep.c,v 1.3 1995/08/16 14:11:36 schj Exp $ */
+d3 3
+d10 3
+@
+
+
+1.3
+log
+@added RCS header
+@
+text
+@d1 5
+a5 2
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/soil/RCS/timestep.c,v 1.2 1995/08/16 14:08:25 schj Exp $ */
+/* $Log$ */
+d12 1
+a12 1
+extern double reltol, abstol;
+d18 1
+d24 1
+a24 1
+ *	Calculation of timestep (dt) depending on pressure head changes
+a35 7
+  /* Indicate t is at end of day (Change this to user specified timestep ??) */
+  if (fllast)
+    {
+      fllast = FALSE;
+      flendd = TRUE;
+    }
+
+d43 2
+a44 3
+	    mdhead = abstol + reltol * fabs (h[i]);
+	    dhead = fabs (hm1[i] - h[i]);
+	    if (dhead < 1.0E-5)
+d48 1
+a48 1
+		t1 = mdhead * dtm1 / dhead;
+a67 3
+  /* limit dt at lower  and upper boundary */
+  dt = dt > dtmin ? dt : dtmin;	/* dt = max(dt,1.0E-3 */
+  dt = dt < dtmax ? dt : dtmax;
+d76 5
+a80 1
+  if ((int) t == daynr)
+@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@d1 5
+a5 6
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/soil/RCS/headcalc.c,v 1.3 1995/08/16 14:05:43 schj Exp $ */
+/*- $RCSfile: headcalc.c,v $
+ *  $Author: schj $
+ *  $Date: 1995/08/16 14:05:43 $
+ *
+ */
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 6
+@

@@ -1,0 +1,77 @@
+head	1.2;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.2
+date	99.01.06.12.13.01;	author schj;	state Alpha;
+branches;
+next	1.1;
+
+1.1
+date	97.09.09.08.45.20;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@determine e earo
+@
+
+
+1.2
+log
+@Version: 0.99g
+@
+text
+@/* $Header: /home/schjpriv/schj/src/vamps_0.99e/src/met.lib/RCS/earo.c,v 1.1 1997/09/09 08:45:20 schj Exp $ */
+
+/* $RCSfile: earo.c,v $
+ * $Author: schj $
+ * $Date: 1997/09/09 08:45:20 $ */
+
+/* metut.c Assorted meteorological functions to estimate
+ * evapo(trans)piration.  Most have been
+ * translated from Pascal (provided by Arnoud F) to C
+ *
+ * Jaap Schellekens */
+
+#include <math.h>
+#include <float.h>
+#include "met.h"
+
+/*C:earo
+ *@@double earo(double ea, double es, double u)
+ *
+ * Determines Eearo (Aerodynamic evaporation or drying power of air).
+ * See calder1990284 for details.
+ * @@ea@@ and @@es@@ should be in mbar, u  mean daily windspeed at 2m in m/s
+ *
+ * Returns earodynamic term in mm/day
+ */
+double 
+earo(double ea, double es, double u)
+{
+	/* 0.1 is to convert mbar to KPa */
+	return 2.6 * 0.1 * (es - ea) * (1 + 0.537 * u);
+}
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99c/src/topsys/RCS/metut.c,v 1.1 1997/04/07 19:43:25 schj Exp $ */
+d3 1
+a3 1
+/* $RCSfile: metut.c,v $
+d5 1
+a5 1
+ * $Date: 1997/04/07 19:43:25 $ */
+@

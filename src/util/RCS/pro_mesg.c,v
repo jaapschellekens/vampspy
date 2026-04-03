@@ -1,0 +1,920 @@
+head	1.19;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.19
+date	99.01.06.12.13.01;	author schj;	state Alpha;
+branches;
+next	1.18;
+
+1.18
+date	99.01.06.12.07.49;	author schj;	state Alpha;
+branches;
+next	1.17;
+
+1.17
+date	97.09.09.08.39.10;	author schj;	state Exp;
+branches;
+next	1.16;
+
+1.16
+date	97.01.16.15.07.50;	author schj;	state Exp;
+branches;
+next	1.15;
+
+1.15
+date	96.11.05.14.59.13;	author schj;	state Alpha;
+branches;
+next	1.14;
+
+1.14
+date	96.10.22.17.41.21;	author schj;	state Exp;
+branches;
+next	1.13;
+
+1.13
+date	96.03.25.07.55.16;	author schj;	state alpha;
+branches;
+next	1.12;
+
+1.12
+date	96.02.27.11.39.46;	author schj;	state Exp;
+branches;
+next	1.11;
+
+1.11
+date	95.12.05.03.07.11;	author schj;	state Exp;
+branches;
+next	1.10;
+
+1.10
+date	95.10.30.13.54.33;	author schj;	state Exp;
+branches;
+next	1.9;
+
+1.9
+date	95.10.23.07.52.03;	author schj;	state Exp;
+branches;
+next	1.8;
+
+1.8
+date	95.10.01.21.01.05;	author schj;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	95.09.19.13.42.39;	author schj;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	95.09.01.11.43.50;	author schj;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	95.08.24.20.53.01;	author schj;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	95.08.24.14.14.24;	author schj;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	95.08.24.12.47.38;	author schj;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	95.08.24.12.25.38;	author schj;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	95.08.23.13.22.08;	author schj;	state Beta;
+branches;
+next	;
+
+
+desc
+@run time message and error functions
+@
+
+
+1.19
+log
+@Version: 0.99g
+@
+text
+@/* $Header: /home/schj/src/vamps_0.99g/src/util/RCS/pro_mesg.c,v 1.18 1999/01/06 12:07:49 schj Alpha $ */
+/*
+ *  $RCSfile: pro_mesg.c,v $
+ *  $Author: schj $
+ *  $Date: 1999/01/06 12:07:49 $
+ */
+
+static char RCSid[] =
+"$Id: pro_mesg.c,v 1.18 1999/01/06 12:07:49 schj Alpha $";
+
+
+#include <stdio.h>
+#include <time.h>
+#include "vamps.h"
+#include "version.h"
+#include "swatsoil.h"
+#include "deffile.h"
+
+char logfilename[1024];
+int verbose = FALSE;
+int loggen = FALSE;
+static FILE *showfile = NULL;
+static FILE *logfile = NULL;
+/*static FILE *logfile; */
+char deffname[1024];
+
+int nrwarn = 0;
+int nrmesg = 0;
+int nrerr = 0;
+
+/* Forward declarations */
+void startlog (char *prname, char *name);
+int endlog(void);
+
+/*-
+ * void logit(char *tolog,char *from,char *TYPE)
+ *
+ * Logs to logfile
+ */
+void
+logit (char *tolog,char *from,char *TYPE)
+{
+  	if (logfile)
+  		(void) fprintf (logfile, "%s: %s: %s: %f: %d\n",from, TYPE,tolog,t,thisstep);
+}
+
+/*C:showit
+ *@@ void showit (char *from,char *type, char *toshow,
+ *               int atverb,int whichverb)
+ *
+ * prints stuff to showfile if whichverb >= atverb
+ */
+void
+showit (char *from,char *type, char *toshow,int atverb,int whichverb)
+{
+  if (whichverb >= atverb)
+    if (!fprintf (showfile, "%s: %s: %s: %f:%d\n",from,type,toshow,t,thisstep))
+      Perror (progname,1,1, RCSid, "Could not write to showfile", toshow);
+
+if (strcmp(MESG,type) == 0)
+	nrmesg++;
+else if (strcmp(WARN,type) == 0)
+	nrwarn++;
+else if (strcmp(ERR,type) == 0)
+	nrerr++;
+
+  if (loggen)
+    logit (toshow,from,type);
+}
+
+void
+startshow (char *prname,char *name)
+{
+  char s[1024];
+  time_t tt;
+  struct tm *tm;
+  int wrote = 0;
+
+  if (showfile == NULL)
+     showfile = stderr;
+   
+  if (verbose){
+    tt = time (NULL);
+    tm = localtime (&tt);
+    (void) strftime (s, (size_t) 1024, "%A %B %d, %Y, %H:%M.%S", tm);
+    wrote += fprintf (showfile, "\n%c %s:\n%c\t%s\n%c\t%s %s\n%c\t%s (c) %s\n", commchar[0], prname, commchar[0], DESCRIPTION, commchar[0], IDENTIFY, PROVERSION, commchar[0], AUTHOR, DATE);
+    wrote += fprintf (showfile, "%c\tBuild on %s at %s by %s\n", commchar[0], WHERE, BUILDDATE, WHO);
+    wrote += fprintf (showfile, "\n%c Run starting at: %s\n", commchar[0], s);
+    wrote += fprintf (showfile, "%c Using input from: %s\n", commchar[0], name);
+    wrote += fprintf (showfile, "%c Using defaults from: %s\n", commchar[0], deffname);
+    if (wrote < 15)
+      Perror (progname,1,1, RCSid, "Could not write to showfile", "startshow()");
+  }
+  if (loggen)
+    startlog(prname,name);
+}
+
+int
+endlog (void)
+{
+  char s[1024];
+  time_t tt;
+  struct tm *tm;
+  int wrote;
+
+  tt = time (NULL);
+  tm = localtime (&tt);
+  printsum(logfile);
+  (void) fprintf(logfile,"pro_mesg: mesg: number of messages: %d: %f %d\n",nrmesg+2,t,thisstep);
+  (void) fprintf(logfile,"pro_mesg: mesg: number of warnings: %d: %f %d\n",nrwarn,t,thisstep);
+  (void) fprintf(logfile,"pro_mesg: mesg: number of errors: %d: %f %d\n",nrerr,t,thisstep);
+  (void) strftime (s, (size_t) 1024, "%A %B %d, %Y, %H:%M.%S", tm);
+  wrote = fprintf (logfile, "\n%c Run ending at: %s\n", commchar[0], s);
+  return fclose(logfile);
+}
+
+void
+endshow ()
+{
+  char s[1024];
+  time_t tt;
+  struct tm *tm;
+  int wrote;
+
+  tt = time (NULL);
+  tm = localtime (&tt);
+  if (verbose){ 
+  (void) fprintf(showfile,"pro_mesg: mesg: number of messages: %d: %f %d\n",nrmesg+2,t,thisstep);
+  (void) fprintf(showfile,"pro_mesg: mesg: number of warnings: %d: %f %d\n",nrwarn,t,thisstep);
+  (void) fprintf(showfile,"pro_mesg: mesg: number of errors: %d: %f %d\n",nrerr,t,thisstep);
+    (void) strftime (s, (size_t) 1024, "%A %B %d, %Y, %H:%M.%S", tm);
+    wrote = fprintf (showfile, "\n%c Run ending at: %s\n", commchar[0], s);
+  }
+  if (loggen)
+    (void)endlog();
+}
+
+void
+startlog (char *prname, char *name)
+{
+ char s[1024];
+  time_t tt;
+  struct tm *tm;
+  int wrote = 0;
+
+  if((logfile = fopen(logfilename,"w")) == NULL)
+    Perror(prname,1,1,RCSid,"Unable to open logfile","logfilename");
+  tt = time (NULL);
+  tm = localtime (&tt);
+  (void) strftime (s, (size_t) 1024, "%A %B %d, %Y, %H:%M.%S", tm);
+  wrote += fprintf (logfile, "\n%c %s:\n%c\t%s\n%c\t%s %s\n%c\t%s (c) %s\n", commchar[0], prname, commchar[0], DESCRIPTION, commchar[0], IDENTIFY, PROVERSION, commchar[0], AUTHOR, DATE);
+  wrote += fprintf (logfile, "%c\tBuild on %s at %s by %s\n", commchar[0], WHERE, BUILDDATE, WHO);
+  wrote += fprintf (logfile, "\n%c Run starting at: %s\n", commchar[0], s);
+  wrote += fprintf (logfile, "%c Using input from: %s\n", commchar[0], name);
+  wrote += fprintf (logfile, "%c Using defaults from: %s\n", commchar[0], deffname);
+  if (wrote < 15)
+    Perror (progname,1,1, RCSid, "Could not write to logfile", "startlog()");
+}
+
+void
+outfileheader (char *name)
+{
+  char s[1024];
+  time_t tt;
+  struct tm *tm;
+  int wrote = 0;
+
+  tt = time (NULL);
+  tm = localtime (&tt);
+  (void) strftime (s, (size_t) 1024, "%A %B %d, %Y, %H:%M.%S", tm);
+  wrote += fprintf (genoutfile, "\n%c %s:\n%c\t%s\n%c\t%s %s\n%c\t%s (c) %s\n", commchar[0], progname, commchar[0], DESCRIPTION, commchar[0], IDENTIFY, PROVERSION, commchar[0], AUTHOR, DATE);
+  wrote += fprintf (genoutfile, "%c\tBuild on %s at %s by %s\n", commchar[0], WHERE, BUILDDATE, WHO);
+  wrote += fprintf (genoutfile, "\n%c Run starting at: %s\n", commchar[0], s);
+  wrote += fprintf (genoutfile, "%c Using input from: %s\n", commchar[0], name);
+  wrote += fprintf (genoutfile, "%c Using defaults from: %s\n", commchar[0], deffname);
+  wrote += fprintf (genoutfile, "\n%c Use the vsel command to extract information from this file.\n", commchar[0]);
+  wrote += fprintf (genoutfile, "%c The input values are dumped at the end of this file.\n", commchar[0]);
+  wrote += fprintf (genoutfile, "%c Thank you for using %s!\n", commchar[0], progname);
+  wrote += fprintf (genoutfile, "\n[header]\nrun_start_time= %s\n", s);
+  if (wrote < 15)
+    Perror (progname,1,1, RCSid, "Could not write to outfile", "outfileheader()");
+
+}
+
+void
+outfiletrailer ()
+{
+  char s[1024];
+  time_t tt;
+  struct tm *tm;
+  int wrote;
+
+  tt = time (NULL);
+  tm = localtime (&tt);
+  (void) strftime (s, (size_t) 1024, "%A %B %d, %Y, %H:%M.%S", tm);
+  wrote = fprintf (genoutfile, "\n[trailer]\nrun_end_time= %s\n", s);
+}
+@
+
+
+1.18
+log
+@Version: 0.99g
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99e/src/util/RCS/pro_mesg.c,v 1.17 1997/09/09 08:39:10 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1997/09/09 08:39:10 $
+d9 1
+a9 1
+"$Id: pro_mesg.c,v 1.17 1997/09/09 08:39:10 schj Exp $";
+@
+
+
+1.17
+log
+@0.99e version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99c/src/util/RCS/pro_mesg.c,v 1.16 1997/01/16 15:07:50 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1997/01/16 15:07:50 $
+d9 1
+a9 1
+"$Id: pro_mesg.c,v 1.16 1997/01/16 15:07:50 schj Exp $";
+d47 3
+a49 2
+/*-
+ * void showit (char *from,char *type, char *toshow,int atverb,int whichverb)
+d51 1
+a51 1
+ * shows stuff to showfile if whichverb >= atverb
+d58 1
+a58 1
+      Perror (progname,1, RCSid, "Could not write to showfile", toshow);
+d92 1
+a92 1
+      Perror (progname,1, RCSid, "Could not write to showfile", "startshow()");
+d147 1
+a147 1
+    Perror(prname,1,RCSid,"Unable to open logfile","logfilename");
+d157 1
+a157 1
+    Perror (progname,1, RCSid, "Could not write to logfile", "startlog()");
+d181 1
+a181 1
+    Perror (progname,1, RCSid, "Could not write to outfile", "outfileheader()");
+a196 2
+  if (wrote < 5)
+    Perror (progname,1, RCSid, "Could not write to outfile", "outfiletrailer()");
+@
+
+
+1.16
+log
+@*** empty log message ***
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/util/RCS/pro_mesg.c,v 1.15 1996/11/05 14:59:13 schj Alpha $ */
+d5 1
+a5 1
+ *  $Date: 1996/11/05 14:59:13 $
+d9 1
+a9 1
+"$Id: pro_mesg.c,v 1.15 1996/11/05 14:59:13 schj Alpha $";
+d17 1
+d22 2
+a23 2
+static FILE *showfile = stderr;
+static FILE *logfile = stderr;
+d43 2
+a44 1
+  (void) fprintf (logfile, "%s: %s: %s: %f: %d\n",from, TYPE,tolog,t,thisstep);
+d78 3
+d85 5
+a89 5
+    wrote += fprintf (showfile, "\n%c %s:\n%c\t%s\n%c\t%s %s\n%c\t%s (c) %s\n", commchar, prname, commchar, DESCRIPTION, commchar, IDENTIFY, PROVERSION, commchar, AUTHOR, DATE);
+    wrote += fprintf (showfile, "%c\tBuild on %s at %s by %s\n", commchar, WHERE, BUILDDATE, WHO);
+    wrote += fprintf (showfile, "\n%c Run starting at: %s\n", commchar, s);
+    wrote += fprintf (showfile, "%c Using input from: %s\n", commchar, name);
+    wrote += fprintf (showfile, "%c Using defaults from: %s\n", commchar, deffname);
+d112 1
+a112 3
+  wrote = fprintf (logfile, "\n%c Run ending at: %s\n", commchar, s);
+  if (wrote < 4)
+    Perror (progname,1, RCSid, "Could not write to logfile", "endlog()");
+d131 1
+a131 3
+    wrote = fprintf (showfile, "\n%c Run ending at: %s\n", commchar, s);
+    if (wrote < 4)
+      Perror (progname,1, RCSid, "Could not write to showfile", "endshow()");
+d150 5
+a154 5
+  wrote += fprintf (logfile, "\n%c %s:\n%c\t%s\n%c\t%s %s\n%c\t%s (c) %s\n", commchar, prname, commchar, DESCRIPTION, commchar, IDENTIFY, PROVERSION, commchar, AUTHOR, DATE);
+  wrote += fprintf (logfile, "%c\tBuild on %s at %s by %s\n", commchar, WHERE, BUILDDATE, WHO);
+  wrote += fprintf (logfile, "\n%c Run starting at: %s\n", commchar, s);
+  wrote += fprintf (logfile, "%c Using input from: %s\n", commchar, name);
+  wrote += fprintf (logfile, "%c Using defaults from: %s\n", commchar, deffname);
+d170 8
+a177 8
+  wrote += fprintf (genoutfile, "\n%c %s:\n%c\t%s\n%c\t%s %s\n%c\t%s (c) %s\n", commchar, progname, commchar, DESCRIPTION, commchar, IDENTIFY, PROVERSION, commchar, AUTHOR, DATE);
+  wrote += fprintf (genoutfile, "%c\tBuild on %s at %s by %s\n", commchar, WHERE, BUILDDATE, WHO);
+  wrote += fprintf (genoutfile, "\n%c Run starting at: %s\n", commchar, s);
+  wrote += fprintf (genoutfile, "%c Using input from: %s\n", commchar, name);
+  wrote += fprintf (genoutfile, "%c Using defaults from: %s\n", commchar, deffname);
+  wrote += fprintf (genoutfile, "\n%c Use the vsel command to extract information from this file.\n", commchar);
+  wrote += fprintf (genoutfile, "%c The input values are dumped at the end of this file.\n", commchar);
+  wrote += fprintf (genoutfile, "%c Thank you for using %s!\n", commchar, progname);
+@
+
+
+1.15
+log
+@Updated to Alpha version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/util/RCS/pro_mesg.c,v 1.14 1996/10/22 17:41:21 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1996/10/22 17:41:21 $
+d9 1
+a9 1
+"$Id: pro_mesg.c,v 1.14 1996/10/22 17:41:21 schj Exp $";
+@
+
+
+1.14
+log
+@added working log files stuff.
+could use a rework
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.98/src/util/RCS/pro_mesg.c,v 1.13 1996/03/25 07:55:16 schj alpha $ */
+d5 1
+a5 1
+ *  $Date: 1996/03/25 07:55:16 $
+d9 1
+a9 1
+"$Id: pro_mesg.c,v 1.13 1996/03/25 07:55:16 schj alpha $";
+@
+
+
+1.13
+log
+@0.98
+@
+text
+@d1 2
+a2 2
+/* $Header: /home/schj/src/vamps_0.975/src/util/RCS/pro_mesg.c,v 1.12 1996/02/27 11:39:46 schj Exp $ */
+/*-
+d5 1
+a5 19
+ *  $Date: 1996/02/27 11:39:46 $
+ *  $Log: pro_mesg.c,v $
+ *  Revision 1.12  1996/02/27 11:39:46  schj
+ *  changed to ansi
+ *
+ * Revision 1.11  1995/12/05  03:07:11  schj
+ *
+ * Revision 1.10  1995/10/30  13:54:33  schj
+ * added deffile.h
+ *
+ * Revision 1.8  1995/10/01  21:01:05  schj
+ * added deffname lo logstart
+ *
+ * Revision 1.7  1995/09/19  13:42:39  schj
+ * updated exitonerror
+ *
+ * Revision 1.6  1995/09/01  11:43:50  schj
+ * updated header
+ *
+d8 2
+a9 1
+/*- pro_mesg.c - vamps messages and error functions */
+a10 2
+static char RCSid[] =
+"$Id: pro_mesg.c,v 1.12 1996/02/27 11:39:46 schj Exp $";
+d16 1
+d18 1
+d22 1
+d26 13
+d40 1
+a40 1
+logit (char *tolog)
+d42 1
+a42 1
+  (void) fprintf (showfile, "%s\n", tolog);
+d45 5
+d51 1
+a51 1
+showit (char *toshow)
+d53 10
+a62 2
+  if (!fprintf (showfile, "%s: %s\n", progname, toshow))
+    Perror (progname,1, RCSid, "Could not write to showfile", toshow);
+d65 1
+a65 1
+    logit (toshow);
+d76 24
+d102 4
+d107 4
+a110 7
+  wrote += fprintf (showfile, "\n%c %s:\n%c\t%s\n%c\t%s %s\n%c\t%s (c) %s\n", commchar, prname, commchar, DESCRIPTION, commchar, IDENTIFY, PROVERSION, commchar, AUTHOR, DATE);
+  wrote += fprintf (showfile, "%c\tBuild on %s at %s by %s\n", commchar, WHERE, BUILDDATE, WHO);
+  wrote += fprintf (showfile, "\n%c Run starting at: %s\n", commchar, s);
+  wrote += fprintf (showfile, "%c Using input from: %s\n", commchar, name);
+  wrote += fprintf (showfile, "%c Using defaults from: %s\n", commchar, deffname);
+  if (wrote < 15)
+    Perror (progname,1, RCSid, "Could not write to showfile", "startshow()");
+d123 11
+a133 4
+  (void) strftime (s, (size_t) 1024, "%A %B %d, %Y, %H:%M.%S", tm);
+  wrote = fprintf (showfile, "\n%c Run ending at: %s\n", commchar, s);
+  if (wrote < 4)
+    Perror (progname,1, RCSid, "Could not write to showfile", "endshow()");
+d137 1
+a137 1
+startlog (char *name)
+d139 4
+d144 12
+@
+
+
+1.12
+log
+@changed to ansi
+@
+text
+@d1 1
+a1 1
+/* $Header: /homes/schj/src/vamps_0.96/src/util/RCS/pro_mesg.c,v 1.11 1995/12/05 03:07:11 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1995/12/05 03:07:11 $
+d7 3
+d29 1
+a29 1
+"$Id: pro_mesg.c,v 1.11 1995/12/05 03:07:11 schj Exp $";
+@
+
+
+1.11
+log
+@*** empty log message ***
+@
+text
+@d1 1
+a1 1
+/* $Header: /homes/schj/src/vamps_0.91/RCS/pro_mesg.c,v 1.10 1995/10/30 13:54:33 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1995/10/30 13:54:33 $
+d7 2
+a10 4
+ * ,
+ *
+ * Revision 1.9  1995/10/23  07:52:03  schj
+ * *** empty log message ***
+d26 1
+a26 1
+"$Id: pro_mesg.c,v 1.10 1995/10/30 13:54:33 schj Exp $";
+d40 1
+a40 2
+logit (tolog)
+     char *tolog;
+d46 1
+a46 2
+showit (toshow)
+     char *toshow;
+d56 1
+a56 3
+startshow (prname, name)
+     char *prname;
+     char *name;
+d92 1
+a92 2
+startlog (name)
+     char *name;
+d98 1
+a98 2
+outfileheader (name)
+     char *name;
+@
+
+
+1.10
+log
+@added deffile.h
+,
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.9/util/RCS/pro_mesg.c,v 1.9 1995/10/23 07:52:03 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1995/10/23 07:52:03 $
+d7 4
+d28 1
+a28 1
+"$Id: pro_mesg.c,v 1.9 1995/10/23 07:52:03 schj Exp $";
+d32 2
+a33 2
+#include "../include/vamps.h"
+#include "../include/version.h"
+@
+
+
+1.9
+log
+@*** empty log message ***
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/util/RCS/pro_mesg.c,v 1.8 1995/10/01 21:01:05 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1995/10/01 21:01:05 $
+d7 3
+d24 1
+a24 1
+"$Id: pro_mesg.c,v 1.8 1995/10/01 21:01:05 schj Exp $";
+a30 1
+int commchar = '#';
+@
+
+
+1.8
+log
+@added deffname lo logstart
+@
+text
+@d1 3
+a3 2
+/* $Header: /home/schj/src/prosper/vamps_0.9/util/RCS/pro_mesg.c,v 1.7 1995/09/19 13:42:39 schj Exp $ */
+/*- $RCSfile: pro_mesg.c,v $
+d5 1
+a5 1
+ *  $Date: 1995/09/19 13:42:39 $
+d7 3
+d21 1
+a21 1
+"$Id: pro_mesg.c,v 1.7 1995/09/19 13:42:39 schj Exp $";
+d47 1
+a47 1
+    Perror (1, RCSid, "Could not write to showfile", toshow);
+d72 1
+a72 1
+    Perror (1, RCSid, "Could not write to showfile", "startshow()");
+d88 1
+a88 1
+    Perror (1, RCSid, "Could not write to showfile", "endshow()");
+a97 28
+/*- void Perror(int exitval, char *from,char *descr,char *xtr)
+ */
+void
+Perror (exitval, from, descr, xtr)
+     int exitval;
+     char *from;
+     char *descr;
+     char *xtr;
+{
+  if (!exitval)
+    {
+      (void) fprintf (stderr, "%s:\terror message:\n", progname);
+      (void) fprintf (stderr, "\tfrom: %s\n", from);
+      (void) fprintf (stderr, "\tdescription: %s %s\n", descr, xtr);
+    }
+  else
+    {
+      (void) fprintf (stderr, "%s:\terror message:\n", progname);
+      (void) fprintf (stderr, "\tfrom: %s\n", from);
+      (void) fprintf (stderr, "\tdescription: %s %s\n", descr, xtr);
+
+      if (genoutfile != stdout)
+	fclose (genoutfile);
+
+      exit (exitval);
+    }
+}
+
+d120 1
+a120 1
+    Perror (1, RCSid, "Could not write to outfile", "outfileheader()");
+d137 1
+a137 1
+    Perror (1, RCSid, "Could not write to outfile", "outfiletrailer()");
+@
+
+
+1.7
+log
+@updated exitonerror
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/util/RCS/pro_mesg.c,v 1.6 1995/09/01 11:43:50 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/09/01 11:43:50 $
+d6 3
+d17 1
+a17 1
+"$Id: pro_mesg.c,v 1.6 1995/09/01 11:43:50 schj Exp $";
+d29 1
+d66 1
+d137 3
+a139 2
+  wrote += fprintf (genoutfile, "%c Using input from: %s\n\n", commchar, name);
+  wrote += fprintf (genoutfile, "%c Use the vsel command to extract information from this file.\n", commchar);
+@
+
+
+1.6
+log
+@updated header
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/util/RCS/pro_mesg.c,v 1.5 1995/08/24 20:53:01 schj Exp $ */
+d4 5
+a8 2
+ *  $Date: 1995/08/24 20:53:01 $
+ *  $Log$
+d14 1
+a14 1
+"$Id: pro_mesg.c,v 1.5 1995/08/24 20:53:01 schj Exp $";
+d132 4
+a135 1
+  wrote += fprintf (genoutfile, "%c Using input from: %s\n", commchar, name);
+@
+
+
+1.5
+log
+@misc
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/util/RCS/pro_mesg.c,v 1.4 1995/08/24 14:14:24 schj Exp $ */
+d4 2
+a5 1
+ *  $Date: 1995/08/24 14:14:24 $
+d11 1
+a11 1
+"$Id: pro_mesg.c,v 1.4 1995/08/24 14:14:24 schj Exp $";
+@
+
+
+1.4
+log
+@RCS
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/util/RCS/pro_mesg.c,v 1.3 1995/08/24 12:47:38 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/08/24 12:47:38 $
+d10 1
+a10 1
+"$Id: pro_mesg.c,v 1.3 1995/08/24 12:47:38 schj Exp $";
+d17 1
+a17 1
+int     commchar = '#';
+d20 2
+a21 2
+static FILE *showfile=stderr;
+/*static FILE *logfile;*/
+d34 3
+a36 1
+  (void) fprintf (showfile, "%s: %s\n", progname, toshow);
+d38 1
+a38 1
+  	logit (toshow);
+d49 1
+d54 6
+a59 5
+  (void) fprintf (showfile, "\n%c %s:\n%c\t%s\n%c\t%s %s\n%c\t%s (c) %s\n", commchar,prname,commchar, DESCRIPTION,commchar, IDENTIFY, PROVERSION,commchar, AUTHOR, DATE);
+  (void) fprintf (showfile, "%c\tBuild on %s at %s by %s\n", commchar, WHERE, BUILDDATE, WHO);
+  (void) fprintf (showfile, "\n%c Run starting at: %s\n", commchar, s);
+  (void) fprintf (showfile, "%c Using input from: %s\n", commchar, name);
+
+d68 1
+d73 3
+a75 1
+  (void) fprintf (showfile, "\n%c Run ending at: %s\n", commchar,  s);
+d88 20
+a107 14
+Perror(exitval,from,descr,xtr)
+int	exitval;
+char	*from;
+char	*descr;
+char	*xtr;
+{
+if (!exitval){
+(void)fprintf(stderr,"%s:\terror message:\n",progname);
+(void)fprintf(stderr,"\tfrom: %s\n",from);
+(void)fprintf(stderr,"\tdescription: %s %s\n",descr,xtr);
+}else{
+(void)fprintf(stderr,"%s:\terror message:\n",progname);
+(void)fprintf(stderr,"\tfrom: %s\n",from);
+(void)fprintf(stderr,"\tdescription: %s %s\n",descr,xtr);
+d109 2
+a110 5
+if (genoutfile != stdout)
+	fclose(genoutfile);
+
+exit(exitval);
+}
+d114 2
+a115 2
+outfileheader(name)
+char *name;
+d120 1
+d125 7
+a131 5
+  (void) fprintf (genoutfile, "\n%c %s:\n%c\t%s\n%c\t%s %s\n%c\t%s (c) %s\n", commchar,progname,commchar, DESCRIPTION,commchar, IDENTIFY, PROVERSION,commchar, AUTHOR, DATE);
+  (void) fprintf (genoutfile, "%c\tBuild on %s at %s by %s\n", commchar, WHERE, BUILDDATE, WHO);
+  (void) fprintf (genoutfile, "\n%c Run starting at: %s\n", commchar, s);
+  (void) fprintf (genoutfile, "%c Using input from: %s\n", commchar, name);
+  (void) fprintf (genoutfile, "\n[header]\nrun_start_time= %s\n", s);
+d136 1
+a136 1
+outfiletrailer()
+d141 1
+d146 3
+a148 1
+  (void) fprintf (genoutfile, "\n[trailer]\nrun_end_time= %s\n", s);
+@
+
+
+1.3
+log
+@include perror function
+@
+text
+@d1 2
+a2 2
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/main/RCS/vamps.c,v 0.10 1995/08/23 14:57:06 schj Exp $ */
+/*- $RCSfile: vamps.c,v $
+d4 1
+a4 1
+ *  $Date: 1995/08/23 14:57:06 $
+d9 2
+a10 2
+static const char RCSid[] =
+"$Id: pro_mesg.c,v 1.2 1995/08/24 12:25:38 schj Exp $";
+d55 1
+d78 1
+a78 1
+/*- void perror(int exitval, char *from,char *descr,char *xtr)
+d81 1
+a81 1
+perror(exitval,from,descr)
+d87 4
+a90 1
+if (exitval){
+d95 4
+d101 32
+a132 3
+(void)fprintf(stderr,"%s:\terror message:\n",progname);
+(void)fprintf(stderr,"\tfrom: %s\n",from);
+(void)fprintf(stderr,"\tdescription: %s %s\n",descr,xtr);
+@
+
+
+1.2
+log
+@added RCSid
+@
+text
+@d1 5
+d7 1
+d9 2
+a10 2
+static char RCSid[] =
+"$Id$";
+d75 21
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 5
+@

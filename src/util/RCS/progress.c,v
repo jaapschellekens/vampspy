@@ -1,0 +1,1520 @@
+head	1.25;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.25
+date	99.01.06.12.13.01;	author schj;	state Alpha;
+branches;
+next	1.24;
+
+1.24
+date	99.01.06.12.07.49;	author schj;	state Alpha;
+branches;
+next	1.23;
+
+1.23
+date	97.09.09.08.39.10;	author schj;	state Exp;
+branches;
+next	1.22;
+
+1.22
+date	97.01.16.15.07.58;	author schj;	state Exp;
+branches;
+next	1.21;
+
+1.21
+date	96.11.10.14.47.37;	author schj;	state Exp;
+branches;
+next	1.20;
+
+1.20
+date	96.11.05.14.59.13;	author schj;	state Alpha;
+branches;
+next	1.19;
+
+1.19
+date	96.10.22.17.41.47;	author schj;	state Exp;
+branches;
+next	1.18;
+
+1.18
+date	96.03.25.07.55.20;	author schj;	state alpha;
+branches;
+next	1.17;
+
+1.17
+date	96.02.27.11.39.55;	author schj;	state Exp;
+branches;
+next	1.16;
+
+1.16
+date	96.01.25.15.04.14;	author schj;	state Exp;
+branches;
+next	1.15;
+
+1.15
+date	95.12.17.21.53.09;	author schj;	state Exp;
+branches;
+next	1.14;
+
+1.14
+date	95.12.05.03.07.11;	author schj;	state Exp;
+branches;
+next	1.13;
+
+1.13
+date	95.10.30.13.54.33;	author schj;	state Exp;
+branches;
+next	1.12;
+
+1.12
+date	95.10.24.08.37.47;	author schj;	state Exp;
+branches;
+next	1.11;
+
+1.11
+date	95.10.23.07.52.03;	author schj;	state Exp;
+branches;
+next	1.10;
+
+1.10
+date	95.10.03.14.05.47;	author schj;	state Exp;
+branches;
+next	1.9;
+
+1.9
+date	95.10.01.21.01.21;	author schj;	state Exp;
+branches;
+next	1.8;
+
+1.8
+date	95.09.30.18.01.18;	author schj;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	95.09.23.20.45.12;	author schj;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	95.09.22.15.43.24;	author schj;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	95.09.19.13.42.39;	author schj;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	95.09.04.17.04.18;	author schj;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	95.09.04.11.37.20;	author schj;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	95.09.01.11.44.37;	author schj;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	95.09.01.06.09.11;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@Prints progress bar on screen
+@
+
+
+1.25
+log
+@Version: 0.99g
+@
+text
+@/* $Header: /home/schj/src/vamps_0.99g/src/util/RCS/progress.c,v 1.24 1999/01/06 12:07:49 schj Alpha $ */
+/*
+ *  $RCSfile: progress.c,v $
+ *  $Author: schj $
+ *  $Date: 1999/01/06 12:07:49 $
+ */
+
+static char RCSid[] =
+"$Id: progress.c,v 1.24 1999/01/06 12:07:49 schj Alpha $";
+
+#include "swatsoil.h"
+#include "vamps.h"
+#include "deffile.h"
+#include <stdio.h>
+#include <errno.h>
+
+#include <time.h>
+#ifndef __MSDOS__
+#include <unistd.h>
+#endif
+
+/* int fmttime = TRUE; */
+
+#define POINTSTOSHOW 413
+
+#ifdef __OS2__
+#define TMPTHETA "c:\\tmp\\the.tmp"
+#else
+#define TMPTHETA "/tmp/_the._tmp"
+#endif
+
+#ifdef HAVE_POPEN
+extern FILE *popen (const char *command, const char *type);
+extern int pclose (FILE *stream);
+#endif
+
+#define TIMEFMT "%x %X"
+
+#define PROGSTR1 "\
+-\b\\\b|\b/\b--\b\\\b|\b/\b--\b\\\b|\b/\b--\b\\\b|\b/\b--\b\\\b|\b/\b-\
+-\b\\\b|\b/\b--\b\\\b|\b/\b--\b\\\b|\b/\b--\b\\\b|\b/\b--\b\\\b|\b/\b-\
+"
+
+#define PROGSTR2 "\
+0%\
+-\b/\b|\b\\\b--\b/\b|\b\\\b--\b/\b|\b\\\b--\b/\b|\b\\\b--\b/\b|\b\\\b-\
+10%\
+-\b/\b|\b\\\b--\b/\b|\b\\\b--\b/\b|\b\\\b--\b/\b|\b\\\b--\b/\b|\b\\\b-\
+20%\
+-\b/\b|\b\\\b--\b/\b|\b\\\b--\b/\b|\b\\\b--\b/\b|\b\\\b--\b/\b|\b\\\b-\
+30%\
+-\b/\b|\b\\\b--\b/\b|\b\\\b--\b/\b|\b\\\b--\b/\b|\b\\\b-\
+40%\
+-\b/\b|\b\\\b--\b/\b|\b\\\b--\b/\b|\b\\\b--\b/\b|\b\\\b--\b/\b|\b\\\b-\
+50%\
+-\b/\b|\b\\\b--\b/\b|\b\\\b--\b/\b|\b\\\b--\b/\b|\b\\\b-\
+60%\
+-\b/\b|\b\\\b--\b/\b|\b\\\b--\b/\b|\b\\\b--\b/\b|\b\\\b--\b/\b|\b\\\b-\
+70%\
+-\b/\b|\b\\\b--\b/\b|\b\\\b--\b/\b|\b\\\b--\b/\b|\b\\\b-\
+80%\
+-\b/\b|\b\\\b--\b/\b|\b\\\b--\b/\b|\b\\\b--\b/\b|\b\\\b--\b/\b|\b\\\b-\
+90%\
+-\b/\b|\b\\\b--\b/\b|\b\\\b--\b/\b|\b\\\b--\b/\b|\b\\\b--\b/\b|\b\\\b-\
+100%"
+
+
+char progstr[2048];
+int ptpst;
+int ptt;
+int rest;
+int tpoints = 0;
+int pointstoshow = POINTSTOSHOW;
+static time_t t_starttime;
+static time_t nowtime;
+static int showtime;
+int slprog = 1; /* show progress though slang_function */
+
+
+/*-
+ * void initprogress()
+ * initializes the progress bar system
+ -*/
+void
+initprogress ()
+{
+	int i;
+
+	t_starttime = time ((time_t) NULL);
+	strcpy (progstr, "0");
+	if (pointstoshow == POINTSTOSHOW)	/* allways TRUE */{
+		strcpy (progstr, getdefstr ("vamps", "progstr", progstr, infilename, FALSE));
+		if (strcmp (progstr, "1") == 0)
+		  strcpy (progstr, PROGSTR1);
+		if (strcmp (progstr, "2") == 0)
+		  strcpy (progstr, PROGSTR2);
+		if (strcmp (progstr, "0") == 0)
+		  showtime = 1;
+		pointstoshow = strlen (progstr);
+	} else  {
+		for (i = 0; i < pointstoshow; i++){
+		    progstr[i] = '.';
+		}
+		progstr[pointstoshow] = '\0';
+	}
+	ptpst = steps / pointstoshow == 0 ? 1 : steps / pointstoshow;
+	ptt = pointstoshow / steps == 0 ? 1 : pointstoshow / steps;
+	rest = pointstoshow % steps;
+}
+
+/*-
+ * void showprogress(int step)
+ *	shows a progress bar
+ -*/
+
+void
+showprogress (int step)
+{
+	int pt = 0;
+	static int firstcall=1;
+	char tmstr[1024];
+	int ret;
+	double diff, togo;
+	
+	strcpy(tmstr,"");
+#ifdef HAVE_LIBSLANG
+	if (slprog){
+		ret = SLang_execute_function("vamps_progress");
+		return;
+	}
+#endif
+	if (showtime){
+		if (firstcall == 1){
+			(void) fprintf (stderr, "\n\n\n\n+-----------------------------------------------------------------------------+\n");
+			(void) fprintf (stderr, "| time              |  running | to_go |   [masbal, it,   err, dt,water_cont] |\n");
+			(void) fprintf (stderr, "+-----------------------------------------------------------------------------+\n");
+			firstcall=0;
+		}
+		nowtime = time ((time_t) NULL);
+		diff = /* difftime (nowtime, t_starttime);*/ (double)(nowtime-t_starttime);
+		togo = ((diff * (double) steps / (double) step) - diff);
+		
+		sprintf(tmstr,"%17.6f",t);
+		if (diff > 3600 || togo > 3600)
+		  fprintf (stderr, "|%s  |%5.2f hrs.|%5.2f  |   [%6.3f,%3d,%5d,%8.6f,%5.3f] |\r", tmstr, diff / 3600, (togo) / 3600, masbal, itter[step - 1], error[step - 1], dt, volact);
+		else if (diff > 60 || togo > 60)
+		  fprintf (stderr, "|%s  |%5.2f min.|%5.2f  |   [%6.3f,%3d,%5d,%8.6f,%5.3f] |\r", tmstr, diff / 60, (togo) / 60, masbal, itter[step - 1], error[step - 1], dt, volact);
+		else
+		  fprintf (stderr, "|%s  |%5.0f sec.|%5.0f  |   [%6.3f,%3d,%5d,%8.6f,%5.3f] |\r", tmstr, diff, (togo), masbal, itter[step - 1], error[step - 1], dt, volact);
+		
+		if (steps == t)
+		  fprintf (stderr, "\n");
+	}else{
+		if (step % ptpst == 0 && (step / ptpst) * ptt <= pointstoshow)
+		  do{
+			  fprintf (stderr, "%c", progstr[tpoints]);
+			  pt++;
+			  tpoints++;
+		  }while (pt < ptt);
+		
+		if (step == steps && ptt > 1)
+		  for (pt = 0; pt < rest; pt++)	{
+			  fprintf (stderr, "%c", progstr[tpoints]);
+			  tpoints++;
+		  }
+	}
+}
+@
+
+
+1.24
+log
+@Version: 0.99g
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99e/src/util/RCS/progress.c,v 1.23 1997/09/09 08:39:10 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1997/09/09 08:39:10 $
+d9 1
+a9 1
+"$Id: progress.c,v 1.23 1997/09/09 08:39:10 schj Exp $";
+@
+
+
+1.23
+log
+@0.99e version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99c/src/util/RCS/progress.c,v 1.22 1997/01/16 15:07:58 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1997/01/16 15:07:58 $
+d9 1
+a9 1
+"$Id: progress.c,v 1.22 1997/01/16 15:07:58 schj Exp $";
+d22 1
+a22 2
+int graphics = 0;
+int fmttime = TRUE;
+d32 1
+a32 2
+#ifndef __MSDOS__
+#define HASPOPEN
+a121 1
+	TM tm;
+@
+
+
+1.22
+log
+@added grass popen
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/util/RCS/progress.c,v 1.21 1996/11/10 14:47:37 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1996/11/10 14:47:37 $
+d9 1
+a9 1
+"$Id: progress.c,v 1.21 1996/11/10 14:47:37 schj Exp $";
+a18 1
+#include <sys/time.h>
+d35 2
+a36 2
+extern FILE *G_popen (const char *command, const char *type);
+extern int G_pclose (FILE *stream);
+a69 1
+#define WAITFORPLOT 6
+a75 3
+FILE *grpipe = NULL;
+int showgraph = FALSE;
+char graphcommand[1024];
+d79 2
+d89 1
+a89 1
+  int i;
+d91 20
+a110 67
+  t_starttime = time ((time_t) NULL);
+  strcpy (progstr, "0");
+  if (pointstoshow == POINTSTOSHOW)	/* allways TRUE */
+    {
+      strcpy (progstr, getdefstr ("vamps", "progstr", progstr, infilename, FALSE));
+      if (strcmp (progstr, "1") == 0)
+	strcpy (progstr, PROGSTR1);
+      if (strcmp (progstr, "2") == 0)
+	strcpy (progstr, PROGSTR2);
+      if (strcmp (progstr, "0") == 0)
+	showtime = 1;
+
+      pointstoshow = strlen (progstr);
+    }
+  else
+    {
+      for (i = 0; i < pointstoshow; i++)
+	{
+	  progstr[i] = '.';
+	}
+      progstr[pointstoshow] = '\0';
+    }
+  ptpst = steps / pointstoshow == 0 ? 1 : steps / pointstoshow;
+  ptt = pointstoshow / steps == 0 ? 1 : pointstoshow / steps;
+  rest = pointstoshow % steps;
+
+
+#ifdef HASPOPEN
+  /* now for the optional graphics progress info */
+  if (showgraph && !graphics)
+    {
+      strcpy(graphcommand,getdefstr ("vamps", "graphcommand", GRAPHCOMMAND, deffname, FALSE));
+      grpipe = G_popen (graphcommand, "w");
+      if (grpipe != NULL)
+	{
+	  fprintf (grpipe, "set data style lines\n");
+#ifdef __OS2__
+	  fprintf (grpipe, "set term pm\n");
+#else
+	  fprintf (grpipe, "set term x11\n");
+#endif
+	  fprintf (grpipe, "plot x title 'INITIALIZING..'\n");
+	  fprintf (grpipe, "set nokey\n");
+	  fprintf (grpipe, "set xrange[0:1.0]\n");
+	  fflush (grpipe);
+	  sleep (WAITFORPLOT);	/* Wait for the plot program to start */
+	}
+      else
+	/* Somehow we never get here, also if the plotprogram is
+	   non-existant
+	 */
+	{
+	  Perror (progname, 1, RCSid, "Could not open pipe to:", graphcommand);
+	}
+    }
+  if (showgraph && graphics)
+    {
+      strcpy(graphcommand,getdefstr ("vamps", "graphcommand", GRAPHCOMMAND, deffname, FALSE));
+      if ((grpipe = popen (graphcommand, "w")) != (FILE *) NULL)
+	{
+	}
+      else
+	{
+	  Perror (progname, 1, RCSid, "Could not open pipe to:", graphcommand);
+	}
+    }
+#endif
+d117 1
+d121 6
+a126 70
+  int pt = 0;
+  static int firstcall=1;
+  char tmstr[1024];
+  TM tm;
+#ifdef HASPOPEN
+  int i;
+  FILE *tmp;
+  char *tmpn=NULL;
+#endif
+  double diff, togo;
+
+  if (showtime)
+    {
+      if (firstcall == 1)
+	{
+	  (void) fprintf (stderr, "\n\n\n\n+-----------------------------------------------------------------------------+\n");
+	  (void) fprintf (stderr, "| time              |  running | to_go |       [masbal, it,err,dt,water_cont] |\n");
+	  (void) fprintf (stderr, "+-----------------------------------------------------------------------------+\n");
+	  firstcall=0;
+	}
+      nowtime = time ((time_t) NULL);
+      diff = /* difftime (nowtime, t_starttime);*/ (double)(nowtime-t_starttime);
+      togo = ((diff * (double) steps / (double) step) - diff);
+
+      /* fmt the time string */
+      if (fmttime){
+      ts_jdate(&tm,t);
+      (void)strftime(tmstr,1024,TIMEFMT,&tm);
+      } else {
+      sprintf(tmstr,"%17.6f",t);
+      }
+      if (diff > 3600 || togo > 3600)
+	fprintf (stderr, "|%s  |%5.2f hrs.|%5.2f  |       [%6.3f,%3d,%1d,%8.6f,%5.3f] |\r", tmstr, diff / 3600, (togo) / 3600, masbal, itter[step - 1], error[step - 1], dt, volact);
+      else if (diff > 60 || togo > 60)
+	fprintf (stderr, "|%s  |%5.2f min.|%5.2f  |       [%6.3f,%3d,%1d,%8.6f,%5.3f] |\r", tmstr, diff / 60, (togo) / 60, masbal, itter[step - 1], error[step - 1], dt, volact);
+      else
+	fprintf (stderr, "|%s  |%5.0f sec.|%5.0f  |       [%6.3f,%3d,%1d,%8.6f,%5.3f] |\r", tmstr, diff, (togo), masbal, itter[step - 1], error[step - 1], dt, volact);
+
+      if (steps == t)
+	fprintf (stderr, "\n");
+    }
+  else
+    {
+      if (step % ptpst == 0 && (step / ptpst) * ptt <= pointstoshow)
+	do
+	  {
+	    fprintf (stderr, "%c", progstr[tpoints]);
+	    pt++;
+	    tpoints++;
+	  }
+	while (pt < ptt);
+
+      if (step == steps && ptt > 1)
+	for (pt = 0; pt < rest; pt++)
+	  {
+	    fprintf (stderr, "%c", progstr[tpoints]);
+	    tpoints++;
+	  }
+    }
+
+
+#ifdef HASPOPEN
+   if (grpipe && showgraph)
+     {
+	tmpn="/tmp/vamps.tt";
+	if (!tmpn)
+	  Perror(progname,1,RCSid,"Failed to create tmp filename","Stop!");
+	
+	if (!(tmp = fopen (tmpn, "w")))
+	  Perror(progname,1,RCSid,"Failed to create tmp file:",tmpn);
+d128 41
+a168 9
+	for (i = 0; i < layers; i++)
+	  fprintf (tmp, "%f %f\n", z[i], howsat[i]);
+	fclose (tmp);
+	
+	fprintf (grpipe, "set title 't: %f'\n", t);
+	fprintf (grpipe, "plot '%s' using 2:1\n", tmpn);
+	fflush (grpipe);
+	if (step == steps){
+	   G_pclose (grpipe);
+a169 10
+     }
+   else if (showgraph && graphics)
+     {
+	for (i = 0; i < layers; i++)
+	  fprintf (grpipe, "%f %f\n", z[i], howsat[i]);
+	fflush (grpipe);
+	if (step == steps)
+	  pclose (grpipe);
+     }
+#endif
+a170 3
+
+
+
+@
+
+
+1.21
+log
+@needs to be rewritten, to something clear
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/util/RCS/progress.c,v 1.20 1996/11/05 14:59:13 schj Alpha $ */
+d5 1
+a5 1
+ *  $Date: 1996/11/05 14:59:13 $
+d9 1
+a9 1
+"$Id: progress.c,v 1.20 1996/11/05 14:59:13 schj Alpha $";
+d15 1
+d36 2
+a37 2
+extern FILE *popen (const char *command, const char *type);
+extern int pclose (FILE *stream);
+d88 1
+a88 1
+ */
+d126 2
+a127 1
+      if ((grpipe = popen (graphcommand, "w")) != (FILE *) NULL)
+d166 1
+a166 1
+ */
+d249 1
+a249 1
+	   pclose (grpipe);
+@
+
+
+1.20
+log
+@Updated to Alpha version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/util/RCS/progress.c,v 1.19 1996/10/22 17:41:47 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1996/10/22 17:41:47 $
+d9 1
+a9 1
+"$Id: progress.c,v 1.19 1996/10/22 17:41:47 schj Exp $";
+d42 3
+a44 1
+---finished."
+d260 3
+@
+
+
+1.19
+log
+@diff seems to be indent related
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.98/src/util/RCS/progress.c,v 1.18 1996/03/25 07:55:20 schj alpha $ */
+d5 1
+a5 48
+ *  $Date: 1996/03/25 07:55:20 $
+ *  $Log: progress.c,v $
+ *  Revision 1.18  1996/03/25 07:55:20  schj
+ *  updated progress bar
+ *
+ *  Revision 1.17  1996/02/27 11:39:55  schj
+ *  deleted calculating string (was to large)
+ *  changed to ansi
+ *
+ * Revision 1.16  1996/01/25  15:04:14  schj
+ * minor changes
+ *
+ *  Revision 1.15  1995/12/17 21:53:09  schj
+ *  added string 0, display of time and step
+ *
+ * Revision 1.13  1995/10/30  13:54:33  schj
+ * added deffile.h
+ *
+ * Revision 1.12  1995/10/24  08:37:47  schj
+ * Added os/2 support
+ *
+ * Revision 1.10  1995/10/03  14:05:47  schj
+ * changed graphics stuff
+ *
+ * Revision 1.9  1995/10/01  21:01:21  schj
+ * changed DEFNAME for deffname
+ *
+ * Revision 1.8  1995/09/30  18:01:18  schj
+ * added experimental gnuplot progress support
+ *
+ * Revision 1.7  1995/09/23  20:45:12  schj
+ * added ifdef DDEBUG
+ *
+ * Revision 1.5  1995/09/19  13:42:39  schj
+ * updated exitonerror
+ *
+ * Revision 1.4  1995/09/04  17:04:18  schj
+ * added get from input file
+ *
+ * Revision 1.3  1995/09/04  11:37:20  schj
+ * added initprogress to reduce overhead
+ *
+ * Revision 1.2  1995/09/01  11:44:37  schj
+ * updated header
+ *
+ * Revision 1.1  1995/09/01  06:09:11  schj
+ * Initial revision
+ *
+d9 1
+a9 1
+"$Id: progress.c,v 1.18 1996/03/25 07:55:20 schj alpha $";
+d117 1
+d195 1
+a195 1
+      sprintf(tmstr,"%f9.2",t);
+@
+
+
+1.18
+log
+@updated progress bar
+@
+text
+@d1 2
+a2 2
+/* $Header: /home/schj/src/vamps_0.975/src/util/RCS/progress.c,v 1.17 1996/02/27 11:39:55 schj Exp $ */
+/*-
+d5 1
+a5 1
+ *  $Date: 1996/02/27 11:39:55 $
+d7 3
+d56 1
+a56 1
+"$Id: progress.c,v 1.17 1996/02/27 11:39:55 schj Exp $";
+d70 1
+d86 2
+d124 1
+a124 1
+char *graphcommand;
+d130 2
+a131 2
+ *  void initprogress()
+ *  initializes the progress bar system
+a165 1
+  showgraph = getdefint ("vamps", "showgraph", showgraph, deffname, FALSE);
+d168 1
+a168 1
+      graphcommand = getdefstr ("vamps", "graphcommand", GRAPHCOMMAND, deffname, FALSE);
+d193 1
+a193 1
+      graphcommand = getdefstr ("vamps", "graphcommand", GRAPHCOMMAND, deffname, FALSE);
+d214 2
+d227 3
+a229 3
+	  (void) fprintf (stderr, "\n\n\n\n+---------------------------------------------------------------------+\n");
+	  (void) fprintf (stderr, "| time      |  running | to_go |       [masbal, it,err,dt,water_cont] |\n");
+	  (void) fprintf (stderr, "+---------------------------------------------------------------------+\n");
+d236 7
+d244 1
+a244 1
+	fprintf (stderr, "|%9.2f  |%5.2f hrs.|%5.2f  |       [%6.3f,%3d,%1d,%8.6f,%5.3f] |\r", t, diff / 3600, (togo) / 3600, masbal, itter[step - 1], error[step - 1], dt, volact);
+d246 1
+a246 1
+	fprintf (stderr, "|%9.2f  |%5.2f min.|%5.2f  |       [%6.3f,%3d,%1d,%8.6f,%5.3f] |\r", t, diff / 60, (togo) / 60, masbal, itter[step - 1], error[step - 1], dt, volact);
+d248 1
+a248 1
+	fprintf (stderr, "|%9.2f  |%5.0f sec.|%5.0f  |       [%6.3f,%3d,%1d,%8.6f,%5.3f] |\r", t, diff, (togo), masbal, itter[step - 1], error[step - 1], dt, volact);
+d274 18
+a291 28
+  if (grpipe && showgraph)
+    {
+      /*tmpn=tmpnam(tmpn);*/
+      tmpn="/tmp/vamps.tt";
+      if (!tmpn)
+      	Perror(progname,1,RCSid,"Failed to create tmp filename","Stop!");
+
+      if (!(tmp = fopen (tmpn, "w")))
+      	Perror(progname,1,RCSid,"Failed to create tmp file:",tmpn);
+
+      for (i = 0; i < layers; i++)
+	fprintf (tmp, "%f %f\n", z[i], howsat[i]);
+      fclose (tmp);
+
+      fprintf (grpipe, "set title 't: %f'\n", t);
+      fprintf (grpipe, "plot '%s' using 2:1\n", tmpn);
+      fflush (grpipe);
+      if (step == steps){
+	pclose (grpipe);
+	}
+    }
+  else if (showgraph && graphics)
+    {
+      for (i = 0; i < layers; i++)
+	fprintf (grpipe, "%f %f\n", z[i], howsat[i]);
+      fflush (grpipe);
+      if (step == steps)
+	pclose (grpipe);
+d293 9
+@
+
+
+1.17
+log
+@deleted calculating string (was to large)
+changed to ansi
+@
+text
+@d1 1
+a1 1
+/* $Header: /homes/schj/src/vamps_0.96/src/util/RCS/progress.c,v 1.16 1996/01/25 15:04:14 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1996/01/25 15:04:14 $
+d7 4
+d53 1
+a53 1
+"$Id: progress.c,v 1.16 1996/01/25 15:04:14 schj Exp $";
+d220 3
+a222 3
+	  (void) fprintf (stderr, "\n\n\n\n+------------------------------------------------------------------+\n");
+	  (void) fprintf (stderr, "| time   |  running | to_go |       [masbal, it,err,dt,water_cont] |\n");
+	  (void) fprintf (stderr, "+------------------------------------------------------------------+\n");
+d230 1
+a230 1
+	fprintf (stderr, "|%6.2f  |%5.2f hrs.|%5.2f  |       [%6.3f,%3d,%1d,%8.6f,%5.3f] |\r", t, diff / 3600, (togo) / 3600, masbal, itter[step - 1], error[step - 1], dt, volact);
+d232 1
+a232 1
+	fprintf (stderr, "|%6.2f  |%5.2f min.|%5.2f  |       [%6.3f,%3d,%1d,%8.6f,%5.3f] |\r", t, diff / 60, (togo) / 60, masbal, itter[step - 1], error[step - 1], dt, volact);
+d234 1
+a234 1
+	fprintf (stderr, "|%6.2f  |%5.0f sec.|%5.0f  |       [%6.3f,%3d,%1d,%8.6f,%5.3f] |\r", t, diff, (togo), masbal, itter[step - 1], error[step - 1], dt, volact);
+@
+
+
+1.16
+log
+@minor changes
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.96/src/util/RCS/progress.c,v 1.15 1995/12/17 21:53:09 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1995/12/17 21:53:09 $
+d7 3
+a12 3
+ *  Revision 1.14  1995/12/05 03:07:11  schj
+ *  *** empty log message ***
+ *
+a14 1
+ * ,
+a18 3
+ * Revision 1.11  1995/10/23  07:52:03  schj
+ * *** empty log message ***
+ *
+a30 3
+ * Revision 1.6  1995/09/22  15:43:24  schj
+ * *** empty log message ***
+ *
+d49 1
+a49 1
+"$Id: progress.c,v 1.15 1995/12/17 21:53:09 schj Exp $";
+d55 1
+a55 1
+#include <unistd.h>
+d57 1
+d59 2
+d74 2
+d79 1
+a79 80
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b-calculating\b\b\b\b\b\b\b\b\b\b\b\
+calculating\b\b\b\b\b\b\b\b\b\b\b---finished."
+d113 1
+a113 1
+int  showgraph=FALSE;
+d128 1
+a128 1
+  t_starttime=time((time_t)NULL);
+d137 1
+a137 1
+      if (strcmp(progstr, "0") == 0)
+d156 1
+a156 1
+  showgraph = getdefint("vamps","showgraph",showgraph,deffname,FALSE);
+d159 2
+a160 2
+      graphcommand=getdefstr("vamps","graphcommand",GRAPHCOMMAND,deffname,FALSE);
+      if ((grpipe = popen (graphcommand, "w")) != (FILE *)NULL)
+d164 1
+a164 1
+	fprintf(grpipe,"set term pm\n");
+d170 1
+a170 1
+	  fprintf (grpipe, "set xrange[0:0.7]\n");
+d172 1
+a172 1
+          sleep(WAITFORPLOT); /* Wait for the plot program to start */
+d174 4
+a177 3
+      else /* Somehow we never get here, also if the plotprogram is
+	      non-existant
+	      */
+d179 1
+a179 1
+	  Perror (progname,1, RCSid, "Could not open pipe to:", graphcommand);
+d182 4
+a185 3
+    if (showgraph && graphics) {
+      graphcommand=getdefstr("vamps","graphcommand",GRAPHCOMMAND,deffname,FALSE);
+      if ((grpipe = popen (graphcommand, "w")) != (FILE *)NULL)
+d190 1
+a190 1
+	  Perror (progname,1, RCSid, "Could not open pipe to:", graphcommand);
+d201 1
+a201 2
+showprogress (step)
+     int step;
+d204 1
+d208 1
+d210 43
+a252 1
+  double diff,togo;
+a253 30
+  if (showtime){
+  nowtime = time((time_t)NULL);
+  diff=difftime(nowtime,t_starttime);
+  togo=((diff*(double)steps/(double)step)-diff);
+
+  if (diff > 3600 || togo > 3600)
+       fprintf(stderr,"t %6.3f %5.2f hrs. %5.2fto go [%5.4f,%3d,%1d,%8.6f,%5.2f]\r", t,diff/3600,(togo)/3600,masbal,itter[step-1],error[step-1],dt,volact);
+  else if (diff > 60 || togo > 60)
+       fprintf(stderr,"t %6.3f %5.2f min. %5.2fto go [%5.4f,%3d,%1d,%8.6f,%5.2f]\r", t,diff/60,(togo)/60,masbal,itter[step-1],error[step-1],dt,volact); 
+    else
+       fprintf(stderr,"t %6.3f %5.0f sec. %5.0fto go [%5.4f,%3d,%1d,%8.6f,%5.2f]\r", t,diff,(togo),masbal,itter[step-1],error[step-1],dt,volact);
+  if ( t == steps-1)
+    fprintf(stderr,"\nRun took %5.2f minutes.\n",diff/60.0);
+  }else{
+  if (step % ptpst == 0 && (step / ptpst) * ptt <= pointstoshow)
+    do
+      {
+	fprintf (stderr, "%c", progstr[tpoints]);
+	pt++;
+	tpoints++;
+      }
+    while (pt < ptt);
+
+  if (step == steps && ptt > 1)
+    for (pt = 0; pt < rest; pt++)
+      {
+	fprintf (stderr, "%c", progstr[tpoints]);
+	tpoints++;
+      }
+}
+d258 8
+a265 1
+      tmp = fopen (TMPTHETA, "w");
+d267 1
+a267 1
+	fprintf (tmp, "%f %f\n", z[i], theta[i]);
+d269 3
+a271 2
+      fprintf (grpipe, "set title 'day: %d'\n", step);
+      fprintf (grpipe, "plot '%s' using 2:1\n", TMPTHETA);
+d273 1
+a273 1
+      if (step == steps)
+d275 4
+a278 1
+    } else if (showgraph && graphics){
+d280 1
+a280 1
+	fprintf (grpipe, "%f %f\n", z[i], theta[i]);
+d284 1
+a284 1
+    }
+a286 1
+
+@
+
+
+1.15
+log
+@added string 0, display of time and step
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.95/src/util/RCS/progress.c,v 1.14 1995/12/05 03:07:11 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1995/12/05 03:07:11 $
+d7 3
+d56 1
+a56 1
+"$Id: progress.c,v 1.14 1995/12/05 03:07:11 schj Exp $";
+d196 1
+a196 1
+static time_t starttime;
+d209 1
+a209 1
+  starttime=time((time_t)NULL);
+d292 1
+a292 1
+  diff=difftime(nowtime,starttime);
+d296 1
+a296 2
+       fprintf(stderr,"vamps: step %d running for %5.2f hours. %5.2f hours to go.\r",
+	    step,diff/3600,(togo)/3600);
+d298 1
+a298 2
+        fprintf(stderr,"vamps: step %d running for %5.2f minutes. %5.2f minutes to go.\r",
+	      step,diff/60,(togo)/60); 
+d300 2
+a301 3
+       fprintf(stderr,"vamps: step %d running for %5.0f seconds. %5.0f seconds to go.\r",
+	      step,diff,(togo));
+  if (step == steps)
+@
+
+
+1.14
+log
+@*** empty log message ***
+@
+text
+@d1 1
+a1 1
+/* $Header: /homes/schj/src/vamps_0.91/RCS/progress.c,v 1.13 1995/10/30 13:54:33 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1995/10/30 13:54:33 $
+d7 3
+d53 1
+a53 1
+"$Id: progress.c,v 1.13 1995/10/30 13:54:33 schj Exp $";
+d60 2
+d193 3
+d206 2
+a207 1
+  strcpy (progstr, "2");
+d215 2
+d285 1
+d287 17
+d319 1
+@
+
+
+1.13
+log
+@added deffile.h
+,
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.91/util/RCS/progress.c,v 1.12 1995/10/24 08:37:47 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1995/10/24 08:37:47 $
+d7 4
+d50 1
+a50 1
+"$Id: progress.c,v 1.12 1995/10/24 08:37:47 schj Exp $";
+d52 3
+a54 3
+#include "../include/swatsoil.h"
+#include "../include/vamps.h"
+#include "../include/deffile.h"
+d58 2
+d178 1
+a178 1
+
+d224 1
+a224 1
+  if (showgraph)
+d239 13
+a251 1
+          sleep(4); /* Wait for the plot program to start */
+d300 6
+@
+
+
+1.12
+log
+@Added os/2 support
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.9/util/RCS/progress.c,v 1.11 1995/10/23 07:52:03 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1995/10/23 07:52:03 $
+d7 3
+d46 1
+a46 1
+"$Id: progress.c,v 1.11 1995/10/23 07:52:03 schj Exp $";
+d50 1
+d252 1
+d255 1
+@
+
+
+1.11
+log
+@*** empty log message ***
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/util/RCS/progress.c,v 1.10 1995/10/03 14:05:47 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1995/10/03 14:05:47 $
+d7 3
+d43 1
+a43 1
+"$Id: progress.c,v 1.10 1995/10/03 14:05:47 schj Exp $";
+d51 4
+d56 1
+d220 3
+d224 1
+d282 1
+@
+
+
+1.10
+log
+@changed graphics stuff
+@
+text
+@d1 3
+a3 2
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/util/RCS/progress.c,v 1.9 1995/10/01 21:01:21 schj Exp $ */
+/*- $RCSfile: progress.c,v $
+d5 1
+a5 1
+ *  $Date: 1995/10/01 21:01:21 $
+d7 3
+d40 1
+a40 1
+"$Id: progress.c,v 1.9 1995/10/01 21:01:21 schj Exp $";
+d171 2
+a172 1
+/*- void initprogress()
+d208 2
+a209 2
+      strcpy(graphcommand,getdefstr("vamps","graphcommand",GRAPHCOMMAND,deffname,FALSE));
+      if ((grpipe = popen (graphcommand, "w")) != NULL)
+d212 1
+d221 1
+a221 1
+	  Perror (1, RCSid, "Could not open pipe to:", graphcommand);
+d227 2
+a228 1
+/*-	void showprogress(int step)
+@
+
+
+1.9
+log
+@changed DEFNAME for deffname
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/prosper/vamps_0.9/util/RCS/progress.c,v 1.8 1995/09/30 18:01:18 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/09/30 18:01:18 $
+d6 3
+d36 1
+a36 1
+"$Id: progress.c,v 1.8 1995/09/30 18:01:18 schj Exp $";
+a43 1
+#define GRAPHCOMMAND "/usr/local/bin/gnuplot -title VAMPS-PROGRESS -geometry 160x220+20+8"
+d165 1
+a173 1
+  char *graphcommand;
+d203 1
+a203 1
+      graphcommand = getdefstr("vamps","graphcommand",GRAPHCOMMAND,deffname,FALSE);
+d207 1
+a208 1
+	  fprintf (grpipe, "plot x\n");
+@
+
+
+1.8
+log
+@added experimental gnuplot progress support
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/prosper/vamps_0.9/util/RCS/progress.c,v 1.7 1995/09/23 20:45:12 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/09/23 20:45:12 $
+d6 3
+d33 1
+a33 1
+"$Id: progress.c,v 1.7 1995/09/23 20:45:12 schj Exp $";
+d44 1
+a44 1
+#ifndef _MSDOS_
+d198 1
+a198 1
+  showgraph = getdefint("vamps","showgraph",showgraph,DEFNAME,FALSE);
+d201 1
+a201 1
+      graphcommand = getdefstr("vamps","graphcommand",GRAPHCOMMAND,DEFNAME,FALSE);
+@
+
+
+1.7
+log
+@added ifdef DDEBUG
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/prosper/vamps_0.9/util/RCS/progress.c,v 1.6 1995/09/22 15:43:24 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/09/22 15:43:24 $
+d6 3
+a28 1
+#ifdef DDEBUG
+d30 13
+a42 1
+"$Id: progress.c,v 1.6 1995/09/22 15:43:24 schj Exp $";
+a150 4
+#include "../include/swatsoil.h"
+#include "../include/vamps.h"
+
+#define POINTSTOSHOW 413
+d152 8
+a159 6
+char    progstr[2048];
+int     ptpst;
+int     ptt;
+int     rest;
+int     tpoints = 0;
+int     pointstoshow = POINTSTOSHOW;
+d167 2
+a168 1
+  int     i;
+d170 2
+a171 2
+  strcpy(progstr,"2");
+  if (pointstoshow == POINTSTOSHOW) /* allways TRUE */
+d173 5
+a177 5
+    strcpy(progstr,getdefstr("vamps","progstr",progstr ,infilename,FALSE));
+    if (strcmp(progstr,"1")==0)
+    	strcpy(progstr,PROGSTR1);
+    if (strcmp(progstr,"2")==0)
+    	strcpy(progstr,PROGSTR2);
+d179 1
+a179 1
+    pointstoshow=strlen(progstr);    
+d192 22
+d221 1
+a221 1
+int     step;
+d223 3
+a225 1
+  int     pt = 0;
+d242 15
+@
+
+
+1.6
+log
+@*** empty log message ***
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/util/RCS/progress.c,v 1.5 1995/09/19 13:42:39 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/09/19 13:42:39 $
+d6 3
+d26 1
+d28 2
+a29 1
+"$Id: progress.c,v 1.5 1995/09/19 13:42:39 schj Exp $";
+d136 1
+d142 1
+a142 1
+char    *progstr;
+d149 3
+d157 1
+d160 1
+a160 1
+    progstr=getdefstr("vamps","progstr",progstr ,infilename,FALSE);
+a169 1
+    progstr=(char *) ts_memory((char *)progstr,pointstoshow*sizeof(int),progname);
+@
+
+
+1.5
+log
+@updated exitonerror
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/util/RCS/progress.c,v 1.4 1995/09/04 17:04:18 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/09/04 17:04:18 $
+d6 3
+d24 1
+a24 1
+"$Id: progress.c,v 1.4 1995/09/04 17:04:18 schj Exp $";
+d148 1
+a148 1
+  if (pointstoshow == POINTSTOSHOW)
+d172 3
+@
+
+
+1.4
+log
+@added get from input file
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/util/RCS/progress.c,v 1.3 1995/09/04 11:37:20 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/09/04 11:37:20 $
+d6 3
+d21 1
+a21 13
+"$Id: progress.c,v 1.3 1995/09/04 11:37:20 schj Exp $";
+
+#include "../include/swatsoil.h"
+#include "../include/vamps.h"
+
+#define POINTSTOSHOW 413
+
+char    progstr[1024];
+int     ptpst;
+int     ptt;
+int     rest;
+int     tpoints = 0;
+int     pointstoshow = POINTSTOSHOW;
+d23 81
+a103 4
+void
+initprogress ()
+{
+  int     i;
+d105 1
+a105 4
+  if (pointstoshow == POINTSTOSHOW)
+    {
+      if (strcpy(progstr,getdefstr("vamps","progressstr",NULL,infilename))==NULL)
+      strcpy (progstr, "\
+d126 27
+a152 1
+100%");
+d157 1
+@
+
+
+1.3
+log
+@added initprogress to reduce overhead
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/util/RCS/progress.c,v 1.2 1995/09/01 11:44:37 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/09/01 11:44:37 $
+d6 3
+d18 1
+a18 1
+"$Id: progress.c,v 1.2 1995/09/01 11:44:37 schj Exp $";
+d23 1
+a23 1
+#define POINTSTOSHOW 80
+d37 1
+a37 4
+  ptpst = steps / pointstoshow == 0 ? 1 : steps / pointstoshow;
+  ptt = pointstoshow / steps == 0 ? 1 : pointstoshow / steps;
+  rest = pointstoshow % steps;
+  if (pointstoshow == 80)
+d39 1
+d41 22
+a62 1
+0%----10%-----20%-----30%-----40%-----50%-----60%-----70%-----80%----90%----100%");
+d72 3
+@
+
+
+1.2
+log
+@updated header
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/util/RCS/progress.c,v 1.1 1995/09/01 06:09:11 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/09/01 06:09:11 $
+d6 3
+d14 2
+a15 2
+static  char RCSid[] =
+"$Id: progress.c,v 1.1 1995/09/01 06:09:11 schj Exp $";
+d21 30
+a50 1
+int step;
+d53 2
+a54 1
+showprogress()
+d56 6
+a61 13
+int pt=0;
+int ptpst;
+int ptt;
+int rest;
+step++;
+
+ptpst= steps/POINTSTOSHOW == 0 ? 1 : steps/POINTSTOSHOW; 
+ptt= POINTSTOSHOW/steps == 0 ? 1 : POINTSTOSHOW/steps; 
+rest =  POINTSTOSHOW % steps;
+
+if (step % ptpst == 0 && (step/ptpst)*ptt <= POINTSTOSHOW )
+    do {
+	fprintf(stderr,".");
+d63 10
+a72 5
+	}while( pt < ptt);
+
+if (step == steps && ptt > 1)
+  for (pt=0;pt<rest;pt++)
+	fprintf(stderr,".");
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 2
+a2 2
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/soil/RCS/fluxes.c,v 1.5 1995/08/29 13:58:54 schj Exp $ */
+/*- $RCSfile: fluxes.c,v $
+d4 5
+a8 2
+ *  $Date: 1995/08/29 13:58:54 $
+ *  $Log$
+d12 1
+a12 1
+"$Id: fluxes.c,v 1.5 1995/08/29 13:58:54 schj Exp $";
+d15 1
+d18 1
+d21 1
+a21 3
+showprogress(step,steps)
+int	step;
+int	steps;
+d27 1
+d32 1
+a32 1
+ 
+@

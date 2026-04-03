@@ -1,0 +1,46 @@
+# Build output
+src/objs*/
+src/vamps
+src/vsel
+src/vamps_nopy
+
+# Compiled libraries (installed by make lib)
+libDarwin_arm64/
+libLinux_x86_64/
+lib*/
+
+# Object and archive files
+*.o
+*.a
+
+# Python C extension — compiled binary, platform-specific
+vampspy/*.so
+vampspy/*.pyd
+
+# Python build artefacts
+build/
+dist/
+*.egg-info/
+__pycache__/
+*.pyc
+*.pyo
+
+# Generated config
+src/vconfig.h
+src/config.cache
+src/config.log
+src/config.status
+
+# Simulation output files
+*.dat
+*.out
+*.log
+vamps.log
+example1.out
+
+# Stray output files in root
+example1.out
+
+# Editor temporaries
+*~
+.DS_Store

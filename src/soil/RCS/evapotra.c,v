@@ -1,0 +1,413 @@
+head	1.13;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.13
+date	97.01.16.15.03.37;	author schj;	state Exp;
+branches;
+next	1.12;
+
+1.12
+date	96.11.05.15.00.48;	author schj;	state Alpha;
+branches;
+next	1.11;
+
+1.11
+date	96.10.22.17.53.37;	author schj;	state Exp;
+branches;
+next	1.10;
+
+1.10
+date	96.04.09.12.07.54;	author schj;	state Exp;
+branches;
+next	1.9;
+
+1.9
+date	96.03.24.11.33.37;	author schj;	state alpha;
+branches;
+next	1.8;
+
+1.8
+date	95.11.14.20.27.37;	author schj;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	95.10.23.07.51.09;	author schj;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	95.10.19.13.05.57;	author schj;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	95.10.03.14.06.53;	author schj;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	95.09.04.11.40.29;	author schj;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	95.09.01.06.11.38;	author schj;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	95.08.29.13.58.26;	author schj;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	95.08.28.13.43.40;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@evapotranspiration per timestep
+@
+
+
+1.13
+log
+@changed header
+@
+text
+@/* $Header: /home/schj/src/vamps_0.99/src/soil/RCS/evapotra.c,v 1.12 1996/11/05 15:00:48 schj Alpha $ */
+/*  $RCSfile: evapotra.c,v $
+ *  $Author: schj $
+ *  $Date: 1996/11/05 15:00:48 $
+ */
+
+#ifdef DDEBUG
+static  char RCSid[] =
+"$Id: evapotra.c,v 1.12 1996/11/05 15:00:48 schj Alpha $";
+#endif
+#include <math.h>
+#include "swatsoil.h"
+#include "canopy.h"
+
+double	ptra;
+double  peva;
+
+/*+Name:evapotra
+ *  Prototype: void evapotra(int i,double *prec, double *intc, double *ptra, double *peva, double * hatm)
+ *  Description: gets prec, int, ptra and hatm for step i from datasets
+ *  Returns: nothing
+ *  Remarks: hatm calculation kind of stupid
++*/
+void
+evapotra(int i,double *prec, double *intc, double *ptra, double *peva, double * hatm)
+{
+  *prec = data[preset].xy[i].y;
+  *intc = data[intset].xy[i].y;
+  *ptra = data[ptransset].xy[i].y;
+  if (Dcanop) /* We have a canopy */
+    *peva = data[soilpevapset].xy[i].y;
+  else
+    *peva = data[pevapset].xy[i].y;
+  *hatm = 4698*22.5*log(0.6);
+}
+@
+
+
+1.12
+log
+@Updated to Alpha version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/soil/RCS/evapotra.c,v 1.11 1996/10/22 17:53:37 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1996/10/22 17:53:37 $
+d9 1
+a9 1
+"$Id: evapotra.c,v 1.11 1996/10/22 17:53:37 schj Exp $";
+d18 6
+d25 1
+a25 1
+evapotra(int i)
+d27 3
+a29 3
+  prec = data[preset].xy[i].y;
+  intc = data[intset].xy[i].y;
+  ptra = data[ptransset].xy[i].y;
+d31 1
+a31 1
+    peva = data[soilpevapset].xy[i].y;
+d33 2
+a34 2
+    peva = data[pevapset].xy[i].y;
+  hatm = 4698*22.5*log(0.6);
+@
+
+
+1.11
+log
+@removed log in file
+some indentation
+@
+text
+@d1 1
+a1 1
+/* $Header: /homes/schj/src/vamps_0.98/src/soil/RCS/evapotra.c,v 1.10 1996/04/09 12:07:54 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1996/04/09 12:07:54 $
+d9 1
+a9 1
+"$Id: evapotra.c,v 1.10 1996/04/09 12:07:54 schj Exp $";
+@
+
+
+1.10
+log
+@minor
+@
+text
+@d1 2
+a2 2
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.98/src/soil/RCS/evapotra.c,v 1.9 1996/03/24 11:33:37 schj alpha $ */
+/*- $RCSfile: evapotra.c,v $
+d4 1
+a4 17
+ *  $Date: 1996/03/24 11:33:37 $
+ *  $Log: evapotra.c,v $
+ *  Revision 1.9  1996/03/24 11:33:37  schj
+ *  cosmetic changes
+ *
+ * Revision 1.8  1995/11/14  20:27:37  schj
+ * changed include statement
+ *
+ * Revision 1.6  1995/10/19  13:05:57  schj
+ * gets swap vars from datasets
+ *
+ * Revision 1.5  1995/10/03  14:06:53  schj
+ * added ifdef DDEBUG
+ *
+ * Revision 1.4  1995/09/04  11:40:29  schj
+ * added log in RCS header
+ *
+d9 1
+a9 1
+"$Id: evapotra.c,v 1.9 1996/03/24 11:33:37 schj alpha $";
+d21 8
+a28 5
+      prec = data[preset].xy[i].y;
+      intc = data[intset].xy[i].y;
+      ptra = data[ptransset].xy[i].y;
+      peva = data[pevapset].xy[i].y;
+      hatm = 4698*22.5*log(0.6);
+@
+
+
+1.9
+log
+@cosmetic changes
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.97/src/soil/RCS/evapotra.c,v 1.8 1995/11/14 20:27:37 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/11/14 20:27:37 $
+d6 3
+d25 1
+a25 1
+"$Id: evapotra.c,v 1.8 1995/11/14 20:27:37 schj Exp $";
+@
+
+
+1.8
+log
+@changed include statement
+@
+text
+@d1 1
+a1 1
+/* $Header: /homes/schj/src/vamps_0.91/RCS/evapotra.c,v 1.7 1995/10/23 07:51:09 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/10/23 07:51:09 $
+d6 2
+a7 2
+ * Revision 1.7  1995/10/23  07:51:09  schj
+ * *** empty log message ***
+d22 1
+a22 1
+"$Id: evapotra.c,v 1.7 1995/10/23 07:51:09 schj Exp $";
+d32 1
+a32 2
+evapotra(i)
+int	i;
+a33 6
+/*
+      prec = data[preset].xy[i].y;
+      intc = data[intset].xy[i].y;
+      peva = data[pevapset].xy[i].y;
+      ptra = data[ptransset].xy[i].y;
+      */
+@
+
+
+1.7
+log
+@*** empty log message ***
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.9/soil/RCS/evapotra.c,v 1.6 1995/10/19 13:05:57 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/10/19 13:05:57 $
+d6 3
+d22 1
+a22 1
+"$Id: evapotra.c,v 1.6 1995/10/19 13:05:57 schj Exp $";
+d25 2
+a26 2
+#include "../include/swatsoil.h"
+#include "../include/canopy.h"
+@
+
+
+1.6
+log
+@gets swap vars from datasets
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/soil/RCS/evapotra.c,v 1.5 1995/10/03 14:06:53 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/10/03 14:06:53 $
+d6 3
+d19 1
+a19 1
+"$Id: evapotra.c,v 1.5 1995/10/03 14:06:53 schj Exp $";
+d21 1
+a21 1
+
+@
+
+
+1.5
+log
+@added ifdef DDEBUG
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/prosper/vamps_0.9/soil/RCS/evapotra.c,v 1.4 1995/09/04 11:40:29 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/09/04 11:40:29 $
+d6 3
+d16 1
+a16 1
+"$Id: evapotra.c,v 1.4 1995/09/04 11:40:29 schj Exp $";
+d20 1
+d29 1
+d34 6
+@
+
+
+1.4
+log
+@added log in RCS header
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/soil/RCS/evapotra.c,v 1.3 1995/09/01 06:11:38 schj Exp $ */
+d4 5
+a8 2
+ *  $Date: 1995/09/01 06:11:38 $
+ *  $Log$
+d11 1
+a11 1
+
+d13 2
+a14 1
+"$Id: evapotra.c,v 1.3 1995/09/01 06:11:38 schj Exp $";
+@
+
+
+1.3
+log
+@empty body
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/soil/RCS/evapotra.c,v 1.2 1995/08/29 13:58:26 schj Exp $ */
+d4 2
+a5 2
+ *  $Date: 1995/08/29 13:58:26 $
+ *
+d10 1
+a10 1
+"$Id: evapotra.c,v 1.2 1995/08/29 13:58:26 schj Exp $";
+d18 2
+a19 1
+evapotra()
+d21 4
+a24 3
+/* ptra=0.5*prec+0.1;
+ peva = 0.4*prec+0.5;
+ */
+@
+
+
+1.2
+log
+@added dummy ptra
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/soil/RCS/evapotra.c,v 1.1 1995/08/28 13:43:40 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/08/28 13:43:40 $
+d10 1
+a10 1
+"$Id: evapotra.c,v 1.1 1995/08/28 13:43:40 schj Exp $";
+d20 1
+a20 1
+ ptra=0.5*prec+0.1;
+d22 1
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 2
+a2 2
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/soil/RCS/calcgwl.c,v 1.4 1995/08/24 20:50:46 schj Exp $ */
+/*- $RCSfile: calcgwl.c,v $
+d4 1
+a4 1
+ *  $Date: 1995/08/24 20:50:46 $
+d10 1
+a10 1
+"$Id: calcgwl.c,v 1.4 1995/08/24 20:50:46 schj Exp $";
+d15 1
+d20 2
+@

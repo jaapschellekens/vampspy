@@ -1,0 +1,198 @@
+
+
+
+vsel(1)                                                   vsel(1)
+
+
+NNAAMMEE
+       vsel - select parameters from a vamps output file
+
+SSYYNNOOPPSSIISS
+       vvsseell   [----hheellpp]   [----HHeeaaddeerr]   [----ccooppyyrriigghhtt]   [----lliicceennssee]
+       [----vveerrbboossee]       [----mmeemmuussee]       [----CCoommmmeenntt _c_o_m_m_e_n_t_c_h_a_r]
+       [----nnuummbbeerr _l_a_y_e_r]                             [----ttiimmee _t_i_m_e]
+       [[----ppaarraammeetteerr _p_a_r_a_m_e_t_e_r]_._._.]           [----ssKKiipp _s_k_i_p_f_a_c_t_o_r]
+       [----oouuttffiillee _o_u_t_f_i_l_e]                    [----iinnddeexx _i_n_d_e_x_f_i_l_e]
+       [----IInnddeexx _i_n_d_e_x_f_i_l_e] _f_i_l_e_n_a_m_e
+
+
+DDEESSCCRRIIPPTTIIOONN
+       vvsseell is a program for post-processing vvaammppss  output  files
+       (see  vvaammppss(5)  ).   vvsseell allows you select to a parameter
+       from a vvaammppss output-file, either as a single  value  at  a
+       specified  time,  or as a time-series.  Output is in white
+       space delimited ASCII.  vvsseell can  use  an  index  file  to
+       speed up random access to large files.
+
+       If  you need a more low-level kind of access to vvaammppss out-
+       put files you can use ggeettssttrr(1) or iisssseecc(1).  You can also
+       use  the deffile.c library in your own programs.  Input is
+       read from either _f_i_l_e_n_a_m_e or standard input.  If  _f_i_l_e_n_a_m_e
+       is  specified  as  a  single  dash ``--'', it is taken from
+       standard input.  If _o_u_t_f_i_l_e is specified as a single  dash
+       ``--'', all output is send to standard output.
+
+
+OOPPTTIIOONNSS
+       Options   may  be  given  as  either  standard  one-letter
+       options, or GNU style long  options.  Long  options  start
+       with  two  dashes ``----'' and may be truncated to any unam-
+       biguous abbreviation.
+
+
+       ----ccooppyyrriigghhtt
+              Show copyright information and exit
+
+
+       ----lliicceennssee
+              Print license information and exit.
+
+
+       ----HHeeaaddeerr
+              Omit headers from output.
+
+
+       ----hheellpp Print help text and exit.
+
+
+       ----vveerrbboossee
+              Enter verbose mode, program progress  is  displayed
+              on stderr.  Default is silent.
+
+
+
+                    Version 0.99f -- Nov 1997                   1
+
+
+
+
+
+vsel(1)                                                   vsel(1)
+
+
+       ----CCoommmmeenntt _c_o_m_m_e_n_t_c_h_a_r
+              Set the commentchar to char _c_o_m_m_e_n_t_c_h_a_r_.
+
+
+       ----mmeemmuussee
+              Use  more  memory.  Use this option to speedup pro-
+              cessing. Note that a 4.9 Mb input file  will  cause
+              vvsseell  to  grow  to about 28 Mb while running if you
+              use this option.  It is especially  faster  if  you
+              process multiple parameters in one run.  You should
+              not use this option if  the  input-file  is  larger
+              than 5 times the amount of free physical ram.
+
+
+       ----ppaarraammeetteerr _p_a_r_a_m_e_t_e_r
+              Use  parameter  _p_a_r_a_m_e_t_e_r_.  Multiple --pp options are
+              allowed to dump multiple parameters.
+
+
+       ----iinnddeexx _i_n_d_e_x
+              Use the index file _i_n_d_e_x
+
+
+       ----IInnddeexx _i_n_d_e_x
+              Build an index in the file _i_n_d_e_x
+
+
+       ----ttiimmee _t_i_m_e
+              Output only at time _t_i_m_e_.  Multiple --tt options  are
+              allowed  to dump multiple times. You can also spec-
+              ify a range using the --ss and --ee options. If  no  --tt
+              option or range is specified all times are included
+              in the output.
+
+
+       ----ssKKiipp _s_k_i_p_f_a_c_t_o_r
+              Skip every _s_k_i_p_f_a_c_t_o_r times.
+
+
+       ----nnuummbbeerr _l_a_y_e_r
+              Dump only layer _l_a_y_e_r_.  If no --nn option is  present
+              all layers are dumped.  Numbering starts at 0.
+
+
+       ----oouuttffiillee _o_u_t_f_i_l_e
+              Send  all output to _o_u_t_f_i_l_e in stead of the stdout.
+              If you specify -, all output is send to stdout.
+
+
+UUSSAAGGEE
+       vvaammppss output files contain strings, single floating  point
+       values  and  arrays of floating point values.  vvsseell can be
+       used to extract a single parameter at a specified time  or
+       a range of times.
+
+
+
+                    Version 0.99f -- Nov 1997                   2
+
+
+
+
+
+vsel(1)                                                   vsel(1)
+
+
+EEXXAAMMPPLLEESS
+       Select  the parameter theta (an array) at time 12 and time
+       23 in file out.tst:
+       vvsseell --tt 1122 --tt 2233 --pp tthheettaa oouutt..ttsstt
+
+       To select cumprec (a single floating point value) for  all
+       times:
+       vvsseell --pp ccuummpprreecc oouutt..ttsstt
+
+
+
+
+SSEEEE AALLSSOO
+       vvaammppss(5), iisssseecc(1), ggeettssttrr(1).
+
+
+
+AAUUTTHHOORR
+       J. Schellekens
+       schj@geo.vu.nl
+
+
+BBUUGGSS
+       If you use the --mm option vsel uses _l_o_t_s_!_!  of memory.  You
+       should not use this option if the input-file is about  90%
+       of the computers free physical ram.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    Version 0.99f -- Nov 1997                   3
+
+

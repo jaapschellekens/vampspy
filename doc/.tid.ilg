@@ -1,0 +1,9 @@
+This is makeindex, portable version 2.12 [26-May-1993].
+Scanning input file .tid....
+!! Input index error (file = .tid, line = 110):
+   -- Illegal null field.
+done (250 entries accepted, 1 rejected).
+Sorting entries.....done (2142 comparisons).
+Generating output file .tid.ind....done (304 lines written, 0 warnings).
+Output written in .tid.ind.
+Transcript written in .tid.ilg.

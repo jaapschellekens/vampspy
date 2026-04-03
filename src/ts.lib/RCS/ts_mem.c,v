@@ -1,0 +1,213 @@
+head	1.7;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.7
+date	99.01.06.12.13.01;	author schj;	state Alpha;
+branches;
+next	1.6;
+
+1.6
+date	99.01.06.12.07.49;	author schj;	state Alpha;
+branches;
+next	1.5;
+
+1.5
+date	97.09.09.08.42.25;	author schj;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	97.04.10.08.51.24;	author schj;	state Sta;
+branches;
+next	1.3;
+
+1.3
+date	97.04.09.20.37.32;	author schj;	state Sta;
+branches;
+next	1.2;
+
+1.2
+date	96.11.05.15.05.04;	author schj;	state Beta;
+branches;
+next	1.1;
+
+1.1
+date	95.12.17.22.00.49;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@memory routine
+@
+
+
+1.7
+log
+@Version: 0.99g
+@
+text
+@/* $Header: /home/schj/src/vamps_0.99g/src/ts.lib/RCS/ts_mem.c,v 1.6 1999/01/06 12:07:49 schj Alpha $ */
+
+/*  $RCSfile: ts_mem.c,v $
+ *  $Author: schj $
+ *  $Date: 1999/01/06 12:07:49 $ */
+
+#include <sys/types.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include "ts.h"
+
+#ifndef NOMEM_EXIT
+#define NOMEM_EXIT 8
+#endif
+
+static char RCSid[] =
+"$Id: ts_mem.c,v 1.6 1999/01/06 12:07:49 schj Alpha $";
+
+/*C:ts_memory
+ *@@void *ts_memory(void *ptr, size_t size, char *progname)
+ *
+ * Allocates @@size@@ bytes of memory if @@ptr == NULL@@, else
+ * reallocates @@size@@ bytes from @@ptr@@ (ANSI @@realloc()@@). On
+ * memory error, print diagnostic with @@progname@@ and exit
+ * with status @@NOMEM_EXIT@@.
+ * Ret: pointer to allocated memory, deallocate with @@free(3)@@.
+ */
+void *
+ts_memory(void *ptr,size_t size,const char *progname)
+{
+	void	*rp;
+
+	if(ptr)
+		rp = (void *)realloc(ptr, size);
+	else
+		rp = (void *)malloc(size);
+	if(rp)
+		return(rp);
+
+	(void)fprintf(stderr, "%s: Memory allocation failed\n(%s)\n", progname,RCSid);
+	exit(NOMEM_EXIT);
+	/* NOTREACHED */
+}
+@
+
+
+1.6
+log
+@Version: 0.99g
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99e/src/ts.lib/RCS/ts_mem.c,v 1.5 1997/09/09 08:42:25 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1997/09/09 08:42:25 $ */
+d17 1
+a17 1
+"$Id: ts_mem.c,v 1.5 1997/09/09 08:42:25 schj Exp $";
+@
+
+
+1.5
+log
+@0.99e version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99c/src/ts/RCS/ts_mem.c,v 1.4 1997/04/10 08:51:24 schj Sta $ */
+d5 1
+a5 1
+ *  $Date: 1997/04/10 08:51:24 $ */
+d17 1
+a17 1
+"$Id: ts_mem.c,v 1.4 1997/04/10 08:51:24 schj Sta $";
+@
+
+
+1.4
+log
+@added RCSid
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99c/src/ts/RCS/ts_mem.c,v 1.3 1997/04/09 20:37:32 schj Sta $ */
+d5 1
+a5 1
+ *  $Date: 1997/04/09 20:37:32 $ */
+d9 1
+a9 1
+#include <malloc.h>
+d17 1
+a17 1
+"$Id: ts_time.c,v 1.2 1997/04/09 20:38:06 schj Sta $";
+@
+
+
+1.3
+log
+@updated comment
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/ts/RCS/ts_time.c,v 1.1 1996/11/05 15:04:34 schj Alpha $ */
+d3 1
+a3 1
+/*  $RCSfile: ts_time.c,v $
+d5 1
+a5 1
+ *  $Date: 1996/11/05 15:04:34 $ */
+d16 3
+d40 1
+a40 1
+	(void)fprintf(stderr, "%s: Memory allocation failed\n", progname);
+@
+
+
+1.2
+log
+@Updated to Alpha version
+@
+text
+@d1 6
+a6 9
+/* ts_memory.c */
+/*-
+ * void *ts_memory(void *ptr, size_t size, char *progname)
+ *		Allocates size bytes of memory if ptr == NULL, else
+ *		reallocates size bytes from ptr (ANSI realloc()). On
+ *		memory error, print diagnostic with progname and exit
+ *		with status 1.
+ *	Ret:	pointer to allocated memory, deallocate with free(3).
+ */
+d12 13
+d38 1
+a38 1
+	exit(1);
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d3 1
+a3 1
+ *	void *ts_memory(void *ptr, size_t size, char *progname)
+d13 1
+d16 1
+a16 4
+ts_memory(ptr, size, progname)
+void	*ptr;
+size_t	size;
+char	*progname;
+@

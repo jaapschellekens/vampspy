@@ -1,0 +1,4 @@
+- some problems with resizing S-Lang arrays 
+- memory leaks and free problems (seem to be the par array)
+
+_ rewrite that SLang stuff is added once in size XXL

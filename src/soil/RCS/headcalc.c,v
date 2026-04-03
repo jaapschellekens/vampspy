@@ -1,0 +1,3540 @@
+head	1.35;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.35
+date	99.01.06.12.13.01;	author schj;	state Alpha;
+branches;
+next	1.34;
+
+1.34
+date	99.01.06.12.07.49;	author schj;	state Alpha;
+branches;
+next	1.33;
+
+1.33
+date	97.09.09.08.39.39;	author schj;	state Exp;
+branches;
+next	1.32;
+
+1.32
+date	97.01.20.23.45.56;	author schj;	state Exp;
+branches;
+next	1.31;
+
+1.31
+date	97.01.16.15.04.15;	author schj;	state Exp;
+branches;
+next	1.30;
+
+1.30
+date	96.11.05.15.00.48;	author schj;	state Alpha;
+branches;
+next	1.29;
+
+1.29
+date	96.10.22.17.55.05;	author schj;	state Exp;
+branches;
+next	1.28;
+
+1.28
+date	96.09.19.10.45.23;	author schj;	state Exp;
+branches;
+next	1.27;
+
+1.27
+date	96.04.09.12.04.15;	author schj;	state Exp;
+branches;
+next	1.26;
+
+1.26
+date	96.03.24.11.35.22;	author schj;	state alpha;
+branches;
+next	1.25;
+
+1.25
+date	96.03.04.20.38.25;	author schj;	state Exp;
+branches;
+next	1.24;
+
+1.24
+date	96.03.01.14.12.12;	author schj;	state Exp;
+branches;
+next	1.23;
+
+1.23
+date	96.02.21.12.14.03;	author schj;	state Exp;
+branches;
+next	1.22;
+
+1.22
+date	96.02.08.08.15.31;	author schj;	state Exp;
+branches;
+next	1.21;
+
+1.21
+date	96.01.25.15.06.21;	author schj;	state Exp;
+branches;
+next	1.20;
+
+1.20
+date	95.12.17.21.44.10;	author schj;	state Exp;
+branches;
+next	1.19;
+
+1.19
+date	95.12.05.03.01.04;	author schj;	state Exp;
+branches;
+next	1.18;
+
+1.18
+date	95.11.14.20.29.16;	author schj;	state Exp;
+branches;
+next	1.17;
+
+1.17
+date	95.10.30.13.55.17;	author schj;	state Exp;
+branches;
+next	1.16;
+
+1.16
+date	95.10.23.07.51.09;	author schj;	state Exp;
+branches;
+next	1.15;
+
+1.15
+date	95.10.20.11.47.19;	author schj;	state Exp;
+branches;
+next	1.14;
+
+1.14
+date	95.10.20.11.30.11;	author schj;	state Exp;
+branches;
+next	1.13;
+
+1.13
+date	95.10.20.11.28.16;	author schj;	state Exp;
+branches;
+next	1.12;
+
+1.12
+date	95.10.19.13.05.57;	author schj;	state Exp;
+branches;
+next	1.11;
+
+1.11
+date	95.09.23.20.46.22;	author schj;	state Exp;
+branches;
+next	1.10;
+
+1.10
+date	95.09.01.06.13.37;	author schj;	state Exp;
+branches;
+next	1.9;
+
+1.9
+date	95.08.31.10.02.45;	author schj;	state Exp;
+branches;
+next	1.8;
+
+1.8
+date	95.08.24.20.50.46;	author schj;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	95.08.24.14.14.44;	author schj;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	95.08.24.13.01.23;	author schj;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	95.08.23.07.20.58;	author schj;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	95.08.22.07.24.51;	author schj;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	95.08.16.14.05.43;	author schj;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	95.08.16.14.04.20;	author schj;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	95.08.16.13.31.58;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@Calculate water content and pressure head
+@
+
+
+1.35
+log
+@Version: 0.99g
+@
+text
+@/*$Header: /home/schj/src/vamps_0.99g/src/soil/RCS/headcalc.c,v 1.34 1999/01/06 12:07:49 schj Alpha $ 
+ */
+/*  $RCSfile: headcalc.c,v $
+ *  $Author: schj $
+ *  $Date: 1999/01/06 12:07:49 $
+ */
+#define MBALERR 0.5E-3 /* default max error in mass balance */
+
+#define TREDU 2.0 /* initial used for reducing timestep */
+
+#ifdef DEBUG
+static char RCSid[] =
+"$Id: headcalc.c,v 1.34 1999/01/06 12:07:49 schj Alpha $";
+#endif
+
+#include "swatsoil.h"
+#include "marquard.h"
+#include "nrutil.h"
+#include <math.h>
+#include <stdlib.h>
+#include <assert.h>
+#include <signal.h>
+#include <string.h>
+
+/*
+ * These are scratch arrays of layers size, allocated in mkscratch(),
+ * freed in freescratch()
+ */
+static double *greekb, *greekc;
+static double *thomfhold, *hold, *capold, *thoma, *thomb, *thomc, *thomf, *theold;
+static double *km1,*kgeomm1,*dmcm1;
+
+int mbck = 0; /* if set to 1 convergence is checked via mass-balance */
+double mbalerr = MBALERR;
+int noit = 0;
+long int nr_tri = 0; /* number of calls to h_by_tridiag*/
+long int nr_hitt = 0; /* number of calls to h_itt*/
+long int nr_band = 0; /* number of calls to h_by_banddiag*/
+long int nr_sat = 0; /* number of calls to h_sat*/
+long int nr_itter = 0; /* total number of ittereations  */
+int	minitr = 0;
+extern double thetol;
+extern int *error;
+extern int *itter;
+double **mat;
+double **a1;
+int *indx;
+int     numeq, ngwl;
+static int wassat = 0;
+
+int solvemet = TRI; 
+
+/*C:ckcnv
+ *@@int (*ckcnv)() = NULL;
+ *
+ * Pointer to function that checks for convergence. At the
+ * moment 2 are present, th_ckcnv (swattr method) and mb_ckcnv
+ * (a new experimental method). The pointer is set in @@getparm.c@@.
+ * */
+int (*ckcnv)() = NULL;
+
+int mb_ckcnv()
+{
+	register int i;
+	static double v = 0.0, vm1 = 0.0;
+
+	vm1 = v;
+	v = 0.0;
+
+	q[0] = qtop * dt;
+	for (i=0; i < layers; i++){
+		q[i+1] = ((thetm1[i] - theta[i])* dz[i]) + q[i] 
+			+ ((qrot[i] +  qdra[0][i] + qdra[1][i] +
+					qdra[2][i] + qdra[3][i]) * dt);
+		v -= (theta[i] * dz[i]);
+	}
+
+	if (fabs(q[layers] - (v - vm1) - (qtop*dt)) > mbalerr)
+		return 1;
+	else
+		return 0;
+}
+
+/*C:th_ckcnv
+ *@@int th_ckcnv()
+ * 
+ * original swatr method to check convergence
+ * */
+int th_ckcnv()
+{
+#ifdef UNROLL_TEST
+	register int i,j;
+	register double  t1,t2,t3,t4;
+
+	j = layers % 4;
+	for (i = 0; i < j; i++){
+		t1 = fabs (theold[i] - theta[i]);
+		if (t1 > (thetol)||(h[0] > (pond - depth[0])))
+			return 1;
+	}
+	for (i = j; i < layers; i+=4){
+		t1 = fabs (theold[i] - theta[i]);
+		t2 = fabs (theold[i+1] - theta[i+1]);
+		t3 = fabs (theold[i+2] - theta[i+2]);
+		t4 = fabs (theold[i+3] - theta[i+3]);
+		if (t1 > (thetol)||(h[0] > (pond - depth[0])))
+			return 1;
+		else if (t2 > (thetol)||(h[0] > (pond - depth[0])))
+			return 1;
+		else if (t3 > (thetol)||(h[0] > (pond - depth[0])))
+			return 1;
+		else if (t4 > (thetol)||(h[0] > (pond - depth[0])))
+			return 1;
+	}
+	return 0;
+#else
+	register int i;
+	register double  t1;
+
+	for (i = 0; i < layers; i++){
+		t1 = fabs (theold[i] - theta[i]);
+		if (t1 > (thetol)||(h[0] > (pond - depth[0])))
+			return 1;
+	}
+	return 0;
+#endif
+}
+
+/*C:headcalc
+ *@@void headcalc(int pt, double *t)
+ *
+ * This is the new revamped headcalc. It first checks to see if the
+ * profile is completely saturated. If so a trick from @@swat91@@ is
+ * used (@@h_sat()@@) the change to profile to almost saturated.
+ * Unsaturated flow is first solved via a tridiagonal matrix
+ * solution. In some cases this fails and a more general (band
+ * diagonal) solution is used (See Press et al) which is somewhat
+ * slower but more robust
+ *
+ * Returns: 1 if convergence failed, 0 if success */
+int
+headcalc (int pt, double *t)
+{
+#ifndef HAVE_MEMCPY
+	int j;
+#endif
+	int i;
+	int numbit = 0;
+	int noconv = 1;
+	int nonoit;
+	int  cksatu ();
+	double tredu = TREDU;
+	void mat_cof_up ();
+	void mat_cof_det ();
+	void savevars();
+	void h_satu();
+	void h_itt();
+	int h_by_tridiag();
+	void h_by_banddiag();
+	
+	nonoit = noit;
+	
+	/* First we need to store some values regarding the present state  */
+#ifdef HAVE_MEMCPY	
+	memcpy((double *)hm1,(double *)h,layers * sizeof(double));
+	memcpy((double *)thetm1,(double *)theta,layers * sizeof(double));
+	memcpy((double *)km1,(double *)k,layers * sizeof(double));
+	memcpy((double *)dmcm1,(double *)diffmoist,layers * sizeof(double));
+	memcpy((double *)kgeomm1,(double *)kgeom,layers + 1 * sizeof(double));
+#else	
+	for (j = 0; j < layers; j++){
+		hm1[j] = h[j];
+		thetm1[j] = theta[j];
+		km1[j] = k[j];
+		dmcm1[j] = diffmoist[j];
+		kgeomm1[j + 1] = kgeom[j + 1];
+	}
+#endif	
+
+	if (lbc == 0)
+		numeq = ngwl;
+	else
+		numeq = layers - 1;
+
+	/* Reduce timestep until convergence reached */
+	while(numbit == 0 || (dt > (tredu * dtmin) && noconv == 1)){
+		itter[pt]++;
+		numbit++;
+		nr_itter++;
+		mat_cof_det ();
+		savevars();
+		if ((wassat = cksatu())){
+			h_satu();
+			nonoit=1;
+		}else {
+			nonoit=noit;
+			if (solvemet == GEN)
+				h_itt();
+			else{
+				if (solvemet == BAN)
+					h_by_banddiag();
+				else
+					if (h_by_tridiag())
+						h_by_banddiag();
+			}
+		}
+
+		/* calculate rest from new head */
+		theta[numeq] = node[numeq].sp->
+			h2t (node[numeq].soiltype, h[numeq]);
+		diffmoist[numeq] = node[numeq].sp->
+			h2dmc (node[numeq].soiltype, h[numeq]);
+		for (i = numeq - 1; i >= 0; i--){
+			theta[i] = node[i].sp->h2t (node[i].soiltype, h[i]);
+			diffmoist[i] = node[i].sp->
+				h2dmc (node[i].soiltype, h[i]);
+		}
+
+		if (nonoit == 1)
+		  break;
+
+		/* Try a few iterations before reducing the timestep */
+		while(((noconv = ckcnv()) == 1 && numbit < maxitr)
+				|| numbit < minitr){
+			itter[pt]++;
+			qtop = bocotop (&kgeom[0],&ftoph);
+			mat_cof_up ();
+			savevars();
+			if ((wassat = cksatu())){
+				h_satu();
+				nonoit=1;
+			}else {
+				nonoit=noit;
+				if (solvemet == GEN)
+					h_itt();
+				else{
+					if (solvemet == BAN)
+						h_by_banddiag();
+					else	
+						if (h_by_tridiag())
+							h_by_banddiag();
+				}
+			}
+
+			/* calculate rest from new head */
+			theta[numeq] = node[numeq].sp->
+				h2t (node[numeq].soiltype, h[numeq]);
+			diffmoist[numeq] = node[numeq].sp->
+				h2dmc (node[numeq].soiltype, h[numeq]);
+			for (i = numeq - 1; i >= 0; i--){
+				theta[i] = node[i].sp->
+					h2t(node[i].soiltype, h[i]);
+				diffmoist[i] = node[i].sp->
+					h2dmc (node[i].soiltype, h[i]);
+			}
+			numbit++;
+		} 
+		if (noconv){/*start again with smaller timestep */
+			dt /= tredu;
+			if (flendd)
+				flendd = FALSE;
+			/* Restore old values */
+#ifdef HAVE_MEMCPY			
+			memcpy((double *)hm1,(double *)h,layers * 
+					sizeof(double));
+			memcpy((double *)thetm1,(double *)theta,layers * 
+					sizeof(double));
+			memcpy((double *)km1,(double *)k,layers * 
+					sizeof(double));
+			memcpy((double *)dmcm1,(double *)diffmoist,layers * 
+					sizeof(double));
+			memcpy((double *)kgeomm1,(double *)kgeom,layers + 1 * 
+					sizeof(double));
+#else
+			for (j = 0; j < layers; j++){
+				h[j] = hm1[j];
+				theta[j] = thetm1[j];
+				k[j] = km1[j];
+				diffmoist[j] = dmcm1[j];
+				kgeom[j + 1] = kgeomm1[j + 1];
+			}
+#endif			
+			qtop = bocotop (&kgeom[0],&ftoph);
+			numbit = 0;
+		}
+	}
+
+	/* Do something here in future! */
+	if (noconv){
+		/*
+		raise(SIGALRM);
+		showit("headcalc",WARN,"no convergence, try to reduce dtmin and thetol",2,verbose);
+		*/
+	}
+	/* Add timestep to time */
+	*t += dt;
+
+	/* Determine unknown boundary fluxes */
+	if (!wassat && ftoph)
+		qtop = -kgeom[0] * ((h[0] - pond) / depth[0] + 1);
+	else if (wassat && lbc == 5) 
+		qtop = qtop < -(volsat - volact + cqdra) ?
+			-(volsat - volact + cqdra): qtop; 
+
+	if (lbc == 4)
+		qbot = -kgeom[layers - 1] * ((h[layers - 1] - 
+				h[layers - 1 - 1])/depth[layers - 1] + 1);
+	else if (lbc == 0||lbc == 5)
+		qbot = 0.0;
+	else if (lbc == 1)
+		qbot = _getval(&data[id.qbo],*t);
+
+	/* Adjust conductivities  */
+	k[0] = node[0].sp->t2k (node[0].soiltype, theta[0]);
+	for (i = 1; i < layers; i++){
+		k[i] = node[i].sp->t2k (node[i].soiltype, theta[i]);
+		kgeom[i] = MKKGEOM(i);
+	}
+	kgeom[layers] = k[layers - 1];
+	wassat = 0;
+
+	return noconv;
+}
+
+
+
+
+
+/*C:mkscratch
+ * @@void mkscratch()
+ * Allocated the scratch arrays needed in @@headcalc()@@. They are freed
+ * in @@freescratch@@.
+ */ 
+void
+mkscratch ()
+{
+	greekb = dvector(0, layers-1);
+	greekc = dvector(0, layers-1);
+	thoma = dvector(0, layers-1);
+	thomb = dvector(0, layers-1);
+	thomc = dvector(0, layers-1);
+	thomf = dvector(0, layers-1);
+	thomfhold = dvector(0, layers-1);
+	theold = dvector(0, layers-1);
+	capold = dvector(0, layers-1);
+	hold = dvector(0, layers-1);
+	km1 = dvector(0, layers-1);
+	kgeomm1 = dvector(0,layers);
+	dmcm1 = dvector(0,layers-1);
+	mat = dmatrix (1, layers, 1, 4);
+	a1 = dmatrix (1, layers ,1,  4);
+	indx = ivector(1,layers);
+}
+
+/*C:freescratch
+ *@@ void freescratch()
+ * Frees the scratch arrays used in @@headcalc()@@. This is called from 
+ * @@postsoil()@@
+ */ 
+void
+freescratch ()
+{
+	free_dvector (greekb,0,layers-1);
+	free_dvector (greekc,0,layers-1);
+	free_dvector (thoma,0,layers-1);
+	free_dvector (thomb,0,layers-1);
+	free_dvector (thomc,0,layers-1);
+	free_dvector (thomf,0,layers-1);
+	free_dvector (thomfhold,0,layers-1);
+	free_dvector (theold,0,layers-1);
+	free_dvector (capold,0,layers-1);
+	free_dvector (hold,0,layers-1);
+	free_dvector (km1,0,layers-1);
+	free_dvector (kgeomm1,0,layers);
+	free_dvector (dmcm1,0,layers-1);
+	free_ivector (indx,1,layers);
+	free_dmatrix(mat,1,layers,1,4);
+	free_dmatrix(a1,1,layers,1,4);
+}
+
+
+/*C:cksatu
+ *@@ int cksatu()
+ * Checks if the profile is completely saturated.
+ * Returns: 1 if completely saturated, otherwise 0*/
+int 
+cksatu ()
+{
+#ifndef UNROLL_TEST
+	int     i;
+
+	for (i = 0; i < layers; i++)
+		if (h[i] < 0.0)
+			return 0;
+
+	return 1;
+#else
+	int     i,j;
+
+	j = layers % 4;
+	for( i = 0; i < j; i++)
+		if (h[i] < 0.0)
+			return 0;
+
+	for (i = j; i < layers; i+=4){
+		if (h[i] < 0.0)
+			return 0;
+		else if (h[i+1] < 0.0)
+			return 0;
+		else if (h[i+2] < 0.0)
+			return 0;
+		else if (h[i+3] < 0.0)
+			return 0;
+	}
+
+	return 1;
+#endif
+}
+
+
+/*+Name: mat_cof_set
+ * Prototype: void mat_cof_det()
+ * Description: Determines the coefficients a,b,c of the tridiagonal
+ *  matrix 
+ * Returns: nothing+*/
+void
+mat_cof_det ()
+{
+	int     i;
+	double  dtdz;
+
+	/* Calculation of coefficients for layer 0 */
+
+	if (ftoph){	/*h at soil surface prescribed */
+		thomc[0] = -dt * kgeom[1] / dz[0] / depth[1];
+		thomb[0] = -thomc[0] + diffmoist[0] + dt * kgeom[0] /
+			depth[0] / dz[0];
+		thomf[0] = diffmoist[0] * h[0] + dt / (-dz[0]) * 
+			(kgeom[0] - kgeom[1] - qrot[0] - qdra[0][0] - 
+			 qdra[1][0] - qdra[2][0] - qdra[3][0])
+			+ dt * kgeom[0] * pond / depth[0] / dz[0];
+	}else{/* q at soil surface specified */
+		thomc[0] = -dt * kgeom[1] / dz[0] / depth[1];
+		thomb[0] = -thomc[0] + diffmoist[0];
+		thomf[0] = diffmoist[0] * h[0] + dt / (-dz[0]) * 
+			(-qtop - kgeom[1] - qrot[0] - qdra[0][0] -
+			 qdra[1][0] - qdra[2][0] - qdra[3][0]);
+	}
+
+	/* Calculation of coefficients for interior layers */
+	for (i = 1; i < numeq; i++){
+		dtdz = -dt/dz[i];
+		thoma[i] = dtdz * kgeom[i] / depth[i];
+		thomc[i] = dtdz * kgeom[i + 1] / depth[i + 1];
+		thomb[i] = -thoma[i] - thomc[i] + diffmoist[i];
+		thomf[i] = diffmoist[i] * h[i] + dtdz *
+			(kgeom[i] - kgeom[i + 1] -
+			 qrot[i] - qdra[0][i] - qdra[1][i] - qdra[2][i] -
+			 qdra[3][i]);
+	}
+
+	/* Calculation of coefficients for last layer */
+	if (lbc == 0){
+		thoma[numeq] = 0.0;
+		thomc[numeq] = 0.0;
+		thomb[numeq] = 1.0;
+		thomf[numeq] = h[numeq];
+	}else{
+		if (lbc == 4){
+			thoma[numeq] = 0.0;
+			thomb[numeq] = 1.0;
+			thomf[numeq] = h[numeq];
+		}else{
+			thoma[numeq] = -dt * kgeom[numeq] / dz[numeq] /
+				depth[numeq];
+			thomb[numeq] = -thoma[numeq] + diffmoist[numeq];
+			thomf[numeq] = diffmoist[numeq] * h[numeq] +
+				dt / (-dz[numeq]) * (kgeom[numeq] + qbot -
+				qrot[numeq] - qdra[0][numeq] - qdra[1][numeq] -
+				qdra[2][numeq] - qdra[3][numeq]);
+		}
+	}
+}
+
+/*C:mat_cof_up
+ *@@ void mat_cof_up(void)
+ * 
+ * Description: Updated the coeffcients b,f of the tridiagonal
+ *  matrix. This is used in the iteration step.  
+ *
+ * Returns: nothing
+ */
+void
+mat_cof_up ()
+{
+	int     i;
+#ifdef UNROLL_TEST
+	int j;
+#endif
+
+	if (ftoph){/* Head controlled boundary */
+		thomb[0] = -thomc[0] + diffmoist[0] + dt * kgeom[0] / depth[0]
+			/ dz[0];
+	thomf[0] = -theta[0] + theold[0] + diffmoist[0] * h[0] + dt / 
+		(-dz[0]) * (kgeom[0] - kgeom[1] - qrot[0] - qdra[0][0] - 
+		qdra[1][0] - qdra[2][0] - qdra[3][0]) + dt * 
+		kgeom[0] * pond / depth[0] / dz[0];
+	}else{/* We have a flux controlled boundary */
+		thomb[0] = -thomc[0] + diffmoist[0];
+		thomf[0] = -theta[0] + theold[0] + diffmoist[0] * h[0] + dt
+			/ (-dz[0]) * (-qtop - kgeom[1] - qrot[0] - 
+					qdra[0][0] - qdra[1][0] - qdra[2][0] -
+					qdra[3][0]);
+	}
+
+#ifdef UNROLL_TEST
+	/* rest of layers */
+	j = (numeq+1) % 4;
+	for (i=1; i <j; i++){
+		thomb[i] = thomb[i] - capold[i] + diffmoist[i];
+		thomf[i] = thomf[i] - capold[i] * hold[i] + diffmoist[i] *
+			h[i] - theta[i] + theold[i];
+	}
+	for (i = j; i <= numeq; i+=4){
+		thomb[i] = thomb[i] - capold[i] + diffmoist[i];
+		thomf[i] = thomf[i] - capold[i] * hold[i] + diffmoist[i] *
+			h[i] - theta[i] + theold[i];
+		thomb[i+1] = thomb[i+1] - capold[i+1] + diffmoist[i+1];
+		thomf[i+1] = thomf[i+1] - capold[i+1] * hold[i+1] + diffmoist[i+1] *
+			h[i+1] - theta[i+1] + theold[i+1];
+		thomb[i+2] = thomb[i+2] - capold[i+2] + diffmoist[i+2];
+		thomf[i+2] = thomf[i+2] - capold[i+2] * hold[i+2] + diffmoist[i+2] *
+			h[i+2] - theta[i+2] + theold[i+2];
+		thomb[i+3] = thomb[i+3] - capold[i+3] + diffmoist[i+3];
+		thomf[i+3] = thomf[i+3] - capold[i+3] * hold[i+3] + diffmoist[i+3] *
+			h[i+3] - theta[i+3] + theold[i+3];
+	}
+#else
+	/* rest of layers */
+	for (i = 1; i <= numeq; i++){
+		thomb[i] = thomb[i] - capold[i] + diffmoist[i];
+		thomf[i] = thomf[i] - capold[i] * hold[i] + diffmoist[i] *
+			h[i] - theta[i] + theold[i];
+	}
+
+#endif
+	/* Exception for lysimeter bottom */
+	if (lbc == 0){
+		thoma[numeq] = 0.0;
+		thomc[numeq] = 0.0;
+		thomb[numeq] = 1.0;
+		thomf[numeq] = h[ngwl];
+	}else if (lbc == 4){
+		thoma[numeq] = 0.0;
+		thomc[numeq] = 0.0;
+		thomb[numeq] = 1.0;
+		thomf[numeq] = h[numeq];
+	}
+
+}
+
+/*C:h_by_tridiag
+ *@@ int h_by_tridiag()
+ * 
+ * Description: Solves the matrix by the simple and fast algorithm for
+ * a tridiagonal matrix. If a zero pivot occurs it exits and returns 1
+ * and the more general method for solving band-diagonal matrixes
+ * should be used. 0 is returned on success
+ *
+ * Returns: 0 on sucess, 1 on failure*/
+int
+h_by_tridiag ()
+{
+	int i;
+	double bet;
+
+	nr_tri++;
+	bet = thomb[0];
+	if (bet == 0.0)
+		return 1;
+
+
+	greekc[0] = thomf[0] / bet;
+	for (i = 1; i <= numeq; i++){
+		greekb[i] = thomc[i - 1] / bet;
+		if ((bet = thomb[i] - thoma[i] * greekb[i]) == 0.0)
+			return 1;
+
+		greekc[i] = (thomf[i] - thoma[i] * greekc[i - 1]) / bet;
+	}
+
+	h[numeq] = greekc[numeq];
+	for (i = numeq - 1; i >= 0; i--){
+		h[i] = greekc[i] - greekb[i + 1] * h[i + 1];
+	}
+	return 0;
+}
+
+
+/*C:savevars
+ *@@ void savevars()
+ * 
+ * Description: Saves spare copies of the h, theta and diffmoist arrays
+ *
+ * Returns: nothing*/ 
+void 
+savevars()
+{
+#ifdef HAVE_MEMCPY
+	memcpy((double *)hold,(double *)h,layers * sizeof(double));
+	memcpy((double *)theold,(double *)theta,layers * sizeof(double));
+	memcpy((double *)capold,(double *)diffmoist,layers * sizeof(double));
+#else
+	int i;
+
+	for (i=0;i<layers;i++){
+		hold[i]=h[i];
+		theold[i] = theta[i];
+		capold[i] = diffmoist[i];
+	}
+#endif
+}
+
+/*C:h_by_banddiag
+ *@@ void h_by_banddiag()
+ * 
+ * Description: Solves the tridiagonal matrix as if it was a more
+ * general band-diagonal matrix. This is only needed if a zero pivot
+ * occurs in tridiag. This is seldom needed.
+ *
+ * Returns: nothing+*/
+void
+h_by_banddiag()
+{
+	int i;
+	extern void New_mprove(double **a, double **alud, int n, int indx[], double b[], double x[]);
+
+	nr_band++;
+#ifdef HAVE_MEMCPY
+	memcpy((double *)thomfhold,(double *)thomf,layers * sizeof(double));
+#else
+	for (i = 0; i < layers; i++){
+		thomfhold[i] = thomf[i];
+	}
+#endif
+
+	/* These are in band.c */
+	fillmat (mat,thoma, thomb, thomc);
+	bandec (mat, layers, a1, indx);
+	banks (mat, layers, a1, indx, (&thomf[-1]));
+	/*
+	New_mprove(mat,a1,layers, indx, (&thomfhold[-1]),(&thomf[-1]));
+	New_mprove(mat,a1,layers, indx, (&thomfhold[-1]),(&thomf[-1]));
+	*/
+	h[numeq] = thomf[numeq];
+	for (i = numeq - 1; i >= 0; i--)
+		h[i] = thomf[i];
+
+	/* we need to keep the old values of thomf*/
+#ifdef HAVE_MEMCPY
+	memcpy((double *)thomf,(double *)thomfhold,layers * sizeof(double));
+#else
+	for (i = 0; i < layers; i++)
+		thomf[i] = thomfhold[i];
+#endif
+}
+
+
+/*C:h_satu
+ *@@ void h_satu()
+ * 
+ * Changes the profile from completely saturated to almost saturated
+ *
+ * Returns: nothing */
+void
+h_satu()
+{
+	int i;
+
+	nr_sat++;
+	for (i=0; i< layers; i++)
+		qtop = fabs(qtop) > fabs(node[i].sp->ksat) ? -node[i].sp->ksat
+			: qtop;
+	theta[0] -= (qbot-qtop-qdrtot)*dt/dz[0];
+	h[0]=node[0].sp->t2h (node[0].soiltype,theta[0], depth[0]);
+}
+
+/*C:h_itt
+ *@@ void h_itt()
+ * Calculates new head via LU decomposition and uses 2 xtra itterations
+ * to get full machine precision in the solution. It is the slowest
+ * of the three possible solutions.*/
+void
+h_itt()
+{
+	int i;
+	double **tmpmat;
+	double **storemat;
+	int *indx;
+	double dd;
+	extern double **expand_mat(double **mat,int n,int m1,int m2);
+	extern void mprove(double **a,double **alud, int n, int indx[], double b[], double x[]);
+	extern void ludcmp(double **a, int n, int *indx, double *d);
+	extern void lubksb(double **a, int n, int *indx, double b[]);
+
+	nr_hitt++;
+	indx = ivector(1,layers);
+#ifdef HAVE_MEMCPY
+	memcpy((double *)thomfhold,(double *)thomf,layers * sizeof(double));
+#else
+	for (i = 0; i < layers; i++)
+		thomfhold[i] = thomf[i];
+#endif
+
+	fillmat (mat,thoma, thomb, thomc);
+	tmpmat = expand_mat(mat,layers,1,1); 
+	storemat = expand_mat(mat,layers,1,1); 
+	ludcmp(tmpmat,layers,indx,&dd);
+	lubksb(tmpmat,layers,indx,(&thomf[-1]));
+	mprove(storemat,tmpmat,layers, indx, (&thomfhold[-1]),(&thomf[-1]));
+	mprove(storemat,tmpmat,layers, indx, (&thomfhold[-1]),(&thomf[-1]));
+
+	h[numeq] = thomf[numeq];
+	for (i = numeq - 1; i >= 0; i--)
+		h[i] = thomf[i];
+
+	/* we need to keep the old values of thomf*/
+#ifdef HAVE_MEMCPY
+	memcpy((double *)thomf,(double *)thomfhold,layers * sizeof(double));
+#else
+	for (i = 0; i < layers; i++)
+		thomf[i] = thomfhold[i];
+#endif
+
+	free_dmatrix(tmpmat,1,layers,1,layers);
+	free_ivector(indx,1,layers);
+	free_dmatrix(storemat,1,layers,1,layers);
+}
+@
+
+
+1.34
+log
+@Version: 0.99g
+@
+text
+@d1 1
+a1 1
+/*$Header: /home/schjpriv/schj/src/vamps_0.99e/src/soil/RCS/headcalc.c,v 1.33 1997/09/09 08:39:39 schj Exp $ 
+d5 1
+a5 1
+ *  $Date: 1997/09/09 08:39:39 $
+d13 1
+a13 1
+"$Id: headcalc.c,v 1.33 1997/09/09 08:39:39 schj Exp $";
+@
+
+
+1.33
+log
+@0.99e version
+@
+text
+@d1 1
+a1 1
+/*$Header: /home/schjpriv/src/vamps_0.99c/src/soil/RCS/headcalc.c,v 1.32 1997/01/20 23:45:56 schj Exp $ 
+d5 1
+a5 1
+ *  $Date: 1997/01/20 23:45:56 $
+d13 1
+a13 1
+"$Id: headcalc.c,v 1.32 1997/01/20 23:45:56 schj Exp $";
+a15 1
+#include "vconfig.h"
+d22 2
+d64 1
+a64 1
+	int i;
+d91 26
+d126 1
+d132 3
+a134 3
+ * This is the new revamped headcalc. It first checks to
+ * see if the profile is completely saturated. If so a trick from
+ * @@swat91@@ is used (@@h_sat()@@) to change to profile to almost saturated.
+d140 1
+a140 2
+ * Returns: 1 if convergence failed, 0 if success
+ */
+d290 2
+d293 1
+d389 1
+d397 21
+d430 1
+d452 3
+a454 2
+		thoma[i] = -dt * kgeom[i] / dz[i] / depth[i];
+		thomc[i] = -dt * kgeom[i + 1] / dz[i] / depth[i + 1];
+d456 1
+a456 1
+		thomf[i] = diffmoist[i] * h[i] + dt / (-dz[i]) *
+d497 3
+d516 23
+d546 1
+d586 1
+a586 2
+		bet = thomb[i] - thoma[i] * greekb[i];
+		if (bet == 0.0)
+@
+
+
+1.32
+log
+@removed goto labels
+@
+text
+@d1 1
+a1 1
+/*$Header: /home/schj/src/vamps_0.99c/src/soil/RCS/headcalc.c,v 1.31 1997/01/16 15:04:15 schj Exp $ 
+d3 1
+a3 2
+/*
+ *  $RCSfile: headcalc.c,v $
+d5 1
+a5 1
+ *  $Date: 1997/01/16 15:04:15 $
+d7 3
+a10 3
+#define TREDU 2.0		/*
+				 * used for reducing timestep 
+				 */
+d13 1
+a13 1
+"$Id: headcalc.c,v 1.31 1997/01/16 15:04:15 schj Exp $";
+d16 1
+d19 1
+a21 1
+#include <malloc.h>
+d30 5
+d36 1
+d40 1
+a41 1
+extern void bocotop (int pt);
+d46 1
+a46 1
+unsigned long *indx;
+d48 1
+a48 1
+int solvebyband = 0; /* If set to 1 the band-diagonal solution is always used*/
+d50 1
+d52 30
+a81 1
+static int wassat = 0;
+d83 6
+a88 1
+int ckcnv()
+d91 1
+a91 1
+	double  t1;
+a97 1
+
+d103 1
+d106 1
+a106 1
+ * swat91 is used (h_sat()) to change to profile to almost saturated.
+d111 1
+d117 18
+a134 49
+  register int i, j;
+  int noit = 0;
+  int numbit = 0;
+  int noconv = 1;
+  int  cksatu ();
+  void mat_cof_up ();
+  void mat_cof_det ();
+  void savevars();
+  void h_satu();
+  int h_by_tridiag();
+  void h_by_banddiag();
+
+
+  /* First we need to store some values regarding the present state  */
+  for (j = 0; j < layers; j++)
+    {
+      hm1[j] = h[j];
+      thetm1[j] = theta[j];
+    }
+
+  if (lbc == 0)
+    numeq = ngwl;
+  else
+    numeq = layers - 1;
+
+  while((dt >= (TREDU * dtmin) && noconv == 1)){
+	  nr_itter++;
+
+	  mat_cof_det ();
+	  savevars();
+	  if ((wassat = cksatu())){
+		  h_satu();
+		  noit=1;
+	  }else {
+		  noit=swnums;
+		  if (solvebyband)
+			  h_by_banddiag();
+		  else
+			  if (h_by_tridiag())
+				  h_by_banddiag();
+	  }
+  
+	  /* calculate rest from new head */
+	  theta[numeq] = node[numeq].sp->h2t (node[numeq].soiltype, h[numeq]);
+	  diffmoist[numeq] = node[numeq].sp->h2dmc (node[numeq].soiltype, h[numeq]);
+	  for (i = numeq - 1; i >= 0; i--){
+		  theta[i] = node[i].sp->h2t (node[i].soiltype, h[i]);
+		  diffmoist[i] = node[i].sp->h2dmc (node[i].soiltype, h[i]);
+	  }
+d136 155
+a290 2
+	  /*if (noit == 1)
+		  break;*/
+d292 1
+a292 75
+	  while((noconv = ckcnv()) == 1 && numbit < maxitr){
+		  itter[pt] = numbit;
+		  bocotop (pt);
+		  mat_cof_up ();
+		  savevars();
+		  if ((wassat = cksatu())){
+			  h_satu();
+			  noit=1;
+		  }else {
+			  noit=swnums;
+			  if (solvebyband)
+				  h_by_banddiag();
+			  else	
+				  if (h_by_tridiag())
+					  h_by_banddiag();
+		  }
+  
+		  /* calculate rest from new head */
+		  theta[numeq] = node[numeq].sp->h2t (node[numeq].soiltype, h[numeq]);
+		  diffmoist[numeq] = node[numeq].sp->h2dmc (node[numeq].soiltype, h[numeq]);
+		  for (i = numeq - 1; i >= 0; i--){
+			  theta[i] = node[i].sp->h2t (node[i].soiltype, h[i]);
+			  diffmoist[i] = node[i].sp->h2dmc (node[i].soiltype, h[i]);
+		  }
+		  numbit++;
+	  } 
+	  if (noconv == 1){/*start again with smaller timestep */
+		  dt /= TREDU;
+		  if (flendd)
+			  flendd = FALSE;
+		  h[0] = hm1[0];
+		  theta[0] = thetm1[0];
+		  k[0] = node[0].sp->t2k (node[0].soiltype, theta[0]);
+		    diffmoist[0] = node[0].sp->h2dmc (node[0].soiltype, hm1[0]);
+		    for (j = 1; j < layers; j++){
+			    h[j] = hm1[j];
+			    theta[j] = thetm1[j];
+			    k[j] = node[j].sp->t2k (node[j].soiltype, theta[j]);
+			    diffmoist[j] = node[j].sp->h2dmc (node[j].soiltype, h[j]);
+			    kgeom[j] = mkkgeom (j);
+		    }
+		    kgeom[layers] = k[layers - 1];
+		    bocotop (pt);
+		    numbit = 0;
+	  }
+  }
+
+  /* Add timestep to time */
+  *t += dt;
+
+  /* Determine unknown boundary fluxes */
+  if (!wassat && ftoph)
+    qtop = -kgeom[0] * ((h[0] - pond) / depth[0] + 1);
+  else if (wassat && lbc == 5) 
+    qtop = qtop < -(volsat - volact + cqdra) ?
+           -(volsat - volact + cqdra): qtop; 
+
+  if (lbc == 4)
+    qbot = -kgeom[layers - 1] * ((h[layers - 1] - h[layers - 1 - 1]) / 
+				 depth[layers - 1] + 1);
+  else if (lbc == 0||lbc == 5)
+    qbot = 0.0;
+
+  /* Adjust conductivities  */
+  k[0] = node[0].sp->t2k (node[0].soiltype, theta[0]);
+  for (i = 1; i < layers; i++)
+    {
+      k[i] = node[i].sp->t2k (node[i].soiltype, theta[i]);
+      kgeom[i] = mkkgeom (i);
+    }
+  kgeom[layers] = k[layers - 1];
+
+  wassat = 0;
+
+  return noconv;
+d299 5
+a303 5
+/*+Name: mkscratch
+ * Prototype: void mkscratch()
+ * Description: Allocated the scratch arrays needed in headcalc(). They are freed
+ * in freescratch.
+ * Returns: nothing+*/ 
+d307 23
+a329 21
+  greekb = (double *) ts_memory ((void *) NULL, layers * sizeof (double), progname);
+  greekc = (double *) ts_memory ((void *) NULL, layers * sizeof (double), progname);
+  thoma = (double *) ts_memory ((void *) NULL, layers * sizeof (double), progname);
+  thomb = (double *) ts_memory ((void *) NULL, layers * sizeof (double), progname);
+  thomc = (double *) ts_memory ((void *) NULL, layers * sizeof (double), progname);
+  thomf = (double *) ts_memory ((void *) NULL, layers * sizeof (double), progname);
+  thomfhold = (double *) ts_memory ((void *) NULL, layers * sizeof (double), progname);
+  theold = (double *) ts_memory ((void *) NULL, layers * sizeof (double), progname);
+  capold = (double *) ts_memory ((void *) NULL, layers * sizeof (double), progname);
+  hold = (double *) ts_memory ((void *) NULL, layers * sizeof (double), progname);
+
+  mat = matr (layers, 3);
+  a1 = matr (layers, 3);
+  indx = (unsigned long *) ts_memory ((void *) NULL, (2+layers) * sizeof (unsigned long), progname);
+}
+
+/*+Name: freescratch
+ * Prototype: void freescratch()
+ * Description: Frees the scratch arrays used in headcalc(). This is called from postsoil()
+ * Returns: nothing
+ +*/ 
+d333 16
+a348 13
+  free (greekb);
+  free (greekc);
+  free (thoma);
+  free (thomb);
+  free (thomc);
+  free (thomf);
+  free (thomfhold);
+  free (theold);
+  free (capold);
+  free (hold);
+  free (indx);
+  free_matr(mat,layers);
+  free_matr(a1,layers);
+d352 4
+a355 4
+/*+Name: cksatu
+ * Prototype: int cksatu()
+ * Description: checks if the profile is completely saturated.
+ * Returns: 1 if completely saturated, othewise 0+*/
+d359 1
+a359 1
+  int     i;
+d361 3
+a363 3
+  for (i = 0; i < layers; i++)
+    if (h[i] < 0.0)
+      return 0;
+d365 1
+a365 1
+  return 1;
+d377 3
+a379 1
+  int     i;
+d381 47
+a427 63
+  /*
+   * Calculation of coefficients for layer 0 
+   */
+
+  if (ftoph)			/*
+				 * h at soil surface prescribed 
+				 */
+    {
+      thomc[0] = -dt * kgeom[1] / dz[0] / depth[1];
+      thomb[0] = -thomc[0] + diffmoist[0] + dt * kgeom[0] / depth[0] / dz[0];
+      thomf[0] = diffmoist[0] * h[0] + dt / (-dz[0]) * (kgeom[0] - kgeom[1] -
+		 qrot[0] - qdra[0][0] - qdra[1][0] - qdra[2][0] - qdra[3][0])
+	+ dt * kgeom[0] * pond / depth[0] / dz[0];
+    }
+  else
+    {				/*
+				 * q at soil surface specified 
+				 */
+      thomc[0] = -dt * kgeom[1] / dz[0] / depth[1];
+      thomb[0] = -thomc[0] + diffmoist[0];
+      thomf[0] = diffmoist[0] * h[0] + dt / (-dz[0]) * (-qtop - kgeom[1] -
+		qrot[0] - qdra[0][0] - qdra[1][0] - qdra[2][0] - qdra[3][0]);
+    }
+
+  /*
+   * Calculation of coefficients for interior layers  
+   */
+  for (i = 1; i < numeq; i++)
+    {
+      thoma[i] = -dt * kgeom[i] / dz[i] / depth[i];
+      thomc[i] = -dt * kgeom[i + 1] / dz[i] / depth[i + 1];
+      thomb[i] = -thoma[i] - thomc[i] + diffmoist[i];
+      thomf[i] = diffmoist[i] * h[i] + dt / (-dz[i]) *
+	(kgeom[i] - kgeom[i + 1] -
+	 qrot[i] - qdra[0][i] - qdra[1][i] - qdra[2][i] - qdra[3][i]);
+    }
+
+  /*
+   * Calculation of coefficients for last layer  
+   */
+  if (lbc == 0)
+    {
+      thoma[numeq] = 0.0;
+      thomc[numeq] = 0.0;
+      thomb[numeq] = 1.0;
+      thomf[numeq] = h[numeq];
+    }
+  else
+    {
+      if (lbc == 4)
+	{
+	  thoma[numeq] = 0.0;
+	  thomb[numeq] = 1.0;
+	  thomf[numeq] = h[numeq];
+	}
+      else
+	{
+	  thoma[numeq] = -dt * kgeom[numeq] / dz[numeq] / depth[numeq];
+	  thomb[numeq] = -thoma[numeq] + diffmoist[numeq];
+	  thomf[numeq] = diffmoist[numeq] * h[numeq] +
+	    dt / (-dz[numeq]) * (kgeom[numeq] + qbot -
+	       qrot[numeq] - qdra[0][numeq] - qdra[1][numeq] - qdra[2][numeq]
+				 - qdra[3][numeq]);
+a428 1
+    }
+d431 2
+a432 3
+/*+Name: mat_cof_up
+ *
+ * Prototype: void mat_cof_up(void)
+d438 1
+a438 1
+ +*/
+d442 1
+a442 1
+  int     i;
+d444 34
+a477 46
+  if (ftoph)
+    {				/*
+				 * Head controlled boundary 
+				 */
+      thomb[0] = -thomc[0] + diffmoist[0] + dt * kgeom[0] / depth[0] / dz[0];
+      thomf[0] = -theta[0] + theold[0] + diffmoist[0] * h[0] + dt / (-dz[0]) *
+	(kgeom[0] - kgeom[1] - qrot[0] - qdra[0][0] - qdra[1][0]
+	 - qdra[2][0] - qdra[3][0]) + dt * kgeom[0] * pond / depth[0] / dz[0];
+    }
+  else
+    {				/*
+				 * We have a flux controlled boundary 
+				 */
+      thomb[0] = -thomc[0] + diffmoist[0];
+      thomf[0] = -theta[0] + theold[0] + diffmoist[0] * h[0] + dt / (-dz[0]) *
+	(-qtop - kgeom[1] - qrot[0] - qdra[0][0] - qdra[1][0]
+	 - qdra[2][0] - qdra[3][0]);
+    }
+
+  /*
+   * rest of layers 
+   */
+  for (i = 1; i <= numeq; i++)
+    {
+      thomb[i] = thomb[i] - capold[i] + diffmoist[i];
+      thomf[i] = thomf[i] - capold[i] * hold[i] + diffmoist[i] * h[i] -
+	theta[i] + theold[i];
+    }
+
+  /*
+   * Exception for lysimeter bottom 
+   */
+  if (lbc == 0)
+    {
+      thoma[numeq] = 0.0;
+      thomc[numeq] = 0.0;
+      thomb[numeq] = 1.0;
+      thomf[numeq] = h[ngwl];
+    }
+  else if (lbc == 4)
+    {
+      thoma[numeq] = 0.0;
+      thomc[numeq] = 0.0;
+      thomb[numeq] = 1.0;
+      thomf[numeq] = h[numeq];
+    }
+d481 2
+a482 3
+/*+Name: h_by_tridiag
+ *
+ * Prototype: int h_by_tridiag()
+d489 1
+a489 1
+ * Returns: 0 on sucess, 1 on failure+*/
+d493 2
+a494 2
+int i;
+double bet;
+d496 2
+a497 11
+   nr_tri++;
+   bet = thomb[0];
+   if (bet == 0.0)
+      return 1;
+   
+   
+   greekc[0] = thomf[0] / bet;
+   for (i = 1; i <= numeq; i++)
+     {
+	greekb[i] = thomc[i - 1] / bet;
+	bet = thomb[i] - thoma[i] * greekb[i];
+d499 18
+a516 11
+	   return 1;
+	
+	greekc[i] = (thomf[i] - thoma[i] * greekc[i - 1]) / bet;
+     }
+   
+   h[numeq] = greekc[numeq];
+   for (i = numeq - 1; i >= 0; i--)
+     {
+	h[i] = greekc[i] - greekb[i + 1] * h[i + 1];
+     }
+   return 0;
+d520 2
+a521 3
+/*+Name: savevars
+ *
+ * Prototype: void savevars()
+d525 1
+a525 1
+ * Returns: nothing+*/ 
+d529 13
+a541 7
+int i;
+
+   for (i=0;i<layers;i++){
+      hold[i]=h[i];
+      theold[i] = theta[i];
+      capold[i] = diffmoist[i];
+   }
+d544 2
+a545 3
+/*+Name: h_by_banddiag
+ *
+ * Prototype: void h_by_banddiag()
+d555 2
+a556 1
+int i;
+d558 8
+a565 5
+  nr_band++;
+  for (i = 0; i < layers; i++)
+    {
+      thomfhold[i] = thomf[i];
+    }
+d567 19
+a585 12
+  fillmat (mat,thoma, thomb, thomc);
+  bandec (mat, layers, 1, 1, a1, indx);
+  banks (mat, layers, 1, 1, a1, indx, (&thomf[-1]));
+
+
+  h[numeq] = thomf[numeq];
+  for (i = numeq - 1; i >= 0; i--)
+      h[i] = thomf[i];
+
+  /* we need to keep the old values of thomf*/
+  for (i = 0; i < layers; i++)
+      thomf[i] = thomfhold[i];
+d589 2
+a590 3
+/*+Name: h_satu
+ *
+ * Prototype: void h_satu()
+d592 1
+a592 1
+ * Description: Changes the profile from completely saturated to almost saturated
+d594 1
+a594 1
+ * Returns: nothing +*/
+d598 36
+a633 1
+  int i;
+d635 19
+a653 1
+  nr_sat++;
+d655 3
+a657 4
+  for (i=0; i< layers; i++)
+    qtop = fabs(qtop) > fabs(node[i].sp->ksat) ? -node[i].sp->ksat : qtop;
+  theta[0] -= (qbot-qtop-qdrtot)*dt/dz[0];
+  h[0]=node[0].sp->t2h (node[0].soiltype,theta[0], depth[0]);
+@
+
+
+1.31
+log
+@layout
+@
+text
+@d1 1
+a1 1
+/*$Header: /home/schj/src/vamps_0.99/src/soil/RCS/headcalc.c,v 1.30 1996/11/05 15:00:48 schj Alpha $ 
+d6 1
+a6 1
+ *  $Date: 1996/11/05 15:00:48 $
+d14 1
+a14 1
+"$Id: headcalc.c,v 1.30 1996/11/05 15:00:48 schj Alpha $";
+d28 2
+a29 2
+double *greekb, *greekc;
+double *thomfhold, *hold, *capold, *thoma, *thomb, *thomc, *thomf, *theold;
+d46 18
+a63 3
+/*+Name:headcalc
+ * Prototype: void headcalc(int pt, double *t)
+ * Description: This is the new revamped headcalc. It first checks to
+d70 3
+a72 5
+ * Returns: nothing
+ *
+ * Remarks: goto labels should be removed
++*/
+void
+d76 3
+a78 2
+  double  t1;
+  int noit;
+d100 2
+a101 3
+L_410:
+  numbit = 1;
+  nr_itter++;
+d103 13
+a115 15
+
+  mat_cof_det ();
+  savevars();
+    if (cksatu()){
+    h_satu();
+    noit=1;
+  }else
+    {
+    noit=swnums;
+    if (solvebyband)
+      h_by_banddiag();
+    else
+    if (h_by_tridiag())
+  	h_by_banddiag();
+    }
+d117 10
+d128 16
+a143 9
+  /* calculate rest from new head */
+  theta[numeq] = node[numeq].sp->h2t (node[numeq].soiltype, h[numeq]);
+  diffmoist[numeq] = node[numeq].sp->h2dmc (node[numeq].soiltype, h[numeq]);
+  for (i = numeq - 1; i >= 0; i--)
+    {
+      theta[i] = node[i].sp->h2t (node[i].soiltype, h[i]);
+      diffmoist[i] = node[i].sp->h2dmc (node[i].soiltype, h[i]);
+   }
+
+d145 16
+a160 57
+  if (noit != 1) /* iteration step  */
+    {
+L_700:
+  /* Updating coefficient tridiagonal thomas matrix  */
+  mat_cof_up ();
+
+  savevars();
+  if (cksatu()){
+     h_satu();
+     noit=1;
+  }else 
+    {
+      noit=swnums;
+      if (solvebyband)
+	h_by_banddiag();
+      else	
+	if (h_by_tridiag())
+	  h_by_banddiag();
+    }
+  
+
+  /* calculate rest from new head */
+  theta[numeq] = node[numeq].sp->h2t (node[numeq].soiltype, h[numeq]);
+  diffmoist[numeq] = node[numeq].sp->h2dmc (node[numeq].soiltype, h[numeq]);
+  for (i = numeq - 1; i >= 0; i--)
+    {
+      theta[i] = node[i].sp->h2t (node[i].soiltype, h[i]);
+      diffmoist[i] = node[i].sp->h2dmc (node[i].soiltype, h[i]);
+   }
+
+  if (maxitr)
+    for (i = 0; i < layers; i++)
+      {
+	t1 = fabs (theold[i] - theta[i]);
+	if (t1 > (thetol)||(h[0] > (pond - depth[0])))
+	  {
+	    if (numbit < maxitr)
+	      {			/*
+				 * perform another iteration 
+				 */
+		numbit++;
+		itter[pt] = numbit;
+		bocotop (pt);
+		goto L_700;
+	      }
+	    else
+	      {
+		if (dt >= (TREDU * dtmin))
+		  {		/*
+				 * start again with smaller timestep 
+				 */
+		    dt /= TREDU;
+		    if (flendd)
+		      flendd = FALSE;
+		    h[0] = hm1[0];
+		    theta[0] = thetm1[0];
+		    k[0] = node[0].sp->t2k (node[0].soiltype, theta[0]);
+d162 7
+a168 8
+		    for (j = 1; j < layers; j++)
+		      {
+			h[j] = hm1[j];
+			theta[j] = thetm1[j];
+			k[j] = node[j].sp->t2k (node[j].soiltype, theta[j]);
+			diffmoist[j] = node[j].sp->h2dmc (node[j].soiltype, h[j]);
+			kgeom[j] = mkkgeom (j);
+		      }
+d171 1
+a171 9
+		    goto L_410;
+		  }
+		else
+		  {		/*
+				 * no convergence, but allow to continue 
+				 */
+		    error[pt] = 1;
+		  }
+	      }
+d173 2
+a174 2
+      }
+    }
+d201 2
+d205 4
+d516 1
+a516 1
+ * Returns: nothing+*/
+a522 1
+  wassat = 1;
+@
+
+
+1.30
+log
+@Updated to Alpha version
+@
+text
+@d1 1
+a1 1
+/*$Header: /home/schj/src/vamps_0.99/src/soil/RCS/headcalc.c,v 1.29 1996/10/22 17:55:05 schj Exp $ 
+d6 1
+a6 1
+ *  $Date: 1996/10/22 17:55:05 $
+d12 1
+a12 1
+
+d14 2
+a15 1
+"$Id: headcalc.c,v 1.29 1996/10/22 17:55:05 schj Exp $";
+d33 1
+a33 3
+long int nr_itter = 0;          /*
+				 * total number of ittereations 
+				 */
+d44 12
+a55 2
+/*-
+ * void	headcalc(int pt, double *t)
+d57 2
+a58 8
+ * This is the new revamped headcalc. It first checks to see if the
+ * profile is completely saturated. If so a trick from swat91 is
+ * used (h_sat()) to change to profile to almost saturated.
+ * Unsaturated flow is first solved via a tridiagonal matrix
+ * solution. In some cases this fails and a more general (band diagonal)
+ * solution is used (See Press et al) which is somewhat slower but
+ * more robust.
+ */
+d65 7
+a71 7
+  int     cksatu ();
+  void    mat_cof_up ();
+  void    mat_cof_det ();
+  void    savevars();
+  void  h_satu();
+  int	h_by_tridiag();
+  void	h_by_banddiag();
+d74 1
+a74 4
+
+  /*
+   * First we need to store some values regarding the present state 
+   */
+d93 1
+a93 1
+  if (cksatu()){
+d108 2
+a109 2
+  theta[numeq] = soilparm[numeq].thenodeF (numeq, h[numeq]);
+  diffmoist[numeq] = soilparm[numeq].dmcnodeF (numeq, h[numeq]);
+d112 2
+a113 2
+      theta[i] = soilparm[i].thenodeF (i, h[i]);
+      diffmoist[i] = soilparm[i].dmcnodeF (i, h[i]);
+d117 1
+a117 1
+  if (noit != 1)
+a118 3
+  /*
+   * iteration step 
+   */
+d120 1
+a120 3
+  /*
+   * Updating coefficient tridiagonal thomas matrix 
+   */
+d127 1
+a127 1
+  }else
+d139 2
+a140 2
+  theta[numeq] = soilparm[numeq].thenodeF (numeq, h[numeq]);
+  diffmoist[numeq] = soilparm[numeq].dmcnodeF (numeq, h[numeq]);
+d143 2
+a144 2
+      theta[i] = soilparm[i].thenodeF (i, h[i]);
+      diffmoist[i] = soilparm[i].dmcnodeF (i, h[i]);
+d151 1
+a151 1
+	if (t1 > (thetol) || (h[0] > (pond - depth[0])))
+d173 2
+a174 2
+		    k[0] = soilparm[0].theta2kF (0, theta[0]);
+		    diffmoist[0] = soilparm[0].dmcnodeF (0, hm1[0]);
+d179 2
+a180 2
+			k[j] = soilparm[j].theta2kF (j, theta[j]);
+			diffmoist[j] = soilparm[j].dmcnodeF (j, h[j]);
+d197 1
+a197 3
+  /*
+   * Add timestep to time 
+   */
+d200 2
+a201 4
+  /*
+   * Determine unknown boundary fluxes 
+   */
+  if (ftoph)
+d203 3
+d208 3
+a210 2
+    qbot = -kgeom[layers - 1] * ((h[layers - 1] - h[layers - 1 - 1]) / depth[layers - 1] + 1);
+  else if (lbc == 0)
+d213 2
+a214 4
+  /*
+   * Adjust conductivities 
+   */
+  k[0] = soilparm[0].theta2kF (0, theta[0]);
+d217 1
+a217 1
+      k[i] = soilparm[i].theta2kF (i, theta[i]);
+d222 1
+d225 3
+a227 4
+/*-
+ * void mkscratch()
+ * 
+ * Allocated the scratch arrays needed in headcalc(). They are freed
+d229 1
+a229 1
+ */ 
+d249 5
+a253 6
+/*-
+ * void freescratch()
+ * 
+ * Frees the scratch arrays used in headcalc(). This is called from
+ * postsoil().
+ */ 
+d273 4
+a276 6
+/*-
+ * int cksatu()
+ *
+ * checks if the profile is completely saturated.
+ * Returns 0 if not saturated, 1 if saturated
+ */
+d290 5
+a294 5
+/*-
+ * void mat_cof_det()
+ * 
+ * Determines the coefficients a,b,c of the tridiagonal matrix
+ */ 
+d367 3
+a369 2
+/*-
+ * void mat_cof_up()
+d371 5
+a375 3
+ * Updated the coeffcients b,f of the tridiagonal matrix.
+ * This is used in the iteration step.
+ */ 
+d430 3
+a432 2
+/*-
+ * int h_by_tridiag()
+d434 6
+a439 5
+ * Solves the matrix by the simple and fast algorithm for a tridiagonal
+ * matrix. If a zero pivot occurs it exits and returns 1 and the more general 
+ * method for solving band-diagonal matrixes should be used. 0 is returned
+ * on success
+ */
+d472 3
+a474 2
+/*-
+ * void savevars()
+d476 3
+a478 2
+ * Saves spare copies of the h, theta and diffmoist arrays.
+ */ 
+d491 3
+a493 2
+/*-
+ * void h_by_banddiag()
+d495 2
+a496 2
+ * Solves the tridiagonal matrix as if it was a more general
+ * band-diagonal matrix. This is only needed if a zero pivot
+d498 2
+a499 1
+ */ 
+d526 3
+a528 2
+/*-
+ * void h_satu()
+d530 3
+a532 3
+ * Changes the profile from completely saturated to
+ * almost saturated.
+ */ 
+d536 9
+a544 7
+   
+   nr_sat++;
+/*  if (qtop > (qbot-qdrtot))*/
+  {
+  	theta[0] -= (qbot-qtop-qdrtot)*dt/dz[0];
+	h[0]=soilparm[0].prhnodeF(0,theta[0]);
+  }
+@
+
+
+1.29
+log
+@removed log in file
+added suppert for new theta-h function scheme
+@
+text
+@d1 1
+a1 1
+/*$Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.99/src/soil/RCS/headcalc.c,v 1.28 1996/09/19 10:45:23 schj Exp $ 
+d6 1
+a6 1
+ *  $Date: 1996/09/19 10:45:23 $
+d14 1
+a14 1
+"$Id: headcalc.c,v 1.28 1996/09/19 10:45:23 schj Exp $";
+@
+
+
+1.28
+log
+@just before pointer
+@
+text
+@d1 2
+a3 3
+ * $Header: /homes/schj/src/vamps_0.98/src/soil/RCS/headcalc.c,v 1.27 1996/04/09 12:04:15 schj Exp $ 
+ */
+/*-
+d6 1
+a6 59
+ *  $Date: 1996/04/09 12:04:15 $
+ *  $Log: headcalc.c,v $
+ *  Revision 1.27  1996/04/09 12:04:15  schj
+ *  revamped: added band stuff plus saturation check
+ *
+ *  Revision 1.26  1996/03/24 11:35:22  schj
+ *  cosmetic changes
+ *
+ *  Revision 1.25  1996/03/04 20:38:25  schj
+ *  Updated tridiag solve to Num. rep. style -- slightly faster
+ *
+ *  Revision 1.24  1996/03/01 14:12:12  schj
+ *  *** empty log message ***
+ *
+ * Revision 1.23  1996/02/21  12:14:03  schj
+ * *** empty log message ***
+ *
+ * Revision 1.22  1996/02/08  08:15:31  schj
+ * No cjanges
+ *
+ * Revision 1.21  1996/01/25  15:06:21  schj
+ * minor changes
+ *
+ *  Revision 1.20  1995/12/17 21:44:10  schj
+ *  added convergence array
+ *
+ *  Revision 1.19  1995/12/05 03:01:04  schj
+ *  changed method array to integer
+ *
+ *  Revision 1.18  1995/11/14 20:29:16  schj
+ *  changed include
+ *
+ * Revision 1.17  1995/10/30  13:55:17  schj
+ * minor changes
+ *
+ * Revision 1.16  1995/10/23  07:51:09  schj
+ *
+ * Revision 1.15  1995/10/20  11:47:19  schj
+ * some cleaning
+ *
+ * Revision 1.14  1995/10/20  11:30:11  schj
+ * initialize ngwl
+ *
+ * Revision 1.13  1995/10/20  11:28:16  schj
+ * Readded swap iteration stuff, ik works now!
+ *
+ * Revision 1.12  1995/10/19  13:05:57  schj
+ * now works !! it produces same results as swap!
+ * And 30% FASTER!!
+ *
+ * Revision 1.11  1995/09/23  20:46:22  schj
+ * added ifdef DDEBUG
+ *
+ * Revision 1.10  1995/09/01  06:13:37  schj
+ * removed iteration stuff
+ *
+ * Revision 1.9  1995/08/31  10:02:45  schj
+ * hacked swap code, exits after initial cals, swnums=1, seems to work now !!
+ *
+d14 1
+a14 1
+"$Id: headcalc.c,v 1.27 1996/04/09 12:04:15 schj Exp $";
+d25 1
+a25 1
+ * freed in freescratch() (called in dosoil());
+d46 1
+a46 1
+ *	void	headcalc(int pt)
+d108 2
+a109 2
+  theta[numeq] = thenode (numeq, h[numeq], soilparm[numeq].method);
+  diffmoist[numeq] = dmcnode (numeq, h[numeq], soilparm[numeq].method);
+d112 2
+a113 2
+      theta[i] = thenode (i, h[i], soilparm[i].method);
+      diffmoist[i] = dmcnode (i, h[i], soilparm[i].method);
+d144 2
+a145 2
+  theta[numeq] = thenode (numeq, h[numeq], soilparm[numeq].method);
+  diffmoist[numeq] = dmcnode (numeq, h[numeq], soilparm[numeq].method);
+d148 2
+a149 2
+      theta[i] = thenode (i, h[i], soilparm[i].method);
+      diffmoist[i] = dmcnode (i, h[i], soilparm[i].method);
+d178 2
+a179 2
+		    k[0] = theta2k (0, theta[0], soilparm[0].method);
+		    diffmoist[0] = dmcnode (0, hm1[0], soilparm[0].method);
+d184 2
+a185 2
+			k[j] = theta2k (j, theta[j], soilparm[j].method);
+			diffmoist[j] = dmcnode (j, h[j], soilparm[j].method);
+d221 1
+a221 1
+  k[0] = theta2k (0, theta[0], soilparm[0].method);
+d224 1
+a224 1
+      k[i] = theta2k (i, theta[i], soilparm[i].method);
+d253 1
+a253 1
+  indx = (unsigned long *) ts_memory ((void *) NULL, layers * sizeof (unsigned long), progname);
+d381 1
+a381 1
+ * This is used in the itteration step.
+a518 1
+    {
+d520 2
+a521 2
+    }
+  /* wee need to keep the old values of thomf*/
+a522 1
+    {
+a523 1
+    }
+d541 1
+a541 1
+	h[0]=prhnode(0,theta[0],soilparm[0].method);
+@
+
+
+1.27
+log
+@revamped: added band stuff plus saturation check
+@
+text
+@d2 1
+a2 1
+ * $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.98/src/soil/RCS/headcalc.c,v 1.26 1996/03/24 11:35:22 schj alpha $ 
+d7 1
+a7 1
+ *  $Date: 1996/03/24 11:35:22 $
+d9 3
+a70 1
+#define CORRECT 1.0E-20
+d73 1
+a73 1
+"$Id: headcalc.c,v 1.26 1996/03/24 11:35:22 schj alpha $";
+d324 1
+a324 1
+  free ((void *) greekb);
+d500 3
+a502 3
+ * matrix. If a zero pivot occurs it exits and returns 1, otherwise
+ * 0 is returned and the more general method for solving band-diagonal
+ * matrixes should be used.
+d510 23
+a532 24
+  nr_tri++;
+  bet = thomb[0];
+  if (bet == 0.0){
+	(void) Perror (progname, 0, RCSid, "Error in tridiag", "Switching to Banddiag");
+	return 1;
+	}
+  greekc[0] = thomf[0] / bet;
+  for (i = 1; i <= numeq; i++)
+    {
+      greekb[i] = thomc[i - 1] / bet;
+      bet = thomb[i] - thoma[i] * greekb[i];
+      if (bet == 0.0){
+	(void) Perror (progname, 0, RCSid, "Error in tridiag", "Switching to Banddiag");
+	return 1;
+	}
+      greekc[i] = (thomf[i] - thoma[i] * greekc[i - 1]) / bet;
+    }
+
+  h[numeq] = greekc[numeq];
+  for (i = numeq - 1; i >= 0; i--)
+    {
+      h[i] = greekc[i] - greekb[i + 1] * h[i + 1];
+    }
+  return 0;
+d546 5
+a550 5
+for (i=0;i<layers;i++){
+ hold[i]=h[i];
+ theold[i] = theta[i];
+ capold[i] = diffmoist[i];
+}
+@
+
+
+1.26
+log
+@cosmetic changes
+@
+text
+@d1 5
+a5 2
+/* $Header: /home/schj/src/vamps_0.975/src/soil/RCS/headcalc.c,v 1.25 1996/03/04 20:38:25 schj Exp $ */
+/*- $RCSfile: headcalc.c,v $
+d7 1
+a7 1
+ *  $Date: 1996/03/04 20:38:25 $
+d9 3
+d65 4
+a68 2
+#define TREDU 3.0		/* used for reducing timestep */
+#define CORRECT 1.0E-13
+d71 1
+a71 1
+"$Id: headcalc.c,v 1.25 1996/03/04 20:38:25 schj Exp $";
+d74 1
+d78 1
+d80 4
+a83 2
+/* These are scratch arrays of layers size, allocated in mkscratch(),
+   freed in freescratch() (called in dosoil());*/
+d85 7
+a91 2
+double *hold, *capold, *thoma, *thomb, *thomc, *thomf, *theold;
+long int nr_itter = 0;		/* total number of ittereations */
+d96 5
+d105 7
+d116 1
+a116 2
+  register int i, j, numeq;
+  int     ngwl = 0;
+d118 9
+a126 1
+  double  bet;
+d128 4
+a131 1
+  /* First we need to store some values regarding the present state */
+a145 1
+  /*   Calculation of coefficients for layer 0 */
+d147 227
+a373 1
+  if (ftoph)			/* h at soil surface prescribed */
+d382 3
+a384 1
+    {				/* q at soil surface specified */
+d391 3
+a393 1
+  /*   Calculation of coefficients for interior layers  */
+d404 3
+a406 1
+  /*   Calculation of coefficients for last layer  */
+d432 1
+d434 10
+a443 12
+  /* factorization in upper and lower matrix */
+  if (thomb[0] == 0.0)
+	Perror(progname,1,RCSid,"Thomb[0]==0","");
+  bet = thomb[0];
+  greekc[0] = thomf[0] / bet;
+  for (i = 1; i <= numeq; i++)
+    {
+       greekb[i]= thomc[i-1]/bet;
+       bet=thomb[i]-thoma[i]*greekb[i];
+       bet = bet ==0.0 ? CORRECT : bet;
+       greekc[i]=(thomf[i]-thoma[i]*greekc[i-1])/bet;
+    }
+a444 22
+
+  /* First solution */
+  hold[numeq] = h[numeq];
+  h[numeq] = greekc[numeq];
+  theold[numeq] = theta[numeq];
+  theta[numeq] = thenode (numeq, h[numeq], soilparm[numeq].method);
+  /* theta[numeq] = thetm1[numeq] + diffmoist[numeq]*(h[numeq]-hm1[numeq]);*/
+  capold[numeq] = diffmoist[numeq];
+  diffmoist[numeq] = dmcnode (numeq, h[numeq], soilparm[numeq].method);
+  for (i = numeq - 1; i >= 0; i--)
+    {
+      hold[i] = h[i];
+      h[i] = greekc[i] - greekb[i+1] * h[i + 1];
+      theold[i] = theta[i];
+      theta[i] = thenode (i, h[i], soilparm[i].method);
+  /*theta[i] = thetm1[i] + diffmoist[i]*(h[i]-hm1[i]);*/
+      capold[i] = diffmoist[i];
+      diffmoist[i] = dmcnode (i, h[i], soilparm[i].method);
+    }
+  /* iteration step */
+L_700:
+  /* Updating coefficient tridiagonal thomas matrix */
+d446 3
+a448 1
+    {				/* Head controlled boundary */
+d455 3
+a457 1
+    {				/* We have a flux controlled boundary */
+d464 3
+a466 1
+  /* rest of layers */
+d474 3
+a476 1
+  /* Exception for lysimeter bottom */
+d492 17
+a508 2
+  if (thomb[0] == 0.0)
+	Perror(progname,1,RCSid,"Thomb[0]==0","");
+d510 4
+d517 7
+a523 4
+       greekb[i]= thomc[i-1]/bet;
+       bet=thomb[i]-thoma[i]*greekb[i];
+       bet = bet ==0.0 ? CORRECT : bet;
+       greekc[i]=(thomf[i]-thoma[i]*greekc[i-1])/bet;
+a524 1
+  
+a525 1
+  hold[numeq] = h[numeq];
+a526 5
+  theold[numeq] = theta[numeq];
+  /*theta[numeq] = thetm1[numeq] + diffmoist[numeq]*(h[numeq]-hm1[numeq]);*/
+  theta[numeq] = thenode (numeq, h[numeq], soilparm[numeq].method);
+  capold[numeq] = diffmoist[numeq];
+  diffmoist[numeq] = dmcnode (numeq, h[numeq], soilparm[numeq].method);
+d529 1
+a529 7
+      hold[i] = h[i];
+      h[i] = greekc[i] - greekb[i+1] * h[i + 1];
+      theold[i] = theta[i];
+      theta[i] = thenode (i, h[i], soilparm[i].method);
+  /*theta[i] = thetm1[i] + diffmoist[i]*(h[i]-hm1[i]);*/
+      capold[i] = diffmoist[i];
+      diffmoist[i] = dmcnode (i, h[i], soilparm[i].method);
+d531 2
+d535 16
+a550 11
+  if (lbc == 0)
+    for (i = numeq + 1; i < layers; i++)
+      {
+	hold[i] = h[i];
+	h[i] = h[i - 1] + z[i - 1] - z[i];
+	theold[i] = theta[i];
+	theta[i] = thenode (i, h[i], soilparm[i].method);
+  /*theta[i] = thetm1[i] + diffmoist[i]*(h[i]-hm1[i]);*/
+	capold[i] = diffmoist[i];
+	diffmoist[i] = dmcnode (i, h[i], soilparm[i].method);
+      }
+d552 11
+a562 43
+  if (maxitr)
+    for (i = 0; i < layers; i++)
+      {
+	t1 = fabs (theold[i] - theta[i]);
+	if (t1 > (thetol) || (h[0] > (pond - depth[0])))
+	  {
+	    if (numbit < maxitr)
+	      {			/* perform another iteration */
+		numbit++;
+		itter[pt] = numbit;
+		bocotop (pt);
+		goto L_700;
+	      }
+	    else
+	      {
+		if (dt >= (TREDU * dtmin))
+		  {		/* start again with smaller timestep */
+		    dt /= TREDU;
+		    if (flendd)
+		      flendd = FALSE;
+		    h[0] = hm1[0];
+		    theta[0] = thetm1[0];
+		    k[0] = theta2k (0, theta[0], soilparm[0].method);
+		    diffmoist[0] = dmcnode (0, hm1[0], soilparm[0].method);
+		    for (j = 1; j < layers; j++)
+		      {
+			h[j] = hm1[j];
+			theta[j] = thetm1[j];
+			k[j] = theta2k (j, theta[j], soilparm[j].method);
+			diffmoist[j] = dmcnode (j, h[j], soilparm[j].method);
+			kgeom[j] = mkkgeom (j);
+		      }
+		    kgeom[layers] = k[layers - 1];
+		    bocotop (pt);
+		    goto L_410;
+		  }
+		else
+		  {		/* no convergence, but allow to continue */
+		    error[pt] = 1;
+		  }
+	      }
+	  }
+      }
+d564 5
+a568 2
+  /* Add timestep to time */
+  *t += dt;
+d570 3
+a572 3
+  /* Determine unknown boundary fluxes */
+  if (ftoph)
+    qtop = -kgeom[0] * ((h[0] - pond) / depth[0] + 1);
+a573 4
+  if (lbc == 4)
+    qbot = -kgeom[layers - 1] * ((h[layers - 1] - h[layers - 1 - 1]) / depth[layers - 1] + 1);
+  else if (lbc == 0)
+    qbot = 0.0;
+d575 7
+a581 3
+  /* Adjust conductivities */
+  k[0] = theta2k (0, theta[0], soilparm[0].method);
+  for (i = 1; i < layers; i++)
+d583 1
+a583 2
+      k[i] = theta2k (i, theta[i], soilparm[i].method);
+      kgeom[i] = mkkgeom (i);
+a584 2
+  kgeom[layers] = k[layers - 1];
+
+d588 6
+d595 1
+a595 15
+mkscratch ()
+{
+  greekb = (double *) ts_memory ((void *) NULL, layers * sizeof (double), progname);
+  greekc = (double *) ts_memory ((void *) NULL, layers * sizeof (double), progname);
+  thoma = (double *) ts_memory ((void *) NULL, layers * sizeof (double), progname);
+  thomb = (double *) ts_memory ((void *) NULL, layers * sizeof (double), progname);
+  thomc = (double *) ts_memory ((void *) NULL, layers * sizeof (double), progname);
+  thomf = (double *) ts_memory ((void *) NULL, layers * sizeof (double), progname);
+  theold = (double *) ts_memory ((void *) NULL, layers * sizeof (double), progname);
+  capold = (double *) ts_memory ((void *) NULL, layers * sizeof (double), progname);
+  hold = (double *) ts_memory ((void *) NULL, layers * sizeof (double), progname);
+}
+
+void
+freescratch ()
+d597 7
+a603 9
+  free ((void *)greekb);
+  free (greekc);
+  free (thoma);
+  free (thomb);
+  free (thomc);
+  free (thomf);
+  free (theold);
+  free (capold);
+  free (hold);
+@
+
+
+1.25
+log
+@Updated tridiag solve to Num. rep. style -- slightly faster
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.975/src/soil/RCS/headcalc.c,v 1.24 1996/03/01 14:12:12 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1996/03/01 14:12:12 $
+d6 3
+d63 1
+a63 1
+"$Id: headcalc.c,v 1.24 1996/03/01 14:12:12 schj Exp $";
+d68 1
+d366 1
+a366 1
+  free (greekb);
+@
+
+
+1.24
+log
+@*** empty log message ***
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.975/src/soil/RCS/headcalc.c,v 1.23 1996/02/21 12:14:03 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1996/02/21 12:14:03 $
+d6 3
+d60 1
+a60 1
+"$Id: headcalc.c,v 1.23 1996/02/21 12:14:03 schj Exp $";
+d68 1
+a68 1
+double *greeka, *greekb, *greekc;
+d86 1
+d160 5
+a164 3
+  greeka[0] = thomb[0] == 0.0 ? CORRECT : thomb[0];
+  greekb[0] = thomc[0] / greeka[0];
+  for (i = 1; i < numeq; i++)
+d166 4
+a169 3
+      greeka[i] = thomb[i] - thoma[i] * greekb[i - 1];
+      greeka[i] = greeka[i] == 0.0 ? CORRECT : greeka[i];
+      greekb[i] = thomc[i] / greeka[i];
+a170 2
+  greeka[numeq] = thomb[numeq] - thoma[numeq] * greekb[numeq - 1];
+  greeka[numeq] = greeka[numeq] == 0.0 ? CORRECT : greeka[numeq];
+a171 5
+  /* first solution of pressure heads and water contents */
+  greekc[0] = thomf[0] / greeka[0];
+  for (i = 1; i <= numeq; i++)
+    greekc[i] = (thomf[i] - thoma[i] * greekc[i - 1]) /
+      greeka[i];
+d178 1
+d184 1
+a184 1
+      h[i] = greekc[i] - greekb[i] * h[i + 1];
+d187 1
+d233 5
+a237 5
+
+  /* Factorization in upper an lower matrix */
+  greeka[0] = thomb[0] == 0.0 ? CORRECT : thomb[0];
+  greekb[0] = thomc[0] / greeka[0];
+  for (i = 1; i < numeq; i++)
+d239 4
+a242 3
+      greeka[i] = thomb[i] - thoma[i] * greekb[i - 1];
+      greeka[i] = greeka[i] == 0.0 ? CORRECT : greeka[i];
+      greekb[i] = thomc[i] / greeka[i];
+d244 1
+a244 8
+  greeka[numeq] = thomb[numeq] - thoma[numeq] * greekb[numeq - 1];
+  greeka[numeq] = greeka[numeq] == 0.0 ? CORRECT : greeka[numeq];
+
+  /* solution of pressure heads */
+  greekc[0] = thomf[0] / greeka[0];
+  for (i = 1; i <= numeq; i++)
+    greekc[i] = (thomf[i] - thoma[i] * greekc[i - 1]) /
+      greeka[i];
+d249 1
+d256 1
+a256 1
+      h[i] = greekc[i] - greekb[i] * h[i + 1];
+d259 1
+d272 1
+a306 1
+			/*kgeom[j] = 0.5 * (k[j] + k[j - 1]);*/
+a347 1
+  greeka = (double *) ts_memory ((void *) NULL, layers * sizeof (double), progname);
+a361 1
+  free (greeka);
+@
+
+
+1.23
+log
+@*** empty log message ***
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.97/src/soil/RCS/headcalc.c,v 1.22 1996/02/08 08:15:31 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1996/02/08 08:15:31 $
+d6 3
+d54 1
+a54 1
+#define CORRECT 1.0E-13;
+d57 1
+a57 1
+"$Id: headcalc.c,v 1.22 1996/02/08 08:15:31 schj Exp $";
+@
+
+
+1.22
+log
+@No cjanges
+@
+text
+@d1 1
+a1 1
+/* $Header: /homes/schj/src/vamps_0.96/src/soil/RCS/headcalc.c,v 1.21 1996/01/25 15:06:21 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1996/01/25 15:06:21 $
+d6 3
+d50 2
+a51 1
+#define TREDU 2.0 /* used for reducing timestep */
+d53 2
+a54 2
+static  char RCSid[] =
+"$Id: headcalc.c,v 1.21 1996/01/25 15:06:21 schj Exp $";
+d64 1
+d66 3
+a68 3
+extern void bocotop __P((int pt));
+extern int   *error;
+extern int   *itter;
+d75 1
+a75 2
+headcalc (pt)
+int     pt;
+d77 2
+a78 2
+  register int     i, j, numeq;
+  int ngwl=0;
+d95 1
+d153 1
+a153 5
+  greeka[0] = thomb[0];
+  if (greeka[0] ==0.0){
+	  Perror(progname,0,RCSid,"Algorithm failure","First = 0");
+	  greeka[0] = 1.0E-16;
+  }
+d158 1
+d162 2
+a163 4
+  if (greeka[numeq] == 0.0){
+	  Perror(progname,0,RCSid,"Algorithm failure","Last = 0");
+	  greeka[numeq] = 1.0E-16;
+   }
+d174 1
+a174 1
+  theta[numeq] = thenode (numeq, h[numeq],soilparm[numeq].method);
+d176 1
+a176 1
+  diffmoist[numeq] = dmcnode (numeq, h[numeq],soilparm[numeq].method);
+d182 1
+a182 1
+      theta[i] = thenode (i, h[i],soilparm[i].method);
+d184 1
+a184 1
+      diffmoist[i] = dmcnode (i, h[i],soilparm[i].method);
+d230 1
+a230 5
+  greeka[0] = thomb[0];
+  if (greeka[0] ==0.0){
+	  Perror(progname,0,RCSid,"Algorithm failure","First = 0");
+	  greeka[0] = 1.0E-16;
+  }
+d235 1
+d239 1
+a239 4
+  if (greeka[numeq] == 0.0){
+	  Perror(progname,0,RCSid,"Algorithm failure","Last = 0");
+	  greeka[numeq] = 1.0E-16;
+  }
+d250 1
+a250 1
+  theta[numeq] = thenode (numeq, h[numeq],soilparm[numeq].method);
+d252 1
+a252 1
+  diffmoist[numeq] = dmcnode (numeq, h[numeq],soilparm[numeq].method);
+d258 1
+a258 1
+      theta[i] = thenode (i, h[i],soilparm[i].method);
+d260 1
+a260 1
+      diffmoist[i] = dmcnode (i, h[i],soilparm[i].method);
+d270 1
+a270 1
+        theta[i] = thenode (i, h[i],soilparm[i].method);
+d272 1
+a272 1
+      diffmoist[i] = dmcnode (i, h[i],soilparm[i].method);
+d275 44
+a318 46
+  /* Only one iteration if SWNUMS = 1 */
+  /*if (swnums != 1)*/ /* Check for convergence of solution */
+  for (i = 0; i < layers; i++)
+    {
+      t1 = fabs (theold[i] - theta[i]);
+      if (t1 > (thetol) || (h[0] > (pond - depth[0])))
+	{
+	  if (numbit < maxitr)
+	    {			/* perform another iteration */
+	      numbit++;
+	      itter[pt]=numbit;
+	      bocotop (pt);
+	      goto L_700;
+	    }
+	  else
+	    {
+	      if (dt >= (TREDU * dtmin))
+		{		/* start again with smaller timestep */
+		  dt /= TREDU;
+		  if (flendd)
+		    flendd = FALSE;
+		  h[0] = hm1[0];
+		  theta[0] = thetm1[0];
+		  k[0] = theta2k (0, theta[0],soilparm[0].method);
+		  diffmoist[0] = dmcnode (0, hm1[0],soilparm[0].method);
+		  for (j = 1; j < layers; j++)
+		    {
+		      h[j] = hm1[j];
+		      theta[j] = thetm1[j];
+		      k[j] = theta2k (j, theta[j],soilparm[j].method);
+		      diffmoist[j] = dmcnode (j, h[j],soilparm[j].method);
+		      kgeom[j] = 0.5 * (k[j] + k[j - 1]);
+		    }
+		  kgeom[layers] = k[layers-1];
+		  bocotop (pt);
+		  goto L_410;
+		}
+	      else
+		{		/* no convergence, but allow to continue */
+		   error[pt]=1;
+		   if (maxitr > numbit )
+			   Perror(progname,1,RCSid,"He?","Wat is hier gebeurt?");
+		}
+	    }
+	}
+    }
+d321 1
+a321 1
+  t += dt;
+a326 1
+
+d328 1
+a328 1
+    qbot = -kgeom[layers-1] * ((h[layers-1] - h[layers-1 - 1]) / depth[layers-1] + 1);
+d333 1
+a333 1
+  k[0] = theta2k (0, theta[0],soilparm[0].method);
+d336 2
+a337 2
+      k[i] = theta2k (i, theta[i],soilparm[i].method);
+      kgeom[i] = 0.5 * (k[i] + k[i - 1]);
+d339 1
+a339 1
+  kgeom[layers] = k[layers-1];
+@
+
+
+1.21
+log
+@minor changes
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.96/src/soil/RCS/headcalc.c,v 1.20 1995/12/17 21:44:10 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/12/17 21:44:10 $
+d6 3
+d50 1
+a50 1
+"$Id: headcalc.c,v 1.20 1995/12/17 21:44:10 schj Exp $";
+a75 1
+
+@
+
+
+1.20
+log
+@added convergence array
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.95/src/soil/RCS/headcalc.c,v 1.19 1995/12/05 03:01:04 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/12/05 03:01:04 $
+d6 3
+d44 1
+a44 1
+#define TREDU 3.0 /* used for reducing timestep */
+d47 1
+a47 1
+"$Id: headcalc.c,v 1.19 1995/12/05 03:01:04 schj Exp $";
+d148 2
+a149 2
+	  Perror(progname,0,RCSid,"Algorithm failure","Trying the impossible...");
+	  greeka[0] = 1.0E-12;
+d159 2
+a160 2
+	  Perror(progname,0,RCSid,"Algorithm failure","Trying the impossible...");
+	  greeka[numeq] = 1.0E-12;
+d230 2
+a231 2
+	  Perror(progname,0,RCSid,"Algorithm failure","Trying the impossible...");
+	  greeka[0] = 1.0E-12;
+d241 2
+a242 2
+	  Perror(progname,0,RCSid,"Algorithm failure","Trying the impossible...");
+	  greeka[numeq] = 1.0E-12;
+d295 1
+a295 1
+	      if (dt > (TREDU * dtmin))
+d317 1
+a317 1
+		{		/* no convergence  */
+d319 2
+a320 5
+		/*
+		   Perror (progname,0,RCSid,"No convergence","Shit!");
+		   printcom(RCSid);
+		   printcom("No convergence this timestep!");
+		   */
+@
+
+
+1.19
+log
+@changed method array to integer
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.91/soil/RCS/headcalc.c,v 1.18 1995/11/14 20:29:16 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/11/14 20:29:16 $
+d6 3
+a15 1
+ * *** empty log message ***
+d44 1
+a44 1
+"$Id: headcalc.c,v 1.18 1995/11/14 20:29:16 schj Exp $";
+d56 2
+d144 4
+d155 4
+a158 1
+
+d226 4
+d237 4
+d277 1
+a277 1
+  if (swnums != 1) /* Check for convergence of solution */
+d286 1
+a294 4
+		  if (dt < dtmin)
+		    {
+		      Perror (progname,1,RCSid,"Timestep to small, exiting!!","");
+		    }
+d314 4
+a317 2
+		{		/* no convergence, continue but store daynumber */
+		   Perror (progname,0,RCSid,"No convergence","\n\tPlease set swnums to 1 in soil section!");
+d320 1
+@
+
+
+1.18
+log
+@changed include
+@
+text
+@d1 1
+a1 1
+/* $Header: /homes/schj/src/vamps_0.91/RCS/headcalc.c,v 1.17 1995/10/30 13:55:17 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/10/30 13:55:17 $
+d6 3
+d42 1
+a42 1
+"$Id: headcalc.c,v 1.17 1995/10/30 13:55:17 schj Exp $";
+d158 1
+a158 1
+  theta[numeq] = thenode (numeq, h[numeq],soilparm[numeq].method[THENODE]);
+d160 1
+a160 1
+  diffmoist[numeq] = dmcnode (numeq, h[numeq],soilparm[numeq].method[DMCNODE]);
+d166 1
+a166 1
+      theta[i] = thenode (i, h[i],soilparm[i].method[THENODE]);
+d168 1
+a168 1
+      diffmoist[i] = dmcnode (i, h[i],soilparm[i].method[DMCNODE]);
+d232 1
+a232 1
+  theta[numeq] = thenode (numeq, h[numeq],soilparm[numeq].method[THENODE]);
+d234 1
+a234 1
+  diffmoist[numeq] = dmcnode (numeq, h[numeq],soilparm[numeq].method[DMCNODE]);
+d240 1
+a240 1
+      theta[i] = thenode (i, h[i],soilparm[i].method[THENODE]);
+d242 1
+a242 1
+      diffmoist[i] = dmcnode (i, h[i],soilparm[i].method[DMCNODE]);
+d252 1
+a252 1
+        theta[i] = thenode (i, h[i],soilparm[i].method[THENODE]);
+d254 1
+a254 1
+      diffmoist[i] = dmcnode (i, h[i],soilparm[i].method[DMCNODE]);
+d283 2
+a284 2
+		  k[0] = theta2k (0, theta[0],soilparm[0].method[THETA2K]);
+		  diffmoist[0] = dmcnode (0, hm1[0],soilparm[0].method[DMCNODE]);
+d289 2
+a290 2
+		      k[j] = theta2k (j, theta[j],soilparm[j].method[THETA2K]);
+		      diffmoist[j] = dmcnode (j, h[j],soilparm[j].method[DMCNODE]);
+d299 1
+a299 1
+		   Perror (progname,0,RCSid,"No convergence","");
+d321 1
+a321 1
+  k[0] = theta2k (0, theta[0],soilparm[0].method[THETA2K]);
+d324 1
+a324 1
+      k[i] = theta2k (i, theta[i],soilparm[i].method[THETA2K]);
+@
+
+
+1.17
+log
+@minor changes
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.9/soil/RCS/headcalc.c,v 1.16 1995/10/23 07:51:09 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/10/23 07:51:09 $
+d6 3
+d39 1
+a39 1
+"$Id: headcalc.c,v 1.16 1995/10/23 07:51:09 schj Exp $";
+d41 1
+a41 1
+#include "../include/swatsoil.h"
+@
+
+
+1.16
+log
+@*** empty log message ***
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.9/soil/RCS/headcalc.c,v 1.15 1995/10/20 11:47:19 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/10/20 11:47:19 $
+d6 3
+d33 1
+a33 1
+#define TREDU 3.0
+d36 1
+a36 1
+"$Id: headcalc.c,v 1.15 1995/10/20 11:47:19 schj Exp $";
+d311 1
+a311 2
+
+  if (lbc == 0)
+@
+
+
+1.15
+log
+@some cleaning
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.9/soil/RCS/headcalc.c,v 1.14 1995/10/20 11:30:11 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/10/20 11:30:11 $
+d6 3
+d33 1
+a33 1
+"$Id: headcalc.c,v 1.14 1995/10/20 11:30:11 schj Exp $";
+d307 1
+a307 1
+    qbot = -kgeom[laysers-1] * ((h[laysers-1] - h[layers-1 - 1]) / depth[layers-1] + 1);
+@
+
+
+1.14
+log
+@initialize ngwl
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.9/soil/RCS/headcalc.c,v 1.13 1995/10/20 11:28:16 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/10/20 11:28:16 $
+d6 3
+d30 1
+a30 1
+"$Id: headcalc.c,v 1.13 1995/10/20 11:28:16 schj Exp $";
+d51 1
+a51 1
+  int     i, j, lastl, numeq;
+a99 2
+  lastl = layers - 1;
+
+a157 1
+/*goto L_640;*/
+d184 1
+a184 1
+  /* Exception for fixed bottom */
+d244 1
+d246 1
+a246 4
+  if (swnums == 1)
+    goto L_640;
+
+  /* Check for convergence of solution */
+d281 1
+a281 1
+		  kgeom[layers] = k[lastl];
+d287 3
+a289 2
+		  /*if (dnoco == 0)
+		    dnoco = daynr;*/
+a294 1
+L_640:
+d304 1
+a304 1
+    qbot = -kgeom[lastl] * ((h[lastl] - h[lastl - 1]) / depth[lastl] + 1);
+d316 1
+a316 1
+  kgeom[layers] = k[lastl];
+@
+
+
+1.13
+log
+@Readded swap iteration stuff, ik works now!
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.9/soil/RCS/headcalc.c,v 1.12 1995/10/19 13:05:57 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/10/19 13:05:57 $
+d6 3
+d27 1
+a27 1
+"$Id: headcalc.c,v 1.8 1995/08/24 20:50:46 schj Exp $";
+d48 2
+a49 1
+  int     i, j, lastl, numeq, ngwl;
+@
+
+
+1.12
+log
+@now works !! it produces same results as swap!
+And 30% FASTER!!
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/soil/RCS/headcalc.c,v 1.11 1995/09/23 20:46:22 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/09/23 20:46:22 $
+d6 4
+d21 2
+d24 1
+a24 1
+"$Id: headcalc.c,v 1.11 1995/09/23 20:46:22 schj Exp $";
+a29 2
+#define TREDUC 2.0
+
+d45 2
+a46 3
+  int     i, j, lastl;
+  int     numeq=0;
+  int     ngwl=0;
+d61 1
+a129 2
+  if (fabs (greeka[numeq]) < 1.0E-16)
+    Perror(progname,1,RCSid,"Algorithm failure","");
+d138 1
+d140 1
+d142 1
+d146 1
+d148 1
+d150 1
+d153 138
+d292 1
+@
+
+
+1.11
+log
+@added ifdef DDEBUG
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/soil/RCS/headcalc.c,v 1.10 1995/09/01 06:13:37 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/09/01 06:13:37 $
+d6 3
+d18 1
+a18 1
+"$Id: headcalc.c,v 1.10 1995/09/01 06:13:37 schj Exp $";
+d127 1
+a127 1
+    Perror(1,RCSid,"Algorithm failure","");
+a135 1
+  hold[numeq] = h[numeq];
+a136 1
+  theold[numeq] = theta[numeq];
+a137 1
+  capold[numeq] = diffmoist[numeq];
+a140 1
+      hold[i] = h[i];
+a141 1
+      theold[i] = theta[i];
+a142 1
+      capold[i] = diffmoist[i];
+@
+
+
+1.10
+log
+@removed iteration stuff
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/soil/RCS/headcalc.c,v 1.9 1995/08/31 10:02:45 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/08/31 10:02:45 $
+d6 3
+d15 1
+a15 1
+"$Id: headcalc.c,v 1.9 1995/08/31 10:02:45 schj Exp $";
+d38 3
+a40 2
+  int     i, j, lastl, numeq, ngwl;
+  double  t1;
+d136 1
+a136 1
+  theta[numeq] = thenode (numeq, h[numeq]);
+d138 1
+a138 1
+  diffmoist[numeq] = dmcnode (numeq, h[numeq]);
+d144 1
+a144 1
+      theta[i] = thenode (i, h[i]);
+d146 1
+a146 1
+      diffmoist[i] = dmcnode (i, h[i]);
+d164 1
+a164 1
+  k[0] = theta2k (0, theta[0]);
+d167 1
+a167 1
+      k[i] = theta2k (i, theta[i]);
+@
+
+
+1.9
+log
+@hacked swap code, exits after initial cals, swnums=1, seems to work now !!
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/soil/RCS/headcalc.c,v 1.8 1995/08/24 20:50:46 schj Exp $ */
+d4 5
+a8 2
+ *  $Date: 1995/08/24 20:50:46 $
+ *  $Log$
+d12 1
+a12 1
+"$Id: headcalc.c,v 1.8 1995/08/24 20:50:46 schj Exp $";
+a50 1
+L_410:
+a143 142
+  if (swnums == 1)
+    goto L_640;
+
+  /* iteration step */
+L_700:
+  /* Updating coefficient tridiagonal thomas matrix */
+  if (ftoph)
+    {				/* Head controlled boundary */
+      thomb[0] = -thomc[0] + diffmoist[0] + dt * kgeom[0] / depth[0] / dz[0];
+      thomf[0] = -theta[0] + theold[0] + diffmoist[0] * h[0] + dt / (-dz[0]) *
+	(kgeom[0] - kgeom[1] - qrot[0] - qdra[0][0] - qdra[1][0]
+	 - qdra[2][0] - qdra[3][0]) + dt * kgeom[0] * pond / depth[0] / dz[0];
+    }
+  else
+    {				/* We have a flux controlled boundary */
+      thomb[0] = -thomc[0] + diffmoist[0];
+      thomf[0] = -theta[0] + theold[0] + diffmoist[0] * h[0] + dt / (-dz[0]) *
+	(-qtop - kgeom[1] - qrot[0] - qdra[0][0] - qdra[1][0]
+	 - qdra[2][0] - qdra[3][0]);
+    }
+
+  /* rest of layers */
+  for (i = 1; i <= numeq; i++)
+    {
+      thomb[i] = thomb[i] - capold[i] + diffmoist[i];
+      thomf[i] = thomb[i] - capold[i] * hold[i] + diffmoist[i] * h[i] -
+	theta[i] + theold[i];
+    }
+
+  /* Exception for fixed bottom */
+  if (lbc == 0)
+    {
+      thoma[numeq] = 0.0;
+      thomc[numeq] = 0.0;
+      thomb[numeq] = 1.0;
+      thomf[numeq] = h[ngwl];
+    }
+  else if (lbc == 4)
+    {
+      thoma[numeq] = 0.0;
+      thomc[numeq] = 0.0;
+      thomb[numeq] = 1.0;
+      thomf[numeq] = h[numeq];
+    }
+
+
+  /* Factorization in upper an lower matrix */
+  greeka[0] = thomb[0];
+  greekb[0] = thomc[0] / greeka[0];
+  for (i = 1; i < numeq; i++)
+    {
+      greeka[i] = thomb[i] - thoma[i] * greekb[i - 1];
+      greekb[i] = thomc[i] / greeka[i];
+    }
+  greeka[layers-1] = thomb[layers-1] - thoma[layers-1] * greekb[layers - 2];
+  if (fabs (greeka[layers -1]) < 1.0E-16)
+    Perror(1,RCSid,"Algorithm failure","");
+
+  /* solution of pressure heads */
+  greekc[0] = thomf[0] / greeka[0];
+  for (i = 1; i <= numeq; i++)
+    greekc[i] = (thomf[i] - thoma[i] * greekc[i - 1]) /
+      greeka[i];
+
+
+  hold[numeq] = h[numeq];
+  h[numeq] = greekc[numeq];
+  theold[numeq] = theta[numeq];
+  theta[numeq] = thenode (numeq, h[numeq]);
+  capold[numeq] = diffmoist[numeq];
+  diffmoist[numeq] = dmcnode (numeq, h[numeq]);
+  for (i = numeq - 1; i >= 0; i--)
+    {
+      hold[i] = h[i];
+      h[i] = greekc[i] - greekb[i] * h[i + 1];
+      theold[i] = theta[i];
+      theta[i] = thenode (i, h[i]);
+      capold[i] = diffmoist[i];
+      diffmoist[i] = dmcnode (i, h[i]);
+    }
+
+
+  if (lbc == 0)
+    for (i = numeq + 1; i < layers; i++)
+      {
+	hold[i] = h[i];
+	h[i] = h[i - 1] + z[i - 1] - z[i];
+	theold[i] = theta[i];
+	theta[i] = thenode (i, h[i]);
+	capold[i] = diffmoist[i];
+	diffmoist[i] = dmcnode (i, h[i]);
+      }
+  /* Only one iteration if SWNUMS = 1 */
+  if (swnums == 1)
+    goto L_640;
+
+  /* Check for convergence of solution */
+  for (i = 0; i < layers; i++)
+    {
+      t1 = fabs (theold[i] - theta[i]);
+      if (t1 > (thetol) || (h[0] > (pond - depth[0])))
+	{
+	  if (numbit < maxitr)
+	    {			/* perform another iteration */
+	      numbit++;
+	      bocotop (pt);
+	      goto L_700;
+	    }
+	  else
+	    {
+	      if (dt > (TREDUC * dtmin))
+		{		/* start again with smaller timestep */
+		  dt /= TREDUC;
+		  if (dt < dtmin)
+		    {
+		      Perror (1,RCSid,"Timestep to small, exiting!!","");
+		    }
+		  if (flendd)
+		    flendd = FALSE;
+		  h[0] = hm1[0];
+		  theta[0] = thetm1[0];
+		  k[0] = theta2k (0, theta[0]);
+		  diffmoist[0] = dmcnode (0, hm1[0]);
+		  for (j = 1; j < layers; j++)
+		    {
+		      h[j] = hm1[j];
+		      theta[j] = thetm1[j];
+		      k[j] = theta2k (j, theta[j]);
+		      diffmoist[j] = dmcnode (j, h[j]);
+		      kgeom[j] = 0.5 * (k[j] + k[j - 1]);
+		    }
+		  kgeom[layers] = k[lastl];
+		  bocotop (pt);
+		  goto L_410;
+		}
+	      else
+		{		/* no convergence, continue but store daynumber */
+    		Perror(1,RCSid,"No convergence","");
+		}
+	    }
+	}
+    }
+a144 1
+L_640:
+@
+
+
+1.8
+log
+@added protptypes
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/prosper/vamps_0.8/soil/RCS/headcalc.c,v 1.7 1995/08/24 14:14:44 schj Exp $ */
+d4 2
+a5 2
+ *  $Date: 1995/08/24 14:14:44 $
+ *
+d9 1
+a9 1
+"$Id: headcalc.c,v 1.7 1995/08/24 14:14:44 schj Exp $";
+d15 2
+d118 1
+a118 1
+    greeka[numeq] = 1.0E-16;
+d130 1
+a130 1
+  theta[numeq] = thenode (lastl, h[numeq]);
+d132 1
+a132 1
+  diffmoist[numeq] = dmcnode (lastl, h[numeq]);
+d142 3
+a144 6
+ /* remove this !!
+  fprintf(stderr,"%f %d %f %f\n",t,swnums,qbot,qtop);
+  for (i=0;i<layers;i ++){
+  fprintf(stderr,"%f %f\n",h[i],theta[i]);
+  }
+  */
+d182 1
+d196 3
+a198 3
+  greeka[numeq] = thomb[numeq] - thoma[numeq] * greekb[numeq - 1];
+  if (fabs (greeka[numeq]) < 1.0E-16)
+    greeka[numeq] = 1.0E-16;
+d206 1
+d252 1
+a252 1
+	      if (dt > (3.0 * dtmin))
+d254 1
+a254 1
+		  dt /= 3.0;
+d279 1
+a279 2
+		  /*if (dnoco == 0)
+		    dnoco = daynr;*/
+@
+
+
+1.7
+log
+@RCS stuff updated
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/soil/RCS/headcalc.c,v 1.6 1995/08/24 13:01:23 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/08/24 13:01:23 $
+d9 1
+a9 1
+"$Id: headcalc.c,v 1.6 1995/08/24 13:01:23 schj Exp $";
+d13 1
+d20 1
+@
+
+
+1.6
+log
+@added RCSid and use of perror
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/soil/RCS/headcalc.c,v 1.5 1995/08/23 07:20:58 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/08/23 07:20:58 $
+d8 2
+a9 2
+static const char RCSid[] =
+"$Id: vsel.c,v 1.5 1995/08/24 12:47:38 schj Exp $";
+d254 1
+a254 1
+		      perror (1,RCSid,"Timestep to small, exiting!!","");
+@
+
+
+1.5
+log
+@updated, should work now
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/soil/RCS/headcalc.c,v 1.4 1995/08/22 07:24:51 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/08/22 07:24:51 $
+d7 4
+d254 1
+a254 2
+		      showit ("Timestep to small, exiting!!");
+		      exit (2);
+@
+
+
+1.4
+log
+@updated to swap94
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/soil/RCS/headcalc.c,v 1.3 1995/08/16 14:05:43 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/08/16 14:05:43 $
+d24 3
+a26 2
+  int     i, j, lastl,numeq,ngwl;
+  double	t1;
+d36 1
+a36 1
+  	numeq = ngwl;
+d38 1
+a38 1
+  	numeq = layers-1;
+d61 1
+a61 1
+  for (i = 1; i < layers - 1; i++)
+d83 12
+a94 10
+     if (lbc == 4) {
+      thoma[numeq] = 0.0;
+      thomb[numeq] = 1.0;
+      thomf[numeq] = h[numeq];
+     } else
+     {
+      thoma[numeq] = -dt * kgeom[numeq] / dz[numeq] / depth[numeq];
+      thomb[numeq] = -thoma[numeq] + diffmoist[numeq];
+      thomf[numeq] = diffmoist[numeq] * h[numeq] +
+	dt / (-dz[numeq]) * (kgeom[numeq] + qbot -
+d96 2
+a97 2
+			     - qdra[3][numeq]);
+     }
+d109 2
+d134 6
+a139 1
+
+d162 2
+a163 2
+      thomf[i] = thomb[i] - capold[i] * hold[i] + diffmoist[i] * h[i] - 
+      		theta[i] + theold[i];
+d174 2
+a175 2
+  else
+     if (lbc == 4) {
+d179 1
+a179 1
+     } 
+d191 2
+d217 10
+a226 9
+  if (lbc == 0 )
+    for (i= numeq +1; i < layers; i++){
+      hold[i] = h[i];
+      h[i] = h[i-1] + z[i-1] - z[i];
+      theold[i] = theta[i];
+      theta[i] = thenode (i, h[i]);
+      capold[i] = diffmoist[i];
+      diffmoist[i] = dmcnode (i, h[i]);
+    }
+d234 2
+a235 2
+       t1 = fabs(theold[i] - theta[i]);
+      if (t1 > (thetol)  || (h[0] > (pond - depth[0])))
+d253 2
+a254 1
+		  if (flendd) flendd = FALSE;
+d265 1
+a265 1
+		      kgeom[j] = 0.5 *(k[j] + k[j - 1]);
+d293 1
+a293 1
+  	qbot = 0.0;
+d300 1
+a300 1
+      kgeom[i] = 0.5 *(k[i] + k[i - 1]);
+a335 1
+
+@
+
+
+1.3
+log
+@*** empty log message ***
+@
+text
+@d1 1
+a1 1
+/* $Header$ */
+d4 1
+a4 1
+ *  $Date: 1995/08/16 14:04:20 $
+d14 1
+a14 2
+extern double reltol;
+extern double abstol;
+d24 2
+a25 2
+  int     i, j, lastl;
+  double	t1,t2;
+d34 5
+d73 1
+a73 1
+  if (lbc == 0 || lbc == 4)
+d75 4
+a78 3
+      thoma[lastl] = 0.0;
+      thomb[lastl] = 1.0;
+      thomf[lastl] = h[lastl];
+d82 13
+a94 6
+      thoma[lastl] = -dt * kgeom[lastl] / dz[lastl] / depth[lastl];
+      thomb[lastl] = -thoma[lastl] + diffmoist[lastl];
+      thomf[lastl] = diffmoist[lastl] * h[lastl] +
+	dt / (-dz[lastl]) * (kgeom[lastl] + qbot -
+	       qrot[lastl] - qdra[0][lastl] - qdra[1][lastl] - qdra[2][lastl]
+			     - qdra[3][lastl]);
+d100 1
+a100 1
+  for (i = 1; i < layers - 1; i++)
+d105 1
+a105 1
+  greeka[lastl] = thomb[lastl] - thoma[lastl] * greekb[lastl - 1];
+d109 1
+a109 1
+  for (i = 1; i < layers; i++)
+d114 7
+a120 7
+  hold[lastl] = h[lastl];
+  h[lastl] = greekc[lastl];
+  theold[lastl] = theta[lastl];
+  theta[lastl] = thenode (lastl, h[lastl]);
+  capold[lastl] = diffmoist[lastl];
+  diffmoist[lastl] = dmcnode (lastl, h[lastl]);
+  for (i = lastl - 1; i >= 0; i--)
+d149 1
+a149 1
+  for (i = 1; i < layers; i++)
+d151 2
+a152 2
+      thomb[i] -= capold[i] + diffmoist[i];
+      thomf[i] -= capold[i] * hold[i] + diffmoist[i] * h[i] - 
+d157 1
+a157 1
+  if (lbc == 0 || lbc == 4)
+d159 4
+a162 2
+      thomb[layers - 1] = 1.0;
+      thomf[layers - 1] = h[layers - 1];
+d164 6
+d175 1
+a175 1
+  for (i = 1; i < lastl; i++)
+d180 1
+a180 1
+  greeka[lastl] = thomb[lastl] - thoma[lastl] * greekb[lastl - 1];
+d184 1
+a184 1
+  for (i = 1; i < layers; i++)
+d188 7
+a194 7
+  hold[lastl] = h[lastl];
+  h[lastl] = greekc[lastl];
+  theold[lastl] = theta[lastl];
+  theta[lastl] = thenode (lastl, h[lastl]);
+  capold[lastl] = diffmoist[lastl];
+  diffmoist[lastl] = dmcnode (lastl, h[lastl]);
+  for (i = lastl - 1; i >= 0; i--)
+d204 10
+d221 2
+a222 3
+       t1 = fabs(h[i] - hold[i]);
+       t2 = fabs(hold[i]) > fabs(h[i]) ? fabs(hold[i]) : fabs(h[i]);
+      if (t1 > (reltol * t2)  || t1 > abstol || (h[0] > (pond - depth[0])))
+d240 1
+d251 1
+a251 1
+		      kgeom[j] = sqrt ((k[j] * k[j - 1]));
+d274 2
+a275 1
+  if (lbc == 0 || lbc == 4)
+d278 3
+d286 1
+a286 1
+      kgeom[i] = sqrt ((k[i] * k[i - 1]));
+@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@d1 5
+a5 5
+/* $Header */
+/*- FILE: $RCSfile$
+ *  Author: $Author$
+ *  Date: $Date$
+ *  Descrip: $Log$
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 6
+a6 1
+
+@

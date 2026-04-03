@@ -1,0 +1,51 @@
+head	1.2;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.2
+date	95.12.05.03.07.11;	author schj;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	95.08.23.13.22.08;	author schj;	state Beta;
+branches;
+next	;
+
+
+desc
+@interpolatio, not used at moment
+@
+
+
+1.2
+log
+@updated header, is not needed anymore
+@
+text
+@#include "../include/vamps.h"
+
+
+double
+linint(x,set)
+double	x;
+int	set; /* number of data-set */
+{
+int i;
+
+for (i=0;i<data[set].points;i++){
+
+}
+}
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@@

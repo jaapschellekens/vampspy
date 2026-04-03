@@ -1,0 +1,198 @@
+head	1.4;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.4
+date	99.01.06.12.13.01;	author schj;	state Alpha;
+branches;
+next	1.3;
+
+1.3
+date	99.01.06.12.07.49;	author schj;	state Alpha;
+branches;
+next	1.2;
+
+1.2
+date	97.09.09.08.40.34;	author schj;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	97.04.07.19.43.25;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@topsystem which calls scripting language (S-Lang) for all fluxes
+@
+
+
+1.4
+log
+@Version: 0.99g
+@
+text
+@/* $Header: /home/schj/src/vamps_0.99g/src/topsys/RCS/script.c,v 1.3 1999/01/06 12:07:49 schj Alpha $ */
+
+/* $RCSfile: script.c,v $
+ * $Author: schj $
+ * $Date: 1999/01/06 12:07:49 $ */
+#include "topsys.h"
+#include "vamps.h"
+
+#ifdef HAVE_LIBSLANG
+#include "slang.h"
+
+
+static SLang_Name_Type *tfp;
+
+static char RCSid[] =
+ "$Id: script.c,v 1.3 1999/01/06 12:07:49 schj Alpha $";
+
+/*F:script.c
+ * Topsystem based on three S-Lang scripts: @@pre_top@@, @@tstep_top@@ and
+ * @@post_top@@. @@pre_top@@ is executed before the first calculations and can be
+ * used to set op variables and time-series needed for the run. It should not
+ * require arguments or return any items. @@post_top@@ can be used to clean up
+ * or report after te last calculations have been made. It also should not
+ * require arguments or return any items. @@tstep_top@@ should return 4 floating
+ * point numbers: precipitation, interception, transpiration and
+ * soilevaporation for that timestep. @@tstep_top@@ requires one argument, the
+ * current timestep.
+ * 
+ * This topsystem can be very simple or very complex. The file topsys.sl in 
+ * the S-Lang directory contains a simple example.
+ */ 
+
+/* External procedure in scripting language (S-Lang) */
+void
+tstep_top_script(int tstep, double *precipitation, double *interception,
+		double *transpiration, double *soilevaporation)
+{
+	int ix,tt;
+	double p,i,pp,ppp;
+
+	SLang_push_integer(tstep);
+	SLexecute_function(tfp);
+	if (SLang_pop_float(&p,&ix,&tt) ||
+			SLang_pop_float(&i,&ix,&tt) ||
+			SLang_pop_float(&pp,&ix,&tt) ||
+			SLang_pop_float(&ppp,&ix,&tt))
+		Perror(progname,1,0,RCSid,"Pop_error:","tstep_top did not return the required number of items.");
+
+	*precipitation = p;
+	*interception = i;
+	*transpiration = pp;
+	*soilevaporation = ppp;
+}
+
+
+void
+pre_top_script()
+{
+	/* This one should set how to determine stuff and get info from
+	 * input file. Also sets should be added and mem allocated */
+
+	if (SLang_execute_function("pre_top")){
+		if (NULL == (tfp = SLang_get_function("tstep_top")))
+			Perror(progname,1,0,RCSid,"Could not find S-Lang function:","tstep_top");
+	}else{
+		Perror(progname,1,0,RCSid,"Could not excecute S-Lang function:","pre_top");
+	}
+}
+
+void
+post_top_script()
+{
+	if (SLang_execute_function("post_top")){
+	}else{
+		Perror(progname,1,0,RCSid,"Could not excecute S-Lang function:","post_top");
+	}
+}
+#endif
+@
+
+
+1.3
+log
+@Version: 0.99g
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99e/src/topsys/RCS/script.c,v 1.2 1997/09/09 08:40:34 schj Exp $ */
+d5 1
+a5 1
+ * $Date: 1997/09/09 08:40:34 $ */
+d16 1
+a16 1
+ "$Id: script.c,v 1.2 1997/09/09 08:40:34 schj Exp $";
+@
+
+
+1.2
+log
+@0.99e version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99c/src/topsys/RCS/script.c,v 1.1 1997/04/07 19:43:25 schj Exp $ */
+d5 1
+a5 1
+ * $Date: 1997/04/07 19:43:25 $ */
+d11 2
+d16 1
+a16 2
+ "$Id: script.c,v 1.1 1997/04/07 19:43:25 schj Exp $";
+
+d18 14
+d47 1
+a47 1
+		Perror(progname,1,RCSid,"Pop_error:","tstep_top");
+d64 1
+a64 1
+			Perror(progname,1,RCSid,"Could not find S-Lang function:","tstep_top");
+d66 1
+a66 1
+		Perror(progname,1,RCSid,"Could not excecute S-Lang function:","pre_top");
+d75 1
+a75 1
+		Perror(progname,1,RCSid,"Could not excecute S-Lang function:","post_top");
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99c/src/topsys/script.c,v 1.1 1997/04/02 06:44:49 schj Exp $ */
+d5 1
+a5 1
+ * $Date: 1997/04/02 06:44:49 $ */
+d8 2
+d11 1
+d14 1
+a14 1
+ "$Id: script.c,v 1.1 1997/04/02 06:44:49 schj Exp $";
+a16 1
+static SLang_Name_Type *tfp;
+a52 9
+	if (getsetbyname("inr") == -1)
+		(void)add_set (NULL, "inr", "inr", steps, 0, 0);
+	if (getsetbyname("spe") == -1)
+		(void)add_set (NULL, "spe", "spe", steps, 0, 0);
+	if (getsetbyname("ptr") == -1)
+		(void)add_set (NULL, "ptr", "ptr", steps, 0, 0);
+	id.inr = getsetbyname("inr");
+	id.spe = getsetbyname("spe");
+	id.ptr = getsetbyname("ptr");
+d63 1
+@

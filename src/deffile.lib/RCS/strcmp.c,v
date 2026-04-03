@@ -1,0 +1,381 @@
+head	1.11;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.11
+date	99.01.06.12.13.01;	author schj;	state Alpha;
+branches;
+next	1.10;
+
+1.10
+date	99.01.06.12.07.49;	author schj;	state Alpha;
+branches;
+next	1.9;
+
+1.9
+date	97.05.09.09.26.35;	author schj;	state Exp;
+branches;
+next	1.8;
+
+1.8
+date	97.05.07.11.05.44;	author schj;	state Sta;
+branches;
+next	1.7;
+
+1.7
+date	97.05.07.11.00.29;	author schj;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	97.04.10.09.32.11;	author schj;	state Sta;
+branches;
+next	1.5;
+
+1.5
+date	96.11.05.15.06.48;	author schj;	state Alpha;
+branches;
+next	1.4;
+
+1.4
+date	96.10.22.17.59.23;	author schj;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	96.09.06.12.25.25;	author schj;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	96.03.24.11.44.14;	author schj;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	96.02.19.11.10.13;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@My strcasecmp function, very simple!
+@
+
+
+1.11
+log
+@Version: 0.99g
+@
+text
+@/* $Header: /home/schj/src/vamps_0.99g/src/deffile.lib/RCS/strcmp.c,v 1.10 1999/01/06 12:07:49 schj Alpha $ */
+/*
+ *  $RCSfile: strcmp.c,v $
+ *  $Author: schj $
+ *  $Date: 1999/01/06 12:07:49 $
+ */
+
+#include <string.h>
+#include <ctype.h>
+#include "deffile.h"
+
+static char RCSid[] =
+"$Id: strcmp.c,v 1.10 1999/01/06 12:07:49 schj Alpha $";
+
+/*C:Strcasecmp
+ *@@ int Strcasecmp(const char *s, const char *ss)
+ *
+ * Description: compares s and ss ignoring case
+ *
+ * Returns: 0 if identical, or the position of the first non
+ * matching character if not */
+int
+Strcasecmp (const char *s, const char *ss)
+{
+	int retval=0;
+
+	while (*s != '\0' && *ss != '\0'){
+		if (toupper(*s) != toupper(*ss)){
+			retval++;
+			break;
+		}
+		s++;
+		ss++;
+	}
+  
+	/* Length difference */
+	if ((*s != '\0' || *ss != '\0') && (*s != *ss))
+		retval++;
+
+	return retval--;
+}
+@
+
+
+1.10
+log
+@Version: 0.99g
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99e/src/deffile.lib/RCS/strcmp.c,v 1.9 1997/05/09 09:26:35 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1997/05/09 09:26:35 $
+d13 1
+a13 1
+"$Id: strcmp.c,v 1.9 1997/05/09 09:26:35 schj Exp $";
+@
+
+
+1.9
+log
+@no change
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99c/src/deffile.lib/RCS/strcmp.c,v 1.8 1997/05/07 11:05:44 schj Sta $ */
+d5 1
+a5 1
+ *  $Date: 1997/05/07 11:05:44 $
+d13 1
+a13 1
+"$Id: strcmp.c,v 1.8 1997/05/07 11:05:44 schj Sta $";
+d20 1
+a20 1
+ * Returns: 0 if identical, or the position+1 of the first non
+d40 1
+a40 1
+	return retval;
+@
+
+
+1.8
+log
+@Stable version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99c/src/deffile.lib/RCS/strcmp.c,v 1.7 1997/05/07 11:00:29 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1997/05/07 11:00:29 $
+d13 1
+a13 1
+"$Id: strcmp.c,v 1.7 1997/05/07 11:00:29 schj Exp $";
+@
+
+
+1.7
+log
+@Updated to reflect changes in memlist.c
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99c/src/deffile/RCS/strcmp.c,v 1.6 1997/04/10 09:32:11 schj Sta $ */
+d5 1
+a5 1
+ *  $Date: 1997/04/10 09:32:11 $
+d13 1
+a13 1
+"$Id: strcmp.c,v 1.6 1997/04/10 09:32:11 schj Sta $";
+@
+
+
+1.6
+log
+@changed layout + doc
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/deffile/RCS/strcmp.c,v 1.5 1996/11/05 15:06:48 schj Alpha $ */
+d5 1
+a5 1
+ *  $Date: 1996/11/05 15:06:48 $
+d13 1
+a13 1
+"$Id: strcmp.c,v 1.5 1996/11/05 15:06:48 schj Alpha $";
+@
+
+
+1.5
+log
+@Updated to Alpha version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/deffile/RCS/strcmp.c,v 1.4 1996/10/22 17:59:23 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1996/10/22 17:59:23 $
+a11 1
+#ifdef DEBUG
+d13 1
+a13 2
+"$Id: strcmp.c,v 1.4 1996/10/22 17:59:23 schj Exp $";
+#endif
+d15 2
+a16 2
+/*-
+ * int Strcasecmp (const char *s, const char *ss)
+d18 4
+a21 3
+ * compares s and ss ignoring case. returns 0 if identical,
+ * 1 or larger if not.
+ */
+d25 1
+a25 1
+  int retval=0;
+d27 7
+a33 6
+  while (*s != '\0' && *ss != '\0')
+    {
+      if (toupper(*s) != toupper(*ss))
+	{
+	  retval++;
+	  break;
+a34 3
+      s++;
+      ss++;
+    }
+d36 3
+a38 3
+  /* Length difference */
+  if ((*s != '\0' || *ss != '\0') && (*s != *ss))
+    retval++;
+d40 1
+a40 1
+  return retval;
+@
+
+
+1.4
+log
+@some stuff to make it faster (i hope)
+@
+text
+@d1 1
+a1 1
+/* $Header: /homes/schj/src/vamps_0.99/src/deffile/RCS/strcmp.c,v 1.3 1996/09/06 12:25:25 schj Exp $ */
+d5 1
+a5 11
+ *  $Date: 1996/09/06 12:25:25 $
+ *  $Log: strcmp.c,v $
+ *  Revision 1.3  1996/09/06 12:25:25  schj
+ *  cosmetic
+ *
+ *  Revision 1.2  1996/03/24 11:44:14  schj
+ *  mostly cosmetic
+ *
+ * Revision 1.1  1996/02/19  11:10:13  schj
+ * Initial revision
+ *
+d14 1
+a14 1
+"$Id: strcmp.c,v 1.3 1996/09/06 12:25:25 schj Exp $";
+@
+
+
+1.3
+log
+@cosmetic
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.98/src/deffile/RCS/strcmp.c,v 1.2 1996/03/24 11:44:14 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1996/03/24 11:44:14 $
+d7 3
+d24 1
+a24 1
+"$Id: strcmp.c,v 1.2 1996/03/24 11:44:14 schj Exp $";
+d36 1
+a36 4
+int retval=0;
+
+  if (strlen(s)!=strlen(ss))
+  	return 1;
+d38 1
+a38 1
+  while (*s != '\0' && *ss != '\0' && *s!='\n' && *ss != '\n')
+d40 1
+a40 1
+       if (toupper(*s) != toupper(*ss))
+d42 1
+a42 1
+      	retval++;
+d45 2
+a46 2
+	s++;
+	ss++;
+d48 4
+@
+
+
+1.2
+log
+@mostly cosmetic
+@
+text
+@d1 2
+a2 3
+/* deffile.c */
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.975/src/deffile/RCS/strcmp.c,v 1.1 1996/02/19 11:10:13 schj Exp $ */
+/*-
+d5 1
+a5 1
+ *  $Date: 1996/02/19 11:10:13 $
+d7 3
+d21 1
+a21 1
+"$Id: strcmp.c,v 1.1 1996/02/19 11:10:13 schj Exp $";
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d2 1
+a2 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.97/src/deffile/RCS/deffile.c,v 1.22 1996/02/08 08:21:03 schj Exp $ */
+d4 1
+a4 1
+ *  $RCSfile: deffile.c,v $
+d6 5
+a10 2
+ *  $Date: 1996/02/08 08:21:03 $
+ *  $Log: deffile.c,v $
+d17 1
+d19 2
+a20 1
+"$Id: deffile.c,v 1.22 1996/02/08 08:21:03 schj Exp $";
+d22 6
+d29 1
+a29 1
+strcasecmp(const char *s,const char *ss)
+d31 1
+d33 2
+a34 2
+while ((toupper(*s++) == toupper(*ss++)) && *s && *ss)
+	;
+d36 6
+a41 2
+if (*s || *ss){
+	return 1;
+d43 5
+a47 1
+return 0;
+@

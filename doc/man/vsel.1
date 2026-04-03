@@ -1,0 +1,198 @@
+.TH vsel 1 "Version VERSION"
+.ds -- \-\^\-
+.ds b[ \fR[\|\fP
+.ds b] \fR\|]\fP
+.SH NAME
+vsel \- select parameters from a vamps output file
+.SH SYNOPSIS
+.B vsel
+.B \*(b[\*(--help\*(b]
+.B \*(b[\*(--Header\*(b]
+.B \*(b[\*(--copyright\*(b]
+.B \*(b[\*(--license\*(b]
+.B \*(b[\*(--verbose\*(b]
+.B \*(b[\*(--memuse\*(b]
+.BI \*(b[\*(--Comment\  commentchar\*(b]
+.BI \*(b[\*(--number\  layer\*(b]
+.BI \*(b[\*(--time\  time\*(b]
+.BI \*(b[\*(b[\*(--parameter\  parameter\*(b]...\*(b]
+.BI \*(b[\*(--sKip\  skipfactor\*(b]
+.BI \*(b[\*(--outfile\  outfile\*(b]
+.BI \*(b[\*(--index\  indexfile\*(b]
+.BI \*(b[\*(--Index\  indexfile\*(b]
+.I filename
+
+.SH DESCRIPTION
+.B vsel
+is a program for post-processing 
+.B vamps 
+output files (see  
+.BR vamps (5)
+). 
+.B vsel
+allows you select to a parameter from a 
+.B vamps
+output-file, either as a single value
+at a specified time, or as a time-series.
+Output is in white space delimited ASCII.
+.B vsel
+can use an index file to speed up random access to large files.
+
+If you need a more low-level kind of access to
+.B vamps
+output files you can use
+.BR getstr (1)
+or
+.BR issec (1).
+You can also use the deffile.c library in your own programs.
+Input is read from either
+.I filename
+or standard input. If
+.I filename
+is specified as a single dash
+.RB `` \- '',
+it is taken from standard input. 
+If
+.I outfile
+is specified as a single dash
+.RB `` \- '',
+all output is send to standard output. 
+
+.SH OPTIONS
+Options may be given as either standard
+one-letter options, or GNU style long options. Long options start with
+two dashes
+.RB `` \*(-- ''
+and may be truncated to any unambiguous abbreviation.
+
+.TP
+.B \*(--copyright
+Show copyright information and exit
+
+.TP
+.B \*(--license
+Print license information and exit.
+
+.TP
+.B \*(--Header
+Omit headers from output.
+
+.TP
+.B \*(--help
+Print help text and exit.
+
+.TP
+.B \*(--verbose
+Enter verbose mode, program progress is displayed on stderr.
+Default is silent.
+
+.TP
+.BI \*(--Comment\  commentchar
+Set the commentchar to char
+.I commentchar.
+
+.TP 
+.B \*(--memuse
+Use more memory. Use this option to speedup processing. Note that
+a 4.9 Mb input file will cause
+.B vsel
+to grow to about 28 Mb while running if you use this option.
+It is especially faster if you process multiple parameters in one run.
+You should not use this option if the input-file is larger than 5 times
+the amount of free physical ram.
+
+.TP
+.BI \*(--parameter\  parameter
+Use parameter
+.I parameter.
+Multiple 
+.B \-p
+options are allowed to dump multiple parameters.
+
+.TP
+.BI \*(--index\  index
+Use the index file
+.I index
+
+.TP
+.BI \*(--Index\  index
+Build an index in the file
+.I index
+
+.TP
+.BI \*(--time\  time
+Output only at time 
+.I time.
+Multiple 
+.B \-t
+options are allowed to dump multiple times. You
+can also specify a range using the 
+.B \-s
+and 
+.B \-e
+options. If
+no 
+.B \-t
+option or range is specified all times are included
+in the output.
+
+.TP
+.BI \*(--sKip\  skipfactor
+Skip every
+.I skipfactor
+times.
+
+.TP
+.BI \*(--number\  layer
+Dump only layer
+.I layer.
+If no 
+.B \-n
+option is present all layers are dumped.
+Numbering starts at 0.
+
+.TP
+.BI \*(--outfile\  outfile
+Send all output to 
+.I outfile
+in stead of the stdout. If you specify \-, all output is send
+to stdout.
+
+.SH USAGE
+.B vamps
+output files contain strings, single floating point values and arrays of
+floating point values. 
+.B vsel 
+can be used to extract a single parameter at a specified time or
+a range of times. 
+
+.SH EXAMPLES
+Select the parameter theta (an array) at time 12 and time 23 in file out.tst:
+.br
+.B vsel \-t 12 \-t 23 \-p theta out.tst
+
+To select cumprec (a single floating point value) for all times:
+.br
+.B vsel \-p cumprec out.tst
+
+
+    
+.SH SEE ALSO
+.BR vamps (5),
+.BR issec (1),
+.BR getstr (1).
+
+
+.SH AUTHOR
+J. Schellekens
+.br
+schj@geo.vu.nl
+
+.SH BUGS
+If you use the
+.B \-m
+option vsel uses
+.I lots!!
+of memory. 
+You should not use this option if the input-file is about 90% of
+the computers free physical ram.

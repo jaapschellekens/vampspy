@@ -1,0 +1,127 @@
+head	1.2;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.2
+date	95.12.05.03.07.11;	author schj;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	95.08.23.13.22.08;	author schj;	state Beta;
+branches;
+next	;
+
+
+desc
+@insert substring into string
+@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@#include <string.h>
+
+/*-
+ * strrep - replace a substring in a string
+ *
+ * char *strrep(char *s,char *rep,char *with);
+ *
+ * the string s is not! changed.
+ *
+ */
+
+char
+*strrep(s,rep,with)
+char 	*s;
+char 	*rep;
+char 	*with;
+{
+char *pt;
+char *ps;
+static char buff[1024];
+char *tmp;
+int	i;
+
+tmp=buff;
+
+if ((ps=strstr(s,rep))==NULL)
+	return s;
+
+strcpy(tmp,s);
+pt=ps;
+
+for(i=0;i<strlen(rep);i++)
+	pt++;
+
+
+while (s!=ps){
+	*tmp=*s;
+	s++;
+	tmp++;
+}
+
+while (*with!='\0'){
+	*tmp=*with;
+	tmp++;
+	with++;
+}
+
+while (*pt!='\0'){
+	*tmp=*pt;
+	pt++;
+	tmp++;
+}
+*tmp='\0';
+
+return buff;
+}
+
+/*-
+ * strins - insert a string into another string at a given position
+ *
+ * char	*strins(char *s,char *ct,char *pos)
+ *
+ * string s must be large to hold the extra chars. The original
+ * string is changed!
+ */
+
+char *
+strins (s, ct, pos)
+     char *s;
+     char *ct;
+     char *pos;
+
+{
+  char tmp[1024];
+  register char *p = s;
+
+
+  while (p != pos)
+    ++p;
+
+  strcpy (tmp, pos);
+
+  while (*p++ = (*ct++))
+    ;
+
+  strcat (s, tmp);
+
+  return s;
+}
+
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@@

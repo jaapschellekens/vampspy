@@ -1,0 +1,41 @@
+head	1.1;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.1
+date	97.04.07.19.43.25;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@header file for metut.c
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/* $Header: /home/schjpriv/schj/src/vamps_0.99c/src/topsys/script.c,v 1.1 1997/04/02 06:44:49 schj Exp $ */
+
+/* $RCSfile: script.c,v $
+ * $Author: schj $
+ * $Date: 1997/04/02 06:44:49 $ */
+#ifndef _METUT_H
+#define _METUT_H
+extern void eaes(double td,double rh,double *ea, double *es);
+extern double slope(double Td,double es);
+extern double gamma(double td, double lambda);
+extern double lambda(double Td);
+extern double earo(double ea, double es, double u);
+extern double e0a(double Td,double Rs,double sunratio,double u,double Ea,double Es, double Slope,double Gamma,double L,double earo);
+extern  double ra (double z, double z0, double d, double u);
+extern  double makkink(double rad,double Slope,double Gamma);
+extern double e0b(double Td, double Rs, double Rsout, double Rnet, double u, double Ea, double Es, double Slope, double Gamma, double L, double earo);
+#endif _METUT_H
+@

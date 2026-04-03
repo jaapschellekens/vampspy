@@ -1,0 +1,221 @@
+head	1.6;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.6
+date	99.01.06.12.13.01;	author schj;	state Alpha;
+branches;
+next	1.5;
+
+1.5
+date	99.01.06.12.07.49;	author schj;	state Alpha;
+branches;
+next	1.4;
+
+1.4
+date	97.09.09.08.42.42;	author schj;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	96.11.05.15.08.13;	author schj;	state Alpha;
+branches;
+next	1.2;
+
+1.2
+date	95.11.14.20.37.35;	author schj;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	95.11.14.20.30.14;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@insert a substring into a string, used in prepstr (func.c)
+@
+
+
+1.6
+log
+@Version: 0.99g
+@
+text
+@/* $Header: /home/schj/src/vamps_0.99g/src/maq.lib/RCS/strins.c,v 1.5 1999/01/06 12:07:49 schj Alpha $ */
+/* 
+ *  $RCSfile: strins.c,v $
+ *  $Author: schj $
+ *  $Date: 1999/01/06 12:07:49 $
+ */
+
+#include <string.h>
+#include "marquard.h"
+
+/*-
+ * strrep - replace a substring in a string
+ *
+ * char *strrep(char *s,char *rep,char *with);
+ *
+ * the string s is not! changed.
+ *
+ */
+
+char
+*strrep(char *s,char *rep,char *with)
+{
+char *pt;
+char *ps;
+static char buff[1024];
+char *tmp;
+int	i;
+
+tmp=buff;
+
+if ((ps=strstr(s,rep))==NULL)
+	return s;
+
+strcpy(tmp,s);
+pt=ps;
+
+for(i=0;i<strlen(rep);i++)
+	pt++;
+
+
+while (s!=ps){
+	*tmp=*s;
+	s++;
+	tmp++;
+}
+
+while (*with!='\0'){
+	*tmp=*with;
+	tmp++;
+	with++;
+}
+
+while (*pt!='\0'){
+	*tmp=*pt;
+	pt++;
+	tmp++;
+}
+*tmp='\0';
+
+return buff;
+}
+
+/*-
+ * strins - insert a string into another string at a given position
+ *
+ * char	*strins(char *s,char *ct,char *pos)
+ *
+ * string s must be large to hold the extra chars. The original
+ * string is changed!
+ */
+
+char *
+strins (char *s,char *ct,char *pos)
+{
+  char tmp[1024];
+  register char *p = s;
+
+
+  while (p != pos)
+    ++p;
+
+  strcpy (tmp, pos);
+
+  while ((*p++ = (*ct++)))
+    ;
+
+  strcat (s, tmp);
+
+  return s;
+}
+
+@
+
+
+1.5
+log
+@Version: 0.99g
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99e/src/maq.lib/RCS/strins.c,v 1.4 1997/09/09 08:42:42 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1997/09/09 08:42:42 $
+@
+
+
+1.4
+log
+@0.99e version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/maq/RCS/strins.c,v 1.3 1996/11/05 15:08:13 schj Alpha $ */
+d5 1
+a5 1
+ *  $Date: 1996/11/05 15:08:13 $
+@
+
+
+1.3
+log
+@Updated to Alpha version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.96/src/maq/RCS/strins.c,v 1.2 1995/11/14 20:37:35 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1995/11/14 20:37:35 $
+@
+
+
+1.2
+log
+@added RCS header
+@
+text
+@d1 3
+a3 2
+/* $Header: /homes/schj/src/vamps_0.91/RCS/vamps.c,v 0.20 1995/10/30 13:59:49 schj Exp $ */
+/*- $RCSfile: vamps.c,v $
+d5 1
+a5 2
+ *  $Date: 1995/10/30 13:59:49 $
+ *  $Log: vamps.c,v $
+d9 1
+d21 1
+a21 4
+*strrep(s,rep,with)
+char 	*s;
+char 	*rep;
+char 	*with;
+d73 1
+a73 5
+strins (s, ct, pos)
+     char *s;
+     char *ct;
+     char *pos;
+
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 7
+@

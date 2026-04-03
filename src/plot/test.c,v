@@ -1,0 +1,60 @@
+head	1.2;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.2
+date	99.01.06.12.13.01;	author schj;	state Alpha;
+branches;
+next	1.1;
+
+1.1
+date	99.01.06.12.07.49;	author schj;	state Alpha;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@Version: 0.99g
+@
+text
+@#include <stdio.h>
+#include "slang.h"
+
+int
+main()
+{
+	/* Initialize the library.  This is always needed. */
+
+	if (!init_SLang()		       /* basic interpreter functions */
+			|| !init_SLmath() 	       /* sin, cos, etc... */
+#ifdef unix
+			|| !init_SLunix()	       /* unix system calls */
+#endif
+			|| !init_SLfiles()) {
+		fprintf(stderr, "Unable to initialize S-Lang.\n");
+		exit(-1);
+	}
+	SLang_Traceback = 1;
+	sl_plot_init();
+	SLang_load_file ("plot_tst.sl");
+
+	return 0;
+}
+
+@
+
+
+1.1
+log
+@Version: 0.99g
+@
+text
+@@

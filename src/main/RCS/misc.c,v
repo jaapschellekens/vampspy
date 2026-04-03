@@ -1,0 +1,305 @@
+head	1.4;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.4
+date	99.01.06.12.13.01;	author schj;	state Alpha;
+branches;
+next	1.3;
+
+1.3
+date	99.01.06.12.07.49;	author schj;	state Alpha;
+branches;
+next	1.2;
+
+1.2
+date	97.09.09.08.38.14;	author schj;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	97.01.16.14.59.11;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@SLASH Misc
+@
+
+
+1.4
+log
+@Version: 0.99g
+@
+text
+@#ifdef HAVE_CONFIG_H
+#include "vconfig.h"
+#endif
+
+#ifdef HAVE_LIBSLANG
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#ifdef unix
+#include <sys/stat.h>
+#endif
+#include <slang.h>
+
+
+#define DIRSEP	'/'
+
+extern char	sl_arg0[];
+extern int	sl_tty;
+
+/*-
+ * Termination
+-*/
+void
+sl_exit(int stat)
+{
+	if(sl_tty & 2)
+		SLang_reset_tty();
+#ifdef MALLOC_DEBUG
+	SLdump_malloc_statistics();
+#endif
+	if(stat)
+		exit(stat);
+	if(SLang_Error)
+		exit(1);
+
+	exit(0);
+	/* NOTREACHED */
+}
+
+/*-
+ * Error hook, called from SLang_doerror
+-*/
+void
+sl_errproc(char *msg)
+{
+	(void)fprintf(stderr, "%s: %s\n", sl_arg0, msg);
+
+	if(SLang_Error == SL_MALLOC_ERROR)
+		sl_exit(0);
+
+	SLang_Error = 0;
+
+	return;
+}
+/*-
+ * char *sl_strsep(char **strp, char *sep)
+ *	4.3BSD strsep emulation
+-*/
+char *
+sl_strsep(char **strp, char *sep)
+{
+	char	*cp, *rp;
+
+	cp = rp = *strp;
+	if(rp != (char *)NULL)
+		cp = strpbrk(rp, sep);
+	if(cp != (char *)NULL)
+		*cp++ = '\0';
+	*strp = cp;
+
+	return(rp);
+}
+/*-
+ * Called on malloc etc. failure
+-*/
+void
+sl_memerr(void)
+{
+	SLang_Error = SL_MALLOC_ERROR;
+	sl_errproc("Memory allocation failed, aborting");
+	/* NOTREACHED */
+}
+
+/*C:sl_make_strv
+ * char **sl_make_strv(char *str, char *sep, int *vlen)
+ *	Returns malloc'ed char ** of vlen malloc'ed char * from
+ *	string str, separated by one or more characters from sep;
+ *	nf is minimum 1, str is not modified, trailing newline is
+ *	stripped. Use sl_free_strv() to free memory.
+ */
+char **
+sl_make_strv(char *str, char *sep, int *vlen)
+{
+	int	n, nf, all;
+	char	*sp, *rp, *tmp, **strv;
+
+	nf = 0;
+	all = 8;
+	n = strlen(str);
+	if(n && str[n-1] == '\n')
+		n--;
+	tmp = SLmake_nstring(str, n);
+	strv = (char **)SLMALLOC(all * sizeof(char *));
+	for(sp = tmp; sp != (char *)NULL; ) {
+		while((rp = sl_strsep(&sp, sep)) != (char *)NULL && *rp) {
+			if(nf >= all - 1) {
+				strv = (char **)SLREALLOC((char *)strv,
+					(all += 8) * sizeof(char *));
+			}
+			strv[nf++] = SLmake_string(rp);
+		}
+	}
+
+	/* always terminate with NULL */
+	strv[nf] = (char *)NULL;
+	SLFREE(tmp);
+	*vlen = nf;
+
+	return(strv);
+}
+
+/*-
+ * void sl_free_strv(char **strv)
+ *	Free allocated memory for strv from sl_make_strv().
+-*/
+void
+sl_free_strv(char **strv)
+{
+	int	n;
+
+	for(n = 0; strv[n]; n++)
+		SLFREE(strv[n]);
+	SLFREE((void *)strv);
+
+	return;
+}
+
+/*-
+ * char *sl_statfile(char *file, *plist)
+ *	Find out if a file exist in a colon (:) separated pathlist
+ *	specification. Leading, trailing and multiple ':' are
+ *	removed. Returns a malloc'ed char * to the pathname if the
+ *	file is found.  If the file is not found or file and/or
+ *	plist is NULL or NUL, NULL is returned.
+-*/
+char *
+sl_statfile(char *file, char *plist)
+{
+	int	len, n, nf;
+	char	*path, **strv;
+#ifdef unix   
+	struct stat	st;
+#else
+        FILE *tmpf;
+#endif   
+
+	if(file == (char *)NULL || *file == 0
+		|| plist == (char *)NULL || *plist == 0)
+		return((char *)NULL);
+
+	/* determine max size and allocate path buffer */
+	path = SLMALLOC((strlen(plist) + strlen(file) + 2) * sizeof(char));
+
+	strv = sl_make_strv(plist, ":", &nf);
+
+	/* loop through plist */
+	for(n = 0; n < nf; n++) {
+		strcpy(path, strv[n]);
+		len = strlen(path);
+		if(len && path[len - 1] != DIRSEP) {
+			path[len++] = DIRSEP;
+			path[len] = '\0';
+		}
+		strcat(path, file);
+
+		/* probably unix only? Note: no permissions checked */
+#ifdef unix	   
+		if(!stat(path, &st))
+			break;
+#else
+	   if (tmpf = fopen(path,"r") != NULL){
+	      fclose(tmpf);
+	      break;
+	   }
+#endif	   
+	}
+
+	/* file not found, clean up */
+	if(n == nf) {
+		SLFREE(path);
+		path = (char *)NULL;
+	}
+	else
+		path = SLREALLOC(path, (strlen(path) + 1) * sizeof(char));
+
+	/* clean up strv */
+	sl_free_strv(strv);
+
+	return(path);
+}
+
+/*-
+ * char *sl_fgetl(FILE *fp)
+ *	Get the next line from open file fp up to the newline which
+ *	is replaced with NUL. Returns char * to the NUL terminated
+ *	string or NULL on EOF or error; return ptr points to static
+ *	memory overwritten at each invocation.
+-*/
+char *
+sl_fgetl(FILE *fp)
+{
+	int	c, n;
+	static int	nb = 0;
+	static char	*buf;
+
+	if(!nb)
+		buf = (char *)SLMALLOC((nb = 64) * sizeof(char));
+	n = 0;
+	while((c = getc(fp)) != EOF && c != '\n') {
+		if(n >= nb) {
+			buf = (char *)SLREALLOC(buf, (nb += 64) * sizeof(char));
+		}
+		buf[n++] = (char)c;
+	}
+	if(!n && c != '\n')
+		return((char *)NULL);
+
+	buf[n] = '\0';
+	return(buf);
+}
+#endif
+@
+
+
+1.3
+log
+@Version: 0.99g
+@
+text
+@@
+
+
+1.2
+log
+@0.99e version
+@
+text
+@@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 5
+d14 1
+d17 38
+d73 10
+d84 1
+a84 1
+/*-
+d90 1
+a90 1
+-*/
+d231 1
+@

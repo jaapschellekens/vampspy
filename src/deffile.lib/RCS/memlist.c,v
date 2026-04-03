@@ -1,0 +1,1791 @@
+head	1.9;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.9
+date	99.01.06.12.13.01;	author schj;	state Alpha;
+branches;
+next	1.8;
+
+1.8
+date	99.01.06.12.07.49;	author schj;	state Alpha;
+branches;
+next	1.7;
+
+1.7
+date	97.09.09.08.43.02;	author schj;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	97.05.09.09.26.35;	author schj;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	97.05.07.11.05.44;	author schj;	state Sta;
+branches;
+next	1.4;
+
+1.4
+date	97.05.07.11.00.29;	author schj;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	97.04.10.09.32.11;	author schj;	state Sta;
+branches;
+next	1.2;
+
+1.2
+date	96.11.05.15.06.48;	author schj;	state Alpha;
+branches;
+next	1.1;
+
+1.1
+date	96.10.25.12.10.27;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.9
+log
+@Version: 0.99g
+@
+text
+@/* $Header: /home/schj/src/vamps_0.99g/src/deffile.lib/RCS/memlist.c,v 1.8 1999/01/06 12:07:49 schj Alpha $ 
+ */
+/*  $RCSfile: memlist.c,v $
+ *  $Author: schj $
+ *  $Date: 1999/01/06 12:07:49 $ */
+/*F:memlist.c
+ *
+ * Functions use to create and maintain a memory list of a vamps
+ * input file. This allows for speedup, editing and saving these
+ * files. 
+ * 
+ * A file with the name DEF_OVR (this is a #define) will serve
+ * as an override list. A file with the name DEF_DEF will contain 
+ * defaults that are used as a last resort. Usually DEF_DEF = _defaults_
+ * and DEF_OVR = _override_
+ * The code that handles this is actually in @@deffile.c@@. 
+ * */
+
+static char RCSid[] =
+"$Id: memlist.c,v 1.8 1999/01/06 12:07:49 schj Alpha $";
+
+#include <stdio.h>
+#include <ctype.h>
+#include <string.h>
+#include <math.h>
+#include <stdlib.h>
+#include "deffile.h"
+
+static ftype *fdata = NULL;
+static int nrf = -1; /* number of files in memory */
+
+static varst  *vars = (varst *) NULL;
+static int     nrvars = -1;
+
+extern void *defmem (void *ptr, size_t size, char *prog);
+
+/*:getnfpos
+ *@@ int getnfpos(const char *fname, int n)
+ *
+ * Gets a free position for adding a new mem list of a file. If
+ * the list is full a new possition is allocated if the n flag > 0 */
+int getnfpos(const char *fname, int n)
+{
+	int i,npos = -1;
+
+	for (i = 0; i < nrf; i++){
+		if (strcmp(fname,fdata[i].fname) == 0){
+			npos = i;
+			break;
+		}
+	}
+	if (npos == -1 && n > 0){
+		if (nrf == -1)
+			nrf++;
+
+		npos = nrf;
+		nrf++;
+		/* Allocate new memory ... */
+		fdata = (ftype *) defmem ((void *) fdata,
+				nrf * sizeof (ftype), defprog);
+		if((fdata[npos].fname = strdup(fname)) == NULL)
+			perror(RCSid);
+		fdata[npos].slist = NULL;
+		fdata[npos].secpt = -1;
+	}
+
+	return npos;
+}
+
+/*:getnspos
+ *@@ int getnspos(const char *secname,int filenr, int n)
+ *
+ * Gets a free position for adding a new mem list of a section. If
+ * the section is not already present a new possition is allocated */
+int getnspos(const char *secname,int filenr, int n)
+{
+	int i,npos = -1;
+
+	if (filenr >= nrf || !secname)
+		return -1;
+
+	for (i = fdata[filenr].secpt - 1; i >=0; i--){
+		if (fdata[filenr].slist){
+			if (fdata[filenr].slist[i].vpt == -1){
+				npos = i;
+				if((fdata[filenr].slist[npos].secname = 
+					strdup(secname)) == NULL)
+					perror(RCSid);
+				fdata[filenr].slist[npos].nlist =
+					NULL;
+				break;
+			}
+			if (strcmp(secname,fdata[filenr].slist[i].secname)==0){
+				npos = i;
+				break;
+			}
+		}
+	}
+
+	if (npos == -1 && n > 0){
+		if (fdata[filenr].secpt == -1)
+			fdata[filenr].secpt++;
+
+		npos = fdata[filenr].secpt;
+		fdata[filenr].secpt++;
+
+		/* Allocate new memory ... */
+		fdata[filenr].slist = (stype *) defmem ((void *)
+				fdata[filenr].slist, 
+				(fdata[filenr].secpt) * 
+				sizeof (stype), defprog);
+		if((fdata[filenr].slist[npos].secname = 
+			strdup(secname)) == NULL)
+			perror(RCSid);
+		fdata[filenr].slist[npos].vpt =  -1;
+		fdata[filenr].slist[npos].nlist =  NULL;
+	}
+
+	return npos;
+}
+
+int 
+getvpos(const char *varn, stype *sec)
+{
+	int i, npos = -1;
+
+	if (!varn || !sec)
+		return -1;
+
+	for (i = sec->vpt - 1; i >= 0; i--){
+		if (strcmp(varn,sec->nlist[i].var) == 0){
+			npos =  i;
+			break;
+		}
+	}
+
+	return npos;
+}
+
+/*C:addvar
+ *@@ int addvar(const char *fname,const  char *secname,const  char *var,
+ *@@		const  char *val,int nck)
+ *
+ * Adds variable @@var@@ with value @@val@@ to the memorylist in section
+ * @@secname@@ in file @@fname@@.
+ *
+ * If nck > 0 then no check for double entries is made.
+ * Addvar returns 0 if an existing position is used and 1 if
+ * a new position is allocated.
+ * */
+int 
+addvar(const char *fname,const  char *secname,const  char *var,
+		const  char *val,int nck)
+{
+	int fl = -1;
+	int sl = -1;
+	int ipos;
+
+	fl = getnfpos(fname,1);
+	sl = getnspos(secname,fl,1);
+	if (nck || (ipos = getvpos(var,&fdata[fl].slist[sl])) == -1){
+		if(fdata[fl].slist[sl].vpt == -1)
+			fdata[fl].slist[sl].vpt++;
+		ipos = fdata[fl].slist[sl].vpt;
+
+		fdata[fl].slist[sl].vpt++;
+		fdata[fl].slist[sl].nlist = (vtype *) defmem ((void *)
+				fdata[fl].slist[sl].nlist, 
+				(fdata[fl].slist[sl].vpt) * 
+				sizeof (vtype), defprog);
+		fdata[fl].slist[sl].nlist[ipos].var = NULL;
+		fdata[fl].slist[sl].nlist[ipos].val = NULL;
+		if((fdata[fl].slist[sl].nlist[ipos].var = strdup(var)) == NULL)
+			perror(RCSid);
+		if((fdata[fl].slist[sl].nlist[ipos].val = strdup(val)) == NULL)
+			perror(RCSid);
+		fdata[fl].slist[sl].nlist[ipos].hits = 0;
+		return 1;
+	}else{
+		free(fdata[fl].slist[sl].nlist[ipos].val);
+		if((fdata[fl].slist[sl].nlist[ipos].val = 
+			strdup(val)) == NULL)
+			perror(RCSid);
+
+		return 0;
+	}
+}
+
+char  
+*getvarval(const char *fname,const  char *secname,const  char *var)
+{
+	int fl,sl,vl;
+
+	if ((fl = getnfpos(fname,0)) == -1)
+		return NULL;
+	if ((sl = getnspos(secname,fl,0)) == -1)
+		return NULL;
+	if ((vl = getvpos(var,&fdata[fl].slist[sl])) == -1)
+		return NULL;
+	else{
+		fdata[fl].slist[sl].nlist[vl].hits++;
+		return fdata[fl].slist[sl].nlist[vl].val;
+	}
+}
+
+/*C:writememini
+ *@@ int writememini (char *fname, char *inifile, FILE * stream)
+ * 
+ * Writes the memlist if fileid @@i@@ to file @@fname@@ or
+ * stream @@stream@@ (depending on which of the two ! NULL
+ * If @@inifile@@ is not in memory or @@fname@@ could not be opened
+ * -1 is returned.
+ * */
+int
+writememini (char *fname, char *inifile, FILE * stream)
+{
+	int j,k,i;
+	FILE *out;
+
+	i = getnfpos(inifile,0);
+	if (i <0 || i >= nrf)
+		return -1;
+
+	if (stream)	/* Dump to stream if given */
+		out = stream;
+	else {
+		if (strcmp (fname, "-") != 0) {
+			if ((out = fopen (fname, "w")) == NULL)
+				return -1;
+		} else
+		out = stdout;
+	}
+
+	(void)fprintf(out,"%c Written by: %s\n",
+		      commchar[0],RCSid);
+	(void)fprintf(out,"%c Original file was: %s\n",
+		      commchar[0],fdata[i].fname);
+	(void)fprintf(out,"%c Number of sections in this file: %d\n",
+		      commchar[0],fdata[i].secpt);
+	for (j=0; j < fdata[i].secpt; j++){
+		if (fdata[i].slist[j].nlist){
+			fprintf(out,"\n%c Number of vars in %s: %d\n",
+					commchar[0],fdata[i].slist[j].secname,
+					fdata[i].slist[j].vpt);
+			(void)fprintf(out,"[%s]\n",fdata[i].slist[j].secname);
+			for (k = 0; k < fdata[i].slist[j].vpt; k++){
+				if (fdata[i].slist[j].nlist[k].hits > 1)
+					fprintf(out,"%c Hits: %d\n",
+					commchar[0],fdata[i].slist[j].nlist[k].hits);
+				(void)fprintf(out,"%s=%s\n",
+					      fdata[i].slist[j].nlist[k].var,
+					      fdata[i].slist[j].nlist[k].val);		
+			}
+		}
+	}
+
+	if (!stream && out != stdout)
+		fclose(out);
+
+	return 0;
+}
+
+/*C:getnextvar
+ *@@int getnextvar(char *fname, char *section, char *name, char *val,
+ *@@                int reset)
+ *
+ * get the next variable from the memlist of @@fname@@. If @@reset@@ is
+ * non zero the pointer is set to the beginning of the list. If the
+ * end of the list is reached or the list is non-existent -1 is
+ * returned, otherwise 0.  @@section@@, @@name@@ and @@val@@ will hold the
+ * values found. @@section@@, @@name@@ and @@val@@ should be large enough to
+ * hold @@512@@ chars.
+ * */
+
+int getnextvar(char *fname, char *section, char *name,
+		char *val, int reset)
+{
+	int i,k,j = 0;
+	static int lastpos = 0;
+	int thispos = 0;
+
+	i = getnfpos(fname,0);
+	if (i <0 || i >= nrf)
+		return -1;
+
+	lastpos = reset > 0 ? 0 : lastpos;
+
+	for (j=0; j < fdata[i].secpt; j++){
+		if (fdata[i].slist[j].nlist){
+			for (k = 0; k < fdata[i].slist[j].vpt; k++){
+				thispos++;
+				if (thispos > lastpos)
+					break;
+			}
+			if (thispos > lastpos)
+				break;
+		}
+		if (thispos > lastpos)
+			break;
+	}
+
+	if (thispos > lastpos){
+		strncpy(val,fdata[i].slist[j].nlist[k].val,511);
+		strncpy(name,fdata[i].slist[j].nlist[k].var,511);
+		strncpy(section,fdata[i].slist[j].secname,511);
+	} else {
+		return -1;
+	}
+
+	lastpos = thispos;
+	return 0;
+}
+
+/*C:printsection 
+ *@@ int printsection(const char fname, const char secname)
+ *
+ * Prints section @@section@@ in file @@fname@@ (in the mem image)
+ * to stdout.
+ * */
+int printsection(const char *fname, const char *secname)
+{
+	int fl,sl,i;
+
+	if ((fl = getnfpos(fname,0)) == -1)
+		return -1;
+	if ((sl = getnspos(secname,fl,0)) == -1)
+		return -2;
+
+	printf("%%%s in %s:\n[%s]\n",secname,fname,secname);
+	for (i=0; i < fdata[fl].slist[sl].vpt; i++){
+		printf("%s=%s\n",fdata[fl].slist[sl].nlist[i].var,fdata[fl].slist[sl].nlist[i].val);
+	}
+
+	return 0;
+}
+
+/*C:delsection
+ *@@ void delsection(const char fname, const char secname)
+ *
+ * Deletes section @@section@@ in file @@fname@@ (in the mem image)
+ * Memory is freed and the position marked as free.
+ * */
+void delsection(const char *fname, const char *secname)
+{
+	int fl,sl,i;
+
+	if ((fl = getnfpos(fname,0)) == -1)
+		return;
+	if ((sl = getnspos(secname,fl,0)) == -1)
+		return;
+
+	for (i=0; i < fdata[fl].slist[sl].vpt; i++){
+		free(fdata[fl].slist[sl].nlist[i].var);
+		free(fdata[fl].slist[sl].nlist[i].val);
+	}
+	fdata[fl].slist[sl].vpt = -1;
+	free(fdata[fl].slist[sl].nlist);
+	free(fdata[fl].slist[sl].secname);
+	fdata[fl].slist[sl].nlist = NULL;
+	fdata[fl].slist[sl].secname = NULL;
+}
+
+int
+getfid(const char *fname)
+{
+	int i;
+
+	for (i=0; i < nrf; i++)
+		if (strcmp(fdata[i].fname,fname) == 0)
+			return i;
+	return -1;
+}
+
+int
+delfile(const char *fname)
+{
+	int i,j,k;
+
+	if ((i = getfid(fname)) == -1)
+		return -1;
+
+	for (j =0; j < fdata[i].secpt; j++){
+		for (k=0; k < fdata[i].slist[j].vpt; k++){
+			free(fdata[i].slist[j].nlist[k].var);
+			free(fdata[i].slist[j].nlist[k].val);
+		}
+		fdata[i].slist[j].vpt = -1;
+		free(fdata[i].slist[j].nlist);
+		free(fdata[i].slist[j].secname);
+		fdata[i].slist[j].nlist = NULL;
+		fdata[i].slist[j].secname = NULL;
+	}
+	free(fdata[i].fname);
+	free(fdata[i].slist);
+	fdata[i].fname = NULL;
+	fdata[i].slist = NULL;
+	fdata[i].secpt = -1;
+	nrf--;
+
+	return i;
+}
+
+/*C:delmemlist
+ *@@void delmemlist (void)
+ *
+ * Description: Deletes the regular defmem list (read with rinmem)
+ * for all files.
+ * Returns: nothing
+ */
+void 
+delmemlist (void)
+{
+	int i,j,k; 
+
+	for (i = nrf - 1; i >= 0 ; i--){
+		for (j =0; j < fdata[i].secpt; j++){
+			for (k=0; k < fdata[i].slist[j].vpt; k++){
+				free(fdata[i].slist[j].nlist[k].var);
+				free(fdata[i].slist[j].nlist[k].val);
+			}
+			fdata[i].slist[j].vpt = -1;
+			free(fdata[i].slist[j].nlist);
+			free(fdata[i].slist[j].secname);
+			fdata[i].slist[j].nlist = NULL;
+			fdata[i].slist[j].secname = NULL;
+		}
+		free(fdata[i].fname);
+		free(fdata[i].slist);
+		fdata[i].secpt = -1;
+	}
+
+	free(fdata);
+	nrf = -1;
+	fdata = NULL;
+}
+
+/*C:setvar
+ *@@int setvar(char *s)
+ * 
+ * Description: add a value, section name to the mem copy of input file
+ * setvar is used to maintain an override list of the input file. This
+ * list is fist checked by pro_getdefault. "s" should have the form:
+ * section name value
+ * 
+ * Returns: nothing
+ * 
+ * Remarks: See also: @@getvar@@
+ * */
+void
+setvar (char *s)
+{
+	char    name[NAMEL];
+	char    section[SECL];
+	char    value[VALL];
+
+	if (!(getvar (s))){	/* don't allow for double entries  */
+		nrvars++;
+		sscanf (s, "%s %s %s", section, name, value);
+		vars = (varst *) defmem ((void *) vars, (1 + nrvars) * sizeof (varst), defprog);
+		vars[nrvars].section = (char *) defmem ((void *) NULL, 1 + strlen (section), defprog);
+		vars[nrvars].name = (char *) defmem ((void *) NULL, 1 + strlen (name), defprog);
+		vars[nrvars].value = (char *) defmem ((void *) NULL, 1 + strlen (value), defprog);
+		strcpy (vars[nrvars].section, section);
+		strcpy (vars[nrvars].name, name);
+		strcpy (vars[nrvars].value, value);
+	}
+}
+
+
+/*C:getvar
+ *@@char *getvar(char *s)
+ *
+ * getvar - return value of section name
+ *	s should be: section name
+ *	Ret: pointer to value, or NULL if not found
+ *	See also: s@@etvar(char *s)@@
+ */
+
+char
+*getvar (char *s)
+{
+	char    name[NAMEL];
+	char    section[SECL];
+	int     i;
+
+	sscanf (s, "%s %s", section, name);
+
+
+	for (i = 0; i <= nrvars; i++) {
+		if ((Strcasecmp (vars[i].section, section) == 0) &&
+				(Strcasecmp (vars[i].name, name) == 0))
+			return vars[i].value;
+	}
+
+	return (char *) NULL;
+}
+
+char *(*editfunc)(char *editstr) = NULL;
+
+/*Ceditmemitem
+ *@@void editmemitem(char *section, char *name, char *def)
+ *
+ * Edits the item in the memlist, returning @@*def@@ on escape
+ * If @@editfunc@@ points to an edit function that function
+ * is used, otherwise @@fgets@@ is used.
+ */
+void
+editmemitem(char *section,char *name,char *def)
+{
+	char editbuf[LBUFF];
+
+	if (editfunc != NULL){
+		strcpy(editbuf,editfunc(def));
+	}else{
+		fprintf(stderr,"default = %s: ",def);
+		fgets(editbuf,LBUFF,stdin);
+		if (strlen(editbuf) < 1)
+			strcpy(editbuf,def);
+	}
+	addvar("NO FILE DEFINED",section,name,editbuf,0);
+}
+
+/*C:rinmem
+ *@@int rinmem(char *fname)
+ *
+ * reads an intire defaults file into mem (the vars list)
+ * options are:
+ *@@	1: dump file to stdout (removed)
+ *@@	2: dump file to stdout, strip comments (removed)
+ *@@	3: read into the override defmem list
+ *@@	4: read into the normal defmem list
+ *
+ * Returns: 0 is error, 1= ok
+ */
+int     opt = 4;
+int check = 0;
+
+int 
+rinmem (char *fname)
+{
+	char   *cp, *rp;
+	static char    buf[LBUFF];
+	FILE   *thef;
+	char    section[SECL];
+	static char    name[NAMEL];
+	static char    value[VALL];
+	static char    outp[LBUFF];
+
+	if (fname) {
+		if (strcmp (fname, "-") == 0) {
+			thef = stdin;
+		} else {
+			if ((thef = fopen (fname, "r")) == NULL) {
+				return 0;
+			}
+		}
+	} else
+		return 0;/*  assume already opened defaults */
+
+		while ((cp = fgets (buf, LBUFF, thef)) != (char *) NULL) {
+		while (isspace (*cp))
+			cp++;
+		if (*cp && !strchr(commchar,*cp)) {
+nsec:	/* this is a bit of a kludge, but it works */
+		if (*cp == '[' && (rp = strchr (cp, ']')) !=
+				(char *) NULL) {
+			*rp = '\0';
+			cp++;
+			strcpy (section, cp);
+			/*  found a section header */
+			/* while ((cp=Fgets (buf, LBUFF, thef)) != (char *) NULL) { */
+			while ((cp=fgetl (thef)) != (char *) NULL) {
+			/* cp[strlen (cp) - 1] = '\0'; */
+			while (isspace (*cp))
+				cp++;
+			if (*cp== '[')/*Bail out-we are at new section*/
+				goto nsec;
+
+			if (*cp && !strchr(commchar,*cp)){
+				for (rp = cp; *rp && *rp != '='; rp++)
+					;
+				/* Skip trailing whitespace */
+				while (isspace (*rp)|| *rp == '=') rp--;
+				rp++;		
+				if (*rp)
+					*rp++ = '\0';
+				strcpy (name, cp);
+				/* YES! a var was found */
+				if (opt == 1)
+					fprintf (stdout, "%s = ", name);
+				rp--;
+				*rp = ' ';
+				cp = rp;
+				while (*cp != '=' && *cp != '\0')
+					cp++;
+				if (*cp != '\0')
+					cp++;
+				else
+					cp = rp;
+				while (isspace (*cp))	
+					/* skip whitespace */
+					cp++;
+				for (rp = cp; *rp == '\n' || *rp == '\r'; rp++);
+				/* go to end of line  or commentchar */
+				for (rp--; !isspace (*rp); rp--);
+				/* go back to last text */
+				if (*rp)
+					*rp++ = '\0';
+				if (strlen(cp)){
+				strcpy (value, cp);
+				if (opt == 3) {
+					sprintf (outp, "%s %s %s", section, name, value);
+					setvar (outp);
+				}
+				else if (opt == 4) {
+					if (defverb > 3)
+						prit(section);
+					addvar (fname,section, name, value,0);
+				}
+				}
+			}
+			}
+		}
+		}
+		}
+
+  if (thef != stdin)
+    (void) fclose (thef);
+
+  return 1;
+}
+@
+
+
+1.8
+log
+@Version: 0.99g
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99e/src/deffile.lib/RCS/memlist.c,v 1.7 1997/09/09 08:43:02 schj Exp $ 
+d5 1
+a5 1
+ *  $Date: 1997/09/09 08:43:02 $ */
+d20 1
+a20 1
+"$Id: memlist.c,v 1.7 1997/09/09 08:43:02 schj Exp $";
+@
+
+
+1.7
+log
+@0.99e version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99c/src/deffile.lib/RCS/memlist.c,v 1.6 1997/05/09 09:26:35 schj Exp $ 
+d5 1
+a5 1
+ *  $Date: 1997/05/09 09:26:35 $ */
+d10 7
+a16 1
+ * files. A seperate list containning 'overrides' can also exist.
+d20 1
+a20 1
+"$Id: memlist.c,v 1.6 1997/05/09 09:26:35 schj Exp $";
+d61 2
+a62 1
+		fdata[npos].fname = strdup(fname);
+d86 3
+a88 2
+				fdata[filenr].slist[npos].secname = 
+					strdup(secname);
+d112 3
+a114 2
+		fdata[filenr].slist[npos].secname = 
+			strdup(secname);
+d173 4
+a176 2
+		fdata[fl].slist[sl].nlist[ipos].var = strdup(var);
+		fdata[fl].slist[sl].nlist[ipos].val = strdup(val);
+d181 3
+a183 2
+		fdata[fl].slist[sl].nlist[ipos].val = 
+			strdup(val);
+d259 74
+@
+
+
+1.6
+log
+@Updated to use fgetl in stead of Fgets. No more buffer needed.
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99c/src/deffile.lib/RCS/memlist.c,v 1.5 1997/05/07 11:05:44 schj Sta $ 
+d5 1
+a5 1
+ *  $Date: 1997/05/07 11:05:44 $ */
+d14 1
+a14 1
+"$Id: memlist.c,v 1.5 1997/05/07 11:05:44 schj Sta $";
+d166 1
+d188 2
+a189 1
+	else
+d191 1
+d230 3
+a232 2
+			fprintf(out,"\n%c Number of vars in this section: %d\n",
+					commchar[0],fdata[i].slist[j].vpt);
+d235 3
+d239 2
+a240 2
+						fdata[i].slist[j].nlist[k].var,
+						fdata[i].slist[j].nlist[k].val);		
+d530 2
+a531 1
+#ifndef NNEWTYPE
+a532 3
+#else
+					setvalue (section, name, value, check);
+#endif
+@
+
+
+1.5
+log
+@Stable version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99c/src/deffile.lib/RCS/memlist.c,v 1.4 1997/05/07 11:00:29 schj Exp $ 
+d5 1
+a5 1
+ *  $Date: 1997/05/07 11:00:29 $ */
+d14 1
+a14 1
+"$Id: memlist.c,v 1.4 1997/05/07 11:00:29 schj Exp $";
+d478 3
+a480 2
+			while ((cp=Fgets (buf, LBUFF, thef)) != (char *) NULL) {
+			cp[strlen (cp) - 1] = '\0';
+@
+
+
+1.4
+log
+@Major revision. at this point the memory list now
+supports multiple files. It uses mach less memory as well.
+The syntax of several functions has changed!
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99c/src/deffile/RCS/memlist.c,v 1.3 1997/04/10 09:32:11 schj Sta $ 
+d5 1
+a5 1
+ *  $Date: 1997/04/10 09:32:11 $ */
+d14 1
+a14 1
+"$Id: memlist.c,v 1.3 1997/04/10 09:32:11 schj Sta $";
+@
+
+
+1.3
+log
+@changed layout + doc
+@
+text
+@d1 1
+a1 2
+/*
+ * $Header: /home/schj/src/vamps_0.99/src/deffile/RCS/memlist.c,v 1.2 1996/11/05 15:06:48 schj Alpha $ 
+d3 1
+a3 2
+/* 
+ *  $RCSfile: memlist.c,v $
+d5 7
+a11 3
+ *  $Date: 1996/11/05 15:06:48 $
+ */
+
+d14 1
+a14 1
+"$Id: memlist.c,v 1.2 1996/11/05 15:06:48 schj Alpha $";
+d23 2
+d26 2
+a27 5
+
+varst  *vars = (varst *) NULL;
+listt  *list = (listt *) NULL;
+int     nrvars = -1;
+int     nrlist = -1;
+a29 1
+static int getvalueid (char *section, char *name);
+d31 8
+a38 2
+/*C:setvalue
+@@static void setvalue(char *section, char *name, char *value, int check)
+d40 22
+a61 4
+Description: setvar is used to maintain a mem copy of the input file. This list is fist checked by pro_getdefault after the override list (\myref{setvar}) If check !=0 then the list is checked for an existing value first
+Returns: nothing
+Remarks: see also @@getvalue@@ and @@getvalueid@@
+*/
+d63 6
+a68 2
+void
+setvalue (char *section, char *name, char *value, int check)
+d70 4
+a73 1
+	int     listid;
+d75 14
+a88 17
+	if (section && name && value)
+		if (!check || (listid = getvalueid (section, name)) == -1){
+			/* add a new entry */
+			/* don't allow for double entries */
+			nrlist++;
+			list = (listt *) defmem ((void *) list, (nrlist+1) * sizeof (listt), defprog);
+			list[nrlist].section = (char *) defmem ((void *) NULL, (1+strlen (section)) * sizeof (char), defprog);
+
+			strcpy (list[nrlist].section, section);
+			list[nrlist].name = (char *) defmem ((void *) NULL, (1+strlen (name)) * sizeof (char), defprog);
+			list[nrlist].value = (char *) defmem ((void *) NULL, (1+strlen (value)) * sizeof (char), defprog);
+
+			strcpy (list[nrlist].name, name);
+			strcpy (list[nrlist].value, value);
+		} else {/* set entry to new value */
+			list[listid].value = (char *) defmem ((void *) list[listid].value, (1+strlen (value)) *sizeof(char), defprog);
+			strcpy (list[listid].value, value);
+d90 21
+d113 4
+a116 2
+/*C:getvalueid
+@@static int getvalueid(char *section,char *name)
+d118 2
+a119 9
+Description: return list nr of section name
+Returns: item number, or -1 if not found
+Remarks: See also: @@setvalue@@
+*/
+int     getvaluehint = 0;
+static int
+getvalueid (char *section, char *name)
+{
+	int     i;
+d121 4
+a124 6
+getrestart:
+	for (i = getvaluehint; i <= nrlist; i++){
+		if ((Strcasecmp (list[i].section, section) == 0) &&
+				(Strcasecmp (list[i].name, name) == 0)) {
+			getvaluehint = i <= 1 ? i : i - 2;
+			return i;
+d128 45
+a172 3
+	if (getvaluehint){
+		getvaluehint = 0;
+		goto getrestart;
+d174 6
+d181 8
+a188 1
+	return -1;
+d191 13
+a203 2
+/*C:getvalue
+@@char *getvalue(const char *section, const char *name)
+d205 13
+a217 8
+Description: return value of section name
+Returns: pointer to value, or NULL if not found
+Remarks: See also: @@setvalue@@
+*/
+char
+*getvalue (const char *section,const char *name)
+{
+	int     i;
+d219 16
+a234 6
+getrestart:
+	for (i = getvaluehint; i <= nrlist; i++){
+		if ((Strcasecmp (list[i].section, section) == 0) &&
+				(Strcasecmp (list[i].name, name) == 0)) {
+			getvaluehint = i <= 1 ? i : i - 2;
+			return list[i].value;
+d238 36
+a273 4
+	if (getvaluehint){
+		getvaluehint = 0;
+		goto getrestart;
+	}
+d275 4
+a278 1
+	return (char *) NULL;
+d281 28
+a308 2
+/*C:delmenlist
+@@void delmemlist (void)
+d310 7
+a316 3
+Description: Deletes the regular defmem list (read with rinmem)
+Returns: nothing
++*/
+d320 1
+a320 1
+	int     i;
+d322 15
+a336 13
+	for (i = 0; i <= nrlist; i++){
+		if (list[i].section){
+			free (list[i].section);
+			list[i].section = (char *) NULL;
+		}
+		if (list[i].name){
+			free (list[i].name);
+			list[i].name = (char *) NULL;
+		}
+		if (list[i].value){
+			free (list[i].value);
+			list[i].value = (char *) NULL;
+		}
+d339 3
+a341 3
+	nrlist = -1;
+	free (list);
+	list = (listt *) NULL;
+d345 11
+a355 11
+@@int setvar(char *s)
+
+Description: add a value, section name to the mem copy of input file
+setvar is used to maintain an override list of the input file. This
+list is fist checked by pro_getdefault. "s" should have the form:
+section name value
+
+Returns: nothing
+
+Remarks: See also: @@getvar@@
+*/
+d427 1
+a427 1
+	setvalue(section,name,editbuf,1);
+d431 11
+a441 11
+@@int rinmem(char *fname)
+
+ reads an intire defaults file into mem (the vars list)
+ options are:
+	1: dump file to stdout (removed)
+	2: dump file to stdout, strip comments (removed)
+	3: read into the override defmem list
+	4: read into the normal defmem list
+
+Returns: 0 is error, 1= ok
+*/
+d470 1
+a470 1
+		if (*cp && *cp != commchar) {
+d485 1
+a485 1
+			if (*cp && *cp != commchar){
+d515 1
+d522 3
+d526 2
+a539 146
+
+/*C:writememini
+@@int writememini (char *fname, int *format,FILE stream)
+
+Description: write the mem list to an ini file
+ 	format =0 is ini, 1 is set (tcl), 2 is as comment
+	3 = latex2e
+	it would be easyer to sort the list with repect to section,
+	but his works more or less
+Returns: 1, always
+*/
+int
+writememini (char *fname, int *format, FILE * stream)
+{
+	FILE   *out;
+	int     i, j;
+	int    *doneit;		/* these have been written */
+
+	if (stream)	/* Dump to stream if given */
+		out = stream;
+	else {
+		if (strcmp (fname, "-") != 0) {
+			if ((out = fopen (fname, "w")) == NULL) {
+				deferror (defprog, 3, RCSid, "Cannot open file for writing", fname);
+			}
+		} else
+		out = stdout;
+	}
+
+	doneit = (int *) defmem ((void *) NULL, (nrlist +1) * sizeof (int), defprog);
+
+	/** First print a header */
+	switch (*format){
+		case 0:
+			(void) fprintf (out, "%c Generated by writememini: %s\n",commchar, RCSid);
+			break;
+		case 1:
+			(void) fprintf (out, "%c Generated by writememini: %s\n",commchar, RCSid);
+			break;
+		case 2:
+			(void) fprintf (out, "%c Generated by writememini: %s\n",commchar, RCSid);
+			break;
+		case 3:
+			(void) fprintf (out, "\\documentclass{article}\n");
+			(void) fprintf (out, "\\begin{document}\n");
+			break;
+		default:
+			break;
+	}
+
+	for (i = 0; i <= nrlist; i++)
+		doneit[i] = 0;
+
+	for (i = 0; i <= nrlist; i++) {
+		if (doneit[i] == 0) {
+			doneit[i] = 1;
+			switch (*format){
+				case 0:	/* as ini file */
+					{
+						(void) fprintf (out, "\n\n[%s]\n%s = %s\n", list[i].section, list[i].name, list[i].value);
+						break;
+					}
+				case 2:		/*
+						 * As a comment 
+						 */
+					{
+						(void) fprintf (out, "\n\n%c[%s]\n%c%s = %s\n", commchar, list[i].section, commchar, list[i].name, list[i].value);
+						break;
+					}
+				case 1:		/*
+						 * as tcl set 
+						 */
+					{
+						(void) fprintf (out, "set %s(%s) {%s}\n", list[i].section, list[i].name, list[i].value);
+						break;
+					}
+				case 3:		/*
+						 * as latex2e set 
+						 */
+					{
+						(void) fprintf (out, "\\section{\\verb@@%s@@}\n \\verb@@%s = %s@@\n", list[i].section, list[i].name, list[i].value);
+						break;
+					}
+				default:
+					break;
+			}
+			for (j = i + 1; j <= nrlist; j++)
+			{
+				if (Strcasecmp (list[i].section, list[j].section) == 0)
+				{
+					switch (*format)
+					{
+						case 0:
+							{
+								(void) fprintf (out, "%s = %s\n", list[j].name, list[j].value);
+								break;
+							}
+						case 2:
+							{
+								(void) fprintf (out, "%c%s = %s\n", commchar, list[j].name, list[j].value);
+								break;
+							}
+						case 1:
+							{
+								(void) fprintf (out, "set %s(%s) {%s}\n", list[j].section, list[j].name, list[j].value);
+								break;
+							}
+						case 3:	/*
+							 * as latex2e set 
+							 */
+							{
+								(void) fprintf (out, "\\verb@@%s = %s@@\n", list[j].name, list[j].value);
+								break;
+							}
+						default:
+							break;
+					}
+					doneit[j] = 1;
+				}
+			}
+		}
+	}
+
+	/*
+	 * Last print a trailer 
+	 */
+	switch (*format)
+	{
+		case 0:
+			break;
+		case 1:
+			break;
+		case 2:
+			break;
+		case 3:
+			(void) fprintf (out, "\\end{document}\n");
+			break;
+	}
+	if (!stream && out != stdout)
+		fclose (out);
+
+	free (doneit);
+
+	return 1;
+}
+
+@
+
+
+1.2
+log
+@Updated to Alpha version
+@
+text
+@d2 1
+a2 1
+ * $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.99/src/deffile/RCS/memlist.c,v 1.1 1996/10/25 12:10:27 schj Exp $ 
+d7 1
+a7 1
+ *  $Date: 1996/10/25 12:10:27 $
+d12 1
+a12 1
+"$Id: memlist.c,v 1.1 1996/10/25 12:10:27 schj Exp $";
+d31 7
+a37 9
+/*-
+ * static void setvalue(char *section, char *name, char *value)
+ *
+ * setvar is used to maintain a mem copy of the input file. This
+ * list is fist checked by pro_getdefault after the override list (setvar)
+ *
+ * setvalue - add a value, section name to the mem copy of input file
+ *	See also: static getvalue(char *sectionchar *name,char *value)
+ */
+d42 1
+a42 1
+  int     listid;
+d44 18
+a61 19
+  if (!check || (listid = getvalueid (section, name)) == -1)
+    /* add a new entry */
+    {	/* don't allow for double entries */
+      nrlist++;
+      list = (listt *) defmem ((void *) list, (nrlist+1) * sizeof (listt), defprog);
+      list[nrlist].section = (char *) defmem ((void *) NULL, (1+strlen (section)) * sizeof (char), defprog);
+
+      strcpy (list[nrlist].section, section);
+      list[nrlist].name = (char *) defmem ((void *) NULL, (1+strlen (name)) * sizeof (char), defprog);
+      list[nrlist].value = (char *) defmem ((void *) NULL, (1+strlen (value)) * sizeof (char), defprog);
+
+      strcpy (list[nrlist].name, name);
+      strcpy (list[nrlist].value, value);
+    }
+  else
+    {/* set entry to new value */
+      list[listid].value = (char *) defmem ((void *) list[listid].value, (1+strlen (value)) *sizeof(char), defprog);
+      strcpy (list[listid].value, value);
+    }
+d64 7
+a70 7
+/*-
+ * static int getvalueid(char *section,char *name)
+ *
+ * getvalueid - return list nr  section name
+ *	Ret: item number, or -1 if not found
+ *	See also: setvalue()
+ */
+d75 1
+a75 1
+  int     i;
+d78 6
+a83 6
+  for (i = getvaluehint; i <= nrlist; i++)
+    {
+      if ((Strcasecmp (list[i].section, section) == 0) && (Strcasecmp (list[i].name, name) == 0))
+	{
+	  getvaluehint = i <= 1 ? i : i - 2;
+	  return i;
+a84 1
+    }
+d86 4
+a89 5
+  if (getvaluehint)
+    {
+      getvaluehint = 0;
+      goto getrestart;
+    }
+d91 1
+a91 1
+  return -1;
+d94 7
+a100 9
+/*-
+ * char *getvalue(const char *section, const char *name)
+ *
+ * getvalue - return value of section name
+ *
+ *	Ret: pointer to value, or NULL if not found
+ *	See also: setvalue()
+ *
+ */
+d104 1
+a104 1
+  int     i;
+d107 6
+a112 6
+  for (i = getvaluehint; i <= nrlist; i++)
+    {
+      if ((Strcasecmp (list[i].section, section) == 0) && (Strcasecmp (list[i].name, name) == 0))
+	{
+	  getvaluehint = i <= 1 ? i : i - 2;
+	  return list[i].value;
+a113 1
+    }
+d115 4
+a118 5
+  if (getvaluehint)
+    {
+      getvaluehint = 0;
+      goto getrestart;
+    }
+d120 1
+a120 1
+  return (char *) NULL;
+d123 6
+a128 6
+/*- 
+ * delmemlist ()
+ *
+ * Deletes the regular defmem list (read with rinmem)
+ *
+ */
+d132 1
+a132 1
+  int     i;
+d134 13
+a146 16
+  for (i = 0; i <= nrlist; i++)
+    {
+      if (list[i].section)
+	{
+	  free (list[i].section);
+	  list[i].section = (char *) NULL;
+	}
+      if (list[i].name)
+	{
+	  free (list[i].name);
+	  list[i].name = (char *) NULL;
+	}
+      if (list[i].value)
+	{
+	  free (list[i].value);
+	  list[i].value = (char *) NULL;
+a147 1
+    }
+d149 3
+a151 3
+  nrlist = -1;
+  free (list);
+  list = (listt *) NULL;
+d154 12
+a165 11
+/*-
+ * int setvar(char *s)
+ *
+ * setvar - add a value, section name to the mem copy of input file
+ * setvar is used to maintain an override list of the input file. This
+ * list is fist checked by pro_getdefault. "s" should have the form:
+ *	section name value
+ *
+ *	See also: getvar(char *s)
+ *
+ */
+d169 15
+a183 16
+  char    name[NAMEL];
+  char    section[SECL];
+  char    value[VALL];
+
+  if (!(getvar (s)))
+    {	/* don't allow for double entries  */
+      nrvars++;
+      sscanf (s, "%s %s %s", section, name, value);
+      vars = (varst *) defmem ((void *) vars, (1 + nrvars) * sizeof (varst), defprog);
+      vars[nrvars].section = (char *) defmem ((void *) NULL, 1 + strlen (section), defprog);
+      vars[nrvars].name = (char *) defmem ((void *) NULL, 1 + strlen (name), defprog);
+      vars[nrvars].value = (char *) defmem ((void *) NULL, 1 + strlen (value), defprog);
+      strcpy (vars[nrvars].section, section);
+      strcpy (vars[nrvars].name, name);
+      strcpy (vars[nrvars].value, value);
+    }
+d187 2
+a188 2
+/*-
+ * char *getvar(char *s)
+d193 1
+a193 1
+ *	See also: setvar(char *s)
+d199 3
+a201 3
+  char    name[NAMEL];
+  char    section[SECL];
+  int     i;
+d203 1
+a203 1
+  sscanf (s, "%s %s", section, name);
+d206 4
+a209 5
+  for (i = 0; i <= nrvars; i++)
+    {
+      if ((Strcasecmp (vars[i].section, section) == 0) && (Strcasecmp (vars[i].name, name) == 0))
+	{
+	  return vars[i].value;
+a210 1
+    }
+d212 1
+a212 1
+  return (char *) NULL;
+d217 2
+a218 2
+/*-
+ * void editmemitem(char *section, char *name, char *def)
+d220 3
+a222 3
+ * Edits the item in the memlist, returning *def on escape
+ * If editfunc points to an edit function that function
+ * is used, otherwise fgets is used.
+d227 11
+a237 12
+  int item;
+  char editbuf[LBUFF];
+  
+  if (editfunc != NULL){
+  strcpy(editbuf,editfunc(def));
+  }else{
+    fprintf(stderr,"default = %s: ",def);
+    fgets(editbuf,LBUFF,stdin);
+    if (strlen(editbuf) < 1)
+      strcpy(editbuf,def);
+  }
+  setvalue(section,name,editbuf,1);
+d240 12
+a251 12
+/*-
+ * int rinmem(char *fname)
+ *
+ * reads an intire defaults file into mem (the vars list)
+ * options are:
+ *	1: dump file to stdout (removed)
+ *	2: dump file to stdout, strip comments (removed)
+ *	3: read into the override defmem list
+ *	4: read into the normal defmem list
+ *
+ *	return = 0 is error, 1= ok
+ */
+d258 21
+a278 73
+  char   *cp, *rp;
+  static char    buf[LBUFF];
+  FILE   *thef;
+  char    section[SECL];
+  static char    name[NAMEL];
+  static char    value[VALL];
+  static char    outp[LBUFF];
+
+  if (fname)
+    {
+      if (strcmp (fname, "-") == 0)
+	{
+	  thef = stdin;
+	}
+      else
+	{
+	  if ((thef = fopen (fname, "r")) == NULL)
+	    {
+	      return 0;
+	    }
+	}
+    }
+  else
+    return 0;			/*
+				 * assume already opened defaults 
+				 */
+
+  while ((cp = fgets (buf, LBUFF, thef)) != (char *) NULL)
+    {
+      while (isspace (*cp))
+	cp++;
+      if (*cp && *cp != commchar)
+	{
+	nsec:			/*
+				 * this is a bit of a kludge, but it works 
+				 */
+	  if (*cp == '[' && (rp = strchr (cp, ']')) != (char *) NULL)
+	    {
+	      *rp = '\0';
+	      cp++;
+	      strcpy (section, cp);	/*
+					 * found a section header 
+					 */
+	      while ((cp = Fgets (buf, LBUFF, thef)) != (char *) NULL)
+		{
+		  cp[strlen (cp) - 1] = '\0';
+		  while (isspace (*cp))
+		    cp++;
+		  if (*cp == '[')/* Bail out -- we are at new section */
+		    goto nsec;
+                    
+                  if (*cp && *cp != commchar)
+		    {
+		      /*for (rp = cp; *rp && !isspace (*rp) && *rp != '='; rp++)
+			;*/
+		     for (rp = cp; *rp && *rp != '='; rp++)
+				;
+		      /* Skip trailing whitespace */
+		      while (isspace (*rp) || *rp == '=') rp--;
+				rp++;		
+		      if (*rp)
+			*rp++ = '\0';
+		      strcpy (name, cp);	/*
+						 * YES! a var was found 
+						 */
+		      if (opt == 1)
+			fprintf (stdout, "%s = ", name);
+		      rp--;
+		      *rp = ' ';
+		      cp = rp;
+		      while (*cp != '=' && *cp != '\0')		/*
+								 * find = 
+								 */
+d280 5
+a284 1
+		      if (*cp != '\0')
+d286 47
+a332 19
+		      else
+			cp = rp;
+		      while (isspace (*cp))	/*
+						 * skip whitespace 
+						 */
+			cp++;
+		      for (rp = cp; *rp == '\n' || *rp == '\r'; rp++);	/*
+									 * go to end of line  or commentchar 
+									 */
+		      for (rp--; !isspace (*rp); rp--);		/*
+								 * go back to last text 
+								 */
+		      if (*rp)
+			*rp++ = '\0';
+		      strcpy (value, cp);
+		      if (opt == 3)
+			{
+			  sprintf (outp, "%s %s %s", section, name, value);
+			  setvar (outp);
+a333 3
+		      else if (opt == 4)
+			{
+			  setvalue (section, name, value, check);
+a334 1
+		    }
+d336 2
+a337 3
+	    }
+	}
+    }
+d345 10
+a354 9
+/*-
+ * int writememini (char *fname, int *format,FILE stream)
+ *
+ *	write the mem list to an ini file
+ * 	format =0 is ini, 1 is set (tcl), 2 is as comment
+ *	3 = latex2e
+ *	it would be easyer to sort the list with repect to section,
+ *	but his works more or less.
+ */
+d358 113
+a470 55
+  FILE   *out;
+  int     i, j;
+  int    *doneit;		/*
+				 * these have been written 
+				 */
+
+  if (stream)			/*
+				 * Dump to stream if given 
+				 */
+    out = stream;
+  else
+    {
+      if (strcmp (fname, "-") != 0)
+	{
+	  if ((out = fopen (fname, "w")) == NULL)
+	    {
+	      deferror (defprog, 3, RCSid, "Cannot open file for writing", fname);
+	    }
+	}
+      else
+	out = stdout;
+    }
+
+  doneit = (int *) defmem ((void *) NULL, (nrlist +1) * sizeof (int), defprog);
+
+  /*
+   * First print a header 
+   */
+  switch (*format)
+    {
+    case 0:
+      (void) fprintf (out, "%c Generated by writememini: %s\n",commchar, RCSid);
+      break;
+    case 1:
+      (void) fprintf (out, "%c Generated by writememini: %s\n",commchar, RCSid);
+      break;
+    case 2:
+      (void) fprintf (out, "%c Generated by writememini: %s\n",commchar, RCSid);
+      break;
+    case 3:
+      (void) fprintf (out, "\\documentclass{article}\n");
+      (void) fprintf (out, "\\begin{document}\n");
+      break;
+    default:
+      break;
+    }
+
+  for (i = 0; i <= nrlist; i++)
+    {
+      doneit[i] = 0;
+    }
+
+  for (i = 0; i <= nrlist; i++)
+    {
+      if (doneit[i] == 0)
+d472 1
+a472 43
+	  doneit[i] = 1;
+	  switch (*format)
+	    {
+	    case 0:		/*
+				 * as ini file 
+				 */
+	      {
+		(void) fprintf (out, "\n\n[%s]\n%s = %s\n", list[i].section, list[i].name, list[i].value);
+		break;
+	      }
+	    case 2:		/*
+				 * As a comment 
+				 */
+	      {
+		(void) fprintf (out, "\n\n%c[%s]\n%c%s = %s\n", commchar, list[i].section, commchar, list[i].name, list[i].value);
+		break;
+	      }
+	    case 1:		/*
+				 * as tcl set 
+				 */
+	      {
+		(void) fprintf (out, "set %s(%s) {%s}\n", list[i].section, list[i].name, list[i].value);
+		break;
+	      }
+	    case 3:		/*
+				 * as latex2e set 
+				 */
+	      {
+		(void) fprintf (out, "\\section{%s}\n \\begin{verbatim}%s = %s\\end{verbatim}\n", list[i].section, list[i].name, list[i].value);
+		break;
+	      }
+	    default:
+	      break;
+	    }
+	  for (j = i + 1; j <= nrlist; j++)
+	    {
+	      if (Strcasecmp (list[i].section, list[j].section) == 0)
+		{
+		  switch (*format)
+		    {
+		    case 0:
+		      {
+			(void) fprintf (out, "%s = %s\n", list[j].name, list[j].value);
+d474 1
+a474 4
+		      }
+		    case 2:
+		      {
+			(void) fprintf (out, "%c%s = %s\n", commchar, list[j].name, list[j].value);
+d476 1
+a476 4
+		      }
+		    case 1:
+		      {
+			(void) fprintf (out, "set %s(%s) {%s}\n", list[j].section, list[j].name, list[j].value);
+d478 2
+a479 6
+		      }
+		    case 3:	/*
+				 * as latex2e set 
+				 */
+		      {
+			(void) fprintf (out, "\\begin{verbatim}%s = %s\\end{verbatim}\n", list[j].name, list[j].value);
+d481 3
+a483 27
+		      }
+		    default:
+		      break;
+		    }
+		  doneit[j] = 1;
+		}
+	    }
+	}
+    }
+
+  /*
+   * Last print a trailer 
+   */
+  switch (*format)
+    {
+    case 0:
+      break;
+    case 1:
+      break;
+    case 2:
+      break;
+    case 3:
+      (void) fprintf (out, "\\end{document}\n");
+      break;
+    }
+  if (!stream && out != stdout)
+    fclose (out);
+d485 1
+a485 1
+  free (doneit);
+d487 1
+a487 1
+  return 1;
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d2 1
+a2 1
+ * $Header: /homes/schj/src/vamps_0.99/src/deffile/RCS/deffile.c,v 1.28 1996/10/22 19:15:54 schj Exp $ 
+d5 1
+a5 1
+ *  $RCSfile: deffile.c,v $
+d7 1
+a7 1
+ *  $Date: 1996/10/22 19:15:54 $
+d12 1
+a12 1
+"$Id: deffile.c,v 1.28 1996/10/22 19:15:54 schj Exp $";
+d28 1
+a28 1
+void *memory (void *ptr, size_t size, char *prog);
+d46 3
+a48 6
+  if (!check || (listid = getvalueid (section, name)) == -1)	/*
+								 * add a new entry 
+								 */
+    {				/*
+				 * don't allow for double entries 
+				 */
+d50 2
+a51 2
+      list = (listt *) memory ((void *) list, (nrlist+1) * sizeof (listt), defprog);
+      list[nrlist].section = (char *) memory ((void *) NULL, strlen (section) * sizeof (int), defprog);
+d54 2
+a55 2
+      list[nrlist].name = (char *) memory ((void *) NULL, strlen (name) * sizeof (int), defprog);
+      list[nrlist].value = (char *) memory ((void *) NULL, strlen (value) * sizeof (int), defprog);
+d61 2
+a62 4
+    {				/*
+				 * set entry to new value 
+				 */
+      list[listid].value = (char *) memory ((void *) list[listid].value, strlen (value) *sizeof(int), defprog);
+d135 1
+a135 1
+ * Deletes the regular memory list (read with rinmem)
+d186 1
+a186 3
+    {				/*
+				 * don't allow for double entries 
+				 */
+d189 4
+a192 4
+      vars = (varst *) memory ((void *) vars, (1 + nrvars) * sizeof (varst), defprog);
+      vars[nrvars].section = (char *) memory ((void *) NULL, 1 + strlen (section), defprog);
+      vars[nrvars].name = (char *) memory ((void *) NULL, 1 + strlen (name), defprog);
+      vars[nrvars].value = (char *) memory ((void *) NULL, 1 + strlen (value), defprog);
+d210 1
+a210 2
+       *
+getvar (char *s)
+d230 26
+d263 2
+a264 2
+ *	3: read into the override memory list
+ *	4: read into the normal memory list
+d414 1
+a414 1
+	      deferror (defprog, 3, RCSid, "Cannot open for writing", fname);
+d421 1
+a421 1
+  doneit = (int *) memory ((void *) NULL, (nrlist +1) * sizeof (int), defprog);
+d441 2
+d501 1
+a501 1
+			(void) fprintf (out, "%c %s = %s\n", commchar, list[j].name, list[j].value);
+d513 1
+a513 1
+			(void) fprintf (out, "\\begin{verbatim} %s = %s\\end{verbatim}\n", list[j].name, list[j].value);
+d540 1
+a540 1
+  if (!stream)
+@

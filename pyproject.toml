@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=68", "numpy>=1.20"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vampspy"
+version = "0.1.0"
+description = "Python interface to the VAMPS 1D unsaturated zone model"
+requires-python = ">=3.9"
+dependencies = ["numpy"]
+
+[project.optional-dependencies]
+notebook = ["matplotlib", "jupyter"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["vampspy*"]

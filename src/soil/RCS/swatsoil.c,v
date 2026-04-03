@@ -1,0 +1,4908 @@
+head	1.37;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.37
+date	99.01.06.12.13.01;	author schj;	state Alpha;
+branches;
+next	1.36;
+
+1.36
+date	99.01.06.12.07.49;	author schj;	state Alpha;
+branches;
+next	1.35;
+
+1.35
+date	98.11.30.13.37.03;	author schj;	state Exp;
+branches;
+next	1.34;
+
+1.34
+date	98.11.30.13.36.35;	author schj;	state Exp;
+branches;
+next	1.33;
+
+1.33
+date	97.09.09.08.39.39;	author schj;	state Exp;
+branches;
+next	1.32;
+
+1.32
+date	97.01.16.15.05.31;	author schj;	state Exp;
+branches;
+next	1.31;
+
+1.31
+date	96.12.30.11.32.50;	author schj;	state Exp;
+branches;
+next	1.30;
+
+1.30
+date	96.11.10.15.24.45;	author schj;	state Exp;
+branches;
+next	1.29;
+
+1.29
+date	96.11.05.15.00.48;	author schj;	state Alpha;
+branches;
+next	1.28;
+
+1.28
+date	96.10.22.17.57.04;	author schj;	state Exp;
+branches;
+next	1.27;
+
+1.27
+date	96.10.06.16.30.10;	author schj;	state Exp;
+branches;
+next	1.26;
+
+1.26
+date	96.09.19.09.43.08;	author schj;	state Exp;
+branches;
+next	1.25;
+
+1.25
+date	96.04.09.12.08.16;	author schj;	state Exp;
+branches;
+next	1.24;
+
+1.24
+date	96.03.25.07.50.50;	author schj;	state alpha;
+branches;
+next	1.23;
+
+1.23
+date	96.03.24.11.39.50;	author schj;	state Exp;
+branches;
+next	1.22;
+
+1.22
+date	96.02.08.08.19.01;	author schj;	state Exp;
+branches;
+next	1.21;
+
+1.21
+date	96.01.25.15.07.12;	author schj;	state Exp;
+branches;
+next	1.20;
+
+1.20
+date	95.12.17.21.46.44;	author schj;	state Exp;
+branches;
+next	1.19;
+
+1.19
+date	95.12.05.03.04.43;	author schj;	state Exp;
+branches;
+next	1.18;
+
+1.18
+date	95.11.14.20.29.00;	author schj;	state Exp;
+branches;
+next	1.17;
+
+1.17
+date	95.10.30.13.55.56;	author schj;	state Exp;
+branches;
+next	1.16;
+
+1.16
+date	95.10.23.07.51.09;	author schj;	state Exp;
+branches;
+next	1.15;
+
+1.15
+date	95.10.19.13.05.57;	author schj;	state Exp;
+branches;
+next	1.14;
+
+1.14
+date	95.09.26.22.11.53;	author schj;	state Exp;
+branches;
+next	1.13;
+
+1.13
+date	95.09.23.20.47.36;	author schj;	state Exp;
+branches;
+next	1.12;
+
+1.12
+date	95.09.19.13.41.58;	author schj;	state Exp;
+branches;
+next	1.11;
+
+1.11
+date	95.09.04.11.39.08;	author schj;	state Exp;
+branches;
+next	1.10;
+
+1.10
+date	95.09.01.06.14.26;	author schj;	state Exp;
+branches;
+next	1.9;
+
+1.9
+date	95.08.29.14.01.21;	author schj;	state Exp;
+branches;
+next	1.8;
+
+1.8
+date	95.08.28.13.43.40;	author schj;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	95.08.24.20.50.46;	author schj;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	95.08.24.14.14.44;	author schj;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	95.08.24.13.02.28;	author schj;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	95.08.23.13.14.25;	author schj;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	95.08.23.07.22.22;	author schj;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	95.08.16.14.08.25;	author schj;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	95.08.16.13.36.49;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@Main soil module
+@
+
+
+1.37
+log
+@Version: 0.99g
+@
+text
+@/* $Header: /home/schj/src/vamps_0.99g/src/soil/RCS/swatsoil.c,v 1.36 1999/01/06 12:07:49 schj Alpha $ */
+/*  $RCSfile: swatsoil.c,v $
+ *  $Author: schj $
+ *  $Date: 1999/01/06 12:07:49 $ */
+
+static char RCSid[] =
+"$Id: swatsoil.c,v 1.36 1999/01/06 12:07:49 schj Alpha $";
+
+#include <math.h>
+#include <stdlib.h>
+#include "vamps.h"
+#include "deffile.h"
+#include "swatsoil.h"
+#include "marquard.h"
+#include "soils.h"
+#include "nrutil.h"
+
+int headc_method = 0; /* head calculation method. SWATR (0) or TOPOG (1) */
+double estdmc = 0;		/* should DMC be estimate numerically? */
+double fieldcap = -100.0;	/* Field capacity in cm */
+double avgtheta;		/* average water content */
+double SMD; 			/* Soil moisture deficit (cm) */
+double smddepth;		/* depth to calculate SMD to */
+int outskip = 1;		/* Skip steps in output (soilout) */
+int soilverb = 0;		/* Seperate verbose */
+int layers;			/* number of soil nodes */
+int spnr = 0;			/* Number of soil types in mem */
+soilparmt *sp = NULL;		/* array of soil structs */
+node_t *node = NULL;		/* array of soil nodes */
+int initprof = 0;		/* swinco in swatr see intial() */
+int speed = 3;			/* ranges from 1 to 5*/
+int mktab = 0;			/* make look-up table or not */
+
+/* See src91/headcalc.f for source */
+/* These are alle the new gloabal vars needed */
+/* These are all in swatsoil.h */
+double volsat;			/* water volume at saturation [cm] */
+double dsoilp;			/* total depth of soil profile [cm] */
+double volact;			/* actual water volume [cm] */
+double volini;			/* initial water content [cm] */
+double cqbot = 0.0;
+double reltol = 0.001;
+double abstol = 0.5;
+int ftoph;
+int daynr;
+double *gwl;			/* length 2 */
+double *basegw;			/* length 2 */
+double *gw;			/* length a year 366, must be same as input */
+int *error;			/* length a year 366, must be same as input */
+int *itter;			/* steps long */
+double *q;			/* length layers +1  flow for each layer */
+double *inq;			/* length layers +1 in inflow for each layer */
+double aqave, aqamp, aqomeg, aqtamx, rimlay, cofqha, cofqhb;
+
+int fllast = FALSE;             /* end of day? */
+int maxitr = 80;	       	/* Max number of iterations */
+int numbit;
+int lbc = 0;			/* Lower bottom condition (was swbotb) */
+double prec = 0.0;
+double intc = 0.0;
+double qdrtot = 0.0;
+double	ptra = 0.0;
+double  peva = 0.0;
+double dhead;
+double mdhead;
+int flendd;
+#ifdef MPORE
+double *mp_theta; 		/* amount of water in pore */
+double *mp_res; 		/* resistance entering soil matrix */
+#endif
+double *k;			/* Conductivity (length is layers +1!!) */
+double *depth;			/* Depth of each layer (disnod in swatr) */
+double *h;			/* head in each layer */
+double *kgeom;			/* geo gemm van k */
+double *diffmoist;		/* differential moisture cap. */
+double *theta;			/* Theta at t */
+double *howsat;			/* How saturated ( on a 0 to 1 scale) */
+double *thetm1;			/* Theta one step back */
+double *dz;			/* Thickness of layers size of compartement */
+double *dzf;			/* delta z forward (z[i] - z[i-1]) */
+double *dzc;			/* delta z central ((z[i+1] - z[i-1])/2) */
+double *z;			/* Depth */
+double *hm1;			/* Head one timestep back */
+double qtop;			/* Discharge at top */
+double *qrot;			/* Root extraction rate,determined in rootex.f*/
+double **qdra;			/* 4x layers matrix */
+double qbot;			/* bottom q?? */
+double *mqdra;
+
+/* stuff for balance and rootex */
+/* double osmota, osmotb; */
+
+/* These are local to swatsoil.c */
+void readvangenu (char *secname, int spnr, int layer);
+void readclapp (char *secname, int spnr, int layer);
+#ifdef HAVE_LIBSLANG
+void make_Slang_soil_arrays(void);
+void readuserf (char *secname, int spnr, int layer);
+#endif
+void read_soiltable (char *secname, int spnr, int layer);
+extern void calcgwl ();
+extern void watcon ();
+extern void fluxes ();
+extern void setzero ();
+extern void output (int tstep);
+extern void soilout (int tstep);
+extern int headcalc (int i, double *t);
+extern double timestep (double t, double e_t,double *dt, double *dtm1);
+extern void bocobot (int pt);
+extern double det_hatm(int i);
+extern double reduceva (int swreduc);
+extern void rootex (int pt, double drz);
+void initial ();
+extern int getparams (char *infilename);
+int readstype (char *section, char *fname, int layer);
+
+
+
+
+/*C:initial
+ *@@void initial()
+ *
+ * Sets initial values
+ *
+ * Return:  nothing*/
+void
+initial ()
+{
+	int i;
+	double *tmparray,tt;
+	int pts;
+
+	/* Calculate depth of soil profile, make dz negative */
+	dsoilp = 0.0;
+	for (i = 0; i < layers; i++){
+		dsoilp += dz[i];
+		dz[i] = -1.0 * fabs (dz[i]);
+	}
+
+	z[0] = 0.5 * dz[0];
+	depth[0] = z[0];
+	dzf[0] = dz[0];
+	for (i = 1; i < layers; i++){
+		z[i] = z[i - 1] + (0.5 * (dz[i - 1] + dz[i]));
+		depth[i] = z[i] - z[i - 1];
+	}
+	depth[layers] = 0.5 * dz[layers - 1];
+	/* get dzf and dzc for TOPOG solution */
+	dzc[0] = dz[0];
+	dzf[0] = z[1] - z[0];
+	for (i =1; i < layers; i++){
+		if (i < layers -1)
+			dzc[i] = (z[i+1] - z[i-1]) * 0.5;
+		dzf[i] = z[i] - z[i-1];
+	}
+
+	/* Get inital conditions via one of three methods:
+	   0 = Given theta profile
+	   1 = given pressure head profile
+	   2 = pressure head profile is calculated
+	 */
+	switch (initprof){
+		case 0:	/* Water content profile */
+			tmparray = getdefar("soil","theta_initial",NULL,infilename,&pts,TRUE);
+			if (pts != layers){
+				showit("swatsoil",ERR,"Point not layers (theta_initial)",1,verbose);
+				Perror(progname,1,0,RCSid,"Theta initial array length not correct","");
+			}
+			for (i = 0; i < layers; i++){
+				node[i].theta_initial = tmparray[i];
+				theta[i] = node[i].theta_initial;
+				h[i] = node[i].sp->t2h (node[i].soiltype, theta[i], depth[i]);
+			}
+			free(tmparray);
+			if (lbc == 4)	/* Change h for last layer */
+				h[layers - 1] = _getval(&data[id.hea],t);
+			theta[layers - 1] = node[layers-1].sp->h2t (node[layers - 1].soiltype, h[layers - 1]);
+
+			break;
+		case 1:	/* pressure head profile */
+			tmparray = getdefar("soil","h_initial",NULL,infilename,&pts,TRUE);
+			if (pts != layers){
+				showit("swatsoil",ERR,"Point not layers (h_initial)",1,verbose);
+				Perror(progname,1,0,RCSid,"H initial array length not correct","");
+			}
+			for (i = 0; i < layers; i++){
+				node[i].h_initial = tmparray[i];
+				h[i] = node[i].h_initial;
+				theta[i] = node[i].sp->h2t (node[i].soiltype, h[i]);
+			}
+			free(tmparray);
+			break;
+		case 2:	/* calculate pressure head profile, need gw level */
+			if (lbc == 0)
+				gwl[0] = gw[0];
+			else
+				gwl[0] = -fabs (getdefdoub ("soil", "gw_initial", 0.0, infilename, TRUE));
+
+			for (i = 0; i < layers; i++){
+				h[i] = gwl[0] - z[i];
+				theta[i] = node[i].sp->h2t (node[i].soiltype, h[i]);
+			}
+			break;
+		case 3: /* uniform head */	
+			tt = getdefdoub ("soil", "h_initial", 0.0, infilename, TRUE);
+			fprintf(stderr,"%f\n",tt);
+			for (i = 0; i < layers; i++){
+				node[i].h_initial = tt;
+				h[i] = tt;
+				theta[i] = node[i].sp->h2t (node[i].soiltype, h[i]);
+			}
+			break;
+		default:
+			Perror (progname, 1,0, RCSid, "Initial profile method not known.", " initprof >3");
+			break;
+	}
+
+	watcon ();	/* Calculate actual water content */
+	volini = volact;
+
+	for (i = 0; i < layers; i++)
+		volsat -= dz[i] * node[i].sp->thetas;
+
+  /* Save initial moisture content and pressure heads */
+	for (i = 0; i < layers; i++){
+		thetm1[i] = theta[i];
+		hm1[i] = h[i];
+	}
+
+	/* hydraulic conductivities, diffrential moisture capacities
+	   and geometrical mean hydraulic conductivities for each layer */
+	diffmoist[0] = node[0].sp->h2dmc (node[0].soiltype, h[0]);
+	k[0] = node[0].sp->t2k (node[0].soiltype, theta[0]);
+	kgeom[0] = 0.5 * (node[0].sp->ksat + k[0]);
+	for (i = 1; i < layers; i++){
+		diffmoist[i] = node[i].sp->h2dmc (node[i].soiltype, h[i]);
+		k[i] = node[i].sp->t2k (node[i].soiltype, theta[i]);
+		kgeom[i] = MKKGEOM(i);
+	}
+	kgeom[layers] = k[layers - 1];
+
+	/* This comes from evapotra.f */
+	/* Calculate pressure head of the atmosphere */
+	hatm = -2.75E5; /* CHECK THIS !!!*/
+}
+
+static int rlay = 0;
+
+/*+Name: initnode
+ *
+ * Prototype:  void initnode(int layer)
+ *
+ * Description:  reads init values for layer layer
+ *
+ * Returns:  nothing+*/
+void
+initnode (int layer)
+{
+  char s[1024];
+  int exitonerror = 1;
+  void readtable ();
+
+  sprintf (s, "layer_%d", layer);
+  /* check if same as above */
+  if (!issection (s, infilename) && layer != 0){
+	  node[layer].as_above = TRUE;
+	  exitonerror = 0;
+  }else{
+	  node[layer].as_above = FALSE;
+	  exitonerror = 1;
+	  rlay++;
+  }
+
+  node[layer].rlay = rlay;
+
+  /* Geth depth info */
+  node[layer].thickness = getdefdoub (s, "thickness", layer > 0 ? node[layer - 1].thickness : 0.0, infilename, exitonerror);
+  dz[layer] = node[layer].thickness;
+  strcpy(node[layer].soilsection,
+	 getdefstr(s,"soilsection", layer > 0 ? 
+		   node[layer - 1].soilsection : "Unknown section",
+		   infilename,exitonerror));
+
+  /* Link to existing soil type or read a new one */
+  if (node[layer].as_above)
+      node[layer].soiltype = node[layer -1].soiltype;
+  else
+      node[layer].soiltype = readstype(node[layer].soilsection, infilename, layer);
+}
+
+
+/*+Name: read_soiltable
+ *
+ *  Prototype:  void read_soiltable(char *secname, int spnr)
+ *
+ *  Description:  reads info from secname and calls readtablefile
+ *
+ *  Returns:  nothing+*/
+void
+read_soiltable (char *secname, int spnr, int layer)
+{
+  FILE *thef;
+  char tabfname[1024];
+  int exitonerror=1;
+  int ftype = 1;		/* file type default = TOPOG */
+  extern void readtablefile (FILE * stream, int layer, int type);
+
+  if ((ftype = getdefint (secname, "tablefiletype", ftype, infilename, FALSE)) != 1)
+    {				/* only the TOPOG format has this information in the file */
+      exitonerror = TRUE;
+    }
+  sp[spnr].thetas = getdefdoub (secname, "thetas", 0.0, infilename, exitonerror);
+  sp[spnr].ksat = getdefdoub (secname, "ksat", 0.0, infilename, exitonerror);
+  sp[spnr].mktable = mktab;	/* set this to 1 as well */
+
+  
+ 
+  /* First create an empty table */
+  strcpy (tabfname, getdefstr (secname, "tablefile", NULL, infilename, TRUE));
+  if ((thef = fopen (tabfname, "r")) == NULL)
+      Perror (progname, 1,1, RCSid, "Soil table file open failed:", tabfname);
+  readtablefile (thef, spnr, ftype);
+  (void)fclose (thef);		/* close the table file */
+    
+   /* Set the function pointers to what we want */
+   sp[spnr].t2k=t2k_2;
+   sp[spnr].h2dmc=h2dmc_2;
+   sp[spnr].t2h=t2h_2;
+   sp[spnr].h2t=h2t_2;
+}
+
+void
+readclapp (char *secname, int spnr, int layer)
+{
+	int exitonerror = 1;
+	extern void filltables (int, int, int);
+
+	sp[spnr].thetas = getdefdoub (secname, "thetas", 0.0, infilename, exitonerror);
+	sp[spnr].ksat = getdefdoub (secname, "ksat", 0.0, infilename, exitonerror);
+	sp[spnr].b = getdefdoub (secname, "b", 0.0, infilename, exitonerror);
+	sp[spnr].n = 2.0 + 3.0/sp[spnr].b;
+	sp[spnr].psisat = getdefdoub (secname, "psisat", 0.0, infilename, exitonerror);
+
+	/* Set function pointers to the right functions */
+	sp[spnr].t2k=t2k_0;
+	sp[spnr].h2dmc=h2dmc_0;
+	sp[spnr].t2h=t2h_0;
+	sp[spnr].h2t=h2t_0;
+	sp[spnr].h2k=h2k_0;
+	sp[spnr].h2dkdp=h2dkdp_0;
+	sp[spnr].h2u=h2u_0;
+
+   /* mktable for layer 0 is set in getparm */
+	if ((sp[spnr].mktable = mktab)){
+		filltables (spnr, layer, estdmc);
+		/* ReSet function pointers to the right functions
+		   (detbytable = 3) */
+		sp[spnr].t2k=t2k_2;
+		sp[spnr].h2dmc=h2dmc_2;
+		sp[spnr].t2h=t2h_2;
+		sp[spnr].h2t=h2t_2;
+		sp[spnr].h2k=h2k_2;
+		sp[spnr].h2dkdp=h2dkdp_2;
+		sp[spnr].h2u=h2u_2;
+	}
+}
+
+#ifdef HAVE_LIBSLANG
+void
+readuserf (char *secname, int spnr, int layer)
+{
+	int exitonerror = 1;
+	extern void filltables (int, int,int );
+
+	sp[spnr].thetas = getdefdoub (secname, "thetas", 0.0, infilename, exitonerror);
+	sp[spnr].ksat = getdefdoub (secname, "ksat", 0.0, infilename, exitonerror);
+
+	SLang_push_string(secname);
+	SLang_push_integer(spnr);
+	if (!SLang_execute_function("getspars")){
+		Perror("swatsoil",1,0,RCSid,"S-Lang function getspars not defined","needed if method = 5");
+	}
+
+	/* Set function pointers to the right functions */
+	sp[spnr].t2k=t2k_3;
+	sp[spnr].h2dmc=h2dmc_3;
+	sp[spnr].t2h=t2h_3;
+	sp[spnr].h2t=h2t_3;
+	sp[spnr].h2k=h2k_3;
+	sp[spnr].h2dkdp=h2dkdp_3;
+	sp[spnr].h2u=h2u_3;
+
+
+	/* mktable for layer 0 is set in getparm */
+	if ((sp[spnr].mktable = mktab)) {
+		filltables (spnr, layer, estdmc);
+		/* ReSet function pointers to the right functions (detbytable = 3) */
+		sp[spnr].t2k=t2k_2;
+		sp[spnr].h2dmc=h2dmc_2;
+		sp[spnr].t2h=t2h_2;
+		sp[spnr].h2t=h2t_2;
+		sp[spnr].h2k=h2k_2;
+		sp[spnr].h2dkdp=h2dkdp_2;
+		sp[spnr].h2u=h2u_2;
+	}
+}
+#endif
+
+
+static double ttl;
+
+
+
+/*C:readvangenu
+ *@@void readvangenu(char *secname, int spnr, int layer)
+ *
+ *  Description:  read van gunuchten stuff for layer layer and soilinfo spnr
+ *
+ *  Returns:  nothing*/
+void
+readvangenu (char *secname, int spnr, int layer)
+{
+  int exitonerror=1;
+  extern void filltables (int, int, int);
+
+  sp[spnr].thetas = getdefdoub (secname, "thetas", 0.0, infilename, exitonerror);
+  sp[spnr].ksat = getdefdoub (secname, "ksat", 0.0, infilename, exitonerror);
+  sp[spnr].n = getdefdoub (secname, "n",  0.0, infilename, exitonerror);
+  ttl = getdefdoub (secname, "l", 0.5, infilename, 0);
+  sp[spnr].m = 1.0 - (1.0 / sp[spnr].n);
+  sp[spnr].l = sp[spnr].m * (ttl + 2.0);
+  sp[spnr].alpha = getdefdoub (secname, "alpha", 0.0, infilename, exitonerror);
+
+   sp[spnr].t2k=t2k_1;
+   sp[spnr].h2dmc=h2dmc_1;
+   sp[spnr].t2h=t2h_1;
+   sp[spnr].h2t=h2t_1;
+   sp[spnr].h2k=h2k_1;
+   sp[spnr].h2dkdp=h2dkdp_1;
+   sp[spnr].h2u=h2u_1;
+   /* mktable for layer 0 is set in getparm THIS SHOULD CHANGE*/
+   if ((sp[spnr].mktable = mktab))
+   {			/* First create an empty table */
+	   filltables (spnr, layer, estdmc);
+	   /* set pointter to table lookup functions */
+	   sp[spnr].t2k=t2k_2;
+	   sp[spnr].h2dmc=h2dmc_2;
+	   sp[spnr].t2h=t2h_2;
+	   sp[spnr].h2t=h2t_2;
+	   sp[spnr].h2k=h2k_2;
+	   sp[spnr].h2dkdp=h2dkdp_2;
+	   sp[spnr].h2u=h2u_2;
+   }
+}
+
+
+
+/*+Name: presoil
+ *
+ *  Prototype:  void presoil(void)
+ *
+ *  Description:  initializes soil stuff
+ *
+ *  Returns:  nothing+*/
+static int firsttime=1;
+void
+presoil (void)
+{
+	int i;
+	extern void mkscratch ();
+
+	if (firsttime){
+		soilverb = getdefint ("soil", "verbose", verbose, infilename, FALSE);
+		(void) showit ("swatsoil",MESG,"getting initial values",2,soilverb);
+		getparams (infilename);
+		mkscratch ();
+	}
+	/* Make link to soil pointer. This must be done now and not before
+	   because of mem reallocation! */
+	for (i = 0; i < layers; i++)
+		node[i].sp = &sp[node[i].soiltype];
+
+	initial ();			/* This was (about) initial.f */
+	setzero ();
+	fluxes ();
+
+	/* Print this in output file  we ar in the initial section */
+	printint ("layers", layers);
+	printcom ("initial water content of the profile");
+	printfl ("volini", volini);
+	printfl ("volsat", volsat);
+	printar ("z", z, layers);
+	printar ("dz", dz, layers);
+	printar ("theta", theta, layers);
+	printar ("k", k, layers);
+	printar ("h", h, layers);
+	printfl ("outskip",outskip);
+	fprintf (genoutfile, "as_above=");
+	for (i = 0; i < layers; i++)
+		fprintf (genoutfile, "%d ", node[i].as_above);
+	fprintf (genoutfile, "\n");
+
+	/* set initial time  to first record in precip file (experimental) */
+	dtm1 = dt;
+	if (steps > data[id.pre].points){
+		fprintf(stderr,"P = %d, steps = %d id.pre = %d\n",data[id.pre].points,steps,id.pre);
+		Perror (progname, 1,0, RCSid, "more steps then P values !!", "");
+	}
+#ifdef HAVE_LIBSLANG
+	if(firsttime)
+		make_Slang_soil_arrays();
+#endif
+	if (firsttime)
+		initprogress ();
+
+	firsttime = 0;
+}
+
+/*C:tstep_soil
+ *@@ void tstep_soil (int i,double e_t, double t_prec, double t_intc,double t_ptra,
+ *@@			double t_peva)
+ *
+ *  Description: Calculated theta etc for end of time in record  i
+ *  of the precipitation file. This is the core of the soil module
+ *
+ *  Returns: nothing*/
+void
+tstep_soil (int i, double e_t,double t_prec, double t_intc, double t_ptra, double t_peva)
+{
+	int instep_i = 0;
+
+	setzero ();	/* Set daily stuff to zero */
+	daynr = i + 1; /* Calculate day number*/
+	flendd = FALSE;	/* end of timestep set in timestep.c */
+	/* Soil evaporation */
+	prec = t_prec;
+	intc = t_intc;
+	ptra = t_ptra;
+	peva = t_peva;
+	hatm = det_hatm(i);
+	reva = reduceva (swredu); /* reduce soil evaporation*/
+	do{ /* Loop _within_ the given timestep */
+		instep_i++; /* number of steps within a timestep */
+		if (lbc == 2 || lbc == 3 /*|| swdrai == 1*/) 
+			calcgwl();
+		tm1 = t;
+		(void)timestep (t,e_t,&dt,&dtm1);	/* Calculate new timestep */
+		bocobot (i);		/* Bottom boundary conditions */
+		if (dodrain)		/* Lateral drainage */
+			drainage (dodrain);
+		qtop = bocotop (&kgeom[0],&ftoph);/* Top boundary conditions */
+#ifdef MPORE
+		mpore(i); /* flow and water exchange with matrix */
+#endif
+#ifdef NHC
+		nheadcalc(n,&t,&dt);
+#else
+		rootex (i,data[id.rdp].xy[i].y);/* root extraction */
+		error[i] += headcalc (i, &t);
+#endif
+		watcon ();
+		fluxes ();
+		integral (i);
+		dethowsat ();
+		if (soilverb > 3)
+			showprogress (i + 1 - startpos);
+	}while (!flendd);		/* end of timestep reached, set in timestep */
+  	/* cummulative amounts  */
+	cumprec += prec;
+  	cumintc += intc;
+  	cumeva += reva;
+  	cumtra += ptra;
+	/* these are used within timestep, they have to be reset to
+	   prevent rounding errors from becoming to large!*/
+	_cumprec = cumprec;
+	_cumintc = cumintc;
+	_cumeva = cumeva;
+	_cumtra = cumtra;
+
+	itter[i]/=instep_i;
+	instep_i = 0;
+	calcgwl ();
+	avgtheta= detavgtheta(layers); 
+	SMD = smd(smddepth == 0.0 ? data[id.rdp].xy[i].y : smddepth,fieldcap);
+	/* Updat the data-sets */
+	data[id.qbo].xy[i].y = qbot;
+	data[id.qbo].xy[i].x = data[id.pre].xy[i].x;
+	data[id.vol].xy[i].y = volact;
+	data[id.vol].xy[i].x = data[id.pre].xy[i].x;
+	data[id.avt].xy[i].y = avgtheta;
+	data[id.avt].xy[i].x = data[id.pre].xy[i].x;
+
+	if (!(i % outskip))
+		soilout (i);/* Produce daily output to stdout or named file(genoutfile) */
+
+	if (soilverb > 0)
+		showprogress (i + 1 - startpos);
+}
+
+/*C:postsoil
+ *
+ *  Prototype:  void postsoil()
+ * 
+ *  Description:  Cleans up after presoil and tstep_soil. Frees all mem
+ *
+ *  Returns:  nothing+*/
+void
+postsoil ()
+{
+	int i, j;
+	extern void freescratch ();
+
+	setzero();
+	for (i = 0; i< spnr; i++){
+		if (sp[i].mktable == 1){
+			for (j = 0; j < 4; j++) {
+				if (sp[i].tab[j].x)
+					free (sp[i].tab[j].x);
+				if (sp[i].tab[j].y)
+					free (sp[i].tab[j].y);
+			}
+			if (sp[i].tab)
+				free (sp[i].tab);
+		}
+	}
+	spnr = 0;
+	firsttime = 1;
+	free(sp);
+	free (node);
+
+	free_dvector(theta, 0, layers -1);
+	free_dvector(howsat, 0, layers -1);
+	free_dvector(diffmoist, 0, layers -1);
+	free_dvector(thetm1, 0, layers -1);
+	free_dvector(dz, 0, layers -1);
+	free_dvector(dzc, 0, layers -1);
+	free_dvector(dzf, 0, layers -1);
+	free_dvector(z, 0, layers -1);
+	free_dvector(h, 0, layers -1);
+	free_dvector(hm1, 0, layers -1);
+	free_dvector(qrot, 0, layers -1);
+	free_dvector(depth, 0, layers);
+	free_dvector(k, 0, layers -1);
+	free_ivector(allowdrain, 0, layers -1);
+	free_dvector(kgeom, 0, layers);
+	free_dvector(q, 0, layers);
+	free_dvector(inq, 0, layers);
+
+	free_dmatrix (qdra, 0,layers,0,3);
+	free_dvector (gwl,0,steps + 1);
+	free_dvector (basegw,0,1);
+	free_ivector (error,0,steps+1);
+	free_ivector (itter,0,steps+1);
+
+	sp = NULL;
+	node = NULL;
+	freescratch ();
+#ifdef NR_MEM_DEBUG
+	prmeminfo();
+#endif
+}
+
+/*C:readstype 
+ *@@ int readstype (char *section, char *fname, int layer)
+ *
+ *  Allocates new sp if needed and reads soil parameters
+ *  from section and calls one of the method specific read functions
+ *
+ *  Returns: index of sp linked to node */
+int 
+readstype (char *secname, char *fname, int layer)
+
+{
+	int exitonerror = 1;
+
+	spnr++; /* allocate new soil type and inc array index */
+	sp = (soilparmt *) ts_memory ((void *)sp, spnr * sizeof (soilparmt), progname);
+
+	exitonerror = FALSE;
+
+	strcpy (sp[spnr -1].description, 
+			getdefstr (secname, "description", "NO DESCRIPTION", fname, FALSE));
+	sp[spnr -1].residual_water = 
+		getdefdoub (secname, "theta_residual", 0.0, fname, TRUE);
+
+	exitonerror = layer > 0 ? FALSE : TRUE;
+
+	/* Get k_hor/k_ver if drainage is used */
+	if (dodrain)
+		sp[spnr - 1].kh_kv = getdefdoub (secname, "kh/kv", 1.0, fname, FALSE);
+
+	sp[spnr -1].method = getdefint (secname, "method", 1, infilename, TRUE);
+	switch (sp[spnr -1].method){
+		case 0:	/* Use clapp & Hornberger stuff */
+			readclapp (secname, spnr -1, layer);
+			break;
+		case 1:
+			readvangenu (secname, spnr -1, layer);
+			break;
+		case 2:	/* This set in readvangenu as well !!! */
+			Perror (progname, 1,0, RCSid, "Method obsolute, use mktable in soil section", "");
+			break;
+		case 3:	/* Dtermine parameters from marquardt, use stand-alone version ! */
+			Perror (progname, 1,0, RCSid, "This function no longer updated (k vs h method = 3)", "Use stand-alone version, or _soil program");
+			break;
+		case 4:	/* Read input from TOPOG _soil tables (experimental) */
+			read_soiltable (secname, spnr -1, layer);
+			break;
+#ifdef HAVE_LIBSLANG
+		case 5:	/* Use user defined functions */
+			readuserf (secname, spnr -1, layer);
+			break;
+#endif
+		default:
+			Perror (progname, 1,0, RCSid, "Method not known:", "k vs h method");
+			break;
+	}
+
+  return spnr -1;
+}
+@
+
+
+1.36
+log
+@Version: 0.99g
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99f/src/soil/RCS/swatsoil.c,v 1.35 1998/11/30 13:37:03 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1998/11/30 13:37:03 $ */
+d7 1
+a7 1
+"$Id: swatsoil.c,v 1.35 1998/11/30 13:37:03 schj Exp $";
+@
+
+
+1.35
+log
+@*** empty log message ***
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99f/src/soil/RCS/swatsoil.c,v 1.34 1998/11/30 13:36:35 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1998/11/30 13:36:35 $ */
+d7 1
+a7 1
+"$Id: swatsoil.c,v 1.34 1998/11/30 13:36:35 schj Exp $";
+d575 1
+a575 1
+	_cumprec = cumpre;
+@
+
+
+1.34
+log
+@added rounding fix (cumprec cumintc comtra, see integral.c)
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99e/src/soil/RCS/swatsoil.c,v 1.33 1997/09/09 08:39:39 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1997/09/09 08:39:39 $ */
+d7 1
+a7 1
+"$Id: swatsoil.c,v 1.33 1997/09/09 08:39:39 schj Exp $";
+d574 1
+a574 1
+	   prevent rounding errors from becoming to large!
+@
+
+
+1.33
+log
+@0.99e version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99c/src/soil/RCS/swatsoil.c,v 1.32 1997/01/16 15:05:31 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1997/01/16 15:05:31 $ */
+d7 1
+a7 1
+"$Id: swatsoil.c,v 1.32 1997/01/16 15:05:31 schj Exp $";
+d18 1
+d80 2
+d125 1
+a125 1
+ *  Returns:  nothing*/
+d130 1
+a130 1
+	double *tmparray;
+d142 1
+d148 8
+d167 1
+a167 1
+				Perror(progname,1,RCSid,"Theta initial array length not correct","");
+d184 1
+a184 1
+				Perror(progname,1,RCSid,"H initial array length not correct","");
+d204 9
+d214 1
+a214 1
+			Perror (progname, 1, RCSid, "Initial profile method not known.", " initprof >2");
+d321 1
+a321 1
+      Perror (progname, 1, RCSid, "Soil table file open failed:", tabfname);
+d335 2
+a336 7
+  int exitonerror = 1;
+  extern void filltables (int, int, int);
+
+  sp[spnr].thetas = getdefdoub (secname, "thetas", 0.0, infilename, exitonerror);
+  sp[spnr].ksat = getdefdoub (secname, "ksat", 0.0, infilename, exitonerror);
+  sp[spnr].b = getdefdoub (secname, "b", 0.0, infilename, exitonerror);
+  sp[spnr].psisat = getdefdoub (secname, "psisat", 0.0, infilename, exitonerror);
+d338 14
+a351 5
+   /* Set function pointers to the right functions */
+   sp[spnr].t2k=t2k_0;
+   sp[spnr].h2dmc=h2dmc_0;
+   sp[spnr].t2h=t2h_0;
+   sp[spnr].h2t=h2t_0;
+d354 12
+a365 9
+  if ((sp[spnr].mktable = mktab))
+    {
+	filltables (spnr, layer, estdmc);
+	/* ReSet function pointers to the right functions (detbytable = 3) */
+       sp[spnr].t2k=t2k_2;
+       sp[spnr].h2dmc=h2dmc_2;
+       sp[spnr].t2h=t2h_2;
+       sp[spnr].h2t=h2t_2;
+    }
+d372 2
+a373 2
+  int exitonerror = 1;
+  extern void filltables (int, int,int );
+d375 2
+a376 2
+  sp[spnr].thetas = getdefdoub (secname, "thetas", 0.0, infilename, exitonerror);
+  sp[spnr].ksat = getdefdoub (secname, "ksat", 0.0, infilename, exitonerror);
+d378 5
+a382 5
+  SLang_push_string(secname);
+  SLang_push_integer(spnr);
+  if (!SLang_execute_function("getspars")){
+    Perror("swatsoil",1,RCSid,"S-Lang function getspars not defined","needed if method = 5");
+  }
+d384 22
+a405 16
+   /* Set function pointers to the right functions */
+   sp[spnr].t2k=t2k_3;
+   sp[spnr].h2dmc=h2dmc_3;
+   sp[spnr].t2h=t2h_3;
+   sp[spnr].h2t=h2t_3;
+
+   /* mktable for layer 0 is set in getparm */
+  if ((sp[spnr].mktable = mktab))
+    {
+	filltables (spnr, layer, estdmc);
+	/* ReSet function pointers to the right functions (detbytable = 3) */
+       sp[spnr].t2k=t2k_2;
+       sp[spnr].h2dmc=h2dmc_2;
+       sp[spnr].t2h=t2h_2;
+       sp[spnr].h2t=h2t_2;
+    }
+d414 2
+a415 3
+/*+Name: readvangenu
+ *
+ *  Prototype:  void readvangenu(char *secname, int spnr, int layer)
+d419 1
+a419 1
+ *  Returns:  nothing+*/
+d438 3
+d443 1
+a443 1
+       {			/* First create an empty table */
+d450 4
+a453 1
+       }
+a503 1
+	/*t = data[id.pre].xy[0].x; */
+d507 1
+a507 1
+		Perror (progname, 1, RCSid, "more steps then P values !!", "");
+d555 3
+d560 1
+d568 12
+d600 1
+a600 1
+/*+Name: postsoil
+d636 2
+d701 1
+a701 1
+			Perror (progname, 1, RCSid, "Method obsolute, use mktable in soil section", "");
+d704 1
+a704 1
+			Perror (progname, 1, RCSid, "This function no longer updated (k vs h method = 3)", "Use stand-alone version, or _soil program");
+d715 1
+a715 1
+			Perror (progname, 1, RCSid, "Method not known:", "k vs h method");
+@
+
+
+1.32
+log
+@A lot
+@
+text
+@d1 2
+a2 3
+/* $Header: /home/schj/src/vamps_0.99b/src/soil/RCS/swatsoil.c,v 1.31 1996/12/30 11:32:50 schj Exp $ */
+/*  
+ *  $RCSfile: swatsoil.c,v $
+d4 1
+a4 2
+ *  $Date: 1996/12/30 11:32:50 $
+ */
+d7 1
+a7 1
+"$Id: swatsoil.c,v 1.31 1996/12/30 11:32:50 schj Exp $";
+a9 1
+#include <malloc.h>
+d16 1
+d18 5
+a22 4
+double fieldcap = -100.0; /* Field capacity in cm */
+double avgtheta;
+double SMD; /* Soil moisture deficit (cm) */
+double smddepth;
+a23 1
+/*int headbased = TRUE;*/		/* default to head-based solution */
+d26 3
+a28 3
+int spnr = 0;/* Number of soil types in mem */
+soilparmt *sp = NULL;
+node_t *node = NULL;
+d30 2
+a31 2
+int speed = 3; /* ranges from 1 to 5*/
+int mktab = 0;
+a32 3
+/* Some setnames needed in the soil modules */
+int gwset, preset, intset, pevapset, ptransset,drootset;
+int qbotset,volactset,avgthetaset;
+d36 4
+a39 5
+int swnums = 0;
+double volsat;
+double dsoilp; /* total depth of soil profile*/
+double volact;
+double volini;			/* Initial water content */
+a44 5
+int dayend;
+int daysta;
+int year;
+int yearen;
+int ndyear;
+a47 2
+double *hgiven;			/* length a year 366, must be same as input */
+double *qbottom;		/* length a year 366, must be same as input */
+d49 1
+a49 1
+int *itter;			/* length a year 366, must be same as input */
+d55 1
+a55 1
+int maxitr = 25;	       	/* Max number of iterations */
+d61 2
+d67 2
+a68 2
+double *mp_theta; /* amount of water in pore */
+double *mp_res; /* resistance entering soil matrix */
+d82 1
+a82 1
+double *qrot;			/* Root extraction rate, determined in rootex.f */
+a84 1
+double *layer;			/* soil layer, can this go ?? */
+d88 1
+a88 2
+double osmota, osmotb;
+double *cml;
+d93 2
+d96 1
+a96 1
+/*void get_detvangenu  (int layer); */
+a97 3
+#ifndef NOSLANG
+void make_Slang_soil_arrays(void);
+#endif
+d104 2
+a105 3
+extern void headcalc (int i, double *t);
+extern double timestep (int step,double *dt, double *dtm1);
+extern void bocotop (int pt);
+d107 3
+a109 3
+extern void evapotra(int i,double *prec, double *intc, double *ptra, double *peva, double * hatm);
+extern double reduceva ();
+extern void rootex (int pt,double drz);
+d117 2
+a118 1
+/*+Name: initial
+d120 1
+a120 1
+ *  Prototype:  void initial()
+d122 1
+a122 3
+ *  Description:  set initial values
+ *
+ *  Returns:  nothing+*/
+d126 10
+a135 4
+  int i;
+  double *tmparray;
+  int pts;
+ 
+d137 7
+d145 21
+a165 7
+  /* Calculate depth of soil profile, make dz negative */
+  dsoilp = 0.0;
+  for (i = 0; i < layers; i++)
+    {
+      dsoilp += dz[i];
+      dz[i] = -1.0 * fabs (dz[i]);
+    }
+d167 28
+a194 28
+  z[0] = 0.5 * dz[0];
+  depth[0] = z[0];
+  for (i = 1; i < layers; i++)
+    {
+      z[i] = z[i - 1] + (0.5 * (dz[i - 1] + dz[i]));
+      depth[i] = z[i] - z[i - 1];
+    }
+  depth[layers] = 0.5 * dz[layers - 1];
+
+
+  /* Get inital conditions via one of three methods:
+     0 = Given theta profile
+     1 = given pressure head profile
+     2 = pressure head profile is calculated
+   */
+  switch (initprof)
+    {
+    case 0:			/* Water content profile */
+	tmparray = getdefar("soil","theta_initial",NULL,infilename,&pts,TRUE);
+	if (pts != layers){
+	  showit("swatsoil",ERR,"Point not layers (theta_initial)",1,verbose);
+	  Perror(progname,1,RCSid,"Theta initial array length not correct","");
+	}
+      for (i = 0; i < layers; i++)
+	{
+	  node[i].theta_initial = tmparray[i];
+	  theta[i] = node[i].theta_initial;
+	  h[i] = node[i].sp->t2h (node[i].soiltype, theta[i], depth[i]);
+a195 37
+      free(tmparray);
+      if (lbc == 4)
+	{			/* Change h for last layer */
+	  h[layers - 1] = hgiven[daynr];
+	  theta[layers - 1] = node[layers-1].sp->h2t (node[layers - 1].soiltype, h[layers - 1]);
+	}
+      break;
+    case 1:			/* pressure head profile */
+	tmparray = getdefar("soil","h_initial",NULL,infilename,&pts,TRUE);
+	if (pts != layers){
+	  showit("swatsoil",ERR,"Point not layers (h_initial)",1,verbose);
+	  Perror(progname,1,RCSid,"H initial array length not correct","");
+	}
+      for (i = 0; i < layers; i++)
+	{
+	  node[i].h_initial = tmparray[i];
+	  h[i] = node[i].h_initial;
+	  theta[i] = node[i].sp->h2t (node[i].soiltype, h[i]);
+	}
+      free(tmparray);
+      break;
+    case 2:			/* calculate pressure head profile, need gw level */
+      if (lbc == 0)
+	gwl[0] = gw[daysta];
+      else
+	gwl[0] = -fabs (getdefdoub ("soil", "gw_initial", 0.0, infilename, TRUE));
+
+      for (i = 0; i < layers; i++)
+	{
+	  h[i] = gwl[0] - z[i];
+	  theta[i] = node[i].sp->h2t (node[i].soiltype, h[i]);
+	}
+      break;
+    default:
+      Perror (progname, 1, RCSid, "Initial profile method not known.", " initprof >2");
+      break;
+    }
+d197 2
+a198 2
+  watcon ();			/* Calculate actual water content */
+  volini = volact;
+d200 2
+a201 2
+  for (i = 0; i < layers; i++)
+    volsat -= dz[i] * node[i].sp->thetas;
+d204 4
+a207 19
+  for (i = 0; i < layers; i++)
+    {
+      thetm1[i] = theta[i];
+      hm1[i] = h[i];
+    }
+
+  /* hydraulic conductivities, diffrential moisture capacities
+     and geometrical mean hydraulic conductivities for each layer */
+  diffmoist[0] = node[0].sp->h2dmc (node[0].soiltype, h[0]);
+  k[0] = node[0].sp->t2k (node[0].soiltype, theta[0]);
+  kgeom[0] = 0.5 * (node[0].sp->ksat + k[0]);
+  for (i = 1; i < layers; i++)
+    {
+      diffmoist[i] = node[i].sp->h2dmc (node[i].soiltype, h[i]);
+      k[i] = node[i].sp->t2k (node[i].soiltype, theta[i]);
+      kgeom[i] = mkkgeom (i);
+    }
+  kgeom[layers] = k[layers - 1];
+
+d209 11
+d221 3
+a223 4
+  /* This comes from evapotra.f */
+  /* Calculate pressure head of the atmosphere */
+  hatm = -2.75E5; /* CHECK THIS !!!*/
+
+d315 1
+a315 1
+  extern void filltables (int, int);
+d331 1
+a331 1
+	filltables (spnr, layer);
+d340 1
+d345 1
+a345 1
+  extern void filltables (int, int);
+d365 1
+a365 1
+	filltables (spnr, layer);
+d373 1
+d391 1
+a391 1
+  extern void filltables (int, int);
+d396 1
+a396 1
+  ttl = getdefdoub (secname, "l", 0.0, infilename, exitonerror);
+d408 1
+a408 1
+	   filltables (spnr, layer);
+d430 2
+a431 2
+  int i;
+  extern void mkscratch ();
+d433 41
+a473 41
+  if (firsttime){
+    soilverb = getdefint ("soil", "verbose", verbose, infilename, FALSE);
+    (void) showit ("swatsoil",MESG,"getting initial values",2,soilverb);
+    getparams (infilename);
+    mkscratch ();
+  }
+  /* Make link to soil pointer. This must be done now and not before
+     because of mem reallocation! */
+  for (i = 0; i < layers; i++)
+      node[i].sp = &sp[node[i].soiltype];
+
+  initial ();			/* This was (about) initial.f */
+  setzero ();
+  fluxes ();
+
+  /* Print this in output file  we ar in the initial section */
+  printint ("layers", layers);
+  printcom ("initial water content of the profile");
+  printfl ("volini", volini);
+  printfl ("volsat", volsat);
+  printar ("z", z, layers);
+  printar ("dz", dz, layers);
+  printar ("theta", theta, layers);
+  printar ("k", k, layers);
+  printar ("h", h, layers);
+  printfl ("outskip",outskip);
+  fprintf (genoutfile, "as_above=");
+  for (i = 0; i < layers; i++)
+    fprintf (genoutfile, "%d ", node[i].as_above);
+  fprintf (genoutfile, "\n");
+
+  /* set initial time  to first record in precip file (experimental) */
+  /*t = data[preset].xy[0].x; */
+  dtm1 = dt;
+  if (steps > data[preset].points)
+    {
+      Perror (progname, 1, RCSid, "more steps then P values !!", "");
+    }
+#ifndef NOSLANG
+  if(firsttime)
+  	make_Slang_soil_arrays();
+d475 2
+a476 2
+  if (firsttime)
+  	initprogress ();
+d478 1
+a478 1
+  firsttime = 0;
+d481 3
+a483 3
+/*+Name: tstep_soil
+ *
+ *  Prototype: void tstep_soil (int i )
+d485 2
+a486 1
+ *  Description: Calculated theta etc for end of time in record  i of the precipitation file. This is the core of the soil module
+d488 1
+a488 1
+ *  Returns: nothing+*/
+d490 1
+a490 1
+tstep_soil (int *i)
+d492 22
+a513 14
+  setzero ();			/* Set daily stuff to zero */
+  daynr = *i + 1;               /* Calculate day number*/
+  flendd = FALSE;		/* end of timestep set in timestep.c */
+  /* Soil evaporation */
+  evapotra(*i,&prec,&intc,&ptra,&peva,&hatm);
+  reva = reduceva ();           /* reduce soil evaporation*/
+  do
+    {
+      if (lbc == 2 || lbc == 3 /*|| swdrai == 1*/) calcgwl();
+      timestep (*i,&dt,&dtm1);	/* Calculate new timestep */
+      bocobot (*i);		/* Bottom boundary conditions */
+      if (dodrain)		/* Lateral drainage */
+	drainage (dodrain);
+      bocotop (*i);		/* Top boundary conditions */
+d515 1
+a515 1
+      mpore(*i); /* flow and water exchange with matrix */
+d517 21
+a537 20
+      rootex (*i,data[drootset].xy[*i].y);/* root extraction */
+      headcalc (*i, &t);
+      watcon ();
+      fluxes ();
+      integral (*i);
+      dethowsat ();
+      if (soilverb > 3)
+         showprogress (*i + 1 - startpos);
+    }
+  while (!flendd);		/* end of timestep reached, set in timestep */
+  calcgwl ();
+  avgtheta= detavgtheta(layers); 
+  SMD = smd(smddepth == 0.0 ? data[drootset].xy[*i].y : smddepth,fieldcap);
+  /* Updat the data-sets */
+  data[qbotset].xy[*i].y = qbot;
+  data[qbotset].xy[*i].x = data[preset].xy[*i].x;
+  data[volactset].xy[*i].y = volact;
+  data[volactset].xy[*i].x = data[preset].xy[*i].x;
+  data[avgthetaset].xy[*i].y = avgtheta;
+  data[avgthetaset].xy[*i].x = data[preset].xy[*i].x;
+d539 2
+a540 2
+  if (!(*i % outskip))
+    soilout (*i);/* Produce daily output to stdout or named file(genoutfile) */
+d542 2
+a543 2
+  if (soilverb > 0)
+    showprogress (*i + 1 - startpos);
+d556 49
+a604 44
+  int i, j;
+  extern void freescratch ();
+ 
+  setzero();
+  for (i = 0; i< spnr; i++){
+	  if (sp[i].mktable == 1){
+		  for (j = 0; j < 4; j++) {
+			  if (sp[i].tab[j].x)
+				  free (sp[i].tab[j].x);
+			  if (sp[i].tab[j].y)
+				  free (sp[i].tab[j].y);
+		  }
+		  if (sp[i].tab)
+			  free (sp[i].tab);
+	  }
+  }
+  spnr = 0;
+  firsttime = 1;
+  free(sp);
+  free (node);
+  free (theta);
+  free (howsat);
+  free (diffmoist);
+  free (thetm1);
+  free (dz);
+  free (z);
+  free (hm1);
+  free (h);
+  free (qrot);
+  free (layer);
+  free (depth);
+  free (k);
+  free (kgeom);
+  free (q);
+  free_matr (qdra, 4);
+  free (gwl);
+  free (basegw);
+
+  if (lbc == 4)
+	  free (hgiven);
+
+  sp = NULL;
+  node = NULL;
+  freescratch ();
+d607 2
+a608 1
+/*+Name: readstype 
+d610 1
+a610 3
+ *  Prototype: int readstype (char *section, char *fname, int layer)
+ *
+ *  Description: Allocates new sp if needed and reads soil parameters
+d613 1
+a613 2
+ *  Returns: index of sp linked to node+*/
+
+d637 2
+a638 3
+	switch (sp[spnr -1].method)
+	{
+		case 0:			/* Use clapp & Hornberger stuff */
+d644 1
+a644 1
+		case 2:			/* This set in readvangenu as well !!! */
+d647 1
+a647 1
+		case 3:			/* Dtermine parameters from marquardt, use stand-alone version ! */
+d650 1
+a650 1
+		case 4:			/* Read input from TOPOG _soil tables (experimental) */
+d653 2
+a654 1
+		case 5:			/* Use user defined functions */
+d657 1
+@
+
+
+1.31
+log
+@Added support fomr method = 5 -> S-Lang theta/h/k/dmc functions
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/soil/RCS/swatsoil.c,v 1.30 1996/11/10 15:24:45 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1996/11/10 15:24:45 $
+d9 1
+a9 1
+"$Id: swatsoil.c,v 1.30 1996/11/10 15:24:45 schj Exp $";
+d28 1
+a28 1
+int spnr;/* Number of soil types in mem */
+d119 1
+a119 1
+extern double timestep (int step);
+d122 2
+a123 2
+extern void evapotra ();
+extern void reduceva ();
+a142 1
+  /*  double term1, expon1;*/
+d269 1
+a269 1
+  char s[1024]/*,ss[1024]*/;
+d276 2
+a277 2
+      node[layer].as_above = TRUE;
+      exitonerror = 0;
+d279 3
+a281 3
+    node[layer].as_above = FALSE;
+    exitonerror = 1;
+    rlay++;
+d293 2
+d383 1
+a383 2
+    fprintf(stderr,"Error: S-Lang function getspars not defined and needed if method = 5\n");
+    exit(1);
+d463 4
+a466 4
+   soilverb = getdefint ("soil", "verbose", verbose, infilename, FALSE);
+   (void) showit ("swatsoil",MESG,"getting initial values",2,soilverb);
+   getparams (infilename);
+   mkscratch ();
+d468 5
+d523 3
+a525 2
+  evapotra (*i);                /* Soil evaporation */
+  reduceva ();                  /* reduce soil evaporation*/
+d529 1
+a529 1
+      (void) timestep (*i);	/* */
+d531 1
+a531 1
+      if (dodrain)
+d559 1
+a559 1
+    soilout (*i);		/* Produce daily output to stdout or named file(genoutfile) */
+d578 15
+a592 15
+  for (i = 0; i< spnr; i++)
+    {
+      if (sp[i].mktable == 1)
+	{
+	  for (j = 0; j < 4; j++)
+	    {
+	      if (sp[i].tab[j].x)
+		  free (sp[i].tab[j].x);
+	      if (sp[i].tab[j].y)
+		free (sp[i].tab[j].y);
+	    }
+	  if (sp[i].tab)
+	    free (sp[i].tab);
+	}
+    }
+d614 1
+a614 1
+    free (hgiven);
+d616 2
+d634 6
+a639 3
+    int exitonerror = 1;
+    spnr++; /* allocate net soil type and inc array index */
+    sp = (soilparmt *) ts_memory ((void *)sp, spnr * sizeof (soilparmt), progname);
+d641 4
+a644 1
+  exitonerror = FALSE;
+d646 1
+a646 4
+  strcpy (sp[spnr -1].description, 
+	  getdefstr (secname, "description", "NO DESCRIPTION", fname, FALSE));
+  sp[spnr -1].residual_water = 
+      getdefdoub (secname, "theta_residual", 0.0, fname, TRUE);
+d648 3
+d652 25
+a676 32
+  /* IETS vAN EEN NE SPNR.....??? */
+  exitonerror = layer > 0 ? FALSE : TRUE;
+ 
+  /* Get k_hor/k_ver if drainage is used */
+  if (dodrain)
+      sp[spnr - 1].kh_kv = getdefdoub (secname, "kh/kv", 1.0, fname, FALSE);
+  
+  sp[spnr -1].method = getdefint (secname, "method", 1, infilename, TRUE);
+  switch (sp[spnr -1].method)
+    {
+    case 0:			/* Use clapp & Hornberger stuff */
+      readclapp (secname, spnr -1, layer);
+      break;
+    case 1:
+      readvangenu (secname, spnr -1, layer);
+      break;
+    case 2:			/* This set in readvangenu as well !!! */
+      Perror (progname, 1, RCSid, "Method obsolute, use mktable in soil section", "");
+      break;
+    case 3:			/* Dtermine parameters from marquardt, use stand-alone version ! */
+      Perror (progname, 1, RCSid, "This function no longer updated (k vs h method = 3)", "Use stand-alone version, or _soil program");
+      break;
+    case 4:			/* Read input from TOPOG _soil tables (experimental) */
+      read_soiltable (secname, spnr -1, layer);
+      break;
+     case 5:			/* Use user defined functions */
+      readuserf (secname, spnr -1, layer);
+      break;
+    default:
+      Perror (progname, 1, RCSid, "Method not known:", "k vs h method");
+      break;
+    }
+a679 1
+
+@
+
+
+1.30
+log
+@added fieldcap + xtra calcgwl at begin of step (see swatre.f)
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/soil/RCS/swatsoil.c,v 1.29 1996/11/05 15:00:48 schj Alpha $ */
+d5 1
+a5 1
+ *  $Date: 1996/11/05 15:00:48 $
+d9 1
+a9 1
+"$Id: swatsoil.c,v 1.29 1996/11/05 15:00:48 schj Alpha $";
+d27 4
+a30 2
+int layers;			/* number of soil layers */
+soilparmt *soilparm;
+d77 4
+d104 3
+a106 1
+void readvangenu (int layer);
+d108 1
+a108 2
+void read_soiltable (int layer);
+void readclapp (int layer);
+d127 1
+d132 7
+a138 4
+/*- 
+ *  void initial()
+ *  set initial values
+ */
+d143 1
+a143 1
+  double term1, expon1;
+a166 7
+
+  for (i = 0; i < layers; i++)
+    {
+      expon1 = soilparm[i].l / soilparm[i].m - 2.0;
+      term1 = pow (1.0 - pow (0.99, 1.0 / soilparm[i].m), soilparm[i].m);
+    }
+
+d177 2
+a178 2
+		showit("swatsoil",ERR,"Point not layers (theta_initial)",1,verbose);
+		Perror(progname,1,RCSid,"Theta initial array length not correct","");
+d182 3
+a184 3
+	  soilparm[i].theta_initial = tmparray[i];
+	  theta[i] = soilparm[i].theta_initial;
+	  h[i] = soilparm[i].prhnodeF (i, theta[i]);
+d190 1
+a190 1
+	  theta[layers - 1] = soilparm[layers-1].thenodeF (layers - 1, h[layers - 1]);
+d196 2
+a197 2
+		showit("swatsoil",ERR,"Point not layers (h_initial)",1,verbose);
+		Perror(progname,1,RCSid,"H initial array length not correct","");
+d201 3
+a203 3
+	  soilparm[i].h_initial = tmparray[i];
+	  h[i] = soilparm[i].h_initial;
+	  theta[i] = soilparm[i].thenodeF (i, h[i]);
+d216 1
+a216 1
+	  theta[i] = soilparm[i].thenodeF (i, h[i]);
+d228 1
+a228 1
+    volsat -= dz[i] * soilparm[i].thetas;
+d239 3
+a241 3
+  diffmoist[0] = soilparm[0].dmcnodeF (0, h[0]);
+  k[0] = soilparm[0].theta2kF (0, theta[0]);
+  kgeom[0] = 0.5 * (soilparm[0].ksat + k[0]);
+d244 2
+a245 2
+      diffmoist[i] = soilparm[i].dmcnodeF (i, h[i]);
+      k[i] = soilparm[i].theta2kF (i, theta[i]);
+d254 1
+a254 1
+  hatm = -2.75E5;
+d259 8
+a266 4
+/*-
+ * void initlayer(int layer)
+ * reads init values for layer layer
+ */
+d268 1
+a268 2
+initlayer (layer)
+     int layer;
+d270 2
+a271 2
+  char s[1024],ss[1024];
+  int exitonerror;
+d276 6
+a281 4
+  if (!issection (s, infilename) && layer != 0)
+    soilparm[layer].as_above = TRUE;
+  else{
+    soilparm[layer].as_above = FALSE;
+d285 1
+a285 38
+  soilparm[layer].rlay = rlay;
+
+  exitonerror = FALSE;
+  strcpy (soilparm[layer].description, getdefstr (s, "description", layer > 0 ? soilparm[layer - 1].description : "NO DESCRIPTION", infilename, exitonerror));
+  sprintf(ss,"description of layer %d: %s",layer,soilparm[layer].description);
+  if (!soilparm[layer].as_above)
+  	showit ("swatsoil",MESG,ss,2,soilverb);
+  soilparm[layer].output_points = getdefint (s, "output_points", layer > 0 ? soilparm[layer - 1].output_points : 0, infilename, exitonerror);
+  soilparm[layer].residual_water = getdefdoub (s, "theta_residual", layer > 0 ? soilparm[layer - 1].residual_water : 0.0, infilename, exitonerror);
+
+  exitonerror = layer > 0 ? FALSE : TRUE;
+  dz[layer] = getdefdoub (s, "thickness", layer > 0 ? dz[layer - 1] : 0.0, infilename, exitonerror);
+    soilparm[layer].perc_roots = getdefdoub (s, "perc_roots", layer > 0 ? soilparm[layer - 1].perc_roots : 0.0, infilename, FALSE);
+  if (dodrain)
+  soilparm[layer].kh_kv = getdefdoub (s, "kh/kv", layer > 0 ? soilparm[layer - 1].kh_kv : 1.0, infilename, FALSE);
+  
+  soilparm[layer].method = getdefint (s, "method", layer > 0 ? soilparm[layer - 1].method : 1, infilename, exitonerror);
+  switch (soilparm[layer].method)
+    {
+    case 0:			/* Use clapp & Hornberger stuff */
+      readclapp (layer);
+      break;
+    case 1:
+      readvangenu (layer);
+      break;
+    case 2:			/* This set in readvangenu as well !!! */
+      Perror (progname, 1, RCSid, "Method obsolute, use mktable in soil section", "");
+      break;
+    case 3:			/* Dtermine parameters from marquardt, use stand-alone version ! */
+      Perror (progname, 1, RCSid, "This function no longer updated (k vs h method = 3)", "Use stand-alone version, or _soil program");
+      break;
+    case 4:			/* Read input from TOPOG _soil tables (experimental) */
+      read_soiltable (layer);
+      break;
+    default:
+      Perror (progname, 1, RCSid, "Method not known:", "k vs h method");
+      break;
+    }
+d287 11
+d301 7
+a307 4
+/*- 
+ * void read_soiltable(layer)
+ * 
+ */
+d309 1
+a309 2
+read_soiltable (layer)
+     int layer;
+a311 1
+  char s[1024];
+d313 1
+a313 1
+  int exitonerror;
+d317 1
+a317 3
+  sprintf (s, "layer_%d", layer);
+  exitonerror = layer > 0 ? FALSE : TRUE;
+  if ((ftype = getdefint (s, "tablefiletype", ftype, infilename, FALSE)) != 1)
+d321 13
+a333 26
+  soilparm[layer].thetas = getdefdoub (s, "thetas", layer > 0 ? soilparm[layer - 1].thetas : 0.0, infilename, exitonerror);
+  soilparm[layer].ksat = getdefdoub (s, "ksat", layer > 0 ? soilparm[layer - 1].ksat : 0.0, infilename, exitonerror);
+  soilparm[layer].mktable = 1;	/* set this to 1 as well */
+
+  if (!soilparm[layer].output_points)
+    soilparm[layer].output_points = layers;
+
+  if (soilparm[layer].as_above)
+    {				/* Yes we already have this table */
+      soilparm[layer].tab = soilparm[layer - 1].tab;
+      /* here we need to assing all parameters from previous layer
+         as a precaution */
+      /* Vars we probably need:
+         ksat
+         residual water
+         saturated water content
+       */
+    }
+  else
+    {				/* First create an empty table */
+      strcpy (tabfname, getdefstr (s, "tablefile", NULL, infilename, TRUE));
+      if ((thef = fopen (tabfname, "r")) == NULL)
+	Perror (progname, 1, RCSid, "Soil table file open failed:", tabfname);
+      readtablefile (thef, layer, ftype);
+      (void)fclose (thef);		/* close the table file */
+    }
+d335 4
+a338 4
+   soilparm[layer].theta2kF=theta2k_2;
+   soilparm[layer].dmcnodeF=dmcnode_2;
+   soilparm[layer].prhnodeF=prhnode_2;
+   soilparm[layer].thenodeF=thenode_2;
+d342 1
+a342 2
+readclapp (layer)
+     int layer;
+d344 2
+a345 3
+  char s[1024];
+  int exitonerror;
+  extern void filltables ();
+d347 4
+a350 9
+  sprintf (s, "layer_%d", layer);
+  exitonerror = layer > 0 ? FALSE : TRUE;
+  soilparm[layer].thetas = getdefdoub (s, "thetas", layer > 0 ? soilparm[layer - 1].thetas : 0.0, infilename, exitonerror);
+  soilparm[layer].ksat = getdefdoub (s, "ksat", layer > 0 ? soilparm[layer - 1].ksat : 0.0, infilename, exitonerror);
+  soilparm[layer].data_points = layers;
+  if (!soilparm[layer].output_points)
+    soilparm[layer].output_points = layers;
+  soilparm[layer].b = getdefdoub (s, "b", layer > 0 ? soilparm[layer - 1].b : 0.0, infilename, exitonerror);
+   soilparm[layer].psisat = getdefdoub (s, "psisat", layer > 0 ? soilparm[layer - 1].psisat : 0.0, infilename, exitonerror);
+d353 4
+a356 4
+   soilparm[layer].theta2kF=theta2k_0;
+   soilparm[layer].dmcnodeF=dmcnode_0;
+   soilparm[layer].prhnodeF=prhnode_0;
+   soilparm[layer].thenodeF=thenode_0;
+d359 1
+a359 2
+  if ((soilparm[layer].mktable = getdefint (s, "mktable", soilparm[0].mktable, infilename, FALSE))
+      != FALSE)
+d361 6
+a366 13
+      if (soilparm[layer].as_above)
+	{			/* Yes we already have this table */
+	  soilparm[layer].tab = soilparm[layer - 1].tab;
+	}
+      else
+	{			/* First create an empty table */
+	  filltables (layer);
+	}
+/* ReSet function pointers to the right functions (detbytable = 3) */
+       soilparm[layer].theta2kF=theta2k_2;
+       soilparm[layer].dmcnodeF=dmcnode_2;
+       soilparm[layer].prhnodeF=prhnode_2;
+       soilparm[layer].thenodeF=thenode_2;
+d370 5
+d376 2
+a377 1
+static double ttl;
+d379 6
+d386 5
+a391 28
+/*- void readvangenu(int layer)
+ *  read van gunuchten stuff for layer layer
+ */
+void
+readvangenu (layer)
+     int layer;
+{
+  char s[1024];
+  int exitonerror;
+  extern void filltables ();
+
+  sprintf (s, "layer_%d", layer);
+  exitonerror = layer > 0 ? FALSE : TRUE;
+  soilparm[layer].thetas = getdefdoub (s, "thetas", layer > 0 ? soilparm[layer - 1].thetas : 0.0, infilename, exitonerror);
+  soilparm[layer].ksat = getdefdoub (s, "ksat", layer > 0 ? soilparm[layer - 1].ksat : 0.0, infilename, exitonerror);
+  soilparm[layer].data_points = layers;
+  if (!soilparm[layer].output_points)
+    soilparm[layer].output_points = layers;
+  soilparm[layer].n = getdefdoub (s, "n", layer > 0 ? soilparm[layer - 1].n : 0.0, infilename, exitonerror);
+  ttl = getdefdoub (s, "l", layer > 0 ? ttl : 0.0, infilename, exitonerror);
+  soilparm[layer].m = 1.0 - (1.0 / soilparm[layer].n);
+  soilparm[layer].l = soilparm[layer].m * (ttl + 2.0);
+  soilparm[layer].alpha = getdefdoub (s, "alpha", layer > 0 ? soilparm[layer - 1].alpha : 0.0, infilename, exitonerror);
+
+   soilparm[layer].theta2kF=theta2k_1;
+   soilparm[layer].dmcnodeF=dmcnode_1;
+   soilparm[layer].prhnodeF=prhnode_1;
+   soilparm[layer].thenodeF=thenode_1;
+d393 1
+a393 2
+  if ((soilparm[layer].mktable = getdefint (s, "mktable", soilparm[0].mktable, infilename, FALSE))
+      != FALSE)
+d395 6
+a400 12
+      if (soilparm[layer].as_above)
+	{			/* Yes we already have this table */
+	  soilparm[layer].tab = soilparm[layer - 1].tab;
+	}
+      else
+	{			/* First create an empty table */
+	  filltables (layer);
+	}
+       soilparm[layer].theta2kF=theta2k_2;
+       soilparm[layer].dmcnodeF=dmcnode_2;
+       soilparm[layer].prhnodeF=prhnode_2;
+       soilparm[layer].thenodeF=thenode_2;
+a403 4
+#ifdef MAQ
+/*- void get_detvangenu(int layer)
+ *  determine van gunuchten stuff for layer layer
+ */
+d405 11
+d417 1
+a417 2
+get_detvangenu (layer)
+     int layer;
+d419 2
+a420 7
+  char s[1024];
+  int exitonerror;
+  int pts;
+  int detvangenu (double *theta, double *head, int pts, double thetas,
+		  double thetar, double *alpha, double *n, double *l);
+  static double *pf;
+  static double *theta;
+d422 22
+a443 27
+  sprintf (s, "layer_%d", layer);
+  exitonerror = layer > 0 ? FALSE : TRUE;
+  soilparm[layer].thetas = getdefdoub (s, "thetas", layer > 0 ? soilparm[layer - 1].thetas : 0.0, infilename, exitonerror);
+  soilparm[layer].ksat = getdefdoub (s, "ksat", layer > 0 ? soilparm[layer - 1].ksat : 0.0, infilename, exitonerror);
+  soilparm[layer].data_points = layers;
+  if (!soilparm[layer].output_points)
+    soilparm[layer].output_points = layers;
+  soilparm[layer].n = getdefdoub (s, "n", layer > 0 ? soilparm[layer - 1].n : 0.0, infilename, exitonerror);
+  ttl = getdefdoub (s, "l", layer > 0 ? ttl : 0.0, infilename, exitonerror);
+  soilparm[layer].m = 1.0 - (1.0 / soilparm[layer].n);
+  soilparm[layer].l = soilparm[layer].m * (ttl + 2.0);
+  soilparm[layer].alpha = getdefdoub (s, "alpha", layer > 0 ? soilparm[layer - 1].alpha : 0.0, infilename, exitonerror);
+  pf = getdefar (s, "pf", pf, infilename, &pts, exitonerror);
+  theta = getdefar (s, "theta", theta, infilename, &pts, exitonerror);
+
+  if (!soilparm[layer].as_above)
+    {
+      if (detvangenu (theta, pf, pts, soilparm[layer].thetas,
+		      soilparm[layer].residual_water, &soilparm[layer].alpha,
+		      &soilparm[layer].n, &soilparm[layer].l))
+	Perror (progname, 1, RCSid, "Error while fitting van Genuchten parameters", "");
+      printcom ("Following parameters determine with non-linear regression");
+      sprintf (s, "alpha_%d", layer);
+      printfl (s, soilparm[layer].alpha);
+      sprintf (s, "n_%d", layer);
+      printfl (s, soilparm[layer].n);
+    }
+a444 1
+#endif
+d448 3
+a450 1
+/*- void readfortab(int layer)
+d452 1
+a452 16
+ */
+void
+readfortab (layer)
+     int layer;
+{
+  /*
+     soilparm[layer].theta = getdefar (s, "theta", NULL, infilename, &pts);
+     exitonerror = TRUE;
+     soilparm[layer].pf = getdefar (s, "pf", NULL, infilename, &pts);
+     soilparm[layer].thickness = getdefdoub (s, "thickness", 0.0, infilename);
+     exitonerror = FALSE;
+   */
+}
+
+/*-
+ * void presoil(void)
+d454 1
+a454 1
+ */
+d485 1
+a485 1
+    fprintf (genoutfile, "%d ", soilparm[i].as_above);
+d505 5
+a509 2
+/*-
+ * void daysoil (int i )
+d511 1
+a511 3
+ * Calculated theta etc for end of time in record
+ * i of the precipitation file. This is the core of the soil module.
+ */
+d513 1
+a513 1
+daysoil (int *i)
+d528 3
+d559 3
+a561 2
+/*-
+ * void postsoil()
+d563 3
+a565 2
+ * Cleans up after presoil and daysoil
+ */
+d572 1
+a572 1
+  for (i = 0; i <layers; i++)
+d574 1
+a574 1
+      if (!soilparm[i].as_above)
+d576 1
+a576 5
+	  if (soilparm[i].theta)
+	    free (soilparm[i].theta);
+	  if (soilparm[i].pf)
+	    free (soilparm[i].pf);
+	  if (soilparm[i].mktable == 1)
+d578 4
+a581 9
+	      for (j = 0; j < 4; j++)
+		{
+		  if (soilparm[i].tab[j].x)
+		  free (soilparm[i].tab[j].x);
+		  if (soilparm[i].tab[j].y)
+		  free (soilparm[i].tab[j].y);
+		}
+		  if (soilparm[i].tab)
+	      free (soilparm[i].tab);
+d583 2
+d587 2
+a588 1
+  free (soilparm);
+d611 61
+@
+
+
+1.29
+log
+@Updated to Alpha version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/soil/RCS/swatsoil.c,v 1.28 1996/10/22 17:57:04 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1996/10/22 17:57:04 $
+d9 1
+a9 1
+"$Id: swatsoil.c,v 1.28 1996/10/22 17:57:04 schj Exp $";
+d20 1
+d591 1
+a591 1
+ * i of the precipitation file.
+d597 1
+a597 1
+  daynr = *i + 1;
+d599 2
+a600 2
+  evapotra (*i);
+  reduceva ();
+d603 1
+d615 2
+d618 1
+a618 1
+  while (!flendd);		/* W only one day at the moment */
+d621 1
+a621 1
+  SMD = smd(smddepth == 0.0 ? data[drootset].xy[*i].y : smddepth,-100.0);
+@
+
+
+1.28
+log
+@removed dosoil
+removed log in file
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/soil/RCS/swatsoil.c,v 1.27 1996/10/06 16:30:10 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1996/10/06 16:30:10 $
+d9 1
+a9 1
+"$Id: swatsoil.c,v 1.27 1996/10/06 16:30:10 schj Exp $";
+@
+
+
+1.27
+log
+@move getparam to seperate file
+added pointers to theta-h functions to soilparm[].*
+@
+text
+@d1 2
+a2 2
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.99/src/soil/RCS/swatsoil.c,v 1.26 1996/09/19 09:43:08 schj Exp $ */
+/*- 
+d5 1
+a5 54
+ *  $Date: 1996/09/19 09:43:08 $
+ *  $Log: swatsoil.c,v $
+ *  Revision 1.26  1996/09/19 09:43:08  schj
+ *  Just before adding pointer to k functions etc
+ *
+ *  Revision 1.25  1996/04/09 12:08:16  schj
+ *  minor
+ *
+ *  Revision 1.24  1996/03/25 07:50:50  schj
+ *  removed TRY_SUBDAY
+ *
+ *  Revision 1.23  1996/03/24 11:39:50  schj
+ *  changes to strict ansi
+ *  added diferent vert and hor ksat
+ *  etc...
+ *
+ * Revision 1.22  1996/02/08  08:19:01  schj
+ * added subdayly stuff
+ *
+ * Revision 1.21  1996/01/25  15:07:12  schj
+ * added support for reading and using TOPOG _soil tables
+ * at present some vars are still needed in input-file, this
+ * has to bee cleaned up
+ *
+ *  Revision 1.20  1995/12/17 21:46:44  schj
+ *  added convergenge and itter arrays
+ *  changed showprogress call
+ *
+ *  Revision 1.19  1995/12/05 03:04:43  schj
+ *  added lookup table support
+ *
+ *  Revision 1.18  1995/11/14 20:29:00  schj
+ *  added detvangenu and some minor revisions
+ *
+ * Revision 1.17  1995/10/30  13:55:56  schj
+ * added deffile.h
+ *
+ * Revision 1.15  1995/10/19  13:05:57  schj
+ * seems to work now
+ *
+ * Revision 1.14  1995/09/26  22:11:53  schj
+ * added soil evap redu stuff
+ *
+ * Revision 1.13  1995/09/23  20:47:36  schj
+ * added start of tables caculation method (using method[5] in soilparm)
+ *
+ * Revision 1.12  1995/09/19  13:41:58  schj
+ * updated for exitonerror
+ *
+ * Revision 1.11  1995/09/04  11:39:08  schj
+ * moved prec = data[ to evapotra
+ * gwl, hgiven length set to steps
+ * added iniprogress
+ *
+d9 1
+a9 1
+"$Id: swatsoil.c,v 1.26 1996/09/19 09:43:08 schj Exp $";
+d24 1
+a24 1
+int headbased = TRUE;		/* default to head-based solution */
+a103 2
+extern void allocall ();
+void initlayer (int layer);
+a120 1
+extern double cofred;		/* soil evap reduce stuff */
+d130 1
+a130 1
+  int i, exitonerror;
+d132 2
+a133 1
+  char s[1024];
+d170 5
+d177 1
+a177 6
+	  exitonerror = i > 0 ? FALSE : TRUE;
+	  sprintf (s, "layer_%d", i);
+	  soilparm[i].theta_initial =
+	    getdefdoub (s, "theta_initial",
+			i > 0 ? soilparm[i - 1].theta_initial : 0.0, infilename, exitonerror);
+	  /* Skip check from swatr !! */
+d181 1
+d189 5
+d196 1
+a196 3
+	  exitonerror = i > 0 ? FALSE : TRUE;
+	  sprintf (s, "layer_%d", i);
+	  soilparm[i].h_initial = getdefdoub (s, "h_initial", i > 0 ? soilparm[i - 1].h_initial : 0.0, infilename, exitonerror);
+d200 1
+d252 1
+d262 1
+a262 1
+  char s[1024];
+d274 1
+d279 3
+a281 2
+  if (soilverb > 1)
+    showit (soilparm[layer].description);
+d287 1
+a287 1
+
+d545 1
+a545 3
+   if (soilverb > 1)
+        (void) showit ("soil: Getting initial values");
+
+d595 1
+a627 1
+  setzero ();			/* Set daily stuff to zero */
+a690 16
+/*-
+ *	void dosoil()
+ * 	starts the soil module, this loops itproc() for each new day
+ */
+void
+dosoil ()
+{
+  int i;
+
+  presoil ();
+  for (i = 0; i < steps; i++)
+    {				/* do for fixed amount of days */
+      daysoil (&i);
+    }
+  postsoil ();
+}
+@
+
+
+1.26
+log
+@Just before adding pointer to k functions etc
+@
+text
+@d1 1
+a1 1
+/* $Header: /homes/schj/src/vamps_0.98/src/soil/RCS/swatsoil.c,v 1.25 1996/04/09 12:08:16 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1996/04/09 12:08:16 $
+d7 3
+d62 1
+a62 1
+"$Id: swatsoil.c,v 1.25 1996/04/09 12:08:16 schj Exp $";
+d73 3
+d87 1
+a87 1
+
+d93 1
+d173 1
+a173 1
+int getparams (char *infilename);
+a177 254
+/*-
+ *	int getparams(char *infilename)
+ *	Gets the parameters from the inputfile needed for soil module
+ */
+int
+getparams (infilename)
+     char *infilename;
+{
+  int i;
+  int are_roots=0;
+  XY *tmpxy;
+  char s[1024];
+
+
+  speed = getdefint ("soil","speed",speed,infilename,FALSE);
+  switch (speed) {
+     case 1: {
+	/* This is the slowest setting */
+	solvebyband = 1;
+	maxitr = (int) (maxitr * 3);
+	thetol *= 0.4;
+	tm_mult *= 0.4;
+	dtmin *= 0.5;
+	mktab = 0;
+	break;
+     }
+     case 2:  {
+	maxitr = (int)(maxitr * 2);
+	thetol *= 0.8;
+	tm_mult *= 0.6;
+	dtmin *= 0.8;
+	mktab = 0;
+	break;
+     }
+     case 3:  { /* default */
+	break;
+     }
+     case 4:  {
+        maxitr = (int)(maxitr * 0.8);
+	swnums = 1;
+	tm_mult *= 1.2;
+	dtmin *= 2.0;
+	thetol *=1.1;
+	break;
+     }
+     case 5:  {	
+        maxitr = (int)(maxitr * 0.6);
+	thetol *=1.1;
+	tm_mult *= 1.4;
+	mktab = 1;
+	dtmin *= 5.0;
+	swnums = 1;
+	break;
+     }
+     case 6:  {
+	/* This is the fastest setting */
+        maxitr = (int)(maxitr * 0.3);
+	mktab = 1;
+	thetol *= 1.2;
+	swnums = 1;
+	dtmin *= 10.0;
+	break;
+     }
+  }
+  dtmax = getdefdoub ("soil", "dtmax", dtmax, infilename, FALSE);
+  dtmin = getdefdoub ("soil", "dtmin", dtmin, infilename, FALSE);
+  thetol = getdefdoub ("soil", "thetol", thetol, infilename, FALSE);
+  swnums = getdefint ("soil", "swnums", swnums, infilename, FALSE);
+  tm_mult = getdefint ("soil", "tm_mult", tm_mult, infilename, FALSE);
+  maxitr = getdefint ("soil", "maxitr", maxitr, infilename, FALSE);
+  headbased = getdefint ("soil", "headbased", headbased, infilename, FALSE);
+  solvebyband = getdefint ("soil", "solvebyband", solvebyband, infilename, FALSE);
+
+  /* Howmany steps to skip in output */
+  outskip = getdefint ("soil", "outskip", outskip, infilename, FALSE);
+  outskip = outskip <= 0 ? 1 : outskip;
+  /* All following parameters are needed */
+  pondmx = getdefdoub ("soil", "pondmx", pondmx, infilename, TRUE);
+  layers = getdefint ("soil", "layers", 0, infilename, TRUE);	/* number of soil layers */
+  lbc = getdefint ("soil", "bottom", 0, infilename, TRUE);	/* lower boundary condition */
+  initprof = getdefint ("soil", "initprof", 0, infilename, TRUE);	/* initial cond */
+  dodrain = getdefint ("drainage", "method", 0, infilename, FALSE);
+  /* dodrain:
+   * 1 = TOPOG (only flow at saturation)
+   * 2 = VAMPS always lateral flow
+   * */
+
+  if (dodrain)
+    {
+      slope = getdefdoub ("drainage", "slope", slope, infilename, TRUE);
+      mqdra = (double *) ts_memory (NULL, layers * sizeof (double), progname);
+      for (i = 0; i < layers; i++)
+	mqdra[i] = 0.0;
+    }
+
+  allocall (layers);
+
+  switch (lbc)
+    {
+    case 0:
+      printcom ("Using bottom condition 0: Not tested !!.");
+      get_data (getdefstr ("ts", "gw", "nothing", infilename, TRUE), "gw");
+      gwset = getsetbyname ("gw");
+      Perror(progname,0,RCSid,"Bottom condition 0 (daily gw table)","NOT TESTED!!");
+      break;
+    case 1:
+      printcom ("Using bottom condition 1: Not tested!!.");
+      Perror(progname,0,RCSid,"Bottom condition 1 (given flux)","NOT TESTED!!");
+      break;
+    case 2:
+      printcom ("Using bottom condition 2: Not tested!!.");
+      Perror(progname,0,RCSid,"Bottom condition 2 (seepage/infilt)","NOT TESTED!!");
+      break;
+    case 3:
+      printcom ("Using bottom condition 3: Not tested!!.");
+      Perror(progname,0,RCSid,"Bottom condition 3 (Flux calculated as function of h)","NOT TESTED!!");
+      break;
+    case 4:
+      printcom ("Using bottom condition 4: Fixed groundwater level.");
+      hgiven[0] = getdefdoub ("soil", "gwlevel", 0.0, infilename, TRUE);
+      for (i = 1; i < (steps + 2); i++)
+	hgiven[i] = hgiven[0];
+      break;
+    case 5:
+      printcom ("Using bottom condition 5: No flow.");
+      break;
+    case 6:
+      printcom ("Using bottom condition 6: Free drainage.");
+      break;
+    default:
+      Perror (progname, 1, RCSid, "Unkown bottom boundary", "");
+      break;
+    }
+
+
+  soilparm[0].mktable = getdefint ("soil", "mktable", mktab, infilename, FALSE);
+  tablesize = getdefint ("soil", "tablesize", tablesize, infilename, FALSE);
+  dumptables = getdefint ("soil", "dumptables", dumptables, infilename, FALSE);
+
+  for (i = 0; i < layers; i++)	/* Init each layer */
+    initlayer (i);
+
+  for (i = 0; i < layers; i++)
+    if (soilparm[i].mktable)
+      soilparm[i].method = 2;
+
+  smooth (getdefint ("soil", "smooth", 0, infilename, FALSE), 1);
+  smooth (getdefint ("soil", "smooth", 0, infilename, FALSE), 2);
+  smooth (getdefint ("soil", "smooth", 0, infilename, FALSE), 3);
+  fprintf (genoutfile, "ksat=");
+  for (i = 0; i < layers; i++)
+    {				/* Print ksat profile */
+      fprintf (genoutfile, "%g ", soilparm[i].ksat);
+    }
+  fprintf (genoutfile, "\n");
+  fprintf (genoutfile, "thetas=");
+  for (i = 0; i < layers; i++)
+    {				/* Print thetas profile */
+      fprintf (genoutfile, "%g ", soilparm[i].thetas);
+    }
+  fprintf (genoutfile, "\n");
+  fprintf (genoutfile, "residual_water=");
+  for (i = 0; i < layers; i++)
+    {				/* Print res profile */
+      fprintf (genoutfile, "%g ", soilparm[i].residual_water);
+    }
+  fprintf (genoutfile, "\n");
+
+  if ((intset = getsetbyname ("interception")) < 0)
+    {
+      strcpy (s, getdefstr ("ts", "interception", "nothing", infilename, FALSE));
+      if (strcmp (s, "nothing") == 0)
+	Perror (progname, 1, RCSid, "Need interception data", "");
+      get_data (s, "interception");
+      intset = getsetbyname ("interception");
+    }
+
+  if ((pevapset = getsetbyname ("pevaporation")) < 0)
+    {
+      strcpy (s, getdefstr ("ts", "pevaporation", "nothing", infilename, FALSE));
+      if (strcmp (s, "nothing") == 0)
+	Perror (progname, 1, RCSid, "Need evaporation data", "");
+      get_data (s, "pevaporation");
+      pevapset = getsetbyname ("pevaporation");
+    }
+
+  if ((ptransset = getsetbyname ("ptranspiration")) < 0)
+    {
+      strcpy (s, getdefstr ("ts", "ptranspiration", "nothing", infilename, FALSE));
+      if (strcmp (s, "nothing") == 0)
+	Perror (progname, 1, RCSid, "Need transpiration data", "");
+      get_data (s, "ptranspiration");
+      ptransset = getsetbyname ("ptranspiration");
+    }
+
+  /* evaporation reduction  def= no reduction */
+  swredu = getdefint ("soil", "swredu", 0, infilename, FALSE);
+  if (swredu)
+    {
+      cofred = getdefdoub ("soil", "cofred", 0.0, infilename, TRUE);
+    }
+
+  /* blz 12 input */
+  /* Root extraction stuff */
+  /* First a tim series is checked, otherwise the depth var is used */   
+   strcpy (s, getdefstr ("ts", "drootz", "nothing", infilename, FALSE));
+     if (strcmp (s, "nothing") != 0){
+      	get_data (s, "drootz");
+      	drootset = getsetbyname ("drootz");
+        data[drootset].xy=resamp_a_to_b(data[drootset].xy,data[preset].xy,data[drootset].points,data[preset].points);
+       data[drootset].points = data[preset].points;
+	/* Make negative */
+  	for (i=0;i<data[preset].points;i++)
+		data[drootset].xy[i].y *= -1.0;
+      }else{
+        drootz = getdefdoub ("roots", "depth", 0.0, infilename, FALSE);
+     	tmpxy = (XY *) ts_memory (NULL,data[preset].points * sizeof(XY),
+		progname);
+  	for (i=0;i<data[preset].points;i++){
+		tmpxy[i].x=data[preset].xy[i].x;
+		tmpxy[i].y=-1.0*drootz;
+	}
+    	add_set(tmpxy,"drootz",NULL,data[preset].points,0,0);
+      	drootset = getsetbyname ("drootz");
+     }
+
+    for (i=0;i<data[preset].points;i++)
+	if (data[drootset].xy[i].y != 0.0)
+		are_roots++;
+
+
+  if (are_roots)
+    {
+      swsink = getdefint ("roots", "swsink", 0, infilename, TRUE);
+      zronam = 0.0;			/* NO nonactive layers */
+      swhypr = getdefint ("roots", "swhypr", 0, infilename, TRUE);
+      swupfu = getdefint ("roots", "swupfu", 0, infilename, TRUE);
+      if (swupfu == 1)
+	{
+	  cofsza = getdefdoub ("roots", "cofsza", 0.0, infilename, TRUE);
+	  cofszb = getdefdoub ("roots", "cofszb", 0.0, infilename, TRUE);
+	}
+
+      hlim1 = getdefdoub ("roots", "hlim1", 0.0, infilename, TRUE);
+      hlim2u = getdefdoub ("roots", "hlim2u", 0.0, infilename, TRUE);
+      hlim2l = getdefdoub ("roots", "hlim2l", 0.0, infilename, TRUE);
+      hlim3h = getdefdoub ("roots", "hlim3h", 0.0, infilename, TRUE);
+      hlim3l = getdefdoub ("roots", "hlim3l", 0.0, infilename, TRUE);
+      hlim3 = getdefdoub ("roots", "hlim3", 0.0, infilename, TRUE);
+      hlim4 = getdefdoub ("roots", "hlim4", 0.0, infilename, TRUE);
+    }
+
+  return 0;
+}
+d189 1
+a189 1
+  double dsoilp;
+d234 1
+a234 1
+	  h[i] = prhnode (i, theta[i], soilparm[i].method);
+d239 1
+a239 1
+	  theta[layers - 1] = thenode (layers - 1, h[layers - 1], soilparm[layers - 1].method);
+d249 1
+a249 1
+	  theta[i] = thenode (i, h[i], soilparm[i].method);
+d261 1
+a261 1
+	  theta[i] = thenode (i, h[i], soilparm[i].method);
+d284 2
+a285 2
+  diffmoist[0] = dmcnode (0, h[0], soilparm[0].method);
+  k[0] = theta2k (0, theta[0], soilparm[0].method);
+d289 2
+a290 2
+      diffmoist[i] = dmcnode (i, h[i], soilparm[i].method);
+      k[i] = theta2k (i, theta[i], soilparm[i].method);
+d302 1
+a302 1
+
+d319 1
+a319 1
+  else
+d321 3
+a323 1
+
+d348 1
+a348 1
+      Perror (progname, 1, RCSid, "Method obsolute, use converttotable in soil section", "");
+a363 1
+/*Hier is het!! */
+d409 1
+a409 2
+      fclose (thef);		/* close the table file */
+      /*  Perror (progname, 1, RCSid, "Tables not working yet", ""); */
+d411 5
+a415 1
+
+d436 6
+d454 5
+d491 4
+d507 4
+d580 1
+a580 1
+ * void presoil()
+d583 1
+d585 1
+a585 1
+presoil ()
+d590 4
+a593 5
+  soilverb = getdefint ("soil", "verbose", verbose, infilename, FALSE);
+  if (soilverb > 1)
+    (void) showit ("soil: Getting initial values");
+
+  getparams (infilename);
+d595 3
+a597 1
+  mkscratch ();
+d626 2
+a627 1
+  make_Slang_soil_arrays();
+d629 4
+a632 1
+  initprogress ();
+d664 10
+@
+
+
+1.25
+log
+@minor
+@
+text
+@d1 3
+a3 2
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.98/src/soil/RCS/swatsoil.c,v 1.24 1996/03/25 07:50:50 schj alpha $ */
+/*- $RCSfile: swatsoil.c,v $
+d5 1
+a5 1
+ *  $Date: 1996/03/25 07:50:50 $
+d7 3
+d59 1
+a59 1
+"$Id: swatsoil.c,v 1.24 1996/03/25 07:50:50 schj alpha $";
+d147 3
+d190 4
+a193 3
+	maxitr = 25;
+	thetol *= 0.6;
+	dtmin = 1.0E-5;
+d198 1
+a198 2
+	/* This is a slightly faster setting */
+	maxitr = 20;
+d200 2
+a201 1
+	dtmin=1.0E-5;
+d205 1
+a205 1
+     case 3:  {
+d209 1
+d211 2
+a213 1
+	dtmin=1.0E-4;
+d217 3
+d221 1
+a221 1
+	dtmin = 1.0E-4;
+d227 1
+d231 1
+a231 1
+	dtmin = 1.0E-4;
+d239 1
+d426 2
+a427 1
+/*- void initial()
+a660 4
+/*- void readclapp(int layer)
+ *  reads clapp/hornberger stuff for layer layer
+ *  NOT FINISHED YET!!
+ */
+d666 2
+d670 12
+a681 2
+  soilparm[layer].b = getdefdoub (s, "b", 0.0, infilename, FALSE);
+  if (soilparm[layer].b == 0.0)
+d683 8
+a690 9
+      soilparm[layer].clayfrac = getdefdoub (s, "clayfrac", -1.0, infilename, TRUE);
+      /*detfromtab (layers); */
+      /*determine b from defaults, clayfrac */
+    }
+  if (soilparm[layer].clayfrac == -1.0 && soilparm[layer].b == 0.0)
+    {
+      strcpy (soilparm[layer].description, getdefstr (s, "description", "", infilename, TRUE));
+      /*detfromtab (layers); */
+      /*determine b from defaults,  Soiltype */
+d692 1
+a693 4
+  soilparm[layer].thetas = getdefdoub (s, "thetas", 0.0, infilename, TRUE);
+  soilparm[layer].ksat = getdefdoub (s, "ksat", 0.0, infilename, TRUE);
+  soilparm[layer].thickness = getdefdoub (s, "thickness", 0.0, infilename, TRUE);
+}
+d697 2
+d847 3
+a849 1
+
+d860 1
+a860 1
+daysoil (int i)
+d862 1
+a862 1
+  daynr = i + 1;
+d864 1
+a864 1
+  evapotra (i);
+d868 2
+a869 2
+      (void) timestep (i);	/* */
+      bocobot (i);		/* Bottom boundary conditions */
+d872 3
+a874 3
+      bocotop (i);		/* Top boundary conditions */
+      rootex (i,data[drootset].xy[i].y);/* root extraction */
+      headcalc (i, &t);
+d877 1
+a877 1
+      integral (i);
+d882 2
+a883 2
+  if (!(i % outskip))
+    soilout (i);		/* Produce daily output to stdout or named file(genoutfile) */
+d886 2
+a887 2
+  if (soilverb)
+    showprogress (i + 1 - startpos);
+a944 3
+
+  if (initprof == 2)
+    free (gwl);
+d960 1
+a960 1
+      daysoil (i);
+@
+
+
+1.24
+log
+@removed TRY_SUBDAY
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.98/src/soil/RCS/swatsoil.c,v 1.23 1996/03/24 11:39:50 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1996/03/24 11:39:50 $
+d6 3
+d55 1
+a55 1
+"$Id: swatsoil.c,v 1.23 1996/03/24 11:39:50 schj Exp $";
+d72 2
+d76 1
+a76 1
+int gwset, preset, intset, pevapset, ptransset;
+d106 2
+a107 3
+int fllast = FALSE;
+int maxtit = 5;			/* Max number of it in a timestep */
+int maxitr = 5;			/* Number of iterations */
+a109 1
+double precis = 0.5;		/* precision ?? */
+d157 1
+a157 1
+extern void rootex (int pt);
+d173 2
+a176 1
+  /*void detfromtab  (int i); */
+d178 43
+d227 1
+d291 1
+a291 1
+  soilparm[0].mktable = getdefint ("soil", "mktable", 0, infilename, FALSE);
+d360 28
+a387 4
+  swsink = getdefint ("roots", "swsink", 0, infilename, TRUE);
+  zronam = 0.0;			/* NO nonactive layers */
+  drootz[0] = -1.0 * getdefdoub ("roots", "depth", 0.0, infilename, TRUE);
+  if (drootz[0] < 0.0)
+d389 2
+a397 2
+      for (i = 1; i < (steps + 1); i++)
+	drootz[i] = drootz[0];
+d701 1
+a701 1
+  /* mktable for layer 0 is set in getparm */
+d808 1
+d834 1
+a834 1
+ * */
+d836 1
+a836 2
+daysoil (i)
+     int i;
+d839 1
+a839 1
+  flendd = FALSE;		/* end of timestep */
+d849 1
+a849 1
+      rootex (i);
+a875 1
+  extern double *greekb;
+a876 2
+  fprintf(stderr,"In postsoil\n");
+  fprintf(stderr,"greekb = %p gwl\n",greekb);
+a880 1
+  fprintf(stderr,"Layer %d\n",i);
+a888 1
+  fprintf(stderr,"Table %d\n",j);
+a898 1
+  fprintf(stderr,"After Layers\n");
+a899 1
+  fprintf(stderr,"After soilparm\n");
+a914 1
+  fprintf(stderr,"After qdra\n");
+a920 2
+  free (drootz);
+  fprintf(stderr,"After drootz\n");
+a923 2
+  fprintf(stderr,"After gwl\n");
+  fprintf(stderr,"greekb = %p gwl\n",greekb);
+a924 2
+  fprintf(stderr,"After freescratch\n");
+  fprintf(stderr,"End postsoil\n");
+@
+
+
+1.23
+log
+@changes to strict ansi
+added diferent vert and hor ksat
+etc...
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.97/src/soil/RCS/swatsoil.c,v 1.22 1996/02/08 08:19:01 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1996/02/08 08:19:01 $
+d6 5
+d52 1
+a52 1
+"$Id: swatsoil.c,v 1.22 1996/02/08 08:19:01 schj Exp $";
+a744 1
+#ifdef TRY_SUBDAY
+a746 1
+#endif
+@
+
+
+1.22
+log
+@added subdayly stuff
+@
+text
+@d1 1
+a1 1
+/* $Header: /homes/schj/src/vamps_0.96/src/soil/RCS/swatsoil.c,v 1.21 1996/01/25 15:07:12 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1996/01/25 15:07:12 $
+d6 3
+a26 3
+ * Revision 1.16  1995/10/23  07:51:09  schj
+ * *** empty log message ***
+ *
+d47 1
+a47 1
+"$Id: swatsoil.c,v 1.21 1996/01/25 15:07:12 schj Exp $";
+d50 1
+d55 1
+d58 2
+d90 2
+a91 2
+int *error;		/* length a year 366, must be same as input */
+int *itter;		/* length a year 366, must be same as input */
+d97 2
+a98 2
+int maxtit = 25;		/* Max number of it in a timestep */
+int maxitr = 25;		/* Number of iterations */
+d114 1
+d131 6
+a136 6
+void readvangenu __P ((int layer));
+void get_detvangenu __P ((int layer));
+void read_soiltable __P((int layer));
+void readclapp __P ((int layer));
+void allocall __P (());
+void initlayer __P ((int layer));
+d141 11
+a151 13
+extern void output __P ((int tstep));
+extern void soilout __P ((int tstep));
+extern void headcalc __P ((int i));
+extern void timestep __P (());
+extern void bocotop __P ((int pt));
+extern void bocobot __P ((int pt));
+extern void evapotra __P (());
+extern void reduceva __P (());
+extern void rootex __P (());
+void initial __P (());
+int getparams __P ((char *infilename));
+
+double *tar1, *tar2;		/* Tem arrays, alocated and freed in dossoil */
+d167 1
+a167 1
+  /*void detfromtab __P ((int i)); */
+d174 1
+d176 3
+d194 2
+a195 2
+      for (i=0; i< layers; i++)
+      	mqdra[i]=0.0;
+d204 1
+a204 1
+      get_data (getdefstr ("ts", "gw", "nothing", infilename, TRUE), NULL, "gw");
+d206 1
+d210 1
+d214 1
+d218 1
+d239 3
+a241 2
+   tablesize = getdefint ("soil", "tablesize", tablesize, infilename, FALSE);
+   dumptables = getdefint ("soil", "dumptables", dumptables, infilename, FALSE);
+d246 2
+a247 2
+	  if (soilparm[i].mktable)
+	  soilparm[i].method=2;
+d249 19
+a267 8
+  /* Check for precipitation */
+  if ((preset = getsetbyname ("precipitation")) < 0)
+    {
+      strcpy (s, getdefstr ("ts", "precipitation", "nothing", infilename, FALSE));
+      if (strcmp (s, "nothing") == 0)
+	Perror (progname, 1, RCSid, "Need precipitation data", "");
+      get_data (s, NULL, "precipitation");
+      preset = getsetbyname ("precipitation");
+d269 1
+d276 1
+a276 1
+      get_data (s, NULL, "interception");
+d285 1
+a285 1
+      get_data (s, NULL, "pevaporation");
+d294 1
+a294 1
+      get_data (s, NULL, "ptranspiration");
+d302 1
+a302 1
+      cofred = getdefint ("soil", "cofred", 0, infilename, TRUE);
+d319 1
+a319 1
+      for (i = 1; i < (steps + 2); i++)
+d445 1
+a445 1
+      kgeom[i] = 0.5 * (k[i] + k[i - 1]);
+d487 3
+d502 2
+a503 3
+    case 3: /* Dtermine parameters from marquardt, use stand-alone version !*/
+      Perror (progname, 0 ,RCSid, "This function no longer updated","Use stand-alone version, or _soil program");
+      get_detvangenu (layer);
+d505 2
+a506 2
+    case 4: /* Read input from TOPOG _soil tables (experimental) */
+      read_soiltable(layer);
+d509 1
+a509 1
+      Perror (progname, 1, RCSid, "Method not known", "k vs h method");
+d516 1
+a516 1
+/*Hier is het!!*/
+d523 1
+a523 1
+int layer;
+d529 2
+a530 3
+  int i, j;
+  int ftype=1; /* file type default = TOPOG */
+  extern int readtablefile __P((FILE *stream,int layer, int type));
+d534 7
+a540 7
+  if ((ftype = getdefint(s,"tablefiletype",ftype,infilename,FALSE)) != 1)
+    {/* only the TOPOG format has this information in the file */
+	exitonerror = TRUE;
+    }
+      soilparm[layer].thetas = getdefdoub (s, "thetas", layer > 0 ? soilparm[layer - 1].thetas : 0.0, infilename, exitonerror);
+      soilparm[layer].ksat = getdefdoub (s, "ksat", layer > 0 ? soilparm[layer - 1].ksat : 0.0, infilename, exitonerror);
+	soilparm[layer].mktable=1; /* set this to 1 as well */
+d545 20
+a564 20
+      if (soilparm[layer].as_above)
+	{			/* Yes we already have this table */
+	  soilparm[layer].tab = soilparm[layer - 1].tab;
+	  /* here we need to assing all parameters from previous layer
+	     as a precaution */
+	  /* Vars we probably need:
+	     ksat
+	     residual water
+	     saturated water content
+	     */
+	}
+      else
+	{			/* First create an empty table */
+	  strcpy(tabfname,getdefstr(s,"tablefile",NULL,infilename,TRUE));
+	  if ((thef = fopen (tabfname,"r")) == NULL)
+	    Perror (progname,1,RCSid,"Soil table file open failed:",tabfname);
+	  readtablefile (thef,layer,ftype);
+	  fclose(thef); /* close the table file */
+	/*  Perror (progname, 1, RCSid, "Tables not working yet", "");*/
+	}
+d609 1
+a609 2
+  int i, j;
+  extern void filltables();
+d634 1
+a634 1
+	  filltables(layer);
+d639 1
+d651 2
+a652 2
+  int detvangenu __P ((double *theta, double *head, int pts, double thetas,
+		       double thetar, double *alpha, double *n, double *l));
+d684 1
+a684 1
+
+a703 57
+/*- void allocall (int layers)
+ * allocate arrays needed in swatsoil.c
+ */
+
+void
+allocall (layers)
+     int layers;
+{
+  int i;
+
+  /* allocate memory for the layers */
+  soilparm = (soilparmt *) ts_memory ((void *) NULL, layers * sizeof (soilparmt), progname);
+
+  theta = (double *) ts_memory ((void *) NULL, layers * sizeof (double), progname);
+  diffmoist = (double *) ts_memory ((void *) NULL, layers * sizeof (double), progname);
+  thetm1 = (double *) ts_memory ((void *) NULL, layers * sizeof (double), progname);
+  dz = (double *) ts_memory ((void *) NULL, layers * sizeof (double), progname);
+  z = (double *) ts_memory ((void *) NULL, layers * sizeof (double), progname);
+  hm1 = (double *) ts_memory ((void *) NULL, layers * sizeof (double), progname);
+  h = (double *) ts_memory ((void *) NULL, layers * sizeof (double), progname);
+  qrot = (double *) ts_memory ((void *) NULL, layers * sizeof (double), progname);
+  layer = (double *) ts_memory ((void *) NULL, layers * sizeof (double), progname);
+  depth = (double *) ts_memory ((void *) NULL, layers * sizeof (double), progname);
+  k = (double *) ts_memory ((void *) NULL, (layers + 1) * sizeof (double), progname);
+  kgeom = (double *) ts_memory ((void *) NULL, (layers + 1) * sizeof (double), progname);
+  q = (double *) ts_memory ((void *) NULL, (layers + 1) * sizeof (double), progname);
+  inq = (double *) ts_memory ((void *) NULL, (layers + 1) * sizeof (double), progname);
+  cml = (double *) ts_memory ((void *) NULL, (layers) * sizeof (double), progname);
+
+  qdra = matr (4, layers);
+  gwl = (double *) ts_memory ((void *) NULL, 2 * sizeof (double), progname);
+  basegw = (double *) ts_memory ((void *) NULL, 2 * sizeof (double), progname);
+
+    error = (int *) ts_memory ((void *) NULL, (steps + 2) * sizeof (int), progname);
+    itter = (int *) ts_memory ((void *) NULL, (steps + 2) * sizeof (int), progname);
+  if (lbc == 4)
+    hgiven = (double *) ts_memory ((void *) NULL, (steps + 2) * sizeof (double), progname);
+  drootz = (double *) ts_memory ((void *) NULL, steps * sizeof (double), progname);
+
+  if (initprof == 2)
+    gwl = (double *) ts_memory ((void *) NULL, steps * sizeof (double), progname);
+
+  /* Filling with initial values */
+  for (i = 0; i < layers; i++)
+    {
+      layer[i] = i;
+      qdra[0][i] = 0.0;
+      qdra[1][i] = 0.0;
+      qdra[2][i] = 0.0;
+      qdra[3][i] = 0.0;
+    }
+    for (i=0;i<steps+2;i++){
+	    error[i]=0;
+	    itter[i]=0;
+    }
+}
+
+a718 2
+  tar1 = (double *) ts_memory ((void *) NULL, layers * sizeof (double), progname);
+  tar2 = (double *) ts_memory ((void *) NULL, layers * sizeof (double), progname);
+d734 1
+d742 2
+a743 2
+  t = data[preset].xy[0].x;
+#endif  
+d756 3
+a758 4
+ * Calculated theta etc for end of day (timestep) i
+ * Actually this should be changed to record I in precipitation
+ * file.
+ */
+a762 2
+  char ttt[1024];
+
+d764 1
+a764 6
+  if (soilverb > 1)
+    {
+      sprintf (ttt, "t = %d", i);
+      showit (ttt);
+    }
+  flendd = FALSE;
+d769 1
+a769 1
+      timestep (i);		/* */
+d774 2
+a775 2
+      rootex ();
+      headcalc (i);
+d779 1
+a779 2
+  if (soilverb == -1)
+    showprogress (i + 1 - startpos);
+d783 2
+a784 1
+  soilout (i);			/* Produce daily output to stdout or named file(genoutfile) */
+d786 1
+a786 5
+  if (soilverb > 1)
+    {
+      sprintf (ttt, "dt = %f", dt);
+      showit (ttt);
+    }
+a788 1
+
+d799 1
+a799 1
+  int i,j;
+d801 49
+d851 13
+a863 42
+   for (i=layers-1;i>=0; i--){
+      if (!soilparm[i].as_above){
+	 if (soilparm[i].theta)
+	   free(soilparm[i].theta);
+	 if (soilparm[i].pf)
+	   free(soilparm[i].pf);
+	 if (soilparm[i].mktable == 1){
+	    for(j=4;j>=0;j--){
+	       free(soilparm[i].tab[j].x);
+	       free(soilparm[i].tab[j].y);
+	    }
+	    free (soilparm[i].tab);
+	 }
+      }
+   }
+   free(soilparm);
+   free(theta);
+   free(diffmoist);
+   free(thetm1); 
+   free(dz);
+   free(z);
+   free(hm1);
+   free(h);
+   free(qrot);
+   free(layer);
+   free(depth);
+   free(k);
+   free(kgeom);
+   free(q);
+   free_matr(qdra,4);
+   free(gwl);
+   free(basegw);
+
+   if (lbc == 4)
+     free(hgiven);
+   free(drootz);
+
+   if (initprof == 2)
+     free(gwl);
+   freescratch ();
+   free (tar1);
+   free (tar2);
+@
+
+
+1.21
+log
+@added support for reading and using TOPOG _soil tables
+at present some vars are still needed in input-file, this
+has to bee cleaned up
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.96/src/soil/RCS/swatsoil.c,v 1.20 1995/12/17 21:46:44 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/12/17 21:46:44 $
+d6 5
+d47 1
+a47 1
+"$Id: swatsoil.c,v 1.20 1995/12/17 21:46:44 schj Exp $";
+a60 1
+
+d178 4
+d187 2
+d499 1
+a499 2
+FILE *thef;
+
+d504 2
+a505 1
+  extern int readtablefile();
+d509 8
+a516 3
+  soilparm[layer].thetas = getdefdoub (s, "thetas", layer > 0 ? soilparm[layer - 1].thetas : 0.0, infilename, exitonerror);
+  soilparm[layer].ksat = getdefdoub (s, "ksat", layer > 0 ? soilparm[layer - 1].ksat : 0.0, infilename, exitonerror);
+  soilparm[layer].data_points = layers;
+d523 7
+d536 1
+a536 1
+	  readtablefile (thef,layer);
+a540 2
+
+  
+d736 4
+a739 1
+
+d773 4
+a776 1
+
+d786 7
+d810 1
+a810 1
+      timestep ();		/* */
+d813 1
+a813 1
+	drainage ();
+d837 5
+d848 42
+a889 42
+  for (i=layers-1;i>=0; i--){
+	  if (!soilparm[i].as_above){
+		  if (soilparm[i].theta)
+			  free(soilparm[i].theta);
+		  if (soilparm[i].pf)
+			  free(soilparm[i].pf);
+	          if (soilparm[i].mktable){
+			  for(j=0;j<4;j++){
+			  free(soilparm[i].tab[j].x);
+			  free(soilparm[i].tab[j].y);
+			  }
+			  free (soilparm[i].tab);
+		  }
+	  }
+  }
+  free(soilparm);
+  free(theta);
+  free(diffmoist);
+  free(thetm1); 
+  free(dz);
+  free(z);
+  free(hm1);
+  free(h);
+  free(qrot);
+  free(layer);
+  free(depth);
+  free(k);
+  free(kgeom);
+  free(q);
+  free_matr(qdra,4);
+  free(gwl);
+  free(basegw);
+
+  if (lbc == 4)
+    free(hgiven);
+  free(drootz);
+
+  if (initprof == 2)
+    free(gwl);
+  freescratch ();
+  free (tar1);
+  free (tar2);
+@
+
+
+1.20
+log
+@added convergenge and itter arrays
+changed showprogress call
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.95/src/soil/RCS/swatsoil.c,v 1.19 1995/12/05 03:04:43 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/12/05 03:04:43 $
+d6 4
+d42 1
+a42 1
+"$Id: swatsoil.c,v 1.19 1995/12/05 03:04:43 schj Exp $";
+d124 1
+d465 2
+a466 1
+    case 3:
+d469 3
+d479 5
+a483 2
+/*- void readtable()
+ * NOT FINISHED!!
+d486 2
+a487 1
+readtable ()
+d489 32
+a520 1
+  Perror (progname, 1, RCSid, "Tables not working yet", "");
+d740 1
+d787 2
+@
+
+
+1.19
+log
+@added lookup table support
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.91/soil/RCS/swatsoil.c,v 1.18 1995/11/14 20:29:00 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/11/14 20:29:00 $
+d6 3
+d38 1
+a38 1
+"$Id: swatsoil.c,v 1.18 1995/11/14 20:29:00 schj Exp $";
+d59 1
+a59 1
+int swnums = 1;
+d78 2
+d85 2
+a86 2
+int maxtit = 300;		/* Max number of it in a timestep */
+int maxitr = 20;		/* Number of iterations */
+d204 1
+a204 1
+      printcom ("Using bottom condition 5: Free drainage.");
+d212 1
+a212 1
+  soilparm[0].mktable = getdefint ("soil", "mktable", 1, infilename, FALSE);
+a213 1
+   lin = getdefint ("soil", "lininter", lin, infilename, FALSE);
+a329 2
+      soilparm[i].kse99 = soilparm[i].ksat * pow (0.99, expon1) * (1.0 - term1)
+	* (1.0 - term1);
+d648 2
+d666 4
+d753 1
+a753 1
+    showprogress (i + 1);
+@
+
+
+1.18
+log
+@added detvangenu and some minor revisions
+@
+text
+@d1 1
+a1 1
+/* $Header: /homes/schj/src/vamps_0.91/RCS/swatsoil.c,v 1.17 1995/10/30 13:55:56 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/10/30 13:55:56 $
+d6 3
+d35 1
+a35 1
+"$Id: swatsoil.c,v 1.17 1995/10/30 13:55:56 schj Exp $";
+d44 2
+a45 2
+int     soilverb = 0;		/* Seperate verbose */
+int     layers;			/* number of soil layers */
+d47 1
+a47 1
+int     initprof = 0;		/* swinco in swatr see intial() */
+d51 1
+a51 1
+int     gwset, preset, intset, pevapset, ptransset;
+d56 14
+a69 14
+int     swnums = 0;
+double  volsat;
+double  volact;
+double  volini;			/* Initial water content */
+double  cqbot = 0.0;
+double  reltol = 0.001;
+double  abstol = 0.5;
+int     ftoph;
+int     daynr;
+int     dayend;
+int     daysta;
+int     year;
+int     yearen;
+int     ndyear;
+d77 1
+a77 1
+double  aqave, aqamp, aqomeg, aqtamx, rimlay, cofqha, cofqhb;
+d79 12
+a90 12
+int     fllast = FALSE;
+int     maxtit = 300;		/* Max number of it in a timestep */
+int     maxitr = 30;		/* Number of iterations */
+int     numbit;
+int     lbc = 0;		/* Lower bottom condition (was swbotb) */
+double  precis = 0.5;		/* precision ?? */
+double  prec = 0.0;
+double  intc = 0.0;
+double  qdrtot = 0.0;
+double  dhead;
+double  mdhead;
+int     flendd;
+d101 1
+a101 1
+double  qtop;			/* Discharge at top */
+d104 1
+a104 1
+double  qbot;			/* bottom q?? */
+d106 1
+d109 1
+a109 1
+double  osmota, osmotb;
+d145 1
+a145 1
+char   *infilename;
+d147 2
+a148 2
+  int     i;
+  char    s[1024];
+d163 7
+d207 4
+d214 4
+d297 4
+a300 4
+  int     i, exitonerror;
+  double  term1, expon1;
+  char    s[1024];
+  double  dsoilp;
+d347 1
+a347 1
+	  h[i] = prhnode (i, theta[i], soilparm[i].method[PRHNODE]);
+d352 1
+a352 1
+	  theta[layers - 1] = thenode (layers - 1, h[layers - 1], soilparm[layers - 1].method[THENODE]);
+d362 1
+a362 1
+	  theta[i] = thenode (i, h[i], soilparm[i].method[THENODE]);
+d374 1
+a374 1
+	  theta[i] = thenode (i, h[i], soilparm[i].method[THENODE]);
+d397 2
+a398 2
+  diffmoist[0] = dmcnode (0, h[0], soilparm[0].method[DMCNODE]);
+  k[0] = theta2k (0, theta[0], soilparm[0].method[THETA2K]);
+d402 2
+a403 2
+      diffmoist[i] = dmcnode (i, h[i], soilparm[i].method[DMCNODE]);
+      k[i] = theta2k (i, theta[i], soilparm[i].method[THETA2K]);
+d422 1
+a422 1
+int     layer;
+d424 3
+a426 3
+  char    s[1024];
+  int     exitonerror;
+  void    readtable ();
+d446 2
+a447 6
+  /* this has to change, at present all methods the same */
+  soilparm[layer].method[THETA2K] = getdefint (s, "method", layer > 0 ? soilparm[layer - 1].method[THETA2K] : 1, infilename, exitonerror);
+  soilparm[layer].method[THENODE] = getdefint (s, "method", layer > 0 ? soilparm[layer - 1].method[THENODE] : 1, infilename, exitonerror);
+  soilparm[layer].method[DMCNODE] = getdefint (s, "method", layer > 0 ? soilparm[layer - 1].method[DMCNODE] : 1, infilename, exitonerror);
+  soilparm[layer].method[PRHNODE] = getdefint (s, "method", layer > 0 ? soilparm[layer - 1].method[PRHNODE] : 1, infilename, exitonerror);
+  switch (soilparm[layer].method[THETA2K])
+d455 2
+a456 2
+    case 2:
+      readtable ();
+d483 1
+a483 1
+int     layer;
+d485 1
+a485 1
+  char    s[1024];
+d514 1
+a514 1
+int     layer;
+d516 4
+a519 2
+  char    s[1024];
+  int     exitonerror;
+d533 14
+d555 1
+a555 1
+int     layer;
+d557 3
+a559 3
+  char    s[1024];
+  int     exitonerror;
+  int     pts;
+d583 3
+a585 3
+		  soilparm[layer].residual_water, &soilparm[layer].alpha,
+		  &soilparm[layer].n, &soilparm[layer].l))
+	Perror(progname,1,RCSid,"Error while fitting van Genuchten parameters","");
+d588 1
+a588 1
+      printfl (s,soilparm[layer].alpha);
+d590 1
+a590 1
+      printfl (s,soilparm[layer].n);
+d602 1
+a602 1
+int     layer;
+d619 1
+a619 1
+int     layers;
+d621 1
+a621 1
+  int     i;
+d668 1
+a668 1
+  int     i;
+d709 1
+a709 1
+int     i;
+d711 1
+a711 1
+  char    ttt[1024];
+d726 2
+d752 1
+d755 39
+d806 1
+a806 1
+  int     i;
+@
+
+
+1.17
+log
+@added deffile.h
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.9/soil/RCS/swatsoil.c,v 1.16 1995/10/23 07:51:09 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/10/23 07:51:09 $
+d6 3
+d32 1
+a32 1
+"$Id: swatsoil.c,v 1.16 1995/10/23 07:51:09 schj Exp $";
+d36 4
+a39 4
+#include "../include/vamps.h"
+#include "../include/deffile.h"
+#include "../include/swatsoil.h"
+#include "../include/soils.h"
+d41 2
+a42 2
+int soilverb = 0;		/* Seperate verbose */
+int layers;			/* number of soil layers */
+d44 1
+a44 1
+int initprof = 0;		/* swinco in swatr see intial() */
+d48 1
+a48 1
+int gwset, preset, intset, pevapset, ptransset;
+d53 14
+a66 14
+int swnums = 0;	
+double volsat;
+double volact;
+double volini;			/* Initial water content */
+double cqbot = 0.0;
+double reltol = 0.001;
+double abstol = 0.5;
+int ftoph;
+int daynr;
+int dayend;
+int daysta;
+int year;
+int yearen;
+int ndyear;
+d74 1
+a74 1
+double aqave, aqamp, aqomeg, aqtamx, rimlay, cofqha, cofqhb;
+d76 12
+a87 12
+int fllast = FALSE;
+int maxtit = 300;		/* Max number of it in a timestep */
+int maxitr = 30;		/* Number of iterations */
+int numbit;
+int lbc = 0;			/* Lower bottom condition (was swbotb) */
+double precis = 0.5;		/* precision ?? */
+double prec = 0.0;
+double intc = 0.0;
+double qdrtot = 0.0;
+double dhead;
+double mdhead;
+int flendd;
+d98 1
+a98 1
+double qtop;			/* Discharge at top */
+d101 1
+a101 1
+double qbot;			/* bottom q?? */
+d105 1
+a105 1
+double osmota, osmotb;
+d109 3
+a111 2
+void readvangenu __P (());
+void readclapp __P (());
+d113 1
+a113 1
+void initlayer __P (());
+d134 1
+d141 1
+a141 1
+     char *infilename;
+d143 2
+a144 2
+  int i;
+  char s[1024];
+d250 7
+a256 7
+  swhypr = getdefint ("roots", "swhypr", 0, infilename, TRUE);
+  swupfu = getdefint ("roots", "swupfu", 0, infilename, TRUE);
+  if (swupfu == 1)
+    {
+      cofsza = getdefdoub ("roots", "cofsza", 0.0, infilename, TRUE);
+      cofszb = getdefdoub ("roots", "cofszb", 0.0, infilename, TRUE);
+    }
+d278 4
+a281 4
+  int i, exitonerror;
+  double term1, expon1;
+  char s[1024];
+  double dsoilp;
+d403 1
+a403 1
+     int layer;
+d405 3
+a407 3
+  char s[1024];
+  int exitonerror;
+  void readtable ();
+d443 3
+d447 1
+d461 1
+d468 1
+a468 1
+     int layer;
+d470 1
+a470 1
+  char s[1024];
+d493 1
+d499 26
+a524 1
+     int layer;
+d526 7
+a532 2
+  char s[1024];
+  int exitonerror;
+d546 15
+d563 3
+d571 1
+a571 1
+     int layer;
+d588 1
+a588 1
+     int layers;
+d590 1
+a590 1
+  int i;
+d614 1
+d637 1
+a637 1
+  int i;
+d678 1
+a678 1
+     int i;
+d680 1
+a680 1
+  char ttt[1024];
+d733 1
+a733 1
+  int i;
+@
+
+
+1.16
+log
+@*** empty log message ***
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.9/soil/RCS/swatsoil.c,v 1.15 1995/10/19 13:05:57 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/10/19 13:05:57 $
+d6 3
+d28 2
+a29 2
+static  char RCSid[] =
+"$Id: swatsoil.c,v 1.15 1995/10/19 13:05:57 schj Exp $";
+d34 1
+d38 2
+a39 2
+int     soilverb = 0;		/* Seperate verbose */
+int     layers;			/* number of soil layers */
+d41 1
+a41 1
+int     initprof = 0;		/* swinco in swatr see intial() */
+d45 1
+a45 1
+int     gwset,preset, intset,pevapset,ptransset;
+d50 16
+a65 16
+int     swnums = 1;		/* this a a hack */
+double  volsat;
+double  volact;
+double  volini; /* Initial water content */
+double  cqbot=0.0;
+double  reltol = 0.001;
+double  abstol = 0.5;
+int     ftoph;
+int     daynr;
+int     dayend;
+int     daysta;
+int     year;
+int     yearen;
+int     ndyear;
+double *gwl;			/* length 2*/
+double *basegw;		/* length 2*/
+d69 16
+a84 16
+double *q;			/* length layers +1  flow for each layer*/
+double *inq;			/* length layers +1 in inflow for each layer*/
+double  aqave, aqamp, aqomeg, aqtamx, rimlay, cofqha, cofqhb;
+
+int     fllast = FALSE;
+int     maxtit = 300;		/* Max number of it in a timestep*/
+int     maxitr = 30;		/* Number of iterations */
+int     numbit;
+int     lbc = 0;		/* Lower bottom condition (was swbotb)*/
+double  precis = 0.5;		/* precision ?? */
+double  prec= 0.0;
+double  intc= 0.0;
+double  qdrtot = 0.0;
+double  dhead;
+double  mdhead;
+int     flendd;
+d95 1
+a95 1
+double  qtop;			/* Discharge at top */
+d98 1
+a98 1
+double  qbot;			/* bottom q?? */
+d102 2
+a103 2
+double	osmota,osmotb;
+double	*cml;
+d110 4
+a113 4
+extern void calcgwl();
+extern void watcon();
+extern void fluxes();
+extern void setzero();
+d129 1
+a129 1
+extern double cofred; /* soil evap reduce stuff */
+d136 1
+a136 1
+char   *infilename;
+d138 2
+a139 2
+  int     i;
+  char	s[1024];
+d143 5
+a147 5
+  dtmax = getdefdoub ("soil", "dtmax", dtmax, infilename,FALSE);
+  dtmin = getdefdoub ("soil", "dtmin", dtmin, infilename,FALSE);
+  thetol = getdefdoub ("soil", "thetol", thetol, infilename,FALSE);
+  swnums = getdefint ("soil", "swnums", swnums, infilename,FALSE);
+  maxitr = getdefint ("soil", "maxitr", maxitr, infilename,FALSE);
+d150 3
+a152 3
+  pondmx = getdefdoub ("soil", "pondmx", pondmx, infilename,TRUE);
+  layers = getdefint ("soil", "layers", 0, infilename,TRUE);	/* number of soil layers */
+  lbc = getdefint ("soil", "bottom", 0, infilename,TRUE);	/* lower boundary condition */
+d155 1
+d157 31
+a187 10
+  if (lbc == 0)
+      get_data (getdefstr ("ts", "gw", "nothing", infilename,TRUE), NULL, "gw");
+
+  gwset = getsetbyname("gw");
+
+  allocall (layers);
+  if (lbc == 4){
+    hgiven[0] = getdefdoub ("soil", "gwlevel", 0.0, infilename,TRUE);
+     for (i=1;i<(steps+2);i++)
+       hgiven[i] = hgiven[0];
+d194 6
+a199 5
+   /* Check for precipitation */
+  if ((preset = getsetbyname ("precipitation")) < 0){
+      strcpy(s , getdefstr ("ts", "precipitation", "nothing", infilename,FALSE));
+      if (strcmp(s,"nothing")==0)
+	Perror (progname,1,RCSid,"Need precipitation data","");
+d203 6
+a208 5
+ 
+    if ((intset = getsetbyname ("interception")) < 0){
+      strcpy(s ,getdefstr ("ts", "interception", "nothing", infilename,FALSE));
+      if (strcmp(s,"nothing")==0)
+	Perror (progname,1,RCSid,"Need interception data","");
+d213 5
+a217 4
+    if ((pevapset = getsetbyname ("pevaporation")) < 0){
+      strcpy(s ,getdefstr ("ts", "pevaporation", "nothing", infilename,FALSE));
+      if (strcmp(s,"nothing")==0)
+	Perror (progname,1,RCSid,"Need evaporation data","");
+d222 5
+a226 4
+    if ((ptransset = getsetbyname ("ptranspiration")) < 0){
+      strcpy(s ,getdefstr ("ts", "ptranspiration", "nothing", infilename,FALSE));
+      if (strcmp(s,"nothing")==0)
+	Perror (progname,1,RCSid,"Need transpiration data","");
+d231 6
+a236 5
+  /* evaporation reduction  def= no reduction*/
+  swredu = getdefint("soil","swredu",0,infilename,FALSE);
+  if (swredu) {
+     cofred= getdefint("soil","cofred",0,infilename,TRUE);
+  }
+d238 1
+a238 1
+  /* blz 12 input*/
+d240 13
+a252 11
+  swsink = getdefint("roots","swsink",0,infilename,TRUE);
+  swhypr = getdefint("roots","swhypr",0,infilename,TRUE);
+  swupfu = getdefint("roots","swupfu",0,infilename,TRUE);
+  if (swupfu==1){
+  	cofsza = getdefdoub("roots","cofsza",0.0,infilename,TRUE);
+  	cofszb = getdefdoub("roots","cofszb",0.0,infilename,TRUE);
+  }
+  zronam = 0.0; /* NO nonactive layers */
+  drootz[0] =-1.0*getdefdoub("roots","depth",0.0,infilename,TRUE);
+  if (drootz[0] < 0.0) {
+   for (i=1;i<(steps+2);i++)
+d255 8
+a262 8
+  hlim1 = getdefdoub("roots","hlim1",0.0,infilename,TRUE);
+  hlim2u = getdefdoub("roots","hlim2u",0.0,infilename,TRUE);
+  hlim2l = getdefdoub("roots","hlim2l",0.0,infilename,TRUE);
+  hlim3h = getdefdoub("roots","hlim3h",0.0,infilename,TRUE);
+  hlim3l = getdefdoub("roots","hlim3l",0.0,infilename,TRUE);
+  hlim3 = getdefdoub("roots","hlim3",0.0,infilename,TRUE);
+  hlim4 = getdefdoub("roots","hlim4",0.0,infilename,TRUE);
+  }
+d273 4
+a276 4
+  int     i,exitonerror;
+  double	term1,expon1;
+  char    s[1024];
+  double  dsoilp;
+d298 7
+a304 6
+  for (i=0;i<layers;i++){
+	expon1 = soilparm[i].l/soilparm[i].m -2.0;
+	term1 = pow(1.0 - pow(0.99, 1.0/soilparm[i].m),soilparm[i].m);
+	soilparm[i].kse99 = soilparm[i].ksat * pow(0.99,expon1) * (1.0 - term1)
+		* (1.0 - term1);
+  }
+d310 1
+a310 1
+     */
+d320 1
+a320 1
+		    i > 0 ? soilparm[i - 1].theta_initial : 0.0, infilename,exitonerror);
+d323 1
+a323 1
+	  h[i] = prhnode (i, theta[i],soilparm[i].method[PRHNODE]);
+d328 1
+a328 1
+	  theta[layers - 1] = thenode (layers - 1, h[layers - 1],soilparm[layers-1].method[THENODE]);
+d336 1
+a336 1
+	  soilparm[i].h_initial = getdefdoub (s, "h_initial", i > 0 ? soilparm[i - 1].h_initial : 0.0, infilename,exitonerror);
+d338 1
+a338 1
+	  theta[i] = thenode (i, h[i],soilparm[i].method[THENODE]);
+d341 1
+a341 1
+    case 2:/* calculate pressure head profile, need gw level */
+d345 2
+a346 2
+	gwl[0] = -fabs (getdefdoub ("soil", "gw_initial", 0.0, infilename,TRUE));
+	
+d350 1
+a350 1
+	  theta[i] = thenode (i, h[i],soilparm[i].method[THENODE]);
+d354 1
+a354 1
+	Perror(progname,1,RCSid,"Initial profile method not known."," initprof >2");
+d358 1
+a358 1
+  watcon();/* Calculate actual water content */
+d361 2
+a362 2
+  for (i=0; i<layers;i++)
+  	volsat -= dz[i] * soilparm[i].thetas;
+d373 2
+a374 2
+  diffmoist[0] = dmcnode(0,h[0],soilparm[0].method[DMCNODE]);
+  k[0] = theta2k (0, theta[0],soilparm[0].method[THETA2K]);
+d378 3
+a380 3
+      diffmoist[i] = dmcnode (i, h[i],soilparm[i].method[DMCNODE]);
+      k[i] = theta2k (i, theta[i],soilparm[i].method[THETA2K]);
+      kgeom[i] = 0.5 * (k[i]+ k[i-1]);
+d388 1
+a388 1
+    hatm = -2.75E5;
+d398 1
+a398 1
+int     layer;
+d400 3
+a402 3
+  char    s[1024];
+  int	exitonerror;
+  void readtable();
+d406 2
+a407 2
+  if (!issection(s,infilename) && layer != 0)
+  	soilparm[layer].as_above = TRUE;
+d409 1
+a409 1
+  	soilparm[layer].as_above = FALSE;
+d413 2
+a414 2
+  strcpy (soilparm[layer].description, getdefstr (s, "description", layer > 0 ? soilparm[layer - 1].description : "NO DESCRIPTION", infilename,exitonerror));
+  if (soilverb>1)
+d416 2
+a417 2
+  soilparm[layer].output_points = getdefint (s, "output_points", layer > 0 ? soilparm[layer - 1].output_points : 0, infilename,exitonerror);
+  soilparm[layer].residual_water = getdefdoub (s, "theta_residual", layer > 0 ? soilparm[layer - 1].residual_water : 0.0, infilename,exitonerror);
+d420 1
+a420 1
+  dz[layer] = getdefdoub (s, "thickness", layer > 0 ? dz[layer - 1] : 0.0, infilename,exitonerror);
+d423 17
+a439 15
+  soilparm[layer].method[THETA2K] = getdefint (s, "method", layer > 0 ? soilparm[layer-1].method[THETA2K]: 1, infilename,exitonerror);
+  soilparm[layer].method[THENODE] = getdefint (s, "method", layer > 0 ? soilparm[layer-1].method[THENODE]: 1, infilename,exitonerror);
+  soilparm[layer].method[DMCNODE] = getdefint (s, "method", layer > 0 ? soilparm[layer-1].method[DMCNODE]: 1, infilename,exitonerror);
+  soilparm[layer].method[PRHNODE] = getdefint (s, "method", layer > 0 ? soilparm[layer-1].method[PRHNODE]: 1, infilename,exitonerror);
+  switch (soilparm[layer].method[THETA2K]){
+    case 0:/* Use clapp & Hornberger stuff */
+    	readclapp (layer);
+	break;
+     case 1:
+    	readvangenu (layer);
+	break;
+     case 2:
+	readtable();
+	break;
+     default: break;
+d448 1
+a448 1
+readtable()
+d450 1
+a450 1
+Perror(progname,1,RCSid,"Tables not working yet","");
+d458 1
+a458 1
+int     layer;
+d460 1
+a460 1
+  char    s[1024];
+d463 1
+a463 1
+  soilparm[layer].b = getdefdoub (s, "b", 0.0, infilename,FALSE);
+d466 1
+a466 1
+      soilparm[layer].clayfrac = getdefdoub (s, "clayfrac", -1.0, infilename,TRUE);
+d472 1
+a472 1
+      strcpy (soilparm[layer].description, getdefstr (s, "description", "", infilename,TRUE));
+d477 3
+a479 3
+  soilparm[layer].thetas = getdefdoub (s, "thetas", 0.0, infilename,TRUE);
+  soilparm[layer].ksat = getdefdoub (s, "ksat", 0.0, infilename,TRUE);
+  soilparm[layer].thickness = getdefdoub (s, "thickness", 0.0, infilename,TRUE);
+d482 1
+a482 1
+static double  ttl;
+d488 1
+a488 1
+int     layer;
+d490 2
+a491 2
+  char    s[1024];
+  int	exitonerror;
+d495 2
+a496 2
+  soilparm[layer].thetas = getdefdoub (s, "thetas", layer > 0 ? soilparm[layer - 1].thetas : 0.0, infilename,exitonerror);
+  soilparm[layer].ksat = getdefdoub (s, "ksat", layer > 0 ? soilparm[layer - 1].ksat : 0.0, infilename,exitonerror);
+d500 2
+a501 2
+  soilparm[layer].n = getdefdoub (s, "n", layer > 0 ? soilparm[layer - 1].n : 0.0, infilename,exitonerror);
+  ttl = getdefdoub (s, "l", layer > 0 ? ttl : 0.0, infilename,exitonerror);
+d504 1
+a504 1
+  soilparm[layer].alpha = getdefdoub (s, "alpha", layer > 0 ? soilparm[layer - 1].alpha : 0.0, infilename,exitonerror);
+d512 1
+a512 1
+int     layer;
+d515 6
+a520 6
+  soilparm[layer].theta = getdefar (s, "theta", NULL, infilename, &pts);
+      exitonerror = TRUE;
+      soilparm[layer].pf = getdefar (s, "pf", NULL, infilename, &pts);
+      soilparm[layer].thickness = getdefdoub (s, "thickness", 0.0, infilename);
+      exitonerror = FALSE;
+*/
+d529 1
+a529 1
+int     layers;
+d531 1
+a531 1
+  int     i;
+d553 2
+a554 2
+   gwl = (double *) ts_memory ((void *) NULL, 2 * sizeof (double), progname);
+   basegw = (double *) ts_memory ((void *) NULL, 2 * sizeof (double), progname);
+d556 2
+a557 2
+    hgiven = (double *) ts_memory ((void *) NULL, (steps+2) * sizeof (double), progname);
+    drootz = (double *) ts_memory ((void *) NULL, steps * sizeof (double), progname);
+d563 7
+a569 6
+  for (i = 0; i < layers; i++){
+    layer[i] = i;
+    qdra[0][i] =0.0;
+    qdra[1][i] =0.0;
+    qdra[2][i] =0.0;
+    qdra[3][i] =0.0;
+d580 1
+a580 1
+  soilverb = getdefint ("soil", "verbose", verbose, infilename,FALSE);
+d590 2
+a591 2
+  setzero();
+  fluxes();
+d593 1
+a593 1
+ /* Print this in output file  we ar in the initial section*/
+d595 1
+a595 1
+  printcom("initial water content of the profile");
+d601 5
+a605 5
+  fprintf(genoutfile,"as_above=");
+  for (i=0;i<layers;i++)
+  	fprintf(genoutfile,"%d ",soilparm[i].as_above);
+  fprintf(genoutfile,"\n");
+  
+d608 4
+a611 3
+  if (steps > data[preset].points){
+	Perror (progname,1,RCSid,"more steps then P values !!","");
+  }
+d613 1
+a613 1
+  initprogress();
+d617 2
+a618 2
+daysoil(i)
+int	i;
+d620 1
+a620 1
+char ttt[1024];
+d622 31
+a652 31
+      daynr = i + 1;
+      if (soilverb>1)
+	{
+	      sprintf (ttt, "t = %d",i);
+	      showit (ttt);
+	}
+      flendd = FALSE;
+      evapotra(i);
+      reduceva();
+      do
+	{
+	  timestep ();		/* */
+	  bocobot (i);		/* Bottom boundary conditions */
+	  bocotop (i);		/* Top boundary conditions */
+	  rootex();
+	  headcalc (i);
+          watcon();
+	  fluxes();
+	  integral(i);
+	}
+      while (!flendd);		/* W only one day at the moment */
+      calcgwl();
+      soilout(i); /* Produce daily output to stdout or named file(genoutfile) */
+      setzero(); /* Set daily stuff to zero */
+      if (soilverb>1)
+	{
+	      sprintf (ttt, "dt = %f",dt);
+	      showit (ttt);
+	}
+      if (soilverb)
+	showprogress(i+1);
+d657 1
+a657 1
+postsoil()
+d673 1
+a673 1
+  int     i;
+d675 1
+a675 1
+  presoil();
+d677 2
+a678 2
+    {				/* do for fixed amount of days*/
+    	daysoil(i);
+d680 1
+a680 1
+  postsoil();
+@
+
+
+1.15
+log
+@seems to work now
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/soil/RCS/swatsoil.c,v 1.14 1995/09/26 22:11:53 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/09/26 22:11:53 $
+d6 3
+d26 1
+a26 1
+"$Id: swatsoil.c,v 1.14 1995/09/26 22:11:53 schj Exp $";
+a72 2
+int     maxitrhi;
+int     maxitrlo;
+d111 1
+a111 3
+extern void genout __P ((int tstep));
+extern void openout __P ((char *name));
+extern void closeout __P (());
+d143 1
+a341 2
+  printf("INITDIFF %f\n",diffmoist[0]);
+  printf("INITHEAD %f\n",h[0]);
+d540 1
+a554 1
+  openout(outfilename);
+d556 12
+d606 1
+a606 1
+      genout(i); /* Produce daily output to stdout or named file(genoutfile) */
+a623 1
+  closeout();
+@
+
+
+1.14
+log
+@added soil evap redu stuff
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/soil/RCS/swatsoil.c,v 1.13 1995/09/23 20:47:36 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/09/23 20:47:36 $
+d6 3
+d23 1
+a23 1
+"$Id: swatsoil.c,v 1.13 1995/09/23 20:47:36 schj Exp $";
+d142 1
+d160 1
+a160 1
+     for (i=1;i<steps;i++)
+d172 1
+a172 1
+	Perror (1,RCSid,"Need precipitation data","");
+d176 1
+a176 2
+
+    /* Check for interception */
+d180 1
+a180 1
+	Perror (1,RCSid,"Need interception data","");
+a184 1
+    /* Check for potevaporation */
+d188 1
+a188 1
+	Perror (1,RCSid,"Need evaporation data","");
+a192 1
+    /* Check for pottranspiration */
+d196 1
+a196 1
+	Perror (1,RCSid,"Need transpiration data","");
+d200 1
+d218 2
+a219 1
+   for (i=1;i<steps;i++)
+d221 1
+d229 1
+d307 1
+a307 1
+    case 2:			/* calculate pressure head profile, need gw level */
+d320 1
+d324 1
+a324 1
+  watcon();
+d342 2
+d416 1
+a416 1
+Perror(1,RCSid,"Tables not working yet","");
+d522 1
+a522 1
+    hgiven = (double *) ts_memory ((void *) NULL, steps * sizeof (double), progname);
+a538 4
+/*-
+ *	void dosoil()
+ * 	starts the soil module, this loops itproc() for each new day
+ */
+d540 1
+a540 1
+dosoil ()
+a541 2
+  char    ttt[1024];
+  int     i;
+a542 1
+  extern void freescratch ();
+d562 1
+a562 1
+	Perror (1,RCSid,"more steps then P values !!","");
+d566 8
+a573 2
+  for (i = 0; i < steps; i++)
+    {				/* do for fixed amount of days*/
+d605 7
+a611 1
+    }
+d617 17
+@
+
+
+1.13
+log
+@added start of tables caculation method (using method[5] in soilparm)
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/soil/RCS/swatsoil.c,v 1.12 1995/09/19 13:41:58 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/09/19 13:41:58 $
+d6 3
+d20 1
+a20 1
+"$Id: swatsoil.c,v 1.12 1995/09/19 13:41:58 schj Exp $";
+d122 2
+d201 3
+@
+
+
+1.12
+log
+@updated for ecitonerror
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/soil/RCS/swatsoil.c,v 1.11 1995/09/04 11:39:08 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/09/04 11:39:08 $
+d6 3
+d17 1
+a17 1
+"$Id: swatsoil.c,v 1.11 1995/09/04 11:39:08 schj Exp $";
+a41 1
+double  thetol = 0.0001;
+a88 1
+int    *kvspsim;		/* Method to use for for determining k VS psi each layer */
+a113 1
+extern double thenode __P ((int j, double head));
+d276 1
+a276 1
+	  h[i] = prhnode (i, theta[i]);
+d281 1
+a281 1
+	  theta[layers - 1] = thenode (layers - 1, h[layers - 1]);
+d291 1
+a291 1
+	  theta[i] = thenode (i, h[i]);
+d303 1
+a303 1
+	  theta[i] = thenode (i, h[i]);
+d325 2
+a326 2
+  diffmoist[0] = dmcnode(0,h[0]);
+  k[0] = theta2k (0, theta[0]);
+d330 2
+a331 2
+      diffmoist[i] = dmcnode (i, h[i]);
+      k[i] = theta2k (i, theta[i]);
+d354 1
+d357 7
+d373 18
+a390 6
+  kvspsim[layer] = getdefint (s, "method", layer > 0 ? kvspsim[layer - 1] : 1, infilename,exitonerror);
+  if (kvspsim[layer] == 0)
+    /* Use clapp & Hornberger stuff */
+    readclapp (layer);
+  else
+    readvangenu (layer);
+d394 8
+a499 1
+  kvspsim = (int *) ts_memory ((void *) NULL, (layers) * sizeof (int), progname);
+@
+
+
+1.11
+log
+@moved prec = data[ to evapotra
+gwl, hgiven length set to steps
+added iniprogress
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/soil/RCS/swatsoil.c,v 1.10 1995/09/01 06:14:26 schj Exp $ */
+d4 7
+a10 2
+ *  $Date: 1995/09/01 06:14:26 $
+ *  $Log$
+d14 1
+a14 1
+"$Id: swatsoil.c,v 1.10 1995/09/01 06:14:26 schj Exp $";
+d132 9
+a140 11
+  exitonerror = FALSE;
+  dtmax = getdefdoub ("soil", "dtmax", dtmax, infilename);
+  dtmin = getdefdoub ("soil", "dtmin", dtmin, infilename);
+  swnums = getdefint ("soil", "swnums", swnums, infilename);
+
+  exitonerror = TRUE;		/* All following parameters are needed */
+  pondmx = getdefdoub ("soil", "pondmx", pondmx, infilename);
+
+  layers = getdefint ("soil", "layers", 0, infilename);	/* number of soil layers */
+  lbc = getdefint ("soil", "bottom", 0, infilename);	/* lower boundary condition */
+  initprof = getdefint ("soil", "initprof", 0, infilename);	/* initial cond */
+a142 2
+
+     
+d144 1
+a144 1
+      get_data (getdefstr ("ts", "gw", "nothing", infilename), NULL, "gw");
+d150 1
+a150 1
+    hgiven[0] = getdefdoub ("soil", "gwlevel", 0.0, infilename);
+a155 1
+
+d161 1
+a161 1
+      strcpy(s , getdefstr ("ts", "precipitation", "nothing", infilename));
+d170 1
+a170 1
+      strcpy(s ,getdefstr ("ts", "interception", "nothing", infilename));
+d179 1
+a179 1
+      strcpy(s ,getdefstr ("ts", "pevaporation", "nothing", infilename));
+d188 1
+a188 1
+      strcpy(s ,getdefstr ("ts", "ptranspiration", "nothing", infilename));
+a193 1
+  exitonerror = FALSE;
+d195 2
+a196 2
+  swredu = getdefint("soil","swredu",0,infilename);
+  exitonerror = TRUE;
+d199 3
+a201 3
+  swsink = getdefint("roots","swsink",0,infilename);
+  swhypr = getdefint("roots","swhypr",0,infilename);
+  swupfu = getdefint("roots","swupfu",0,infilename);
+d203 2
+a204 2
+  	cofsza = getdefdoub("roots","cofsza",0.0,infilename);
+  	cofszb = getdefdoub("roots","cofszb",0.0,infilename);
+d207 1
+a207 1
+  drootz[0] =-1.0*getdefdoub("roots","depth",0.0,infilename);
+d210 7
+a216 7
+  hlim1 = getdefdoub("roots","hlim1",0.0,infilename);
+  hlim2u = getdefdoub("roots","hlim2u",0.0,infilename);
+  hlim2l = getdefdoub("roots","hlim2l",0.0,infilename);
+  hlim3h = getdefdoub("roots","hlim3h",0.0,infilename);
+  hlim3l = getdefdoub("roots","hlim3l",0.0,infilename);
+  hlim3 = getdefdoub("roots","hlim3",0.0,infilename);
+  hlim4 = getdefdoub("roots","hlim4",0.0,infilename);
+d227 1
+a227 1
+  int     i;
+d273 1
+a273 1
+		    i > 0 ? soilparm[i - 1].theta_initial : 0.0, infilename);
+d289 1
+a289 1
+	  soilparm[i].h_initial = getdefdoub (s, "h_initial", i > 0 ? soilparm[i - 1].h_initial : 0.0, infilename);
+a294 1
+      exitonerror = TRUE;
+d298 1
+a298 1
+	gwl[0] = -fabs (getdefdoub ("soil", "gw_initial", 0.0, infilename));
+a341 1
+  exitonerror = FALSE;
+d353 1
+d357 1
+a357 1
+  strcpy (soilparm[layer].description, getdefstr (s, "description", layer > 0 ? soilparm[layer - 1].description : "NO DESCRIPTION", infilename));
+d360 2
+a361 2
+  soilparm[layer].output_points = getdefint (s, "output_points", layer > 0 ? soilparm[layer - 1].output_points : 0, infilename);
+  soilparm[layer].residual_water = getdefdoub (s, "theta_residual", layer > 0 ? soilparm[layer - 1].residual_water : 0.0, infilename);
+d364 2
+a365 2
+  dz[layer] = getdefdoub (s, "thickness", layer > 0 ? dz[layer - 1] : 0.0, infilename);
+  kvspsim[layer] = getdefint (s, "method", layer > 0 ? kvspsim[layer - 1] : 1, infilename);
+d385 1
+a385 1
+  soilparm[layer].b = getdefdoub (s, "b", 0.0, infilename);
+d388 1
+a388 1
+      soilparm[layer].clayfrac = getdefdoub (s, "clayfrac", -1.0, infilename);
+d394 1
+a394 2
+      exitonerror = TRUE;
+      strcpy (soilparm[layer].description, getdefstr (s, "description", "", infilename));
+d398 4
+a401 4
+  exitonerror = TRUE;
+  soilparm[layer].thetas = getdefdoub (s, "thetas", 0.0, infilename);
+  soilparm[layer].ksat = getdefdoub (s, "ksat", 0.0, infilename);
+  soilparm[layer].thickness = getdefdoub (s, "thickness", 0.0, infilename);
+d413 1
+d417 2
+a418 2
+  soilparm[layer].thetas = getdefdoub (s, "thetas", layer > 0 ? soilparm[layer - 1].thetas : 0.0, infilename);
+  soilparm[layer].ksat = getdefdoub (s, "ksat", layer > 0 ? soilparm[layer - 1].ksat : 0.0, infilename);
+d422 2
+a423 2
+  soilparm[layer].n = getdefdoub (s, "n", layer > 0 ? soilparm[layer - 1].n : 0.0, infilename);
+  ttl = getdefdoub (s, "l", layer > 0 ? ttl : 0.0, infilename);
+d426 1
+a426 1
+  soilparm[layer].alpha = getdefdoub (s, "alpha", layer > 0 ? soilparm[layer - 1].alpha : 0.0, infilename);
+d508 1
+a508 1
+  soilverb = getdefint ("soil", "verbose", verbose, infilename);
+@
+
+
+1.10
+log
+@added progress call
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/soil/RCS/swatsoil.c,v 1.9 1995/08/29 14:01:21 schj Exp $ */
+d4 2
+a5 1
+ *  $Date: 1995/08/29 14:01:21 $
+d9 1
+a9 1
+"$Id: swatsoil.c,v 1.9 1995/08/29 14:01:21 schj Exp $";
+a129 4
+  maxitr = getdefdoub ("soil", "maxit", 0.0, infilename);
+  abstol = getdefdoub ("soil", "abstol", abstol, infilename);
+  reltol = getdefdoub ("soil", "reltol", reltol, infilename);
+  thetol = getdefdoub ("soil", "thetatol", thetol, infilename);
+d133 1
+a133 2
+  maxitrlo = maxitr / 4;
+  maxitrhi = 3 * maxitrlo;
+d150 1
+a150 1
+     for (i=1;i<365;i++)
+d209 1
+a209 1
+   for (i=1;i<365;i++)
+d407 1
+d425 1
+a425 1
+  soilparm[layer].l = getdefdoub (s, "l", 0.0, infilename);
+d427 1
+a427 1
+  soilparm[layer].l = soilparm[layer].m * (soilparm[layer].l + 2.0);
+d481 2
+a482 2
+    hgiven = (double *) ts_memory ((void *) NULL, 366 * sizeof (double), progname);
+    drootz = (double *) ts_memory ((void *) NULL, 366 * sizeof (double), progname);
+d485 1
+a485 1
+    gwl = (double *) ts_memory ((void *) NULL, 366 * sizeof (double), progname);
+d531 1
+a539 5
+      /* These are include in top boundary conditions */	 
+      prec = data[preset].xy[i].y;
+      intc = data[intset].xy[i].y;
+      peva = data[pevapset].xy[i].y;
+      ptra = data[ptransset].xy[i].y;
+d541 1
+a541 1
+      evapotra();
+d564 1
+a564 1
+	showprogress(t,steps);
+@
+
+
+1.9
+log
+@added rootex, evapo(redu) and assiciated vars
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/soil/RCS/swatsoil.c,v 1.8 1995/08/28 13:43:40 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/08/28 13:43:40 $
+d8 1
+a8 1
+"$Id: swatsoil.c,v 1.8 1995/08/28 13:43:40 schj Exp $";
+d23 1
+a23 1
+int     gwset,preset, intset;
+d28 1
+a28 1
+int     swnums = 2;		/* this a a hack */
+d122 1
+d163 6
+a168 3
+  if ((preset = getsetbyname ("precipitation")) < 0)
+    {
+      get_data (getdefstr ("ts", "precipitation", "nothing", infilename), NULL, "precipitation");
+d172 26
+d364 1
+a364 1
+  if (soilverb)
+a492 1
+    qrot[i] = 0.0;
+d537 1
+a537 1
+      if (soilverb)
+d542 1
+d544 3
+d563 1
+a563 1
+      genout(i); /* Produce daily output to stderr of named file */
+d565 7
+@
+
+
+1.8
+log
+@fixed small typo's
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/soil/RCS/swatsoil.c,v 1.7 1995/08/24 20:50:46 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/08/24 20:50:46 $
+d8 1
+a8 1
+"$Id: swatsoil.c,v 1.7 1995/08/24 20:50:46 schj Exp $";
+a20 1
+double  prec = 0.0;		/* Precipitation */
+d22 1
+a22 1
+/* Soem setnames needed in the soil modules */
+d60 2
+a85 1
+double botcom[5];
+d104 3
+d153 1
+a153 1
+     for (i=1;i<layers;i++)
+a166 8
+  /*
+     if ((evapset = getsetbyname ("evaporation")) < 0)
+     {
+     getdefstr ("soil", "evaporation", "nothing", infilename);
+     evapset = getsetbyname ("evaporation");
+     }
+   */
+
+d168 24
+a275 4
+	if (lbc == 4)
+	  for (i = 0; i <350; i++)
+	    hgiven[i] =getdefdoub ("soil", "gw_initial", 0.0, infilename); 
+
+d455 1
+d513 1
+d515 2
+d522 1
+@
+
+
+1.7
+log
+@remove output() call
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/soil/RCS/swatsoil.c,v 1.6 1995/08/24 14:14:44 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/08/24 14:14:44 $
+d8 1
+a8 1
+"$Id: swatsoil.c,v 1.6 1995/08/24 14:14:44 schj Exp $";
+d82 5
+d433 1
+@
+
+
+1.6
+log
+@added genoutfile support
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/soil/RCS/swatsoil.c,v 1.5 1995/08/24 13:02:28 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/08/24 13:02:28 $
+d8 1
+a8 1
+"$Id: swatsoil.c,v 1.5 1995/08/24 13:02:28 schj Exp $";
+d95 1
+d458 1
+a458 1
+  int     i, j;
+d505 1
+a505 6
+      if (soilverb)
+	{
+	  output (i);		/* Print daily totals */
+	}
+
+  	setzero(); /* Set daily stuff to zero */
+@
+
+
+1.5
+log
+@added RCSid and use of perror
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/soil/RCS/swatsoil.c,v 1.4 1995/08/23 13:14:25 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/08/23 13:14:25 $
+d7 2
+a8 2
+static const char RCSid[] =
+"$Id: vsel.c,v 1.5 1995/08/24 12:47:38 schj Exp $";
+a296 4
+    fprintf(stderr,"h[i],theta[i],k[i],kgeom[i]\n");
+  for (i=0;i<layers;i++){
+    fprintf(stderr,"%f %f %f %f\n",h[i],theta[i],k[i],kgeom[i]);
+  }
+d473 1
+a473 1
+  openout(NULL);
+d479 1
+a479 1
+	perror (1,RCSid,"more steps then P values !!","");
+d487 1
+a487 5
+	  (void) fprintf (stderr, "t=%f\tdt=%f\n", t, dt);
+	  (void) showit ("soil: Starting iteration");
+	      sprintf (ttt, "soil: volact = %f, volsat = %f", volact, volsat);
+	      showit (ttt);
+	      sprintf (ttt, "soil: volact-volm1 = %f qtop-qbot=%f", volact - volm1,qtop-qbot);
+a490 1
+      fprintf(stderr,"volini= %f masbal = %f volact =  %f cumbot = %f cumtop %f\n", volini,masbal,volact,cumbot,cumtop);
+d503 1
+a503 1
+      genout(i);
+a507 3
+
+      /*for (j = 0; j < layers; j++)
+	k[j] = hconode (j, h[j]);*/
+@
+
+
+1.4
+log
+@updated output stuff, plus totals set to zero
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/soil/RCS/swatsoil.c,v 1.3 1995/08/23 07:22:22 schj Exp $ */
+d4 1
+a4 2
+ *  $Date: 1995/08/23 07:22:22 $
+ *
+d6 4
+d483 1
+a483 2
+  	showit("more steps then P values !!");
+	exit (1);
+@
+
+
+1.3
+log
+@almost all included
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/soil/RCS/swatsoil.c,v 1.2 1995/08/16 14:08:25 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/08/16 14:08:25 $
+d30 1
+a30 1
+double  cqbot;
+d87 1
+d89 3
+d472 1
+d474 2
+d479 6
+a484 1
+  for (i = 0; i < data[preset].points; i++)
+d510 1
+a510 1
+
+d518 2
+d523 1
+@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@d1 2
+a2 2
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/soil/RCS/headcalc.c,v 1.3 1995/08/16 14:05:43 schj Exp $ */
+/*- $RCSfile: headcalc.c,v $
+d4 1
+a4 1
+ *  $Date: 1995/08/16 14:05:43 $
+d26 1
+a26 1
+int     swnums = 1;		/* this a a hack */
+d29 3
+a31 1
+double  volini;
+d42 1
+d46 2
+a47 1
+double *q;			/* length layers +1 */
+d84 3
+d115 2
+d135 1
+a135 1
+  if (lbc == 4)
+d137 4
+d197 1
+a197 1
+	term1 = pow(pow(1.0 - 0.99, 1.0/soilparm[i].m),soilparm[i].m);
+d243 5
+d275 1
+a275 1
+  kgeom[0] = sqrt(soilparm[0].ksat * k[0]);
+d280 1
+a280 1
+      kgeom[i] = sqrt((k[i]* k[i-1]));
+d290 4
+d374 2
+a375 2
+  soilparm[layer].l = getdefdoub (s, "l", layer > 0 ? soilparm[layer - 1].l : 0.0, infilename);
+  soilparm[layer].m = 1 - (1 / soilparm[layer].n);
+d421 2
+d426 2
+a427 2
+  if (lbc == 0)
+    gwl = (double *) ts_memory ((void *) NULL, data[gwset].points * sizeof (double), progname);
+d468 2
+d488 1
+d493 1
+a494 1
+	  timestep ();		/* */
+d497 1
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 6
+@

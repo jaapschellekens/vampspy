@@ -1,0 +1,213 @@
+\begin{thebibliography}{xx}
+
+\harvarditem[Belmans et al.]{Belmans, Wesseling and
+  Feddes}{1983}{belmans1983272}
+Belmans, C., Wesseling, J. and Feddes, R.  (1983).
+\newblock Simulation model of the water balance of a cropped soil: {SWATRE},
+  {\em {J}ournal of {H}ydrology} {\bf 63}:~271--286.
+
+\harvarditem[Beverly]{Beverly}{1994}{beverly1994274}
+Beverly, C.  (1994).
+\newblock Background notes on the {CSIRO} {T}opog model. 2. {D}etails of the
+  soil hydraulic models supported in {T}opog-{S}oil, {\em Technical report},
+  {CSIRO} {D}ivision of {W}ater {R}esources, Black {M}ountain, {C}anberra,
+  {A}ustralia.
+
+\harvarditem[Bringfelt]{Bringfelt}{1986}{bringfelt86}
+Bringfelt, J.  (1986).
+\newblock Test of a forest evapotranspiration model, {\em Meteorology and
+  Climatology Reports~52}, SMHI, Norrk\"{o}pping, Sweden.
+
+\harvarditem[Bruijnzeel]{Bruijnzeel}{1983}{bruijnzeel1983T}
+Bruijnzeel, L.  (1983).
+\newblock {\em Hydrological and Biochemical Aspect of Man-Made Forests in
+  {S}outh-central {J}ava, {I}ndonesia}, PhD thesis, {F}aculty of {E}arth
+  {S}ciences, {V}rije {U}niversiteit, Amsterdam.
+
+\harvarditem[Bruijnzeel and Scatena]{Bruijnzeel and
+  Scatena}{1994}{bruijnzeel1994}
+Bruijnzeel, L. and Scatena, F.  (1994).
+\newblock Hydrological modeling in a humid tropical island setting: with
+  special reference to the {L}uquillo {E}xperimental {F}orest, {P}uerto {R}ico,
+  Research proposal, {V}rije {U}niversiteit {A}msterdam, {I}nternational
+  {I}nstitute for {T}ropical {F}orestry.
+
+\harvarditem[Calder]{Calder}{1986}{calder1986171}
+Calder, I.  (1986).
+\newblock The influence of land use on water yield in upland areas of the
+  {U.K.}, {\em {J}ournal of {H}ydrology} {\bf 88}:~201--211.
+
+\harvarditem[Calder]{Calder}{1990}{calder1990284}
+Calder, I.  (1990).
+\newblock {\em Evaporation in the uplands}, Jhon {W}iley \& {S}ons {L}td.
+
+\harvarditem[Clapp and Hornberger]{Clapp and Hornberger}{1978}{clapp1978263}
+Clapp, R. and Hornberger, G.  (1978).
+\newblock Emperical equations for some soil hydraulic properties, {\em {W}ater
+  {R}esources {R}esearch} {\bf 14}(4):~601--604.
+\newblock from ben, in vd griend model.
+
+\harvarditem[{Commissie Voor Hydrologisch Onderzoek {TNO}}]{{Commissie Voor
+  Hydrologisch Onderzoek {TNO}}}{1988}{commissie1988N}
+{Commissie Voor Hydrologisch Onderzoek {TNO}}  (1988).
+\newblock Van {P}enman naar {M}akkink. {E}en nieuwe berekeninswijze voor
+  klimatologisch verdampingsgetallen, {\em Rapporten en nota's/Commissie voor
+  hydrologisch onderzoek {TNO}~19}, {TNO}, 'S-Gravenhage.
+
+\harvarditem[Davis]{Davis}{1995a}{davis1995283}
+Davis, J.  (1995a).
+\newblock {\em S-{L}ang {C} Programmer's guide}.
+
+\harvarditem[Davis]{Davis}{1995b}{davis1995282}
+Davis, J.  (1995b).
+\newblock {\em S-{L}ang Programmer's guide}.
+\newblock Version 0.1.
+
+\harvarditem[Feddes et al.]{Feddes, Kowalik and Zarasny}{1978}{feddes1978273}
+Feddes, R., Kowalik, P. and Zarasny, H.  (1978).
+\newblock {\em Simulation of field water use and crop yield}, {J}ohn {W}iley \&
+  {S}ons.
+
+\harvarditem[Gash]{Gash}{1979}{gash1979165}
+Gash, J.  (1979).
+\newblock An analytical model of rainfall interception by forests, {\em
+  {Q}uarterly {J}ournal of the {R}oyal {M}eteorological {S}ociety} {\bf
+  105}:~43--55.
+
+\harvarditem[Gash and Morton]{Gash and Morton}{1978}{gash1978167}
+Gash, J. and Morton, A.  (1978).
+\newblock An application of the {R}utter model to the estimation of the
+  interception loss from {T}hetford {F}orest, {\em {J}ournal of {H}ydrology}
+  {\bf 38}:~49--58.
+
+\harvarditem[Gash et al.]{Gash, Wright and Lloyd}{1980}{gash1980166}
+Gash, J., Wright, I. and Lloyd, C.  (1980).
+\newblock Comparative estimates of interception loss from three coniferous
+  forests in {G}reat {B}ritain, {\em {J}ournal of {H}ydrology} {\bf
+  48}:~89--105.
+
+\harvarditem[Herwitz]{Herwitz}{1985}{herwitz1985181}
+Herwitz, R.  (1985).
+\newblock Interception storage capacities of tropical rainforest canopy trees,
+  {\em {J}ournal of {H}ydrology} {\bf 77}:~237--252.
+\newblock AUS Queensland.
+
+\harvarditem[Jackson]{Jackson}{1975}{jackson1975183}
+Jackson, I.  (1975).
+\newblock Relationships between rainfall parameters and interception by
+  tropical rainforest, {\em {J}ournal of {H}ydrology} {\bf 24}:~215--238.
+
+\harvarditem[Kernighan and Ritchie]{Kernighan and Ritchie}{1988}{kernighan1988}
+Kernighan, B. and Ritchie, D.  (1988).
+\newblock {\em The {C } programming language}, 2 edn, Prentice {H}all.
+
+\harvarditem[Leonard]{Leonard}{1967}{leonard1967184}
+Leonard, R.  (1967).
+\newblock Mathematical theory of interception, {\em in} W.~Sopper and H.~Lull
+  (eds), {\em International Symposium on Forest Hydrology}, Pergamon Press,
+  Oxford, pp.~131--136.
+
+\harvarditem[Makkink]{Makkink}{1957}{makkink1957}
+Makkink, G.  (1957).
+\newblock Testing the {P}enman formula by means of lysismeters, {\em {J}ourn.
+  {I}nt. of {W}ater {E}ng.} {\bf 11}:~277--288.
+
+\harvarditem[Makkink]{Makkink}{1961}{makkink1961}
+Makkink, G.  (1961).
+\newblock De verdamping uit vegetaties in verband met de formule van {P}enman,
+  {\em Proceedings and {I}nformations~4}, Comm, {H}ydrol, {R}esearch {TNO}, The
+  {H}ague.
+
+\harvarditem[Marquardt]{Marquardt}{1963}{marquardt1963N}
+Marquardt, D.  (1963).
+\newblock An algorithm for least-square estimates of nonlinear parameters.,
+  {\em J. Society Ind. Applicated Mathematics} {\bf 11}:~431--441.
+
+\harvarditem[Monteith]{Monteith}{1965}{monteith1965}
+Monteith, J.  (1965).
+\newblock Evaporation and environment, {\em Symp. {S}oc. {E}xp. {B}iol.} {\bf
+  19}:~206--234.
+
+\harvarditem[Mualem]{Mualem}{1976}{mualem1976261}
+Mualem, Y.  (1976).
+\newblock A new model for predicting the hydraulic conductivity of unsaturated
+  porous media, {\em {W}ater {R}esources {R}esearch} {\bf 12}(3):~513--522.
+
+\harvarditem[Penman]{Penman}{1956}{penman1956N}
+Penman, H.  (1956).
+\newblock Evaporation: an introductory survey, {\em {N}etherlands {J}ournal of
+  {A}gricultural {S}ciences} {\bf 4}:~9--29.
+
+\harvarditem[Press et al.]{Press, Teukolsky, Vetterling and
+  Flannery}{1992}{press1992B}
+Press, W., Teukolsky, S., Vetterling, W. and Flannery, B.  (1992).
+\newblock {\em Numerical recipies in {C}}, 2 edn, Cambridge university press.
+
+\harvarditem[Roberts et al.]{Roberts, Cabrel, Fisch, Molion, Moore and
+  Shuttleworth}{1993}{roberts1993197}
+Roberts, J., Cabrel, O., Fisch, G., Molion, L., Moore, C. and Shuttleworth, W.
+  (1993).
+\newblock Tranpiration from an {A}mazonian rainforest calculated from stomatal
+  conductance measurements, {\em {A}gricultural and {F}orest {M}eteorology}
+  {\bf 65}:~175--196.
+
+\harvarditem[Rutter et al.]{Rutter, Kershaw, Robins and
+  Morton}{1971}{rutter1971174}
+Rutter, A., Kershaw, K., Robins, P. and Morton, A.  (1971).
+\newblock A predictive model of rainfall interception in forests. 1. a
+  derivation of the model from observations in a plantation of {C}orsican pine,
+  {\em Agricultural {M}eteorology} {\bf 9}:~367--384.
+
+\harvarditem[Rutter et al.]{Rutter, Morton and Robins}{1975}{rutter1975172}
+Rutter, A., Morton, A. and Robins, P.  (1975).
+\newblock A predictive model of rainfall interception in forests. 2.
+  {G}eneralization of the model and comparison with observations in some
+  coniferous and hardwood stands, {\em The {J}ournal of {A}pplied {E}cology}
+  {\bf 12}:~367--380.
+
+\harvarditem[Scatena]{Scatena}{1990}{scatena1990158}
+Scatena, F.  (1990).
+\newblock {W}atershed scale rainfall interception on two forested watersheds in
+  the {L}uquillo mountains of {P}uerto {R}ico, {\em {J}ournal of {H}ydrology}
+  {\bf 113}:~89--102.
+
+\harvarditem[Tsukamoto and Ishigaki]{Tsukamoto and
+  Ishigaki}{1989}{tsukamoto1989185}
+Tsukamoto, Y. and Ishigaki, I.  (1989).
+\newblock Evaporation rates from a forest canopy during storm in a humid
+  region, {\em Regional seminar on tropical forest hydrology}, {IHP}, {U}nesco,
+  {FRIM}, {K}uala {L}umpur, {M}alaysia, p.~10.
+
+\harvarditem[{van Dijk}]{{van Dijk}}{1996}{dijk1996N}
+{van Dijk}, A.  (1996).
+\newblock Evapotranspiration and growth of maize, rice and cassava in rainfed
+  mixed cropping in {W}est {J}ava, {I}ndonesia, {\em Working paper~3},
+  Cikumutuk hydrological research project.
+
+\harvarditem[{{v}an Genuchten}]{{{v}an Genuchten}}{1980}{genuchten1980179}
+{{v}an Genuchten}, M.  (1980).
+\newblock A closed-form equation for predicting the hydraulic conductivity of
+  unsaturated soils, {\em {S}oil {S}cience {S}ociety of {A}merica {J}ournal}
+  {\bf 48}:~892--898.
+
+\harvarditem[Vertessy et al.]{Vertessy, Hatton, O`Shaughnessy and
+  Jayasuriya}{1993}{vertessy1993140}
+Vertessy, R., Hatton, T., O`Shaughnessy, P. and Jayasuriya, M.  (1993).
+\newblock Predicting water yield from a montain ash forest catchment using a
+  terrain analysis based catchment model, {\em {J}ournal of {H}ydrology} {\bf
+  150}:~665--700.
+
+\harvarditem[Waterloo]{Waterloo}{1994}{waterloo1994T2}
+Waterloo, M.  (1994).
+\newblock {\em Water and nutrient dynamics of {\em Pinus Caribaea} plantation
+  forest on former grassland soils in southwest {V}iti {L}evu, {F}iji}, PhD
+  thesis, {F}aculty of {E}arth {S}ciences, {V}rije {U}niversiteit.
+
+\harvarditem[W\"osten et al.]{W\"osten, Bannink and
+  Beuving}{1987}{wosten1987287}
+W\"osten, J., Bannink, M. and Beuving, J.  (1987).
+\newblock Waterretentie- en doorlatendheids- karakteristieken van boven en
+  ondergronden in {N}ederland: de {S}taringreeks, {\em Report 1932}, Stichting
+  voor bodemkaartering, Wageningen.
+
+\end{thebibliography}

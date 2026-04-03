@@ -1,0 +1,57 @@
+head	1.1;
+access;
+symbols;
+locks;
+comment	@# @;
+
+
+1.1
+date	95.08.16.13.37.19;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@Makefile (unix) of soil section vamps
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@SOBJ = soilout.o  swatsoil.o soilut.o soilboun.o timestep.o\
+	integral.o headcalc.o
+
+soil.o: ${SOBJ}
+	ld -r -o $@@  ${SOBJ} 
+
+soilout.o: soilout.c
+	${CC} -c ${DEFS} soilout.c
+
+integral.o: integral.c
+	${CC} -c ${DEFS} integral.c
+
+timestep.o: timestep.c
+	${CC} -c ${DEFS} timestep.c
+
+headcalc.o: headcalc.c
+	${CC} -c ${DEFS} headcalc.c
+
+richard.o: richard.c
+	${CC} -c ${DEFS} richard.c
+
+
+swatsoil.o: swatsoil.c
+	${CC} -c ${DEFS} swatsoil.c
+
+soilboun.o: soilboun.c
+	${CC} -c ${DEFS} soilboun.c
+
+soilut.o: soilut.c
+	${CC} -c ${DEFS} soilut.c
+
+clean:
+	${RM} ${TRASH}
+@

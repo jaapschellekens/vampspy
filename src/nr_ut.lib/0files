@@ -1,0 +1,14 @@
+Files in nr_ut
+--------------
+Makefile	- tested with gcc and gmake only
+0readme		- this file
+0nr_ut.*	- function documentation (extracted from source
+		  code) in ascii, TeX and troff format
+nr_mat.c	- matrix creation and delete functions
+nr_vec.c	- vector creation and delete functions
+nr_rw.c		- matrix/vector read/write functions (ascii)
+nr_stat.c	- simple matrix statistics
+nr_ut.c		- matrix to vector etc. conversion routines
+nrutil.c	- misc stuff, including list management
+nrutil.h	- header file for the lib
+nr_test.c	- simple test

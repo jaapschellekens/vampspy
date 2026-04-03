@@ -1,0 +1,47 @@
+head	1.1;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.1
+date	95.08.16.13.40.50;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@old stuff
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#include <stdio.h>
+#include <math.h>
+#include "../include/vamps.h"
+#include "../include/version.h"
+
+#ifndef PI
+#define PI 3.1415926536
+#endif
+
+/*
+ * See: P132, Physics of plant environment
+ * 	by W.R. van Wijk
+ */
+
+/* T seems to be the julian day */
+double
+ground (gm, gv, t)
+double  gm;
+double  gv;
+double  t;
+{
+  return gm + gv * sin ((double) 2.0 * (double) PI * (t - (double) 81.0) / (double) 365.0);
+}
+@

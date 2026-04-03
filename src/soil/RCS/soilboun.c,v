@@ -1,0 +1,1557 @@
+head	1.26;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.26
+date	99.01.06.12.13.01;	author schj;	state Alpha;
+branches;
+next	1.25;
+
+1.25
+date	99.01.06.12.07.49;	author schj;	state Alpha;
+branches;
+next	1.24;
+
+1.24
+date	97.09.09.08.39.39;	author schj;	state Exp;
+branches;
+next	1.23;
+
+1.23
+date	97.01.16.15.05.20;	author schj;	state Exp;
+branches;
+next	1.22;
+
+1.22
+date	96.11.05.15.00.48;	author schj;	state Alpha;
+branches;
+next	1.21;
+
+1.21
+date	96.10.22.17.56.27;	author schj;	state Exp;
+branches;
+next	1.20;
+
+1.20
+date	96.04.09.12.08.16;	author schj;	state Exp;
+branches;
+next	1.19;
+
+1.19
+date	96.03.24.11.37.58;	author schj;	state alpha;
+branches;
+next	1.18;
+
+1.18
+date	96.02.08.08.17.53;	author schj;	state Exp;
+branches;
+next	1.17;
+
+1.17
+date	95.12.17.21.44.38;	author schj;	state Exp;
+branches;
+next	1.16;
+
+1.16
+date	95.12.05.03.03.34;	author schj;	state Exp;
+branches;
+next	1.15;
+
+1.15
+date	95.11.14.20.29.16;	author schj;	state Exp;
+branches;
+next	1.14;
+
+1.14
+date	95.10.30.13.55.56;	author schj;	state Exp;
+branches;
+next	1.13;
+
+1.13
+date	95.10.19.13.05.57;	author schj;	state Exp;
+branches;
+next	1.12;
+
+1.12
+date	95.09.23.20.46.22;	author schj;	state Exp;
+branches;
+next	1.11;
+
+1.11
+date	95.09.04.11.40.29;	author schj;	state Exp;
+branches;
+next	1.10;
+
+1.10
+date	95.09.01.06.14.43;	author schj;	state Exp;
+branches;
+next	1.9;
+
+1.9
+date	95.08.29.14.01.00;	author schj;	state Exp;
+branches;
+next	1.8;
+
+1.8
+date	95.08.24.20.50.46;	author schj;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	95.08.24.14.14.44;	author schj;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	95.08.24.13.00.38;	author schj;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	95.08.23.07.22.01;	author schj;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	95.08.22.07.30.54;	author schj;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	95.08.16.14.21.41;	author schj;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	95.08.16.14.08.25;	author schj;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	95.08.16.13.41.21;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@top and bottom boundary conditions
+@
+
+
+1.26
+log
+@Version: 0.99g
+@
+text
+@/* $Header: /home/schj/src/vamps_0.99g/src/soil/RCS/soilboun.c,v 1.25 1999/01/06 12:07:49 schj Alpha $ */
+/*  $RCSfile: soilboun.c,v $
+ *  $Author: schj $
+ *  $Date: 1999/01/06 12:07:49 $
+ */
+/* soilboun.c
+ * 	contains functions for calculation of the boundary
+ *	conditions
+ */
+
+static char RCSid[] =
+"$Id: soilboun.c,v 1.25 1999/01/06 12:07:49 schj Alpha $";
+
+#include "soils.h"
+#include "vamps.h"
+#include <math.h>
+#include "swatsoil.h"
+
+#define MINPOND 1.0E-6
+int	fltsat;
+double  hatm, hatmd, ksurf;
+double  pond = 0.0;
+double  pondmx = 0.0;
+double qsurf=0.0;
+int dodrain = FALSE;
+double slope  = 0.0;
+double inflow;
+int *allowdrain;/* 0 == no drianage in layer allowed */
+extern double reva;
+
+static double qmax;
+
+/*C:bocotop
+ *@@ double bocotop (double *kgeo0,int *ftoph)
+ *
+ * Determines the top boundary conditions for each day (timestep)
+ *
+ *  Returns:  qtop 
+ */
+double
+bocotop (double *kgeo0,int *ftoph)
+{
+	double _qtop;
+
+	/* Determine potential flux at the top of the profile */
+	if (pond > MINPOND)
+		_qtop = (reva + intc - (pond / dt) - prec); 
+	else
+		_qtop = (reva + intc - prec);
+
+
+	if (_qtop >= 0.0){/* determine max evaporation flux */
+		ksurf = node[0].sp->
+			t2k(node[0].soiltype, node[0].sp->
+					h2t (node[0].soiltype, hatm));
+		*kgeo0 = 0.5 * (ksurf + k[0]);
+		qmax = kgeom[0] * (hatm - h[0]) / depth[0] - kgeom[0];
+		_qtop = _qtop < fabs (qmax) ? _qtop : fabs (qmax);
+		*ftoph = FALSE;
+	}else{
+		/* Determine boundary conditions during infiltration */
+		*kgeo0 = 0.5 * (node[0].sp->ksat + k[0]);
+		qsurf = kgeom[0] * (pond - h[0]) / depth[0] - kgeom[0];
+		inflow = (qbot - _qtop - qdrtot) * dt;
+
+		if (inflow > fabs(volsat - volact)){
+			*ftoph = TRUE;
+		}else{
+			if (_qtop > qsurf){
+				*ftoph = FALSE;
+			}else{
+				if (_qtop > -node[0].sp->ksat)
+					*ftoph = FALSE;
+				else
+					*ftoph = TRUE;
+			}
+		}
+	}
+
+	return _qtop;
+}
+
+/*C:bocobot
+ *@@ void bocobot(int pt)
+ *
+ * Determines the values of the boundary conditions at the bottom of
+ * the soil profile
+ *
+ *  Returns:  nothing */
+void
+bocobot (int daynr)
+{
+	double  tfrac;
+	int     i;
+	int     lastl;
+	double  deepgw;
+	double  qsat;
+
+	tfrac = t - (int) t;
+
+	if (tfrac == 0.0)
+		tfrac = 1.0;
+
+
+	lastl = layers - 1;
+	switch (lbc){/* Process for different boundary conditions */
+		case 0:
+			/* Interpolation between daily values of given groundwaterlevel */
+			/*if ((daynr == dayend && year == yearen) || daynr == ndyear)
+				gwl[0] = data[id.gwt].xy[daynr].y;
+			else 
+				gwl[0] = data[id.gwt].xy[daynr].y + tfrac * (data[id.gwt].xy[daynr + 1].y - data[id.gwt].xy[daynr].y); */
+			qbot = _getval(&data[id.gwt], t);
+			h[lastl] = gwl[0] - z[lastl];
+			theta[lastl] = node[lastl].sp->h2t (node[lastl].soiltype, h[lastl]);
+			diffmoist[lastl] = node[lastl].sp->h2dmc (node[lastl].soiltype, h[lastl]);
+			k[lastl] = node[lastl].sp->t2k (node[lastl].soiltype, theta[lastl]);
+			kgeom[lastl] = MKKGEOM(lastl); /*sqrt ((k[lastl] * k[lastl - 1]));*/
+			showit ("swatsoil",ERR,"NOT YET IMPLEMENTED LBC = 0 ",0,soilverb);
+			exit (1);
+			break;
+		case 1: /* Given flux */
+			/*
+			if ((daynr == dayend && year == yearen) || daynr == ndyear)
+				qbot = data[id.qbo].xy[daynr].y;
+			else{
+				if (daynr >= steps)
+					qbot = data[id.qbo].xy[daynr].y;
+				else
+					qbot = data[id.qbo].xy[daynr].y + tfrac * (data[id.qbo].xy[daynr + 1].y - data[id.qbo].xy[daynr].y);
+			}
+			*/
+			qbot = _getval(&data[id.qbo], t);
+			break;
+		case 2:
+			/* Seepage or infiltration from/to deep groundwater */
+			deepgw = aqave + aqamp * cos (aqomeg * (t - aqtamx));
+			qbot = (deepgw - gwl[0]) / rimlay;
+			break;
+		case 3:
+			/* Flux calculated as function of h */
+			qbot = cofqha * exp (cofqhb * fabs (gwl[0]));
+			break;
+		case 4:	/* interpolation between daily values of given pressurehead */
+			/*
+			if ((daynr == dayend && year == yearen) || daynr == ndyear){
+				h[layers - 1] = hgiven[daynr];
+			}else{
+				h[layers - 1] = hgiven[daynr] + tfrac * (hgiven[daynr + 1] - hgiven[daynr]);
+			}
+			*/
+			h[layers - 1]  = _getval(&data[id.hea], t);
+			theta[lastl] = node[lastl].sp->h2t (node[lastl].soiltype, h[lastl]);
+			diffmoist[lastl] = node[lastl].sp->h2dmc (node[lastl].soiltype, h[lastl]);
+			k[lastl] = node[lastl].sp->t2k (node[lastl].soiltype, theta[lastl]);
+			kgeom[lastl] = MKKGEOM(lastl);/*0.5 * (k[lastl] + k[lastl - 1]);*/
+			break;
+		case 5:			/* Zero flux at bottom */
+			qbot = 0.0;
+			break;
+		case 6:			/* Free drainage */
+			qbot = -1.0 * kgeom[layers];
+			break;
+		default:
+			break;
+	}
+	/* Bottom compartiment saturated ?
+	   if qbot up find maximum flux through saturated part */
+	qsat = 1000.0;
+	if (h[lastl] >= 0.0 && qbot > 0.0){
+		fltsat = TRUE;
+		for (i = lastl - 1; i >= 0; i--){
+			if (fltsat){
+				if (h[i] >= 0.0)
+					qsat = qsat < kgeom[i + 1] ? qsat : kgeom[i + 1];
+				else
+					fltsat = FALSE;
+			}
+		}
+	}
+
+	/* qbot up and larger than qsat, print error and continue */
+	if (qbot > 0.0 && qbot > qsat && lbc != 0){
+		Perror (progname, 0,0, RCSid, "Bottom bound flux large", "");
+	}
+}
+
+/*+Name: drainage
+ *
+ *  Prototype:  void drainage (int method)
+ *
+ *  Description:  method: 1) topog, only flow at saturation 2) vamps, also unsaturated flow
+ *
+ *  Returns:  nothing+*/
+void
+drainage(int method)
+{
+	int	j;
+	double  kk;
+
+	for (j=0;j<layers; j++){
+		if (allowdrain[j]){ /*drainage allowed only in these layers */
+			kk = k[j]  * node[j].sp->kh_kv;
+			if (method == 1 && theta[j] < node[j].sp->thetas - 0.01) /* Not saturated, no flow (TOPOG model)*/
+				kk = 0.0; /* set kd to zero */
+			qdra[0][j] = kk * slope; /* Calculated outflow cm/day */
+			mqdra[j] += qdra[0][j]*dt;
+		}
+	}
+}
+
+
+/* Program DeZeeuwHellinga; {13-may-91} {$N+} {$S+} {$R+} {$M 16384,0,65520} {
+
+DZH.PAS is de opvolger van ERNST.PAS en ZEEHEL.PAS. Output will be printed
+to printer and to printfile.
+}
+uses DOS, Crt, Printer, Tbox, Windows, Editor, Graphix;
+
+const
+  numint   = 12;                      { number of timesteps per year }
+  shift    = -0.17;                    { delay within usaturated zone }
+  Hbase    = 0.0;                     { drainage basis above mean sea level }
+{ start    = 1955 + 0.5/numint + shift; }
+  PPName   = 'AVG-POT.NE';
+  measName = 'P33INT.DAT';
+  outName  = 'DZH.OUT';
+var
+  P,              { oorspronkelijke neerslag }
+  EVAP,           { potentiele evapotranspiratie: maandelijkse cropfactor*Eo }
+  h0,             { initiele stijghoogte }
+  hOld,           { stijghoogte op t-1 }
+  hNew,           { stijghoogte op t }
+  dt,             { tijdstap }
+  STO,            { storage coefficient }
+  e,              { exp(-jt) }
+  j,              { reservoir factor }
+  W    : real;    { drainage resistance }
+  L,              { lengte vh aquifer }
+  KD,             { transmissiviteit }
+  ERE  : integer; { evenwijdig, radiaal of elliptisch }
+  t    : word;    { tijd }
+  pp,mm,oo   : text;
+  MinX,MaxX,MinY,MaxY,start : single;
+
+Procedure Calculation;
+var N,Wt : real;
+    xx : single;
+    i  : byte;
+
+begin
+  assign(pp,PPname); reset(pp);
+  assign(oo,OutName); rewrite(oo);
+  PopOpen(On,' - Calculating - ');
+    t:= 0;
+    dt:= 365.25/numint;
+    Wt:= W/dt;
+    e:= exp(-j*dt);
+    readln(pp,xx,P);
+    Start:= xx + shift;
+    repeat
+      N:= P/1000; { invoer --> in meters }
+      hNew:= hOld*e + N*Wt*(1-e);
+      writeln(oo,(Start+t/numint):10:3,(hNew+Hbase):10:3);
+      hOld:= hNew;
+      readln(pp,xx,P); inc(t);
+    until EOF(pp);
+  CloseFrame;
+  Close(pp);
+  Close(oo);
+  XY(5,18,'Eindwaarde h na '); write((t/12):4:2,' jaar neerslag        : ',hOld:10:3);
+end;
+
+    XY(7, 5,'            Input name : '); write(grfname[inp]);
+    XY(7, 6,'           Output name : '); write(grfname[oup]);
+    XY(7, 7,'        skip textlines : '); write(txtrow);
+    XY(7, 8,'      Start at X-value : '); write(start:1:0);
+    XY(7, 9,'         Column number : '); write(column);
+    XY(7,10,'Number of moving terms : '); write(dt);
+    textcolor(14);
+    CheckFileName(7, 5,'            input name : ',grfname[inp]);
+    grfname[oup] := grfname[inp];
+    capital(grfname[oup]); changeExt(grfname[oup],'MA ');
+    CheckFileName(7, 6,'           output name : ',grfname[oup]);
+    CheckWord    (7, 7,'        skip textlines : ',txtrow);
+    CheckSing    (7, 8,'      start at X-value : ',start,1,0);
+    CheckWord    (7, 9,'         column number : ',column);
+    CheckWord    (7,10,'number of moving terms : ',dt);
+
+
+Procedure Display;
+var X,Y : byte;
+begin
+  XY(6,2,'           -jt         -jt        ');
+  XY(6,3,'h  = h   .e    + (1 - e    ).R .W ');
+  XY(6,4,' t    t-1                     t   ');
+  XY(5,6,'컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴');
+  repeat
+    XY(6, 7,'Initiele stijghoogte [m]                  : '); X:= whereX; Y:= whereY; write(h0:8:3,' ? ');
+    GetReal(WhereX,WhereY,h0); gotoXY(X,Y); clreol; write(h0:8:3);
+    XY(6, 8,'Aquifer lengte [m]                        : '); X:= whereX; Y:= whereY; write(L:8,' ? ');
+    GetInt(WhereX,WhereY,L); gotoXY(X,Y); clreol; write(L:8);
+    XY(6, 9,'Porositeit [-]                            : '); X:= whereX; Y:= whereY; write(STO:8:3,' ? ');
+    GetReal(WhereX,WhereY,STO); gotoXY(X,Y); clreol; write(STO:8:3);
+    XY(6,10,'Transmissiviteit [m2/d]                   : '); X:= whereX; Y:= whereY; write(KD:8,' ? ');
+    GetInt(WhereX,WhereY,KD); gotoXY(X,Y); clreol; write(KD:8);
+    XY(6,11,'[1] Evenwijdig [2] Radiaal [3] Elliptisch : '); X:= whereX; Y:= whereY; write('[',ERE,'] ? ');
+    GetInt(WhereX,WhereY,ERE); gotoXY(X,Y); clreol; write('[',ERE:1,']');
+    Case ERE of
+      1 : W:= L/(2*KD)*L;  { evenwijdig }
+      2 : W:= L/(4*KD)*L;  { radiaal }
+      3 : W:= L/(3*KD)*L;  { elliptisch }
+    end;
+    j:= 1/(W*STO);
+    hOld:= h0;
+    XY(5,16,'Drainage weerstand wordt (elliptisch) [d]  : '); write(W:10:3);
+    XY(5,17,'Reservoir factor wordt (1/j) [d]           : '); write((1/j):10:3);
+  until ChPop(Off,'Ready (Y/N)? Y') <> 'N';
+end;
+
+Procedure Print;
+const PrtName = 'DZH.PRT';
+var i   : byte;
+    prt : text;
+begin
+  assign(prt,prtName);
+  append(prt);
+  for i:= 1 to 80 do write(prt,'_');
+  writeln(prt);
+  writeln(prt,' Precipitation Surplus Name  : ',PPName);
+  writeln(prt,' Measurements FileName       : ',measName);
+  writeln(prt,' Output FileName             : ',outName);
+  writeln(prt);
+  writeln(prt,' Aantal tijdstappen per jaar                : ',numint:6);
+  writeln(prt,' Verschuiving van de berekeningen           : ',shift:9:2);
+  writeln(prt,' Begin van de berekeningen                  : ',start:9:2);
+  writeln(prt,' Drainage basis a.m.s.l.                    : ',Hbase:9:2);
+  writeln(prt,' Initiele stijghoogte [m]                   : ',h0:9:2);
+  writeln(prt,' [1] Evenwijdig [2] Radiaal [3] Elliptisch  :    [',ERE:1,']');
+  writeln(prt);
+  writeln(prt,' Aquifer lengte [m]                         : ',L:6);
+  writeln(prt,' Transmissiviteit [m2/d]                    : ',KD:6);
+  writeln(prt,' Porositeit [-]                             : ',STO:9:2);
+  writeln(prt,' Drainage weerstand [d]                     : ',W:9:2);
+  writeln(prt,' Reservoir factor (1/j) [d]                 : ',(1/j):9:2);
+  for i:= 1 to 80 do write(prt,'_');
+  writeln(prt);
+  close(prt);
+
+  for i:= 1 to 80 do write(lst,'_');
+  writeln(lst);
+  writeln(lst,' Precipitation Surplus Name  : ',PPName);
+  writeln(lst,' Measurements FileName       : ',measName);
+  writeln(lst,' Output FileName             : ',outName);
+  writeln(lst);
+  writeln(lst,' Aantal tijdstappen per jaar                : ',numint:6);
+  writeln(lst,' Verschuiving van de berekeningen           : ',shift:9:2);
+  writeln(lst,' Begin van de berekeningen                  : ',start:9:2);
+  writeln(lst,' Drainage basis a.m.s.l.                    : ',Hbase:9:2);
+  writeln(lst,' Initiele stijghoogte [m]                   : ',h0:9:2);
+  writeln(lst,' [1] Evenwijdig [2] Radiaal [3] Elliptisch  :    [',ERE:1,']');
+  writeln(lst);
+  writeln(lst,' Aquifer lengte [m]                         : ',L:6);
+  writeln(lst,' Transmissiviteit [m2/d]                    : ',KD:6);
+  writeln(lst,' Porositeit [-]                             : ',STO:9:2);
+  writeln(lst,' Drainage weerstand [d]                     : ',W:9:2);
+  writeln(lst,' Reservoir factor (1/j) [d]                 : ',(1/j):9:2);
+  for i:= 1 to 80 do write(lst,'_');
+  writeln(lst);
+end;
+
+Procedure Init;
+begin
+  SetScreen(' - De Zeeuw-Hellinga - ',' relatie tussen neerslag en voeding','---',Off);
+  h0  := 21.25 - Hbase;
+  L   := 7500;
+  STO := 0.56;
+  KD  := 875;
+  ERE := 3;
+end;
+
+begin
+  Init;
+  Repeat
+    Cursor(Off);
+    Display;
+    Calculation;
+    if ChPop(off,'Display graph (Y/N)? Y') <> 'N' then begin
+      CalcXYtremes(measName,MinX,MaxX,MinY,MaxY);
+      MakeGraph(measName,outName,MinX,MaxX,MinY,MaxY,'Simulation of:');
+    end;
+    if ChPop(off,'Print (Y/N)? N') = 'Y' then Print;
+  Until ChPop(Off,'Finished (Y/N)? N') = 'Y';
+  Done;
+end.
+
+*/
+@
+
+
+1.25
+log
+@Version: 0.99g
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99e/src/soil/RCS/soilboun.c,v 1.24 1997/09/09 08:39:39 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1997/09/09 08:39:39 $
+d12 1
+a12 1
+"$Id: soilboun.c,v 1.24 1997/09/09 08:39:39 schj Exp $";
+@
+
+
+1.24
+log
+@0.99e version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99c/src/soil/RCS/soilboun.c,v 1.23 1997/01/16 15:05:20 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1997/01/16 15:05:20 $
+d12 1
+a12 1
+"$Id: soilboun.c,v 1.23 1997/01/16 15:05:20 schj Exp $";
+d184 1
+a184 1
+		Perror (progname, 0, RCSid, "Bottom bound flux large", "");
+@
+
+
+1.23
+log
+@layout + stuff
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/soil/RCS/soilboun.c,v 1.22 1996/11/05 15:00:48 schj Alpha $ */
+d4 1
+a4 1
+ *  $Date: 1996/11/05 15:00:48 $
+d12 1
+a12 1
+"$Id: soilboun.c,v 1.22 1996/11/05 15:00:48 schj Alpha $";
+d33 2
+a34 1
+/*+Name: bocotop
+d36 1
+a36 1
+ *  Prototype:  void bocotop (int pt)
+d38 4
+a41 5
+ *  Description:  determines the top boundary conditions for each day (timestep)
+ *
+ *  Returns:  nothing +*/
+void
+bocotop (int pt)
+d43 1
+d45 34
+a78 21
+  /* Determine potential flux at the top of the profile */
+  if (pond > MINPOND)
+    qtop = (reva + intc - (pond / dt) - prec); 
+  else
+    qtop = (reva + intc - prec);
+
+
+  if (qtop >= 0.0)
+    {				/* determine max evaporation flux */
+      ksurf = node[0].sp->t2k (node[0].soiltype, node[0].sp->h2t (node[0].soiltype, hatm));
+      kgeom[0] = 0.5 * (ksurf + k[0]);
+      qmax = kgeom[0] * (hatm - h[0]) / depth[0] - kgeom[0];
+      qtop = qtop < fabs (qmax) ? qtop : fabs (qmax);
+      ftoph = FALSE;
+    }
+  else
+    {
+      /* Determine boundary conditions during infiltration */
+      kgeom[0] = 0.5 * (node[0].sp->ksat + k[0]);
+      qsurf = kgeom[0] * (pond - h[0]) / depth[0] - kgeom[0];
+      inflow = (qbot - qtop - qdrtot) * dt;
+d80 1
+a80 18
+      if (inflow > fabs(volsat - volact)){
+	ftoph = TRUE;
+	}
+      else
+	{
+	  if (qtop > qsurf)
+	    {
+	      ftoph = FALSE;
+	    }
+	  else
+	    {
+	      if (qtop > -node[0].sp->ksat)
+		ftoph = FALSE;
+	      else
+		ftoph = TRUE;
+	    }
+	}
+    }
+d83 2
+a84 3
+/*+Name: bocobot
+ *
+ *  Prototype:  void bocobot(int pt)
+d86 2
+a87 1
+ *  Description:  Determines the values of the boundary conditions at the bottom of the soil profile
+d89 1
+a89 1
+ *  Returns:  nothing +*/
+d91 1
+a91 1
+bocobot (int pt)
+d93 73
+a165 48
+  double  tfrac;
+  int     i;
+  int     lastl;
+  double  deepgw;
+  double  qsat;
+
+  tfrac = t - (int) t;
+
+  if (tfrac == 0.0)
+    tfrac = 1.0;
+
+
+  lastl = layers - 1;
+  switch (lbc)			/* Process for different boundary conditions */
+    {
+    case 0:
+      /* Interpolation between daily values of given groundwaterlevel */
+      if ((daynr == dayend && year == yearen) || daynr == ndyear)
+	gwl[0] = data[gwset].xy[daynr].y;
+      else
+	gwl[0] = data[gwset].xy[daynr].y + tfrac * (data[gwset].xy[daynr + 1].y - data[gwset].xy[daynr].y);
+      h[lastl] = gwl[0] - z[lastl];
+      theta[lastl] = node[lastl].sp->h2t (node[lastl].soiltype, h[lastl]);
+      diffmoist[lastl] = node[lastl].sp->h2dmc (node[lastl].soiltype, h[lastl]);
+      k[lastl] = node[lastl].sp->t2k (node[lastl].soiltype, theta[lastl]);
+      kgeom[lastl] = mkkgeom(lastl); /*sqrt ((k[lastl] * k[lastl - 1]));*/
+      showit ("swatsoil",ERR,"NOT YET IMPLEMENTED LBC = 0 ",0,soilverb);
+      exit (1);
+      break;
+    case 1: /* Given flux */
+      if ((daynr == dayend && year == yearen) || daynr == ndyear)
+	qbot = qbottom[daynr];
+      else
+	qbot = qbottom[daynr] + tfrac * (qbottom[daynr + 1] - qbottom[daynr]);
+      break;
+    case 2:
+      /* Seepage or infiltration from/to deep groundwater */
+      deepgw = aqave + aqamp * cos (aqomeg * (t - aqtamx));
+      qbot = (deepgw - gwl[0]) / rimlay;
+      break;
+    case 3:
+      /* Flux calculated as function of h */
+      qbot = cofqha * exp (cofqhb * fabs (gwl[0]));
+      break;
+    case 4:			/* interpolation between daily values of given pressurehead */
+      if ((daynr == dayend && year == yearen) || daynr == ndyear)
+	{
+	  h[layers - 1] = hgiven[daynr];
+d167 13
+a179 3
+      else
+	{
+	  h[layers - 1] = hgiven[daynr] + tfrac * (hgiven[daynr + 1] - hgiven[daynr]);
+d181 4
+a184 29
+      theta[lastl] = node[lastl].sp->h2t (node[lastl].soiltype, h[lastl]);
+      diffmoist[lastl] = node[lastl].sp->h2dmc (node[lastl].soiltype, h[lastl]);
+      k[lastl] = node[lastl].sp->t2k (node[lastl].soiltype, theta[lastl]);
+      kgeom[lastl] = mkkgeom(lastl);/*0.5 * (k[lastl] + k[lastl - 1]);*/
+      break;
+    case 5:			/* Zero flux at bottom */
+      qbot = 0.0;
+      break;
+    case 6:			/* Free drainage */
+      qbot = -1.0 * kgeom[layers];
+      break;
+    default:
+      break;
+    }
+  /* Bottom compartiment saturated ?
+   if qbot up find maximum flux through saturated part */
+  qsat = 1000.0;
+  if (h[lastl] >= 0.0 && qbot > 0.0)
+    {
+      fltsat = TRUE;
+      for (i = lastl - 1; i >= 0; i--)
+	{
+	  if (fltsat)
+	    {
+	      if (h[i] >= 0.0)
+		qsat = qsat < kgeom[i + 1] ? qsat : kgeom[i + 1];
+	      else
+		fltsat = FALSE;
+	    }
+a185 7
+    }
+
+  /* qbot up and larger than qsat, print error and continue */
+  if (qbot > 0.0 && qbot > qsat && lbc != 0)
+    {
+      Perror (progname, 0, RCSid, "Bottom bound flux large", "");
+    }
+d198 2
+a199 2
+  int	j;
+  double  kk;
+d201 9
+a209 9
+  for (j=0;j<layers; j++){
+    if (allowdrain[j]){ /*drainage allowed only in these layers */
+      kk = k[j]  * node[j].sp->kh_kv;
+      if (method == 1 && theta[j] < node[j].sp->thetas - 0.01) /* Not saturated, no flow (TOPOG model)*/
+	kk = 0.0; /* set kd to zero */
+      qdra[0][j] = kk * slope; /* Calculated outflow cm/day */
+      mqdra[j] += qdra[0][j]*dt;
+    }
+  }
+@
+
+
+1.22
+log
+@Updated to Alpha version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/soil/RCS/soilboun.c,v 1.21 1996/10/22 17:56:27 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1996/10/22 17:56:27 $
+d12 1
+a12 1
+"$Id: soilboun.c,v 1.21 1996/10/22 17:56:27 schj Exp $";
+d27 2
+a28 1
+
+d31 1
+a31 1
+static double  inflow, qmax;
+d33 3
+a35 2
+/*
+ * void bocotop (int pt)
+d37 3
+a39 2
+ * determines the top boundary conditions for each day (timestep)
+ */
+d53 1
+a53 1
+      ksurf = soilparm[0].theta2kF (0, soilparm[0].thenodeF (0, hatm));
+d62 1
+a62 1
+      kgeom[0] = 0.5 * (soilparm[0].ksat + k[0]);
+d77 1
+a77 1
+	      if (qtop > -soilparm[0].ksat)
+d86 1
+a86 2
+/*-
+ * void bocobot(int pt)
+d88 5
+a92 3
+ * Determines the values of the boundary conditions at the bottom of
+ * the soil profile.
+ */
+d118 3
+a120 3
+      theta[lastl] = soilparm[lastl].thenodeF (lastl, h[lastl]);
+      diffmoist[lastl] = soilparm[lastl].dmcnodeF (lastl, h[lastl]);
+      k[lastl] = soilparm[lastl].theta2kF (lastl, theta[lastl]);
+d149 3
+a151 3
+      theta[lastl] = soilparm[lastl].thenodeF (lastl, h[lastl]);
+      diffmoist[lastl] = soilparm[lastl].dmcnodeF (lastl, h[lastl]);
+      k[lastl] = soilparm[lastl].theta2kF (lastl, theta[lastl]);
+d188 7
+a194 6
+/*-
+ * void drainage (int method)
+ * method:
+ * 1) topog, only flow at saturation
+ * 2) vamps, also unsaturated flow
+ */
+d198 2
+a199 2
+int	j;
+double  kk;
+d201 9
+a209 7
+for (j=0;j<layers; j++){
+    kk = k[j]  * soilparm[j].kh_kv;
+  if (method == 1 && theta[j] < soilparm[j].thetas - 0.01) /* Not saturated, no flow (TOPOG model)*/
+    kk = 0.0; /* set kd to zero */
+    qdra[0][j] = kk * slope; /* Calculated outflow cm/day */
+    mqdra[j] += qdra[0][j]*dt;
+}
+@
+
+
+1.21
+log
+@removed log in file
+support for new theta-h function stuff
+@
+text
+@d1 1
+a1 1
+/* $Header: /homes/schj/src/vamps_0.98/src/soil/RCS/soilboun.c,v 1.20 1996/04/09 12:08:16 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1996/04/09 12:08:16 $
+d12 1
+a12 1
+"$Id: soilboun.c,v 1.20 1996/04/09 12:08:16 schj Exp $";
+a204 30
+double
+dzh(double t,double N,double hbase)
+	/* time in days */
+	/* percolation in m*/
+	/* base level */
+{
+double  e,	/* exp(-jt)*/ 
+  j,		/* reservoir factor */
+  W;		/* drainage resistance */
+  /*L;*/		/* lengte vh aquifer */
+  double dt,Wt, Start,xx,shift;
+  double P,hNew,hOld,numint;
+
+    t= 0;
+    dt= 365.25/numint;
+    Wt= W/dt;
+    e= exp(-j*dt);
+    Start= xx + shift;
+    do{
+      N= P/1000; /* invoer --> in meters */
+      hNew= hOld*e + N*Wt*(1-e);
+      /* writeln(oo,(Start+t/numint):10:3,(hNew+Hbase):10:3);*/
+      hOld= hNew;
+      /*readln(pp,xx,P);*/
+      t++;
+    }while (t==0.0);
+ return 0.0;
+}
+
+/*
+d206 1
+a206 1
+Program DeZeeuwHellinga; {13-may-91} {$N+} {$S+} {$R+} {$M 16384,0,65520} {
+@
+
+
+1.20
+log
+@minor
+@
+text
+@d1 2
+a2 2
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.98/src/soil/RCS/soilboun.c,v 1.19 1996/03/24 11:37:58 schj alpha $ */
+/*- $RCSfile: soilboun.c,v $
+d4 1
+a4 30
+ *  $Date: 1996/03/24 11:37:58 $
+ *  $Log: soilboun.c,v $
+ *  Revision 1.19  1996/03/24 11:37:58  schj
+ *  cosmetic changes
+ *
+ * Revision 1.18  1996/02/08  08:17:53  schj
+ * added drainage
+ * minor changes
+ *
+ * Revision 1.17  1995/12/17  21:44:38  schj
+ * cosmetic changes
+ *
+ *  Revision 1.16  1995/12/05 03:03:34  schj
+ *  added look-up table support
+ *
+ *  Revision 1.15  1995/11/14 20:29:16  schj
+ *  changed include
+ *
+ * Revision 1.14  1995/10/30  13:55:56  schj
+ * added first attemped on drainage
+ *
+ * Revision 1.13  1995/10/19  13:05:57  schj
+ * seems to work now
+ *
+ * Revision 1.12  1995/09/23  20:46:22  schj
+ * added ifdef DDEBUG
+ *
+ * Revision 1.11  1995/09/04  11:40:29  schj
+ * added log in RCS header
+ *
+d12 1
+a12 1
+"$Id: soilboun.c,v 1.19 1996/03/24 11:37:58 schj alpha $";
+d32 4
+a35 3
+/*-
+ *	void bocotop (int pt)
+ *	determines the top boundary conditions for each day (timestep)
+d50 1
+a50 1
+      ksurf = theta2k (0, thenode (0, hatm, soilparm[0].method), soilparm[0].method);
+d84 4
+a87 3
+ *	void bocobot(int pt)
+ *	Determines the values of the boundary conditions at the bottom of
+ *	the soil profile.
+d114 3
+a116 3
+      theta[lastl] = thenode (lastl, h[lastl], soilparm[lastl].method);
+      diffmoist[lastl] = dmcnode (lastl, h[lastl], soilparm[lastl].method);
+      k[lastl] = theta2k (lastl, theta[lastl], soilparm[lastl].method);
+d118 1
+a118 1
+      showit ("NOT YET IMPLEMENTED LBC = 0 ");
+d145 3
+a147 3
+      theta[lastl] = thenode (lastl, h[lastl], soilparm[lastl].method);
+      diffmoist[lastl] = dmcnode (lastl, h[lastl], soilparm[lastl].method);
+      k[lastl] = theta2k (lastl, theta[lastl], soilparm[lastl].method);
+d185 5
+a189 5
+* void drainage (int method)
+* method:
+* 1) topog, only flow at saturation
+* 2) vamps, also unsaturated flow
+*/
+@
+
+
+1.19
+log
+@cosmetic changes
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.97/src/soil/RCS/soilboun.c,v 1.18 1996/02/08 08:17:53 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1996/02/08 08:17:53 $
+d6 3
+d41 1
+a41 1
+"$Id: soilboun.c,v 1.18 1996/02/08 08:17:53 schj Exp $";
+d221 1
+a221 1
+double  kd;
+d224 5
+a228 8
+  if (j == 0)
+    kd = -k[0] * z[0] * 0.5 * soilparm[j].kh_kv;
+  else
+    kd = k[j] * (z[j-1] - z[j]) * soilparm[j].kh_kv;
+  if (method == 1 && theta[j] < soilparm[j].thetas - 0.01) /* Not saturated, not flow (TOPOG model)*/
+    kd = 0; /* set kd to zero */
+    qdra[0][j] = kd * slope; /* Calculated outflow */
+    mqdra[j] += qdra[0][j]*dt/(-1.0*z[layers-1]);
+@
+
+
+1.18
+log
+@added drainage
+minor changes
+@
+text
+@d1 1
+a1 1
+/* $Header: /homes/schj/src/vamps_0.96/src/soil/RCS/soilboun.c,v 1.17 1995/12/17 21:44:38 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/12/17 21:44:38 $
+d6 4
+d38 1
+a38 1
+"$Id: soilboun.c,v 1.17 1995/12/17 21:44:38 schj Exp $";
+d45 1
+d49 1
+a49 1
+double  pondmx = 1.5;
+d63 1
+a63 2
+bocotop (pt)
+int     pt;
+d67 1
+a67 1
+  if (pond > 1.0E-6)
+d74 1
+a74 1
+    {				/* detrmine max evaporation flux */
+d88 1
+a88 1
+      if (inflow > fabs(volsat - volact))
+d90 1
+d114 1
+a114 2
+bocobot (pt)
+int     pt;
+d141 1
+a141 1
+      kgeom[lastl] = sqrt ((k[lastl] * k[lastl - 1]));
+d172 1
+a172 1
+      kgeom[lastl] = 0.5 * (k[lastl] + k[lastl - 1]);
+d215 1
+a215 2
+drainage(method)
+int method;
+d217 1
+a217 1
+int	j,i;
+d222 1
+a222 1
+    kd = -k[0] * z[0] * 0.5;
+d224 1
+a224 1
+    kd = k[j] * (z[j-1] - z[j]);
+d228 1
+a228 1
+    mqdra[j] += qdra[0][j]*dt;
+d233 4
+a236 4
+dzh(t,N,hbase)
+double	t;	/* time in days */
+double 	N;	/* percolation in m*/
+double 	hbase;	/* base level */
+d240 2
+a241 2
+  W,		/* drainage resistance */
+  L;		/* lengte vh aquifer */
+d258 1
+@
+
+
+1.17
+log
+@cosmetic changes
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.95/src/soil/RCS/soilboun.c,v 1.16 1995/12/05 03:03:34 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/12/05 03:03:34 $
+d6 3
+d34 1
+a34 1
+"$Id: soilboun.c,v 1.16 1995/12/05 03:03:34 schj Exp $";
+d64 1
+a64 1
+    qtop = reva + intc - (pond / dt) - prec; 
+d66 1
+a66 1
+    qtop = reva + intc - prec;
+d84 1
+a84 1
+      if (inflow > (volsat - volact))
+d204 6
+d211 2
+a212 1
+drainage()
+d218 8
+a225 5
+	if (j == 0)
+		kd = k[0] * z[0] * 0.5;
+	else
+		kd = k[j] * (z[j-1] - z[j]);
+	mqdra[j]= qdra[0][j] = kd * slope; /* Calculated outflow */
+@
+
+
+1.16
+log
+@added look-up table support
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.91/soil/RCS/soilboun.c,v 1.15 1995/11/14 20:29:16 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/11/14 20:29:16 $
+d6 3
+d31 1
+a31 1
+"$Id: soilboun.c,v 1.15 1995/11/14 20:29:16 schj Exp $";
+d38 1
+a112 1
+  int     fltsat;
+@
+
+
+1.15
+log
+@changed include
+@
+text
+@d1 1
+a1 1
+/* $Header: /homes/schj/src/vamps_0.91/RCS/soilboun.c,v 1.14 1995/10/30 13:55:56 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/10/30 13:55:56 $
+d6 3
+d28 1
+a28 1
+"$Id: soilboun.c,v 1.14 1995/10/30 13:55:56 schj Exp $";
+d38 3
+a43 1
+static double  qsurf = 0.0;
+d64 1
+a64 1
+      ksurf = theta2k (0, thenode (0, hatm, soilparm[0].method[THENODE]), soilparm[0].method[THETA2K]);
+d128 3
+a130 3
+      theta[lastl] = thenode (lastl, h[lastl], soilparm[lastl].method[THENODE]);
+      diffmoist[lastl] = dmcnode (lastl, h[lastl], soilparm[lastl].method[DMCNODE]);
+      k[lastl] = theta2k (lastl, theta[lastl], soilparm[lastl].method[THETA2K]);
+d135 1
+a135 1
+    case 1:
+d159 3
+a161 3
+      theta[lastl] = thenode (lastl, h[lastl], soilparm[lastl].method[THENODE]);
+      diffmoist[lastl] = dmcnode (lastl, h[lastl], soilparm[lastl].method[DMCNODE]);
+      k[lastl] = theta2k (lastl, theta[lastl], soilparm[lastl].method[THETA2K]);
+d198 1
+d202 1
+d205 6
+a210 1
+for (i=0;i<4; i++){
+d212 27
+d240 7
+d248 180
+@
+
+
+1.14
+log
+@added first attemped on drainage
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.9/soil/RCS/soilboun.c,v 1.13 1995/10/19 13:05:57 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/10/19 13:05:57 $
+d6 3
+d25 1
+a25 1
+"$Id: soilboun.c,v 1.13 1995/10/19 13:05:57 schj Exp $";
+d27 2
+a28 2
+#include "../include/soils.h"
+#include "../include/vamps.h"
+d30 1
+a30 1
+#include "../include/swatsoil.h"
+@
+
+
+1.13
+log
+@seems to work now
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/soil/RCS/soilboun.c,v 1.12 1995/09/23 20:46:22 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/09/23 20:46:22 $
+d6 3
+d22 1
+a22 1
+"$Id: soilboun.c,v 1.12 1995/09/23 20:46:22 schj Exp $";
+d35 2
+a36 7
+/* The are _NOT_ in swatsoil.h*/
+double  qsurf = 0.0;
+double  inflow, qmax;
+
+#ifdef DEBUG
+#undef DEBUG
+#endif
+d183 1
+a183 1
+  /* qbot up and larger than qsat, stop on error */
+d188 10
+@
+
+
+1.12
+log
+@added ifdef DDEBUG
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/soil/RCS/soilboun.c,v 1.11 1995/09/04 11:40:29 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/09/04 11:40:29 $
+d6 3
+d18 2
+a19 2
+static  char RCSid[] =
+"$Id: soilboun.c,v 1.11 1995/09/04 11:40:29 schj Exp $";
+d31 1
+d33 2
+a34 1
+double  qsurf, inflow, qmax;
+d51 1
+a51 1
+    qtop = reva + intc - (pond / dt) - data[preset].xy[pt].y;
+d53 1
+a53 1
+    qtop = reva + intc - data[preset].xy[pt].y;
+d58 1
+a58 1
+      ksurf = theta2k (0, thenode (0, hatm,soilparm[0].method[THENODE]),soilparm[0].method[THETA2K]);
+a65 1
+
+a72 4
+      else if (qtop > qsurf)
+	ftoph = FALSE;
+      else if (qtop > -soilparm[0].ksat)
+	ftoph = FALSE;
+d74 13
+a86 1
+	ftoph = TRUE;
+a87 6
+
+#ifdef DEBUG
+fprintf(stderr,"%s\n",RCSid);
+fprintf(stderr,"qtop = %f\n",qtop);
+#endif
+
+d120 1
+a120 1
+	gwl[0] = data[gwset].xy[daynr].y + tfrac * (data[gwset].xy[daynr+1].y - data[gwset].xy[daynr].y);
+d122 3
+a124 3
+      theta[lastl] = thenode (lastl, h[lastl],soilparm[lastl].method[THENODE]);
+      diffmoist[lastl] = dmcnode (lastl, h[lastl],soilparm[lastl].method[DMCNODE]);
+      k[lastl] = theta2k (lastl, theta[lastl],soilparm[lastl].method[THETA2K]);
+d126 1
+a126 1
+      showit("NOT YET IMPLEMENTED LBC = 0 ");
+d153 3
+a155 3
+      theta[lastl] = thenode (lastl, h[lastl],soilparm[lastl].method[THENODE]);
+      diffmoist[lastl] = dmcnode (lastl, h[lastl],soilparm[lastl].method[DMCNODE]);
+      k[lastl] = theta2k (lastl, theta[lastl],soilparm[lastl].method[THETA2K]);
+d188 1
+a188 1
+      Perror(0, RCSid, "Bottom bound flux large", "");
+@
+
+
+1.11
+log
+@added log in RCS header
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/soil/RCS/soilboun.c,v 1.10 1995/09/01 06:14:43 schj Exp $ */
+d4 5
+a8 2
+ *  $Date: 1995/09/01 06:14:43 $
+ *  $Log$
+d16 1
+a16 1
+"$Id: soilboun.c,v 1.10 1995/09/01 06:14:43 schj Exp $";
+d53 1
+a53 1
+      ksurf = theta2k (0, thenode (0, hatm));
+d116 3
+a118 3
+      theta[lastl] = thenode (lastl, h[lastl]);
+      diffmoist[lastl] = dmcnode (lastl, h[lastl]);
+      k[lastl] = theta2k (lastl, theta[lastl]);
+d147 3
+a149 3
+      theta[lastl] = thenode (lastl, h[lastl]);
+      diffmoist[lastl] = dmcnode (lastl, h[lastl]);
+      k[lastl] = theta2k (lastl, theta[lastl]);
+@
+
+
+1.10
+log
+@no longer exits on large bottom flux
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/soil/RCS/soilboun.c,v 1.9 1995/08/29 14:01:00 schj Exp $ */
+d4 2
+a5 2
+ *  $Date: 1995/08/29 14:01:00 $
+ *
+d13 1
+a13 1
+"$Id: soilboun.c,v 1.9 1995/08/29 14:01:00 schj Exp $";
+a180 4
+#ifdef DEBUG
+fprintf(stderr,"%s\n",RCSid);
+fprintf(stderr,"qbot = %f\n",qbot);
+#endif
+@
+
+
+1.9
+log
+@added DEBUG define
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/soil/RCS/soilboun.c,v 1.8 1995/08/24 20:50:46 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/08/24 20:50:46 $
+d13 1
+a13 1
+"$Id: soilboun.c,v 1.8 1995/08/24 20:50:46 schj Exp $";
+d179 1
+a179 1
+      Perror(1, RCSid, "Bottom bound flux large", "");
+@
+
+
+1.8
+log
+@added protptypes
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/soil/RCS/soilboun.c,v 1.7 1995/08/24 14:14:44 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/08/24 14:14:44 $
+d13 1
+a13 1
+"$Id: soilboun.c,v 1.7 1995/08/24 14:14:44 schj Exp $";
+a22 2
+double  reva = 0.0;		/* Reduced evaporation */
+double  intc = 0.0;		/* interception */
+d24 1
+d28 4
+a46 2
+  qtop = 0.3;
+
+d74 5
+d181 4
+@
+
+
+1.7
+log
+@RCS stuff updated
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/soil/RCS/soilboun.c,v 1.6 1995/08/24 13:00:38 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/08/24 13:00:38 $
+d13 1
+a13 1
+"$Id: soilboun.c,v 1.6 1995/08/24 13:00:38 schj Exp $";
+a36 2
+  int     i;
+  double  t1;
+@
+
+
+1.6
+log
+@added RCSid and use of perror
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/soil/RCS/soilboun.c,v 1.5 1995/08/23 07:22:01 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/08/23 07:22:01 $
+d12 2
+a13 2
+static const char RCSid[] =
+"$Id: vsel.c,v 1.5 1995/08/24 12:47:38 schj Exp $";
+d175 1
+a175 1
+      perror(1, RCSid, "Bottom bound flux large", "");
+@
+
+
+1.5
+log
+@should work now, qbot is not the real bottom q ?
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/soil/RCS/soilboun.c,v 1.4 1995/08/22 07:30:54 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/08/22 07:30:54 $
+d11 4
+d175 1
+a175 2
+      (void) fprintf (stderr, "%s: bottom bound flux (%f) to large\n", progname, qbot);
+      exit(1);
+@
+
+
+1.4
+log
+@updated to swap94
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/soil/RCS/soilboun.c,v 1.3 1995/08/16 14:21:41 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/08/16 14:21:41 $
+d42 2
+d153 1
+a153 1
+  if (h[lastl] <= 0.0 && qbot > 0.0)
+d172 1
+@
+
+
+1.3
+log
+@changed bocobot, no lnger stops on large flux (HACK!)
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/soil/RCS/soilboun.c,v 1.2 1995/08/16 14:08:25 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/08/16 14:08:25 $
+d55 1
+a55 1
+      kgeom[0] = sqrt ((soilparm[0].ksat * k[0]));
+d107 2
+d137 1
+a137 1
+      kgeom[lastl] = sqrt ((k[lastl] * k[lastl - 1]));
+@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@d1 2
+a2 2
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/soil/RCS/headcalc.c,v 1.3 1995/08/16 14:05:43 schj Exp $ */
+/*- $RCSfile: headcalc.c,v $
+d4 1
+a4 1
+ *  $Date: 1995/08/16 14:05:43 $
+d165 1
+a165 1
+  if (qbot > 0.0 && qbot > qsat)
+d167 1
+a167 2
+      (void) fprintf (stderr, "%s: bottom bound flux (%f) to large, stopping\n", progname, qbot);
+      exit (1);
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 6
+@

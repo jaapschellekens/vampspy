@@ -1,0 +1,132 @@
+
+
+
+issec(1)                                                 issec(1)
+
+
+NNAAMMEE
+       issec  -  test  for  existance  of  a  section in an vamps
+       input/output file
+
+
+SSYYNNOOPPSSIISS
+       iisssseecc  [----hheellpp]   [----HHeeaaddeerr]   [----ccooppyyrriigghhtt]   [----lliicceennssee]
+       [----sseeccttiioonn _s_e_c_t_i_o_n] [----CCoommmmeenntt _c_o_m_m_e_n_t_c_h_a_r] [----eexxiitt] _f_i_l_e_-
+       _n_a_m_e
+
+
+DDEESSCCRRIIPPIIOONN
+       iisssseecc can be used to test the existance of a section in  a
+       vvaammppss  input/output  file.   iisssseecc output a singe '1' if a
+       section is not found and a '0' if the section is found.
+
+       Input is read from either _f_i_l_e_n_a_m_e or standard  input.  If
+       _f_i_l_e_n_a_m_e  is specified as a single dash ``--'', it is taken
+       from standard input. Output is  written  to  the  standard
+       output.
+
+
+
+OOPPTTIIOONNSS
+       Options   may  be  given  as  either  standard  one-letter
+       options, or GNU style long  options.  Long  options  start
+       with  two  dashes ``----'' and may be truncated to any unam-
+       biguous abbreviation.
+
+
+       ----ccooppyyrriigghhtt
+              Show copyright information and exit
+
+
+       ----HHeeaaddeerr
+              Omit header from the output.
+
+
+       ----lliicceennssee
+              Print license information and exit.
+
+
+       ----hheellpp Print help text and exit.
+
+
+       ----sseeccttiioonn _s_e_c_t_i_o_n
+              Specify the name of the section to search for.
+
+
+       ----CCoommmmeenntt _c_o_m_m_e_n_t_c_h_a_r
+              Set the commentchar to char _c_o_m_m_e_n_t_c_h_a_r_.
+
+
+       ----eexxiitt Don't produce any output but set the exitlevel (for
+
+
+
+                    Version 0.99f -- Nov 1997                   1
+
+
+
+
+
+issec(1)                                                 issec(1)
+
+
+              use in scrips etc.).  The level is set to 1 if _s_e_c_-
+              _t_i_o_n is not found.  If the section  is  found,  the
+              exitlevel is set to 0.
+
+
+
+
+EEXXAAMMPPLLEESS
+       To  check  for  the  existance of the section vamps in the
+       file veluwe.inp:
+       iisssseecc --ss vvaammppss vveelluuwwee..iinnpp
+
+       The following example uses the --ee option and the && opera-
+       tor  (unix  csh)  top  print a message if the section time
+       does exists in the file test.inp:
+       iisssseecc --ee ttiimmee tteesstt..iinnpp &&&& eecchhoo SSeeccttiioonn ttiimmee eexxiissttss iinn ffiillee
+       tteesstt..iinnpp
+
+
+
+SSEEEE AALLSSOO
+       vvaammppss(5), ggeettssttrr(1).
+
+
+
+AAUUTTHHOORR
+       J. Schellekens
+       schj@geo.vu.nl
+
+
+
+BBUUGGSS
+       ;-)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    Version 0.99f -- Nov 1997                   2
+
+

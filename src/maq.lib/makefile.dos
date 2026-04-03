@@ -1,0 +1,27 @@
+OBJ = marquard.o memory.o func.o strins.o
+
+EXAMPLE = example
+
+libmaq.a: ${OBJ}
+	ar ru $@ $?
+	${RANLIB} $@
+	${INSTALL} $@ ../lib
+
+marquard.o: marquard.c
+	${CC} ${DEFS} -c marquard.c
+
+memory.o: memory.c
+	${CC} ${DEFS} -c memory.c
+
+func.o: func.c
+	${CC} ${DEFS} -c func.c
+
+strins.o: strins.c
+	${CC} ${DEFS} -c strins.c
+
+${EXAMPLE}: libmaq.a  mex.c
+	${CC} -L. mex.c -o $@  -lm -lmaq
+
+
+clean:
+	${RM} ${TRASH} ${EXAMPLE} ${MAQ} 

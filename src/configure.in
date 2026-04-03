@@ -1,0 +1,120 @@
+dnl Process this file with autoconf to produce a configure script.
+AC_INIT(main/vamps.c)
+SUBDIR=
+ISSLANG="no"
+OS=Unknown
+AC_SUBST(SUBDIR)
+AGLRT="$srcdir/agl/noagl"
+AC_SUBST(AGLRT)
+VERSION=`cat ../0version | awk '{print $1}'`
+AC_SUBST(VERSION)
+dnl Checks for programs.
+AC_PROG_CC
+AC_PROG_MAKE_SET
+AC_PROG_RANLIB
+AC_PROG_INSTALL
+AC_PATH_PROG(GNUPLOT, gnuplot)
+AC_PATH_PROG(UNAME, uname)
+AC_PREFIX_PROGRAM(vamps)
+
+if test "$UNAME" != ""; then
+	OS=`$UNAME -s`_`$UNAME -m` 
+cat >> confdefs.h <<EOF
+	#define OS "$OS"
+EOF
+fi
+AC_SUBST(OS)
+
+AC_PATH_X
+if test "$no_x" = "" ; then
+	if test "$x_libraries" != "" ; then
+		LDFLAGS="$LDFLAGS -L$x_libraries"
+	fi	
+fi
+
+AC_CONFIG_HEADER(vconfig.h:vconfig.hin)
+
+AC_SUBST(AGLOBJ)
+AC_SUBST(PLOTOBJ)
+AC_SUBST(SOBJ)
+AC_SUBST(MOBJ)
+AC_SUBST(TOBJ)
+AC_SUBST(UOBJ)
+AC_SUBST(x_libraries)
+AC_SUBST(PYLIBS)
+AC_SUBST(PYINC)
+
+AGLOBJ=
+UOBJ='${OBJDIR}/dataset.o ${OBJDIR}/output.o ${OBJDIR}/getopt.o ${OBJDIR}/progress.o ${OBJDIR}/mktable.o ${OBJDIR}/utout.o ${OBJDIR}/perror.o ${OBJDIR}/pro_mesg.o ${OBJDIR}/xtraout.o ${OBJDIR}/resamp.o ${OBJDIR}/memory.o ${OBJDIR}/smoothar.o'
+SOBJ='${OBJDIR}/soilout.o ${OBJDIR}/swatsoil.o ${OBJDIR}/integral.o ${OBJDIR}/timestep.o ${OBJDIR}/soilboun.o ${OBJDIR}/headcalc.o ${OBJDIR}/soilut.o ${OBJDIR}/band.o ${OBJDIR}/calcgwl.o ${OBJDIR}/fluxes.o ${OBJDIR}/setzero.o ${OBJDIR}/rootex.o ${OBJDIR}/det_hatm.o ${OBJDIR}/reduceva.o ${OBJDIR}/filltab.o ${OBJDIR}/misc_p.o ${OBJDIR}/smooth.o ${OBJDIR}/alloc.o ${OBJDIR}/array.o ${OBJDIR}/getparm.o'
+MOBJ='${OBJDIR}/vamps.o ${OBJDIR}/sigs.o ${OBJDIR}/init_py.o ${OBJDIR}/plot.o'
+TOBJ='${OBJDIR}/intopsys.o  ${OBJDIR}/notree.o ${OBJDIR}/topout.o ${OBJDIR}/pre_can.o ${OBJDIR}/canopy.o'
+PLOTOBJ='${OBJDIR}/draw_frame.o ${OBJDIR}/matrix.o ${OBJDIR}/draw_graph.o ${OBJDIR}/graph.o ${OBJDIR}/getrange.o ${OBJDIR}/getinput.o ${OBJDIR}/scale1.o ${OBJDIR}/draw_histo.o'
+
+
+dnl Checks for Python (required).
+AC_PATH_PROG(PYTHON3_CONFIG, python3-config)
+if test "$PYTHON3_CONFIG" != ""; then
+	PYLIBDIR=`python3 -c "import sysconfig; print(sysconfig.get_config_var('LIBDIR'))"`
+	PYLIBS="-L${PYLIBDIR} -Wl,-rpath,${PYLIBDIR} `$PYTHON3_CONFIG --embed --ldflags`"
+	PYINC=`$PYTHON3_CONFIG --includes`
+	LIBS="$PYLIBS $LIBS"
+else
+	AC_MSG_ERROR([python3-config not found; install Python 3 development headers])
+fi
+
+dnl Checks for libraries.
+
+AC_CHECK_LIB(plot, fbox,LIBS="-lplot $LIBS";\
+cat >> confdefs.h <<EOF
+#define HAVE_LIBPLOT 1
+EOF
+SUBDIR="$SUBDIR plot"
+,PLOTOBJ=,, -lX11)
+AC_CHECK_LIB(agl, main,LIBS="-lagl $LIBS";\
+cat >> confdefs.h <<EOF
+#define HAVE_LIBAGL 1
+EOF
+SUBDIR="$SUBDIR agl"
+LIBS="$LIBS -lX11"
+AGLRT="$srcdir/agl/*.cap $srcdir/agl/*.dat $srcdir/agl/*.nfn"
+,
+AGLOBJ=
+,, -lX11)
+
+dnl Checks for header files.
+AC_HEADER_STDC
+AC_CHECK_HEADERS(unistd.h)
+
+dnl Checks for typedefs, structures, and compiler characteristics.
+AC_C_CONST
+AC_TYPE_SIZE_T
+AC_STRUCT_TM
+
+dnl Checks for library functions.
+AC_TYPE_SIGNAL
+AC_CHECK_FUNCS(popen strdup strftime strstr strtod strtol memcpy snprintf)
+
+
+AC_OUTPUT(../doc/Makefile agl/Makefile deffile.lib/Makefile maq.lib/Makefile main/Makefile ../share/Makefile soil/Makefile met.lib/Makefile ts.lib/Makefile nr_ut.lib/Makefile util/Makefile plot/Makefile Makefile topsys/Makefile ../examples/vamps_demo/Makefile)
+
+#echo "Running configure in slang.0.99/..."
+#(cd slang.0.99/; ./configure)
+
+echo "----------------------------------------------------------------"
+echo "$PROGRAM (version $VERSION) should now be configured"
+echo "- operating system: $OS"
+echo "- C compiler (flags): $CC ($CFLAGS)"
+echo "- Libraries to link: $LIBS"
+echo "- gnuplot bin: $GNUPLOT"
+echo ""
+echo "- installation prefix: $prefix"
+echo "- installation (bin) prefix: $exec_prefix"
+echo "      - vamps lib files: $datadir/vamps$VERSION"
+echo "      - vamps bin files: $bindir"
+echo "      - vamps man pages: $mandir"
+echo ""
+echo "You can now run make to start building $PROGRAM with present"
+echo "options or rerun configure if something is wrong. See also"
+echo "the 0readme and 0install files in the base dir"
+echo "----------------------------------------------------------------"   

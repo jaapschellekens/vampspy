@@ -1,0 +1,213 @@
+head	1.6;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.6
+date	99.01.06.12.13.01;	author schj;	state Alpha;
+branches;
+next	1.5;
+
+1.5
+date	99.01.06.12.07.49;	author schj;	state Alpha;
+branches;
+next	1.4;
+
+1.4
+date	96.11.10.14.54.47;	author schj;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	96.11.05.14.59.13;	author schj;	state Alpha;
+branches;
+next	1.2;
+
+1.2
+date	96.10.22.17.42.39;	author schj;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	96.03.25.07.55.32;	author schj;	state alpha;
+branches;
+next	;
+
+
+desc
+@Smooth an array using moving average
+@
+
+
+1.6
+log
+@Version: 0.99g
+@
+text
+@/* $Header: /home/schj/src/vamps_0.99g/src/util/RCS/smoothar.c,v 1.5 1999/01/06 12:07:49 schj Alpha $ */
+/* $RCSfile: smoothar.c,v $
+ *  $Author: schj $
+ *  $Date: 1999/01/06 12:07:49 $
+ */
+
+static  char RCSid[] =
+"$Id: smoothar.c,v 1.5 1999/01/06 12:07:49 schj Alpha $";
+
+#include "vamps.h"
+
+/*-
+ * double *smoothar (double *ar,int inter,int len)
+ *
+ * Smooths the array *ar of length len by using a simple moving
+ * average of size inter. If inter = 0 no smoothing is done.
+ */
+double
+*smoothar(double *ar,int inter,int len)
+{
+  int	j,i,pt;
+  double tot;
+
+  if (inter >0){
+    for (i=(inter/2); i < len-(inter/2); i++){
+      tot =0.0;
+      pt=0;
+      for (j=i - (inter/2) ;j <= i+(inter/2); j++){
+	tot += ar[j];
+	pt++;
+      }
+      ar[i] = (double)(1.0/(double)pt) * tot; 
+    }
+  }else{
+    if (inter < 0)
+      Perror(progname,1,0,RCSid,"Negative smoothing factor","What did you do?");
+    else
+      showit("smoothar",WARN,"Smoothar called with 0. No smoothing",1,verbose);
+  }
+
+  return ar;
+}
+@
+
+
+1.5
+log
+@Version: 0.99g
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99e/src/util/RCS/smoothar.c,v 1.4 1996/11/10 14:54:47 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1996/11/10 14:54:47 $
+d8 1
+a8 1
+"$Id: smoothar.c,v 1.4 1996/11/10 14:54:47 schj Exp $";
+@
+
+
+1.4
+log
+@Added interval check
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/util/RCS/smoothar.c,v 1.3 1996/11/05 14:59:13 schj Alpha $ */
+d4 1
+a4 1
+ *  $Date: 1996/11/05 14:59:13 $
+d8 1
+a8 1
+"$Id: smoothar.c,v 1.3 1996/11/05 14:59:13 schj Alpha $";
+d36 1
+a36 1
+      Perror(progname,1,RCSid,"Negative smoothing factor","What did you do?");
+@
+
+
+1.3
+log
+@Updated to Alpha version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/util/RCS/smoothar.c,v 1.2 1996/10/22 17:42:39 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1996/10/22 17:42:39 $
+a6 1
+#ifdef DDEBUG
+d8 1
+a8 2
+"$Id: smoothar.c,v 1.2 1996/10/22 17:42:39 schj Exp $";
+#endif
+d14 2
+a15 1
+ * smooths the array *ar of length len by using a simple moving
+d21 2
+a22 2
+int	j,i,pt;
+double tot;
+d24 16
+a39 10
+if (inter)
+for (i=(inter/2); i < len-(inter/2); i++){
+	tot =0.0;
+	pt=0;
+	for (j=i - (inter/2) ;j <= i+(inter/2); j++){
+		tot += ar[j];
+		pt++;
+		}
+	ar[i] = (double)(1.0/(double)pt) * tot; 
+}
+d41 1
+a41 1
+return ar;
+@
+
+
+1.2
+log
+@no changes
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.98/src/util/RCS/smoothar.c,v 1.1 1996/03/25 07:55:32 schj alpha $ */
+d4 1
+a4 8
+ *  $Date: 1996/03/25 07:55:32 $
+ *  $Log: smoothar.c,v $
+ *  Revision 1.1  1996/03/25 07:55:32  schj
+ *  Initial revision
+ *
+ * Revision 1.1  1996/02/15  10:23:07  schj
+ * Initial revision
+ *
+d9 1
+a9 1
+"$Id: smoothar.c,v 1.1 1996/03/25 07:55:32 schj alpha $";
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 2
+a2 2
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.97/src/soil/RCS/howsat.c,v 1.1 1996/02/15 10:23:07 schj Exp $ */
+/*- $RCSfile: howsat.c,v $
+d4 5
+a8 2
+ *  $Date: 1996/02/15 10:23:07 $
+ *  $Log: howsat.c,v $
+d16 1
+a16 1
+"$Id: howsat.c,v 1.1 1996/02/15 10:23:07 schj Exp $";
+@

@@ -1,0 +1,471 @@
+head	1.15;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.15
+date	99.01.06.12.13.01;	author schj;	state Alpha;
+branches;
+next	1.14;
+
+1.14
+date	99.01.06.12.07.49;	author schj;	state Alpha;
+branches;
+next	1.13;
+
+1.13
+date	97.01.16.15.03.28;	author schj;	state Exp;
+branches;
+next	1.12;
+
+1.12
+date	96.11.05.15.00.48;	author schj;	state Alpha;
+branches;
+next	1.11;
+
+1.11
+date	96.10.22.17.53.16;	author schj;	state Exp;
+branches;
+next	1.10;
+
+1.10
+date	96.04.09.12.07.54;	author schj;	state Exp;
+branches;
+next	1.9;
+
+1.9
+date	96.03.24.11.32.25;	author schj;	state alpha;
+branches;
+next	1.8;
+
+1.8
+date	95.11.14.20.26.56;	author schj;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	95.09.23.20.46.22;	author schj;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	95.09.04.11.40.29;	author schj;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	95.08.28.13.43.40;	author schj;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	95.08.24.20.50.46;	author schj;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	95.08.24.12.54.55;	author schj;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	95.08.23.07.20.39;	author schj;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	95.08.22.10.08.04;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@swap94 source
+@
+
+
+1.15
+log
+@Version: 0.99g
+@
+text
+@/* $Header: /home/schj/src/vamps_0.99g/src/soil/RCS/calcgwl.c,v 1.14 1999/01/06 12:07:49 schj Alpha $ */
+/*  $RCSfile: calcgwl.c,v $
+ *  $Author: schj $
+ *  $Date: 1999/01/06 12:07:49 $
+ */
+
+#ifdef DEBUG
+static  char RCSid[] =
+"$Id: calcgwl.c,v 1.14 1999/01/06 12:07:49 schj Alpha $";
+#endif
+
+#include "swatsoil.h"
+
+/*+Name:calcgwl
+ *  Prototype: void calcgwl(void)
+ *  Description: calculates ground water table and perched gw table
+ *  Returns: nothing
+ *  Remarks: should be cleaned and updated to hold unlimited amount of gw tables
++*/
+void
+calcgwl(void)
+{
+  int	i,flsat,lastnod;
+  gwl[0] = MISSVAL;
+  gwl[1] = MISSVAL;
+  basegw[1] = MISSVAL;
+  flsat = FALSE;
+  lastnod = layers;
+
+  for (i = layers-2; i >= 0 ; i--){
+    if (h[i] < 0.0) {
+      /* This calculates gwl using a linear, assumes linear */
+      gwl[0] = z[i+1] + h[i+1];
+      gwl[0] = gwl[0] <0.0 ? gwl[0] : 0.0;
+      break;
+    }
+  }
+  /* Complete saturation */
+  if (i <= 0)
+    gwl[0] = 0.0; 
+  
+  /* Search for perched gw table NOT CHECKED YET!!*/
+  for ( i= 0 ; i<layers; i++){
+    if (h[i] >= 0.0) {
+      gwl[1] = z[i] + h[i] < 0.0 ? z[i] + h[i] : 0.0;
+      lastnod = i;
+      break;
+    }
+  }
+
+  flsat = TRUE;
+  /* find base of perched table */
+  for (i= lastnod ;i <layers; i++){
+    if (flsat && h[i] < 0.0) {
+      basegw[1] = z[i] - dz[i]/2;
+      flsat = FALSE;
+    }
+    if (basegw[1] > 0.0) gwl[1] = MISSVAL;
+  }
+}
+@
+
+
+1.14
+log
+@Version: 0.99g
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99e/src/soil/RCS/calcgwl.c,v 1.13 1997/01/16 15:03:28 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1997/01/16 15:03:28 $
+d9 1
+a9 1
+"$Id: calcgwl.c,v 1.13 1997/01/16 15:03:28 schj Exp $";
+@
+
+
+1.13
+log
+@layout
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/soil/RCS/calcgwl.c,v 1.12 1996/11/05 15:00:48 schj Alpha $ */
+d4 1
+a4 1
+ *  $Date: 1996/11/05 15:00:48 $
+d9 1
+a9 1
+"$Id: calcgwl.c,v 1.12 1996/11/05 15:00:48 schj Alpha $";
+@
+
+
+1.12
+log
+@Updated to Alpha version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/soil/RCS/calcgwl.c,v 1.11 1996/10/22 17:53:16 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1996/10/22 17:53:16 $
+d7 1
+a7 1
+#ifdef DDEBUG
+d9 1
+a9 1
+"$Id: calcgwl.c,v 1.11 1996/10/22 17:53:16 schj Exp $";
+d14 6
+d21 1
+a21 1
+calcgwl()
+d23 37
+a59 42
+int	i,flsat,lastnod;
+double  gwlx;
+
+ gwl[0] = 999.0;
+ gwl[1] = 999.0;
+ basegw[1] = 999.0;
+ flsat = FALSE;
+ lastnod = layers;
+
+ /* Search for groundwater table */
+ if (h[layers-1] >= 0.0 ){
+   flsat = TRUE;
+   gwlx = z[layers -1] + h[layers -1];
+   gwl[0] = 0.0;
+ }
+
+ for (i = layers-2; i>= 0 ; i--){
+ 	if (flsat && h[i] < 0.0) {
+		gwl[0] = z[i] + h[i+1];
+		gwl[0] = gwl[0] <0.0 ? gwl[0] : 0.0;
+		flsat = FALSE;
+	}
+ }
+
+ /* Search for perched gw table */
+ flsat = FALSE;
+ for ( i= 0 ; i<layers; i++){
+ 	if (!flsat && h[i] >= 0.0) {
+		gwl[1] = z[i] + h[i] < 0.0 ? z[i] + h[i] : 0.0;
+		flsat = TRUE;
+		lastnod = i;
+	}
+ }
+
+ /* find base of perched table */
+ for (i= lastnod ;i <layers; i++){
+   if (flsat && h[i] < 0.0) {
+   	basegw[1] = z[i] - dz[i]/2;
+	flsat = FALSE;
+   }
+   if (basegw[1] > 0.0) gwl[1] = 999;
+ }
+@
+
+
+1.11
+log
+@removed log in file
+@
+text
+@d1 1
+a1 1
+/* $Header: /homes/schj/src/vamps_0.98/src/soil/RCS/calcgwl.c,v 1.10 1996/04/09 12:07:54 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1996/04/09 12:07:54 $
+d9 1
+a9 1
+"$Id: calcgwl.c,v 1.10 1996/04/09 12:07:54 schj Exp $";
+@
+
+
+1.10
+log
+@minor
+@
+text
+@d1 2
+a2 2
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.98/src/soil/RCS/calcgwl.c,v 1.9 1996/03/24 11:32:25 schj alpha $ */
+/*- $RCSfile: calcgwl.c,v $
+d4 1
+a4 14
+ *  $Date: 1996/03/24 11:32:25 $
+ *  $Log: calcgwl.c,v $
+ *  Revision 1.9  1996/03/24 11:32:25  schj
+ *  no chnage
+ *
+ * Revision 1.8  1995/11/14  20:26:56  schj
+ * changed include
+ *
+ * Revision 1.7  1995/09/23  20:46:22  schj
+ * added ifdef DDEBUG
+ *
+ * Revision 1.6  1995/09/04  11:40:29  schj
+ * added log in RCS header
+ *
+d9 1
+a9 1
+"$Id: calcgwl.c,v 1.9 1996/03/24 11:32:25 schj alpha $";
+@
+
+
+1.9
+log
+@no chnage
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.97/src/soil/RCS/calcgwl.c,v 1.8 1995/11/14 20:26:56 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/11/14 20:26:56 $
+d6 3
+d22 1
+a22 1
+"$Id: calcgwl.c,v 1.8 1995/11/14 20:26:56 schj Exp $";
+@
+
+
+1.8
+log
+@changed include
+@
+text
+@d1 1
+a1 1
+/* $Header: /homes/schj/src/vamps_0.91/RCS/calcgwl.c,v 1.7 1995/09/23 20:46:22 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/09/23 20:46:22 $
+d6 3
+d19 1
+a19 1
+"$Id: calcgwl.c,v 1.7 1995/09/23 20:46:22 schj Exp $";
+a68 1
+
+@
+
+
+1.7
+log
+@added ifdef DDEBUG
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/soil/RCS/calcgwl.c,v 1.6 1995/09/04 11:40:29 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/09/04 11:40:29 $
+d6 3
+d16 1
+a16 1
+"$Id: calcgwl.c,v 1.6 1995/09/04 11:40:29 schj Exp $";
+d19 1
+a19 1
+#include "../include/swatsoil.h"
+@
+
+
+1.6
+log
+@added log in RCS header
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/soil/RCS/calcgwl.c,v 1.5 1995/08/28 13:43:40 schj Exp $ */
+d4 5
+a8 2
+ *  $Date: 1995/08/28 13:43:40 $
+ *  $Log$
+d11 1
+a11 1
+
+d13 2
+a14 1
+"$Id: calcgwl.c,v 1.5 1995/08/28 13:43:40 schj Exp $";
+@
+
+
+1.5
+log
+@*** empty log message ***
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/soil/RCS/calcgwl.c,v 1.4 1995/08/24 20:50:46 schj Exp $ */
+d4 2
+a5 2
+ *  $Date: 1995/08/24 20:50:46 $
+ *
+d10 1
+a10 1
+"$Id: calcgwl.c,v 1.4 1995/08/24 20:50:46 schj Exp $";
+@
+
+
+1.4
+log
+@*** empty log message ***
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/soil/RCS/calcgwl.c,v 1.3 1995/08/24 12:54:55 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/08/24 12:54:55 $
+d9 2
+a10 2
+static const char RCSid[] =
+"$Id: calcgwl.c,v 1.3 1995/08/24 12:54:55 schj Exp $";
+@
+
+
+1.3
+log
+@added RCSid
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/soil/RCS/calcgwl.c,v 1.2 1995/08/23 07:20:39 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/08/23 07:20:39 $
+d10 1
+a10 1
+"$Id: vsel.c,v 1.5 1995/08/24 12:47:38 schj Exp $";
+d57 1
+a57 1
+   if (basegw[1] > 0.0) gwl[1] == 999;
+@
+
+
+1.2
+log
+@no real change
+@
+text
+@d1 2
+a2 2
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.8/soil/RCS/headcalc.c,v 1.4 1995/08/22 07:24:51 schj Exp $ */
+/*- $RCSfile: headcalc.c,v $
+d4 1
+a4 1
+ *  $Date: 1995/08/22 07:24:51 $
+d7 4
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 7
+d13 2
+a14 1
+int	i;
+d48 1
+a48 1
+ for (i= lastnod i <layers; i++){
+@

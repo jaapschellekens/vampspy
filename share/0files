@@ -1,0 +1,59 @@
+V A M P S  is supplied with a set of functions in S-Lang files. Some
+are needed for the program to function and some can be called by the
+user to perform specific tasks. Ofcourse you can write your own S-Lang
+scripts to let the program do what you want.
+Extensions:
+.sl		Files that contain S-Lang functions
+.slx		Files that contain complete S-Lang programs
+		that can be run as excecutable scripts (UNIX only)
+		or with the "-I filename" option
+----------------------------------------------------------------------
+
+Command line scripts:
+sldoc[.slx]	extract or show functions documantation in
+		S-Lang and C files
+
+Files that can be used with the -I option:
+mkidx.slx	Make index of large output files, this is handy
+                if you want to process these files in a more
+		or less random order. It can save a lot of time.
+mkinp.slx	Very simple input file generator. Although it is
+                simple it should give you a sceleton to start with.
+report.slx	Generates report from output file
+
+The files can be excecuted using 'vamps -I filename '.
+On UNIX systems you can make this scripts `self runnable' by
+adding a first line like '#!/usr/local/bin/vamps -I' and
+making the script excecutable with the chmod(1) command.
+
+Files with utility functions:
+regress.sl	Regression equations, _MUST_ be present
+rep.sl		Called by report.sl
+runut.sl	Utillities for interactive mode _during_ a vamps run
+stop.sl		Vamps emergency stop conditions
+util.sl		Low level utilities, _MUST_ be present
+vamps.sl	Defaults and initializations, _MUST_ be present
+topsys.sl	Example of a very simple topsystem written in
+		S-Lang. 
+soilf.sl	Example of theta/psi functions defined in S-Lang
+		This example uses the Clapp/Hornberger functions
+		which are also present as internal functions.
+		This can be used as a sceleton if you want to
+		add a new method to vamps
+
+Misc:
+metut.sl	Several functions usefull for evapotranspiration 
+		calculations
+stats.sl	Misc. statistical functions written by R. Venneker
+
+
+Defaults file:
+vampsrc         File containing defaults (vamps.rc on MS-DOS systems)
+vampssl
+
+Soil types:
+soillib.cla	This file contains a library of soil types and 
+		theta/phi/k relations for both the clapp/horberger 
+		method. I took the parameters from
+		the original source and converted them to the format
+		that vamps uses.

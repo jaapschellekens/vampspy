@@ -1,0 +1,2838 @@
+
+
+
+vamps(1)                                                 vamps(1)
+
+
+NNAAMMEE
+       vamps - A model of Vegetation-AtMosPhere-Soil water flow
+
+SSYYNNOOPPSSIISS
+       vvaammppss   [----hheellpp]   [----HHeeaaddeerr]   [----ccooppyyrriigghhtt]  [----lliicceennssee]
+       [----vveerrbboossee]    [----sshhoowwddeeff]     [----ffiitt]     [----nnooiinnppuuttdduummpp]
+       [----IInntteerrpprreett]  [----CCoommmmeenntt _c_o_m_m_e_n_t_c_h_a_r]  [----OOuuttppuutt _s_e_t_n_a_m_e]
+       [----DDeetteerrmmiinnee _v_a_r_i_a_b_l_e]                 [----oouuttppuutt _f_i_l_e_n_a_m_e]
+       [----LLooggffiillee _f_i_l_e_n_a_m_e]         [----SSeettvvaarr _s_e_c_t_i_o_n _n_a_m_e _v_a_l_u_e]
+       [----IInntteerrpprreett _f_i_l_e_n_a_m_e] [----ssppEEeedd _s_p_e_e_d] [----iinntteerrFFaaccee] _f_i_l_e_-
+       _n_a_m_e
+
+
+DDEESSCCRRIIPPTTIIOONN
+       vvaammppss  is  a one-dimensional model for describing the flow
+       of water through a forested  ecosystem.   vvaammppss  has  been
+       designed to be flexible and fast. Flexibility allows users
+       to adapt the program either by changing parameters in  the
+       input  file,  or  change  S-Lang based functions. Alterna-
+       tively you can change the source code  and  recompile  the
+       program.  It  is designed to be as fast as I could make it
+       without sacrificing reliability because scientist tend  to
+       solve tomorrows problems with yesterdays hardware. Because
+       I used vvaammppss at the same time as the TTOOPPOOGG model (a physi-
+       cally  based distributed catchment model) vvaammppss is able to
+       share some of it's input files with  TTOOPPOOGG,  notable  soil
+       tables (see vamps(5) for a description).
+
+       As  vvaammppss  is a complicated model, it needs rather compli-
+       cated input files.  The layout of these files is described
+       in  vvaammppss(5) and in the full manual. Also vvaammppss contains a
+       S-Lang interpreter and  an  interface  to  vvaammppss  specific
+       variables  which  allows to user to redefine certain func-
+       tions and generally change  vvaammppss  behaviour.  The  S-Lang
+       library    and    documentation    can    be   found   at:
+       ftp://space.mit.edu/pub/davis/slang
+
+       This manual page describes the vvaammppss command line  options
+       and  -- shortly -- the vvaammppss interactive interface. A full
+       manual including a description of  the  principles  behind
+       the  vvaammppss model is available in LaTeX and postscript for-
+       mat.
+
+       Input is read from either _f_i_l_e_n_a_m_e, or standard input.  If
+       _f_i_l_e_n_a_m_e  is specified as a single dash ``--'', it is taken
+       from standard input. Output is  written  to  the  standard
+       output or _f_i_l_e_n_a_m_e if the --oo option is used.
+
+       vvaammppss  intercepts  some signals (like keyboard interrupts)
+       and ignores them MAXSIG times. This means that if you want
+       to  stop vvaammppss using  ^C you must use this MAXSIG (usually
+       5) times. MAXSIG is defined in vamps.c.
+
+
+
+
+
+                    Version 0.99f -- Nov 1997                   1
+
+
+
+
+
+vamps(1)                                                 vamps(1)
+
+
+UUSSAAGGEE
+       vvaammppss basically runs in two modes. In one  mode  vvaammppss  is
+       started  with command line options, runs and exits when it
+       is finished.  vvaammppss also has an interactive mode in  which
+       vvaammppss  accepts  S-Lang  commands  and executes each as the
+       user enters them via the keyboard.  In  both  modes  vvaammppss
+       needs an input file to perform most actions.
+
+
+
+OOPPTTIIOONNSS
+       Options   may  be  given  as  either  standard  one-letter
+       options, or GNU style long  options.  Long  options  start
+       with  two  dashes ``----'' and may be truncated to any unam-
+       biguous abbreviation.  Short options can be found by  tak-
+       ing the first letter of the long option or (if one is pre-
+       sent) the first capitalized letter  of  the  long  option.
+       This  means that you can specify -h in stead of --help and
+       -F instead of --interFace.
+
+
+       ----HHeeaaddeerr
+              Omit the headers in output.
+
+
+       ----ccooppyyrriigghhtt
+              Show copyright information and exit
+
+
+       ----lliicceennssee
+              Print license information and exit.
+
+
+       ----hheellpp Print help text and exit.
+
+
+       ----vveerrbboossee
+              Enter verbose mode, program progress  is  displayed
+              on stderr.  Default is silent.
+
+
+       ----nnooiinnppuuttdduummpp
+              By  default  the contents of the input-file is also
+              included in the output. Use this  option  to  alter
+              this behaviour.
+
+
+       ----ssppEEeedd _s_p_e_e_d
+              Set  calculation  speed  to speed. See vvaammppss(5) for
+              information  on  settings.   Speed  ranges  from  1
+              (slow) to 6 (fastest).
+
+
+       ----ffiitt  Fit  data  to settings in fit section. See vvaammppss(5)
+
+
+
+                    Version 0.99f -- Nov 1997                   2
+
+
+
+
+
+vamps(1)                                                 vamps(1)
+
+
+              for more information.
+
+
+       ----IInntteerrpprreett
+              Interpret the last argument on the command line  as
+              a S-Lang file.  vvaammppss reads and interprets the file
+              and than exits.
+
+
+       ----OOuuttppuutt _s_e_t_n_a_m_e
+              Dump the specified _s_e_t_n_a_m_e to a  separate  file  in
+              ttss(5)  format.  See  vvaammppss(5) for a list of allowed
+              setnames.
+
+
+       ----DDeetteerrmmiinnee _v_a_r_i_a_b_l_e
+              Determine variable (can be a single variable  or  a
+              time  series).   See vvaammppss(5) for a list of allowed
+              variables. This is normally set in the input  file.
+              Multiple options are allowed.
+
+
+       ----LLooggffiillee _f_i_l_e_n_a_m_e
+              Log this session to the file _f_i_l_e_n_a_m_e.
+
+
+       ----SSeettvvaarr _s_e_c_t_i_o_n _n_a_m_e _v_a_l_u_e
+              Set  the  value of variable _n_a_m_e in section _s_e_c_t_i_o_n
+              to value _v_a_l_u_e.  This overrides the setting in  the
+              input file.
+
+
+       ----CCoommmmeenntt _c_o_m_m_e_n_t_c_h_a_r
+              Set  the  commentchar  to  char _c_o_m_m_e_n_t_c_h_a_r_.  Don't
+              change this unless you have a very good  reason  to
+              do so.
+
+
+       ----sshhoowwddeeff
+              Send  program  defaults to stdout. This can be used
+              to create a defaults file from scratch.
+
+
+
+       ----oouuttppuutt _f_i_l_e_n_a_m_e
+              Send output to _f_i_l_e_n_a_m_e in stead of stdout.
+
+
+       ----IInntteerrpprreett _f_i_l_e_n_a_m_e
+              Interpret (execute) _f_i_l_e_n_a_m_e as an S-Lang file.  If
+              the  file is not found in the current dir the VAMP-
+              SLIB dir is tried.
+
+
+
+
+
+                    Version 0.99f -- Nov 1997                   3
+
+
+
+
+
+vamps(1)                                                 vamps(1)
+
+
+       ----iinntteerrFFaaccee
+              Start the vvaammppss interactive interface. This  option
+              _m_u_s_t be the last option on the command line (before
+              _f_i_l_e_n_a_m_e if any)
+
+
+       _f_i_l_e_n_a_m_e
+              Read input from _f_i_l_e_n_a_m_e.
+
+
+UUSSAAGGEE
+       If the verbose option is set via the command line  or  the
+       input  file vvaammppss show the progress of the calculations on
+       stderr. On UNIX systems that  support  the  ppooppeenn(3)  call
+       with X11 and ggnnuupplloott(1) installed progress information can
+       also be displayed graphically.  This can be done  by  set-
+       ting  the  showgraph  variable  to  1 and the graphcommand
+       variable to the name  of  the  gnuplot  executable.   Both
+       should  be in the [[vvaammppss]] section of your default or input
+       file. See vvaammppss(5) for more information. This option slows
+       down calculations!
+
+
+
+IINNTTRRIINNSSIICCSS
+       These are the documented S-Lang intrinsics added by vvaammppss.
+       They can be used in the vvaammppss interactive mode and in  any
+       of the scripts that vvaammppss processes.
+
+       A  lot  of  general  utilities come from the ssllaasshh package
+       written by R. Venneker.
+
+
+
+
+       ##
+
+       _# _[_p_l_o_t_c_o_m_m_a_n_d_]
+
+       Operator to send a single command to the  plotting  system
+       (gnuplot)  when  followed by an argument or to enter plot-
+       ting mode if no argument is given.  In plotting  mode  all
+       commands  should  be  gnuplot  commands. To switch back to
+       normal mode give a single '#'. The _: and \@ operators also
+       work within plotting mode.
+
+       Some special characters can be used to addres S-Lang vari-
+       ables from within plotting mode.  Words  withing  $'s  are
+       replaced by a string representation of the S-Lang variable
+       with that name. Example
+
+       _v_a_r_i_a_b_l_e _h _= _"_s_i_n_(_x_)_"_;
+       _# _p_l_o_t _$_h_$
+
+
+
+
+                    Version 0.99f -- Nov 1997                   4
+
+
+
+
+
+vamps(1)                                                 vamps(1)
+
+
+       To plot S-Lang matrix variables the \@ char must be  used.
+       Example
+
+       _v_a_r_i_a_b_l_e _m _= _m_r_e_a_d_(_"_m_y_d_a_t_a_._f_i_l_e_"_,_-_1_)_;
+       _# _p_l_o_t _@_m_@ _u_s_i_n_g _1_:_2
+
+       Although  S-Lang  matrix  variables are zero based gnuplot
+       starts counting at 1.
+
+       Variables from vamps output files can also be plotted.  In
+       this  case  both  the  name of the of the variable and the
+       output filename are needed.  They should be seperated by a
+       colon and enclosed in \@ characters:
+
+       _# _p_l_o_t _@_p_r_e_c_i_p_i_t_a_t_i_o_n_:_e_x_a_m_p_l_e_1_._o_u_t_@ _u_s_i_n_g _b_o_x_e_s
+
+       See also _p_l_t.
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_i_t___s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       ::
+
+       _: _c_o_m_m_a_n_d _[_o_p_t_i_o_n_s _._._._]
+
+       Execute a system _c_o_m_m_a_n_d in a subshell. Note that the syn-
+       tax does not use S-Lang conventions; everything after  the
+       `_:'  is passed to the shell. Returns nothing, a message is
+       printed on standard error if _c_o_m_m_a_n_d returned  a  non-zero
+       exit status.
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_t_r_i_n_s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       ??
+
+       _? _[_n_a_m_e _._._._]
+
+       Invoke the _v_a_m_p_s online help system. This command can only
+       be used when running interactive.
+
+       If a single `_?' is entered at the prompt, a list of _n_a_m_e_s,
+       typically  _v_a_m_p_s  command  or  variable  names,  for which
+       online documentation is present will  be  printed  on  the
+       screen.
+
+       If one or more _n_a_m_e(s) are given after the `_?', the avail-
+       able documentation text for those _n_a_m_e(s)  is  printed  on
+       the screen.
+
+
+
+
+                    Version 0.99f -- Nov 1997                   5
+
+
+
+
+
+vamps(1)                                                 vamps(1)
+
+
+       If  there  is more than one screenfull of text, the _c_u_r_s_o_r
+       and _P_g_D_n_/_P_g_U_p keys will cause the text to scroll; pressing
+       `_q'  will  stop  text  display  and go back to the command
+       prompt.
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_t_r_i_n_s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       @@
+
+       _@_s_c_r_i_p_t_n_a_m_e
+
+       This operator passes it's argument  to  _e_v_a_l_f_i_l_e.  It  can
+       only be used when running interactively. It can be used to
+       run scripts in stead of an expression like:
+
+       _(_) _= _e_v_a_l_f_i_l_e_(_"_s_c_r_i_p_t_n_a_m_e_"_)_;
+
+       Note the lack of a space between  the  operator  and  it's
+       argument!
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_i_t___s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       SSLLaanngg__iinniitt__ttttyy
+
+       _I_n_t _S_L_a_n_g___i_n_i_t___t_t_y_(_)
+
+       Initialize the S-Lang tty.
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_i_t___s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       SSLLaanngg__rreesseett__ttttyy
+
+       _I_n_t _S_L_a_n_g___r_e_s_e_t___t_t_y_(_)
+
+       Resets the S-Lang tty. Needed is you want to use stdin and
+       stdout from interactive mode.
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_i_t___s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       SSllaaii__ttoo__ss
+
+       _F_l_o_a_t _S_l_a_i___t_o___s_(_F_l_o_a_t _l_a_i_)
+
+
+
+                    Version 0.99f -- Nov 1997                   6
+
+
+
+
+
+vamps(1)                                                 vamps(1)
+
+
+       Function called in the canopy module  to  convert  lai  to
+       canopy storage. If this S-Lang function is not defined the
+       lai value from the _c_a_n_o_p_y section in  the  input  file  is
+       used.
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_i_t___s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       __sseettss__
+
+       _I_n_t ___s_e_t_s__
+
+       Number of data sets in memory
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_i_t___s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       __vveerrssiioonn__
+
+       _I_n_t ___v_e_r_s_i_o_n__
+
+       Devide by 10 to get version number of Vamps
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_i_t___s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       aaddddsseett
+
+       _V_o_i_d _a_d_d_s_e_t_(_n_a_m_e_, _p_o_i_n_t_s_)
+
+       Adds an empty set _n_a_m_e with _p_o_i_n_t_s points to the list
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_i_t___s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       aaddddttoohhiisstt
+
+       _I_n_t _a_d_d_t_o_h_i_s_t_(_s_t_r_i_n_g_)
+
+       Adds _s_t_r_i_n_g to the history list.
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_i_t___s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+
+
+
+                    Version 0.99f -- Nov 1997                   7
+
+
+
+
+
+vamps(1)                                                 vamps(1)
+
+
+       aaddeevv
+
+       _A_r_r_a_y _a_d_e_v_(_A_r_r_a_y _m_t_x_)
+
+       Returns a row vector with the absolute mean deviations for
+       each column in _m_t_x.
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       aaddiimm
+
+       _I_n_t_e_g_e_r _a_d_i_m_(_A_r_r_a_y _a_r_r_)
+       _I_n_t_e_g_e_r_, _._._. _a_s_i_z_e_(_A_r_r_a_y _a_r_r_)
+       _I_n_t_e_g_e_r _a_t_y_p_e_(_A_r_r_a_y _a_r_r_)
+
+       Give information about array arr. adim returns  the  array
+       dimension  (1,  2  or  3), asize returns the size for each
+       dimension and atype returns the data type of the array.
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       aapprrooppooss
+
+       _a_p_r_o_p_o_s_(_S_t_r_i_n_g _s_u_b_s_t_r_i_n_g_)
+
+       apropos prints all functions and variables containing _s_u_b_-
+       _s_t_r_i_n_g to stdout. It assumes the _p_r_i_n_t_(_) intrinsic
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       aarrgg00
+
+       _S_t_r_i_n_g _a_r_g_0
+
+       Readonly  variable  holding  the  name  of the application
+       (``_s_l_a_s_h'' if running interactive) or the name of the cur-
+       rent script file being processed.
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_t_r_i_n_s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       aassiizzee
+
+       _I_n_t_e_g_e_r _a_d_i_m_(_A_r_r_a_y _a_r_r_)
+       _I_n_t_e_g_e_r_, _._._. _a_s_i_z_e_(_A_r_r_a_y _a_r_r_)
+       _I_n_t_e_g_e_r _a_t_y_p_e_(_A_r_r_a_y _a_r_r_)
+
+       Give  information  about array arr. adim returns the array
+       dimension (1, 2 or 3), asize returns  the  size  for  each
+
+
+
+                    Version 0.99f -- Nov 1997                   8
+
+
+
+
+
+vamps(1)                                                 vamps(1)
+
+
+       dimension and atype returns the data type of the array.
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       aatt__eenndd
+
+       _V_o_i_d _a_t___e_n_d_(_)
+
+       The  vamps s-lang end function. Place extra stuff you want
+       to have done at the end of simulation in this function.
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       aatt__ssttaarrtt
+
+       _V_o_i_d _a_t___s_t_a_r_t_(_)
+
+       This is the vamps s-lang startup function. It can be  com-
+       pletely  empty if you want. The default shows all the data
+       sets in memory.  Place extra stuff you want to  have  done
+       at startup in this function.
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       aattyyppee
+
+       _I_n_t_e_g_e_r _a_d_i_m_(_A_r_r_a_y _a_r_r_)
+       _I_n_t_e_g_e_r_, _._._. _a_s_i_z_e_(_A_r_r_a_y _a_r_r_)
+       _I_n_t_e_g_e_r _a_t_y_p_e_(_A_r_r_a_y _a_r_r_)
+
+       Give  information  about array arr. adim returns the array
+       dimension (1, 2 or 3), asize returns  the  size  for  each
+       dimension and atype returns the data type of the array.
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       ccaatt
+
+       _V_o_i_d _c_a_t_(_i_n_f_, _o_u_t_f_)
+
+       Copies  the  file _i_n_f to _o_u_t_f appending it if _o_u_t_f already
+       exists. _c_a_t only works with ascii files.
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       cclloosseeddeeff
+
+       _i_n_t _c_l_o_s_e_d_e_f _(_)
+
+
+
+
+                    Version 0.99f -- Nov 1997                   9
+
+
+
+
+
+vamps(1)                                                 vamps(1)
+
+
+       Description: closes a file previously opened with  opendef
+       Returns: fclose's result
+
+       from: _._._/_s_r_c_/_d_e_f_f_i_l_e_._l_i_b_/_s_l___i_n_t_e_r_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       ccoonntt
+
+       _c_o_n_t_(_)
+
+       Continiue the current Vamps run
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_i_t___s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       ccooppyyrriigghhtt
+
+       _V_o_i_d _d_i_s_c_l_a_i_m
+       _V_o_i_d _c_o_p_y_r_i_g_h_t
+
+       Shows a short version of the GPL
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_i_t___s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       ccoorrrr
+
+       _A_r_r_a_y _c_o_r_r_(_A_r_r_a_y _m_t_x_)
+
+       Calculate  linear  correlation  coefficient (r) between x-
+       data in column 0 and y-data in subsequent columns.
+
+       Returns a row vector  with  correlation  coefficients  for
+       each column in _m_t_x w.r.t. column 0. Hence, Array[0,0] = 1.
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       ccoovvaarr
+
+       _A_r_r_a_y _c_o_v_a_r_(_A_r_r_a_y _m_t_x_)
+
+       Calculates the covariance between x-data in _m_t_x  column  0
+       and y-data in subsequent columns.
+
+       Returns  a  row vector with covariances for each column in
+       _m_t_x w.r.t. column 0. Hence, Array[0,0] contains the  vari-
+       ance of the data in the first column.
+
+
+
+                    Version 0.99f -- Nov 1997                  10
+
+
+
+
+
+vamps(1)                                                 vamps(1)
+
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       ccppuu
+
+       _F_l_o_a_t _c_p_u_(_)
+
+       Return  the  number of CPU seconds used since the start of
+       the program. On msdos systems this will be  equal  to  the
+       total  run-time. On multitasking systems the actually used
+       cpu time will be returned.
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_i_t___s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       ddeebbuugg
+
+       _V_o_i_d _d_e_b_u_g_(_)
+
+       Alias for _p_r_i_n_t___s_t_a_c_k, prints the present contents of  the
+       S-Lang stack to stdout
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       ddeeffvveerrbb
+
+       _I_n_t _d_e_f_v_e_r_b
+
+       The verbose level in the input file routines. 0 is quit. A
+       higher the number makes this part of Vamps more verbose
+
+       from: _._._/_s_r_c_/_d_e_f_f_i_l_e_._l_i_b_/_s_l___i_n_t_e_r_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       ddiissccllaaiimm
+
+       _V_o_i_d _d_i_s_c_l_a_i_m
+       _V_o_i_d _c_o_p_y_r_i_g_h_t
+
+       Shows a short version of the GPL
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_i_t___s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       ee00aa
+
+       _F_l_o_a_t _e_0_a_(_T_d_,_R_s_,_s_u_n_r_a_t_i_o_,_u_,_E_a_,_E_s_,_S_l_o_p_e_,_G_a_m_m_a_,_L_)
+
+
+
+                    Version 0.99f -- Nov 1997                  11
+
+
+
+
+
+vamps(1)                                                 vamps(1)
+
+
+       Returns: e0 in mm/day (i think) The determination of $E_a$
+       is described in \cite{calder1990284}: \begin{equation} E_a
+       =  2.6   (e_s  -  e_a)   (1  +  0.537  u)   \end{equation}
+       \begin{where}  \Index{$e_a$}  &    actual  vapour pressure
+       [mbar]\\ \Index{$e_s$}  &    vapour pressure at saturation
+       [mbar]\\ \Index{$u$}    &    mean daily wind-speed at 2m\\
+       \end{where}
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       ee00bb
+
+       _F_l_o_a_t _e_0_b_(_T_d_,_R_s_,_R_s_o_u_t_,_R_n_e_t_,_u_,_E_a_,_E_s_,_S_l_o_p_e_,_G_a_m_m_a_,_L_)
+
+       Calculates penman open water evaporation using net  radia-
+       tion.  Use the _d_e_l_g_a_m function to get Gamma, Slope, and L
+
+       Returns: e0 in mm/day (i think)
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       eeaacchh__sstteepp
+
+       _V_o_i_d _e_a_c_h___s_t_e_p_(_)
+
+       The  vamps  S-Lang  function  that  is executed after each
+       timestep.  Place extra stuff you want to have  done  after
+       each  timestep in this function. Normally this function is
+       defined in _v_a_m_p_s_._s_l but it can be redefined in any  S-Lang
+       file  that is loaded by _V_a_m_p_s.  It's default definition is
+       as follows:
+
+            _d_e_f_i_n_e _e_a_c_h___s_t_e_p _(_)
+            _{
+               _% _C_h_e_c_k _f_o_r _c_o_n_d_i_t_i_o_n_a_l _s_w_i_t_c_h_e_s _t_o _i_n_t_e_r_a_c_t_i_v_e _m_o_d_e_, _s_e_e _s_t_o_p_._s_l
+               _s_t_o_p_(_)_;
+               _v___p_r_i_n_t_s_t_r_(_"_C_P_U_"_,_s_t_r_i_n_g_(_c_p_u_)_)_; _% _S_t_o_r_e _C_P_U _t_i_m_e _u_s_e_d _i_n _o_u_t_p_u_t _f_i_l_e
+            _}
+
+       _f_r_o_m _f_i_l_e_: _@_v_a_m_p_s_d_o_c_._t_m_p_@
+
+
+
+       eeaaeess
+
+       _F_l_o_a_t_,_F_l_o_a_t _e_a_e_s_(_t_d_,_r_h_)
+
+       Determines saturation  vapour  pressure  (ea)  and  actual
+       vapour  presssure (ea) from relative humidity and dry bulb
+       temperature. es is calculated according to Bringfeld 1986.
+       Relative  humidity  should  be  in  % and dry bulb temp in
+       degrees Celcius.  Example:
+
+
+
+                    Version 0.99f -- Nov 1997                  12
+
+
+
+
+
+vamps(1)                                                 vamps(1)
+
+
+       _v_a_r_i_a_b_l_e _e_a_,_e_s_;
+
+       _(_e_a_, _e_s_) _= _e_a_e_s_(_2_0_._0_,_7_6_)_;
+       _p_r_i_n_t_f_(_"_e_a _= _%_f _e_s _= _%_f_\_n_"_,_e_a_,_e_s_,_2_)_;
+
+       Returns: ea, es
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       eecchhoo
+
+       _V_o_i_d _e_c_h_o_(_o_b_j_)
+
+       Prints an ascii representation of obj, followed by a  new-
+       line  on standard output. Supported are: Character, Float,
+       Integer, String, and 1D and 2D Arrays for these types.
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       eennddssuubbpplloott
+
+       _V_o_i_d _e_n_d_s_u_b_p_l_o_t_(_)
+
+       Resets the plotting  system  to  single  plot  mode.  Also
+       needed  to  actually  draw the plot on some terminals. See
+       also _s_u_b_p_l_o_t.
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       eerrrroorr
+
+       _V_o_i_d _e_r_r_o_r_(_S_t_r_i_n_g _s_t_r_)
+
+       Prints the text held in _s_t_r followed by a newline on stan-
+       dard error output and raises internal error status.
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_t_r_i_n_s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       eexxiitt
+
+       _e_x_i_t_(_)
+       _q_u_i_t_(_)
+
+       Quits  the S-Lang interpreter and returns to the operating
+       system
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_i_t___s_._c
+
+
+
+
+                    Version 0.99f -- Nov 1997                  13
+
+
+
+
+
+vamps(1)                                                 vamps(1)
+
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       eexxiitt
+
+       _e_x_i_t_(_)
+       _q_u_i_t_(_)
+
+       Quits the S-Lang interpreter and returns to the  operating
+       system
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_i_t___s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       ff__pplloott
+
+       _V_o_i_d _f___p_l_o_t_(_S_t_r_i_n_g _v_a_r_,_S_t_r_i_n_g  _t_h_e_f_,_I_n_t _x_c_o_l_, _I_n_t _y_c_o_l_)
+
+       Plots  var _v_a_r from vamps output file _t_h_e_f.  It does so by
+       calling _v_s_e_l to construct a matrix. This  matrix  is  than
+       passed  to  _m___p_l_o_t  to  make the actual plot.  Column 0 is
+       time.  See also _p_l_o_t and _p_l_o_t_._s_l.
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       ff__ssaavvee
+
+       _V_o_i_d _f___s_a_v_e_(_S_t_r_i_n_g _v_a_r_, _S_t_r_i_n_g _f_i_l_e_n_a_m_e_, _S_t_r_i_n_g _o_u_t_f_i_l_e_n_a_m_e_)
+
+       Writes the variable _v_a_r from the vamps outputfile _f_i_l_e_n_a_m_e
+       to  an  ascii file _o_u_t_f_i_l_e_n_a_m_e. Depending on the nature of
+       the variable two ore more columns are  created.  The  time
+       data resides in the first column.
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       ffoorrmmaatt
+
+       _V_o_i_d _f_o_r_m_a_t_(_S_t_r_i_n_g _f_m_t_)
+
+       Sets  the floating point output format to _f_m_t. If given as
+       the nullstring (""), the default format is restored.   The
+       default  can  be set by calling _f_o_r_m_a_t from _._v_a_m_p_s_s_l, else
+       it  is  set  to  ``_%_6_g''.  (Using  the  S-Lang   intrinsic
+       _s_e_t___f_l_o_a_t___f_o_r_m_a_t is deprecated.)
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_t_r_i_n_s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+
+
+                    Version 0.99f -- Nov 1997                  14
+
+
+
+
+
+vamps(1)                                                 vamps(1)
+
+
+       ffpprriinnttff
+
+       _V_o_i_d _p_r_i_n_t_f_(_S_t_r_i_n_g _f_m_t_, _._._._, _I_n_t_e_g_e_r _N_)
+       _V_o_i_d _f_p_r_i_n_t_f_(_I_n_t_e_g_e_r _f_p_, _S_t_r_i_n_g _f_m_t_, _._._._, _I_n_t_e_g_e_r _N_)
+       _S_t_r_i_n_g _s_p_r_i_n_t_f_(_S_t_r_i_n_g _f_m_t_, _._._._, _I_n_t_e_g_e_r _N_)
+
+       Formatted  printing  cf.  the C printf family, except that
+       the number of parameters  N  must  be  given.  printf  and
+       fprintf  return  nothing,  sprintf  returns  the formatted
+       string.
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       ffssccaannff
+
+
+       Formatted variable assignment like  their  C  counterparts
+       (see  _s_c_a_n_f_(_3_)), except that the assigned values, followed
+       by the number of assignments are placed on the stack.  For
+       example:
+
+            _v_a_r_i_a_b_l_e _m_o_n_t_h_, _d_a_y_;
+            _i_f_(_s_s_c_a_n_f_(_"_D_e_c_e_m_b_e_r_, _5_\_n_"_, _"_%_[_A_-_Z _a_-_z_]_, _%_d_\_n_"_) _=_= _2_)
+            _{
+                 _(_m_o_n_t_h_, _d_a_y_) _= _(_)_;
+                 _._._.
+            _}
+
+       pushes a string followed by an integer on the stack.
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_t_r_i_n_s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       ggaammmmaa
+
+       _F_l_o_a_t _g_a_m_m_a_(_t_d_)
+
+       Calculates  the psychometric constant ([$mbar/{}^o K$]) It
+       assumes an air pressure  of  998mb.  Cp  is  estimated  at
+       1005.0 J/kgK
+
+       Returns: psychrometric constant
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       ggeettaarrgg
+
+       _S_t_r_i_n_g _g_e_t_a_r_g_(_)
+
+       Returns a string holding the next command line argument or
+
+
+
+                    Version 0.99f -- Nov 1997                  15
+
+
+
+
+
+vamps(1)                                                 vamps(1)
+
+
+       ``_-_-'' if there are no options left. Increases the  inter-
+       nal  index  to  the command line arguments each time it is
+       called.  For example:
+
+            _v_a_r_i_a_b_l_e _a_r_g_;
+            _w_h_i_l_e_(_a_r_g _= _g_e_t_a_r_g_(_)_, _s_t_r_c_m_p_(_"_-_-_"_, _a_r_g_)_)
+            _{
+                 _._._.
+            _}
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_t_r_i_n_s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       ggeettddeeffaarr
+
+       _S_t_r_i_n_g _g_e_t_d_e_f_s_t_r_(_s_e_c_t_i_o_n_, _n_a_m_e_, _d_e_f_, _f_n_a_m_e_, _e_x_i_t_o_n_e_r_r_o_r_)
+       _I_n_t _g_e_t_d_e_f_i_n_t_(_s_e_c_t_i_o_n_, _n_a_m_e_, _d_e_f_, _f_n_a_m_e_, _e_x_i_t_o_n_e_r_r_o_r_)
+       _F_l_o_a_t _g_e_t_d_e_f_d_o_u_b_(_s_e_c_t_i_o_n_, _n_a_m_e_, _d_e_f_, _f_n_a_m_e_, _e_x_i_t_o_n_e_r_r_o_r_)
+       _I_n_t_, _A_r_r_a_y _g_e_t_d_e_f_a_r_(_s_e_c_t_i_o_n_, _n_a_m_e_, _f_n_a_m_e_, _e_x_i_t_o_n_e_r_r_o_r_)
+
+       A series  of  functions  te  get  information  from  Vamps
+       input/output files.
+
+       They get the value for variable _n_a_m_e in section _s_e_c_t_i_o_n of
+       the file _f_n_a_m_e. If _e_x_i_t_o_n_e_r_r_o_r != 0 then  the  program  is
+       terminated  if  _n_a_m_e  is not found in _s_e_c_t_i_o_n.  If _e_x_i_t_o_n_-
+       _e_r_r_o_r == 0 and _n_a_m_e is not found _d_e_f is returned  instead.
+       _g_e_t_d_e_f_a_r  is  somewhat  different. Is does not allow a _d_e_f
+       variable and return either one or two  values.  It  always
+       returns the number of points read. If zero points are read
+       no array is returned.
+
+       Say we use the following file (named ex.inp):
+
+       _[_e_x_a_m_p_l_e_]
+       _e_x_a_m_p_l_e_n_a_m_e _= _n_o_n_s_e_n_s_e
+
+       And then call the _g_e_t_d_e_f_s_t_r function like this:
+
+       _v_a_r_i_a_b_l_e _e_x_n _= _g_e_t_d_e_f_s_t_r_(_"_e_x_a_m_p_l_e_"_,_"_e_x_a_m_p_l_e_n_a_m_e_"_,_"_N_o_t _f_o_u_n_d_"_,_"_e_x_._i_n_p_"_,_0_)_;
+
+       the variable exn will now hold the string "nonsense".
+
+       from: _._._/_s_r_c_/_d_e_f_f_i_l_e_._l_i_b_/_s_l___i_n_t_e_r_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       ggeettddeeffddoouubb
+
+       _S_t_r_i_n_g _g_e_t_d_e_f_s_t_r_(_s_e_c_t_i_o_n_, _n_a_m_e_, _d_e_f_, _f_n_a_m_e_, _e_x_i_t_o_n_e_r_r_o_r_)
+       _I_n_t _g_e_t_d_e_f_i_n_t_(_s_e_c_t_i_o_n_, _n_a_m_e_, _d_e_f_, _f_n_a_m_e_, _e_x_i_t_o_n_e_r_r_o_r_)
+
+
+
+                    Version 0.99f -- Nov 1997                  16
+
+
+
+
+
+vamps(1)                                                 vamps(1)
+
+
+       _F_l_o_a_t _g_e_t_d_e_f_d_o_u_b_(_s_e_c_t_i_o_n_, _n_a_m_e_, _d_e_f_, _f_n_a_m_e_, _e_x_i_t_o_n_e_r_r_o_r_)
+       _I_n_t_, _A_r_r_a_y _g_e_t_d_e_f_a_r_(_s_e_c_t_i_o_n_, _n_a_m_e_, _f_n_a_m_e_, _e_x_i_t_o_n_e_r_r_o_r_)
+
+       A series  of  functions  te  get  information  from  Vamps
+       input/output files.
+
+       They get the value for variable _n_a_m_e in section _s_e_c_t_i_o_n of
+       the file _f_n_a_m_e. If _e_x_i_t_o_n_e_r_r_o_r != 0 then  the  program  is
+       terminated  if  _n_a_m_e  is not found in _s_e_c_t_i_o_n.  If _e_x_i_t_o_n_-
+       _e_r_r_o_r == 0 and _n_a_m_e is not found _d_e_f is returned  instead.
+       _g_e_t_d_e_f_a_r  is  somewhat  different. Is does not allow a _d_e_f
+       variable and return either one or two  values.  It  always
+       returns the number of points read. If zero points are read
+       no array is returned.
+
+       Say we use the following file (named ex.inp):
+
+       _[_e_x_a_m_p_l_e_]
+       _e_x_a_m_p_l_e_n_a_m_e _= _n_o_n_s_e_n_s_e
+
+       And then call the _g_e_t_d_e_f_s_t_r function like this:
+
+       _v_a_r_i_a_b_l_e _e_x_n _= _g_e_t_d_e_f_s_t_r_(_"_e_x_a_m_p_l_e_"_,_"_e_x_a_m_p_l_e_n_a_m_e_"_,_"_N_o_t _f_o_u_n_d_"_,_"_e_x_._i_n_p_"_,_0_)_;
+
+       the variable exn will now hold the string "nonsense".
+
+       from: _._._/_s_r_c_/_d_e_f_f_i_l_e_._l_i_b_/_s_l___i_n_t_e_r_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       ggeettddeeffiinntt
+
+       _S_t_r_i_n_g _g_e_t_d_e_f_s_t_r_(_s_e_c_t_i_o_n_, _n_a_m_e_, _d_e_f_, _f_n_a_m_e_, _e_x_i_t_o_n_e_r_r_o_r_)
+       _I_n_t _g_e_t_d_e_f_i_n_t_(_s_e_c_t_i_o_n_, _n_a_m_e_, _d_e_f_, _f_n_a_m_e_, _e_x_i_t_o_n_e_r_r_o_r_)
+       _F_l_o_a_t _g_e_t_d_e_f_d_o_u_b_(_s_e_c_t_i_o_n_, _n_a_m_e_, _d_e_f_, _f_n_a_m_e_, _e_x_i_t_o_n_e_r_r_o_r_)
+       _I_n_t_, _A_r_r_a_y _g_e_t_d_e_f_a_r_(_s_e_c_t_i_o_n_, _n_a_m_e_, _f_n_a_m_e_, _e_x_i_t_o_n_e_r_r_o_r_)
+
+       A series  of  functions  te  get  information  from  Vamps
+       input/output files.
+
+       They get the value for variable _n_a_m_e in section _s_e_c_t_i_o_n of
+       the file _f_n_a_m_e. If _e_x_i_t_o_n_e_r_r_o_r != 0 then  the  program  is
+       terminated  if  _n_a_m_e  is not found in _s_e_c_t_i_o_n.  If _e_x_i_t_o_n_-
+       _e_r_r_o_r == 0 and _n_a_m_e is not found _d_e_f is returned  instead.
+       _g_e_t_d_e_f_a_r  is  somewhat  different. Is does not allow a _d_e_f
+       variable and return either one or two  values.  It  always
+       returns the number of points read. If zero points are read
+       no array is returned.
+
+       Say we use the following file (named ex.inp):
+
+       _[_e_x_a_m_p_l_e_]
+       _e_x_a_m_p_l_e_n_a_m_e _= _n_o_n_s_e_n_s_e
+
+
+
+                    Version 0.99f -- Nov 1997                  17
+
+
+
+
+
+vamps(1)                                                 vamps(1)
+
+
+       And then call the _g_e_t_d_e_f_s_t_r function like this:
+
+       _v_a_r_i_a_b_l_e _e_x_n _= _g_e_t_d_e_f_s_t_r_(_"_e_x_a_m_p_l_e_"_,_"_e_x_a_m_p_l_e_n_a_m_e_"_,_"_N_o_t _f_o_u_n_d_"_,_"_e_x_._i_n_p_"_,_0_)_;
+
+       the variable exn will now hold the string "nonsense".
+
+       from: _._._/_s_r_c_/_d_e_f_f_i_l_e_._l_i_b_/_s_l___i_n_t_e_r_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       ggeettddeeffssttrr
+
+       _S_t_r_i_n_g _g_e_t_d_e_f_s_t_r_(_s_e_c_t_i_o_n_, _n_a_m_e_, _d_e_f_, _f_n_a_m_e_, _e_x_i_t_o_n_e_r_r_o_r_)
+       _I_n_t _g_e_t_d_e_f_i_n_t_(_s_e_c_t_i_o_n_, _n_a_m_e_, _d_e_f_, _f_n_a_m_e_, _e_x_i_t_o_n_e_r_r_o_r_)
+       _F_l_o_a_t _g_e_t_d_e_f_d_o_u_b_(_s_e_c_t_i_o_n_, _n_a_m_e_, _d_e_f_, _f_n_a_m_e_, _e_x_i_t_o_n_e_r_r_o_r_)
+       _I_n_t_, _A_r_r_a_y _g_e_t_d_e_f_a_r_(_s_e_c_t_i_o_n_, _n_a_m_e_, _f_n_a_m_e_, _e_x_i_t_o_n_e_r_r_o_r_)
+
+       A series  of  functions  te  get  information  from  Vamps
+       input/output files.
+
+       They get the value for variable _n_a_m_e in section _s_e_c_t_i_o_n of
+       the file _f_n_a_m_e. If _e_x_i_t_o_n_e_r_r_o_r != 0 then  the  program  is
+       terminated  if  _n_a_m_e  is not found in _s_e_c_t_i_o_n.  If _e_x_i_t_o_n_-
+       _e_r_r_o_r == 0 and _n_a_m_e is not found _d_e_f is returned  instead.
+       _g_e_t_d_e_f_a_r  is  somewhat  different. Is does not allow a _d_e_f
+       variable and return either one or two  values.  It  always
+       returns the number of points read. If zero points are read
+       no array is returned.
+
+       Say we use the following file (named ex.inp):
+
+       _[_e_x_a_m_p_l_e_]
+       _e_x_a_m_p_l_e_n_a_m_e _= _n_o_n_s_e_n_s_e
+
+       And then call the _g_e_t_d_e_f_s_t_r function like this:
+
+       _v_a_r_i_a_b_l_e _e_x_n _= _g_e_t_d_e_f_s_t_r_(_"_e_x_a_m_p_l_e_"_,_"_e_x_a_m_p_l_e_n_a_m_e_"_,_"_N_o_t _f_o_u_n_d_"_,_"_e_x_._i_n_p_"_,_0_)_;
+
+       the variable exn will now hold the string "nonsense".
+
+       from: _._._/_s_r_c_/_d_e_f_f_i_l_e_._l_i_b_/_s_l___i_n_t_e_r_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       hheellpp
+
+       _V_o_i_d _h_e_l_p_(_)
+
+       Prints short info on the Vamps interactive mode. See  also
+       '?'
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+
+                    Version 0.99f -- Nov 1997                  18
+
+
+
+
+
+vamps(1)                                                 vamps(1)
+
+
+       hhiisstt
+
+       _V_o_i_d _h_i_s_t_(_)
+
+       Prints  the  history of command entered at the interactive
+       prompt to the screen.
+
+       Note that the  help operator `?' is  never  added  to  the
+       list.   The  excecute operator \ _i_s _r_e_p_l_a_c_e_d _b_y () = eval-
+       file("arg");@.
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_i_t___s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       lliinnrreegg
+
+       _A_r_r_a_y _l_i_n_r_e_g_(_A_r_r_a_y _m_t_x_)
+
+       Calculates linear  regression  coefficients  for  straight
+       line  fitting,  i.e:  y  =  Ax + B. A is slope and B is y-
+       intercept.  Argument is minimum 2*2 matrix, regression  is
+       performed for all _m_t_x columns j>=1 (y-data) against column
+       0 (x-data).
+
+       Returns a 2*n matrix in which for each column  j  in  _m_t_x,
+       Array[0,j]  =  A and Array[1,j] = B. Hence, Array[0,0] = 1
+       and Array[1,0] = 0.
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       lliinnssppaaccee
+
+       _A_r_r_a_y _l_i_n_s_p_a_c_e_(_F_l_o_a_t _x_0_, _F_l_o_a_t _x_1_, _I_n_t_e_g_e_r _n_)
+
+       Returns a vector of _n elements with linearly spaced inter-
+       vals between _x_0 and _x_1.
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       llooggssppaaccee
+
+       _A_r_r_a_y _l_o_g_s_p_a_c_e_(_F_l_o_a_t _x_0_, _F_l_o_a_t _x_1_, _I_n_t_e_g_e_r _n_)
+
+       Returns a vector of _n elements with logarithmically spaced
+       intervals between 1E_x_0 and 1E_x_1.
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       mm__pplloott
+
+
+
+                    Version 0.99f -- Nov 1997                  19
+
+
+
+
+
+vamps(1)                                                 vamps(1)
+
+
+       _V_o_i_d _m___p_l_o_t_(_M_a_t_r_i_x _m_, _I_n_t _x_c_o_l_, _I_n_t _y_c_o_l_, _S_t_r_i_n_g _t_i_t_l_e_, _S_t_r_i_n_g _x_l_a_b_,
+                 _S_t_r_i_n_g _y_l_a_b_)
+
+       Plots an XY diagram of matrix _m using the current graphics
+       method.   Column  numbering  for  _x_c_o_l  and _y_c_o_l starts at
+       zero. Depending on the graphics method used the top, x and
+       y-axis labels strings cannot be empty.  example:
+
+       _o_u_t_p_u_t_d_e_v _= _1_; _% _s_c_r_e_e_n _g_r_a_p_h_i_c_s
+       _m___p_l_o_t_(_m_,_0_,_1_,_"_M_a_t_r_i_x _m_"_,_"_T_i_m_e_"_,_"_Q_"_)_;
+       _o_u_t_p_u_t_d_e_v _= _0_; _% _P_l_o_t _i_s _O_K_, _m_a_k_e _h_a_r_d_c_o_p_y
+       _m___p_l_o_t_(_m_,_0_,_1_,_"_M_a_t_r_i_x _m_"_,_"_T_i_m_e_"_,_"_Q_"_)_;
+
+       See also _p_l_o_t and _p_l_o_t_._s_l.
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       mmaakkeeiinnddeexx
+
+       _I_n_t _m_a_k_e_i_n_d_e_x_(_f_i_l_e_n_a_m_e_)
+
+       Makes an index (in memory) of file _f_i_l_e_n_a_m_e. It is usefull
+       to speed up random access to large vamps output files. Use
+       _s_a_v_e_i_n_d_e_x to save the index to a file.
+
+       from: _._._/_s_r_c_/_d_e_f_f_i_l_e_._l_i_b_/_s_l___i_n_t_e_r_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       mmaakkkkiinnkk
+
+       _F_l_o_a_t _m_a_k_k_i_n_k_(_r_a_d_,_S_l_o_p_e_,_G_a_m_m_a_)
+
+       calculates  reference evaporation according to Makkink The
+       C1 constant is taken as 0.65 and C2 0.0
+
+       Returns: makkink reference evaporation in mm/day
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       mmaaqqeenndd
+
+       _V_o_i_d _m_a_q_e_n_d_(_i_n_t _m_a_q___m_)
+
+       Cleans up after _m_a_q_i_n_i_t
+
+       from: _._._/_s_r_c_/_m_a_q_._l_i_b_/_m_a_r_q_u_a_r_d_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+
+
+
+                    Version 0.99f -- Nov 1997                  20
+
+
+
+
+
+vamps(1)                                                 vamps(1)
+
+
+       mmaaqqhheeaadd
+
+       _V_o_i_d _m_a_q_h_e_a_d_(_)
+
+       prints startup options of the _m_a_q_r_u_n procedure to stderr
+
+       from: _._._/_s_r_c_/_m_a_q_._l_i_b_/_m_a_r_q_u_a_r_d_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       mmaaqqiinniitt
+
+       _I_n_t _m_a_q_i_n_i_t_(_i_n_t _m_, _i_n_t _n_)
+
+       Initializes the fitting system. n is the number of parame-
+       ters  to  use,  m the number of points used in the fitting
+       process.
+
+       Returns 0 on success, -1 on error
+
+       from: _._._/_s_r_c_/_m_a_q_._l_i_b_/_m_a_r_q_u_a_r_d_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       mmaaqqrruunn
+
+       _I_n_t _m_a_q_r_u_n_(_)
+
+       Runs the fitting procedure with the current  settings  The
+       S-Lang  function _I_n_t _f_i_t_f_(_A_r_r_a_y _p_a_r_[_]_, _I_n_t _m_, _I_n_t _n_) which
+       sets the _r_v_[_] array should  be  defined  and  working.  It
+       should return 0 if successfull and 1 if the function could
+       not be resolved with the supplied values for _p_a_r_[_].
+
+       Returns 0 on success
+
+       from: _._._/_s_r_c_/_m_a_q_._l_i_b_/_m_a_r_q_u_a_r_d_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       mmaaqqttaaiill
+
+       _V_o_i_d _m_a_q_t_a_i_l_(_)
+
+       prints exit info of the _m_a_q_r_u_n procedure to stderr
+
+       from: _._._/_s_r_c_/_m_a_q_._l_i_b_/_m_a_r_q_u_a_r_d_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+
+
+
+                    Version 0.99f -- Nov 1997                  21
+
+
+
+
+
+vamps(1)                                                 vamps(1)
+
+
+       mmaattrriixx
+
+       _A_r_r_a_y _m_a_t_r_i_x_(_I_n_t_e_g_e_r _m_, _I_n_t_e_g_e_r _n_)
+
+       Returns a matrix (two-dimensional  floating  point  array)
+       with  _m  rows and _n columns. All elements are set to zero.
+       A row vector is created with _m_=_1, a column vector is  cre-
+       ated  with  _n_=_1.  Elements  are  addressed by [_i_,_j], where
+       _0_<_=_i_<_m and _0_<_=_j_<_n.
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       mmeeaann
+
+       _A_r_r_a_y _m_e_a_n_(_A_r_r_a_y _m_t_x_)
+
+       Returns a row vector with the mean values for each  column
+       in _m_t_x.
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       mmeeddiiaann
+
+       _A_r_r_a_y _m_e_d_i_a_n_(_A_r_r_a_y _m_t_x_)
+
+       Returns  a row vector with the median values for each col-
+       umn in _m_t_x.
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       mmmmaaxx
+
+       _A_r_r_a_y _m_m_a_x_(_A_r_r_a_y _m_t_x_)
+
+       Returns a row vector with the maximum values for each col-
+       umn in _m_t_x.
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       mmmmiinn
+
+       _A_r_r_a_y _m_m_i_n_(_A_r_r_a_y _m_t_x_)
+
+       Returns a row vector with the minimum values for each col-
+       umn in _m_t_x.
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       mmrreeaadd
+
+
+
+                    Version 0.99f -- Nov 1997                  22
+
+
+
+
+
+vamps(1)                                                 vamps(1)
+
+
+       _A_r_r_a_y _m_r_e_a_d_(_S_t_r_i_n_g _f_i_l_e_, _I_n_t_e_g_e_r _n_c_)
+
+       Reads a matrix (2D floating point array)  from  the  named
+       ascii  _f_i_l_e,  which  is  supposed to consist of lines with
+       numerical fields separated  by  whitespace  (spaces,  TABS
+       and/or  newlines). Lines starting with `_#' or `_%' are con-
+       sidered comments; blank lines are skipped.  If  _n_c>0,  the
+       number  of  matrix columns are set to _n_c. If _n_c is zero or
+       less, the number of columns are set equal to the number of
+       fields  in  the input lines. The number of matrix rows are
+       calculated from dividing the number of values by the  num-
+       ber of lines in the input _f_i_l_e.
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_t_r_i_n_s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       mmwwrriittee
+
+       _V_o_i_d _m_w_r_i_t_e_(_A_r_r_a_y _m_, _S_t_r_i_n_g _f_n_a_m_e_)
+
+       Writes  the double matrix _m to an ascii file Returns noth-
+       ing;
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_t_r_i_n_s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       ooppeennddeeff
+
+       _I_n_t _o_p_e_n_d_e_f _(_S_t_r_i_n_g _f_n_a_m_e_)
+
+       open a file for processing, close with closedef()
+
+       Returns: 0 on error, otherwise 1
+
+       Remarks: Opendef is used to speed up processing  of  files
+       that  are  used  in  a  _sequential_ way. If files must be
+       accessed randomely _r_i_n_i_m_e_m or _r_e_a_d_i_n_d_e_x should be used
+
+       from: _._._/_s_r_c_/_d_e_f_f_i_l_e_._l_i_b_/_s_l___i_n_t_e_r_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       ppaauussee
+
+       _V_o_i_d _p_a_u_s_e_(_I_n_t_e_g_e_r _n_)
+
+       Suspends processing for _n seconds, if _n is positive. If  _n
+       is  less than or equals zero, processing waits until a key
+       is pressed on the keyboard for which the user is  prompted
+
+
+
+                    Version 0.99f -- Nov 1997                  23
+
+
+
+
+
+vamps(1)                                                 vamps(1)
+
+
+       on standard error.
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_t_r_i_n_s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       pplloott
+
+       _p_l_o_t_._s_l _- _h_i_g_h _l_e_v_e_l _p_l_o_t_t_i_n_g _f_u_n_c_t_i_o_n_s
+
+       Plot  functions to allow quick visualization of Vamps out-
+       put files and matrix variables. The  syntax  of  the  high
+       level functions (_f___p_l_o_t and _m___p_l_o_t) is the same, no matter
+       which underlying graphics method is used. Low level  func-
+       tions  depend  on  the graphics method used. The following
+       graphics methods can be used:
+
+            _p_l_o_t      _- _g_n_u _p_l_o_t_u_t_i_l_s _l_i_b _1_._1
+            _a_g_l       _- _A_G_L _g_r_a_p_h_i_c_s _l_i_b _3_._?
+            _e_x_t___p_l_o_t  _- _u_s_i_n_g _e_x_t_e_r_n_a_l _g_n_u _p_l_o_t_u_t_i_l_s _p_r_o_g_r_a_m_s _(_U_N_I_X _o_n_l_y_)
+            _g_n_u___p_l_o_t  _- _u_s_i_n_g _g_n_u_p_l_o_t _i_n_t_e_r_f_a_c_e _(_U_N_I_X _o_n_l_y_)
+                        _s_e_e _a_l_s_o _@_#_@ _a_n_d _@_p_l_t_@_.
+
+       Which of these methods can be  used  in  this  version  of
+       vamps is printed to the screen when using the _p_l_o_t command
+       to initialize the plot system. The _s_h_o_w___p_l_o_t_s_y_s_(_) function
+       can be used for this purpose as well.
+
+       The  _o_u_t_p_u_t_d_e_v variable can be used to specify screen pre-
+       view (1) or hardcopy output (0).
+
+       If more than one graphics  method  is  available  you  can
+       switch  between  methods be setting the _m___p_l_o_t function to
+       the method specific function.  Use the  _s_e_t___p_l_o_t_s_y_s  func-
+       tion to do so.
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       pplloott..ssll
+
+       _p_l_o_t_._s_l _- _h_i_g_h _l_e_v_e_l _p_l_o_t_t_i_n_g _f_u_n_c_t_i_o_n_s
+
+       Plot  functions to allow quick visualization of Vamps out-
+       put files and matrix variables. The  syntax  of  the  high
+       level functions (_f___p_l_o_t and _m___p_l_o_t) is the same, no matter
+       which underlying graphics method is used. Low level  func-
+       tions  depend  on  the graphics method used. The following
+       graphics methods can be used:
+
+            _p_l_o_t      _- _g_n_u _p_l_o_t_u_t_i_l_s _l_i_b _1_._1
+            _a_g_l       _- _A_G_L _g_r_a_p_h_i_c_s _l_i_b _3_._?
+            _e_x_t___p_l_o_t  _- _u_s_i_n_g _e_x_t_e_r_n_a_l _g_n_u _p_l_o_t_u_t_i_l_s _p_r_o_g_r_a_m_s _(_U_N_I_X _o_n_l_y_)
+
+
+
+                    Version 0.99f -- Nov 1997                  24
+
+
+
+
+
+vamps(1)                                                 vamps(1)
+
+
+            _g_n_u___p_l_o_t  _- _u_s_i_n_g _g_n_u_p_l_o_t _i_n_t_e_r_f_a_c_e _(_U_N_I_X _o_n_l_y_)
+                        _s_e_e _a_l_s_o _@_#_@ _a_n_d _@_p_l_t_@_.
+
+       Which of these methods can be  used  in  this  version  of
+       vamps is printed to the screen when using the _p_l_o_t command
+       to initialize the plot system. The _s_h_o_w___p_l_o_t_s_y_s_(_) function
+       can be used for this purpose as well.
+
+       The  _o_u_t_p_u_t_d_e_v variable can be used to specify screen pre-
+       view (1) or hardcopy output (0).
+
+       If more than one graphics  method  is  available  you  can
+       switch  between  methods be setting the _m___p_l_o_t function to
+       the method specific function.  Use the  _s_e_t___p_l_o_t_s_y_s  func-
+       tion to do so.
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       pplloottppaarr
+
+       _V_o_i_d _p_l_o_t_p_a_r_(_"_p_a_r_n_a_m_e_"_)
+
+       calls  _v_s_e_l  and _g_r_a_p_h to plot parameter _p_a_r_n_a_m_e from _o_u_t_-
+       _f_i_l_e_n_a_m_e.
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       pplloottssttyyllee
+
+       _I_n_t _p_l_o_t_s_t_y_l_e_;
+
+       Set the plotting style:
+
+       _0 _= _l_i_n_e_s_, _1 _i_s _m_a_r_k_e_r_s_, _2 _= _m_a_r_k_e_r_s _& _l_i_n_e_s
+
+       _f_r_o_m _f_i_l_e_: _@_v_a_m_p_s_d_o_c_._t_m_p_@
+
+
+
+       pplloottttss
+
+       _I_n_t _p_l_o_t_t_s_(_"_t_s_n_a_m_e_"_)_;
+
+       plots a time serie from the start of the  run  to  current
+       time 't' using the current plot settings
+
+       Returns: nothing
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       pplltt
+
+
+
+                    Version 0.99f -- Nov 1997                  25
+
+
+
+
+
+vamps(1)                                                 vamps(1)
+
+
+       _V_o_i_d _p_l_t___c_l_o_s_e_(_)
+
+       Closes the pipe to the plotting program
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_i_t___s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       pplltt__cclloossee
+
+       _V_o_i_d _p_l_t___c_l_o_s_e_(_)
+
+       Closes the pipe to the plotting program
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_i_t___s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       pppprriinntt
+
+       _V_o_i_d _p_p_r_i_n_t_(_)
+
+       Print the current plot on a postscript printer
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       pprriinnttff
+
+       _V_o_i_d _p_r_i_n_t_f_(_S_t_r_i_n_g _f_m_t_, _._._._, _I_n_t_e_g_e_r _N_)
+       _V_o_i_d _f_p_r_i_n_t_f_(_I_n_t_e_g_e_r _f_p_, _S_t_r_i_n_g _f_m_t_, _._._._, _I_n_t_e_g_e_r _N_)
+       _S_t_r_i_n_g _s_p_r_i_n_t_f_(_S_t_r_i_n_g _f_m_t_, _._._._, _I_n_t_e_g_e_r _N_)
+
+       Formatted  printing  cf.  the C printf family, except that
+       the number of parameters  N  must  be  given.  printf  and
+       fprintf  return  nothing,  sprintf  returns  the formatted
+       string.
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       pprroommpptt
+
+       _S_t_r_i_n_g _p_r_o_m_p_t_(_S_t_r_i_n_g _s_t_r_1_, _S_t_r_i_n_g _s_t_r_2_)
+
+       Sets the prompts used in interactive mode. Default prompts
+       are  ``_S_l_a_s_h_>  ''  and ``___S_l_a_s_h_> ''. If either argument is
+       the nullstring (_"_"),  that  prompt  is  not  changed.  The
+       sequences  _%_#  and  _%_$ are translated to the current input
+       line number and stack depth respectively.
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_t_r_i_n_s_._c
+
+
+
+                    Version 0.99f -- Nov 1997                  26
+
+
+
+
+
+vamps(1)                                                 vamps(1)
+
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       qquuiitt
+
+       _e_x_i_t_(_)
+       _q_u_i_t_(_)
+
+       Quits the S-Lang interpreter and returns to the  operating
+       system
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_i_t___s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       rraa
+
+       _F_l_o_a_t _r_a _(_z_, _z_0_, _d_, _u_)
+
+       Calculates ra (aerodynamic resistance) according to:
+
+            _r_a _= _[_l_n_(_(_z_-_d_)_/_z_0_)_]_^_2 _/_(_k_^_2_u_)
+            _W_h_e_r_e_:
+                 _d  _= _d_i_s_p_l_a_c_e_m_e_n_t _h_e_i_g_h_t
+                 _z  _= _h_e_i_g_h_t _o_f _t_h_e _w_i_n_d _s_p_e_e_d _m_e_a_s_u_r_e_m_e_n_t_s
+                 _u  _= _w_i_n_d_s_p_e_e_d
+                 _z_0 _= _r_o_u_g_h_n_e_s_s _l_e_n_g_t_h
+                 _k  _= _v_o_n _K_a_r_m_a_n _c_o_n_s_t_a_n_t
+
+       Returns: ra
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       rreeaaddiinnddeexx
+
+       _I_n_t _r_e_a_d_i_n_d_e_x_(_f_i_l_e_n_a_m_e_)
+
+       Reads an index previously save with _s_a_v_e_i_n_d_e_x.
+
+       from: _._._/_s_r_c_/_d_e_f_f_i_l_e_._l_i_b_/_s_l___i_n_t_e_r_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       rreeaaddsseett
+
+       _I_n_t _r_e_a_d_s_e_t_(_S_t_r_i_n_g _f_i_l_e_n_a_m_e_, _S_t_r_i_n_g _s_e_t_n_a_m_e_)
+
+       Reads  set  _s_e_t_n_a_m_e from file _f_n_a_m_e. Returns the id of the
+       set or -1 on error.
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_i_t___s_._c
+
+
+
+                    Version 0.99f -- Nov 1997                  27
+
+
+
+
+
+vamps(1)                                                 vamps(1)
+
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       rrmmssqq
+
+       _A_r_r_a_y _r_m_s_q_(_A_r_r_a_y _m_t_x_)
+
+       Returns  a  row  vector  with  the  root  mean  square  or
+       quadratic mean values for each column in _m_t_x.
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       ssaavvee__hhiissttoorryy
+
+       _I_n_t _s_a_v_e___h_i_s_t_o_r_y_(_f_n_a_m_e_)
+
+       Save  the command entered at the interactive prompt to the
+       file _f_n_a_m_e. Returns -1 on error (this file  could  not  be
+       opened in write mode) and 0 on success.
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_i_t___s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       ssaavveeiinnddeexx
+
+       _I_n_t _s_a_v_e_i_n_d_e_x_(_f_i_l_e_n_a_m_e_)
+
+       Save the index to the file _f_i_l_e_n_a_m_e.
+
+       from: _._._/_s_r_c_/_d_e_f_f_i_l_e_._l_i_b_/_s_l___i_n_t_e_r_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       ssaavveettss
+
+       _I_n_t _s_a_v_e_t_s _(_"_t_s_n_a_m_e_"_, _"_f_n_a_m_e_"_, _p_o_i_n_t_s_)
+
+       saves  the time series tsname to the file fname from point
+       0 to point points
+
+       Returns: -1 on failure, 0 on sucess
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       ssccaannff
+
+
+       Formatted variable assignment like  their  C  counterparts
+       (see  _s_c_a_n_f_(_3_)), except that the assigned values, followed
+
+
+
+                    Version 0.99f -- Nov 1997                  28
+
+
+
+
+
+vamps(1)                                                 vamps(1)
+
+
+       by the number of assignments are placed on the stack.  For
+       example:
+
+            _v_a_r_i_a_b_l_e _m_o_n_t_h_, _d_a_y_;
+            _i_f_(_s_s_c_a_n_f_(_"_D_e_c_e_m_b_e_r_, _5_\_n_"_, _"_%_[_A_-_Z _a_-_z_]_, _%_d_\_n_"_) _=_= _2_)
+            _{
+                 _(_m_o_n_t_h_, _d_a_y_) _= _(_)_;
+                 _._._.
+            _}
+
+       pushes a string followed by an integer on the stack.
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_t_r_i_n_s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       ssccrrccoollss
+
+       _I_n_t_e_g_e_r _s_c_r_c_o_l_s
+       _I_n_t_e_g_e_r _s_c_r_r_o_w_s
+
+       Readonly variables set to the number of (text) columns and
+       rows of the screen. These values change  when  the  window
+       size changes.
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_t_r_i_n_s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       ssccrrrroowwss
+
+       _I_n_t_e_g_e_r _s_c_r_c_o_l_s
+       _I_n_t_e_g_e_r _s_c_r_r_o_w_s
+
+       Readonly variables set to the number of (text) columns and
+       rows of the screen. These values change  when  the  window
+       size changes.
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_t_r_i_n_s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       ssddeevv
+
+       _A_r_r_a_y _s_d_e_v_(_A_r_r_a_y _m_t_x_)
+
+       Returns a row vector with the standard deviations for each
+       column in _m_t_x.
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+
+
+                    Version 0.99f -- Nov 1997                  29
+
+
+
+
+
+vamps(1)                                                 vamps(1)
+
+
+       sseett__pplloottssyyss
+
+       _V_o_i_d _s_e_t___p_l_o_t_s_y_s_(_I_n_t _n_r_)
+
+       Sets the uses plotting system to the system  _n_r.  It  uses
+       _s_h_o_w___p_l_o_t_s_y_s  to  display  the  updated  list of available
+       plot-systems. If the _p_l_v_e_r_b variable is > 1
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       sseett__pplloottssyyss__bbyynnaammee
+
+       _V_o_i_d _s_e_t___p_l_o_t_s_y_s___b_y_n_a_m_e_(_S_t_r_i_n_g _n_a_m_e_)
+
+       Sets the uses plotting system to the system _n_a_m_e. It  uses
+       _s_h_o_w___p_l_o_t_s_y_s  to  display  the  updated  list of available
+       plot-systems.
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       sseettiiddxx
+
+       _v_o_i_d _s_l___s_e_t_i_d_x_(_c_h_a_r _*_i_d_x_n_a_m_e_)_;
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_t_r_i_n_s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       sshhooww__pplloottssyyss
+
+       _V_o_i_d _s_h_o_w___p_l_o_t_s_y_s
+
+       Prints short descriptions of all  the  installed  plotting
+       systems  to the screen. The system indicated with a '*' is
+       the active system.
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       ssll__mmeett__iinniitt
+
+       _V_o_i_d _s_l___m_e_t___i_n_i_t
+
+       Initializes the meteo functions: _e_a_e_s_, _v_s_l_o_p_e_, _e_0_b
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_i_t___s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       ssllppaatthh
+
+
+
+                    Version 0.99f -- Nov 1997                  30
+
+
+
+
+
+vamps(1)                                                 vamps(1)
+
+
+       _S_t_r_i_n_g _s_l_p_a_t_h_(_S_t_r_i_n_g _s_t_r_)
+
+       Sets a colon (`_:') separated pathlist  of  directories  to
+       search  when  loading S-Lang command files (using _a_u_t_o_l_o_a_d
+       and _e_v_a_l_f_i_l_e).  If _s_t_r is the nullstring (_"_"),  the  path-
+       list  is not changed. The returned string holds the previ-
+       ous pathlist.
+
+       Within  a  pathlist  specification,  a  single  dot  (`_.')
+       denotes  the current working directory. If the first char-
+       acter of a path in the list is  the  tilde  (`_~'),  it  is
+       expanded  to  the  home  directory  obtained from the _H_O_M_E
+       environment variable. For example, if the user maintains a
+       library   of   S-Lang   command   files   in  a  directory
+       _$_H_O_M_E_/_l_i_b_/_v_a_m_p_s, the command:
+
+            _(_) _= _s_l_p_a_t_h_(_s_t_r_c_a_t_(_"_~_/_l_i_b_/_v_a_m_p_s_:_"_, _s_l_p_a_t_h_(_"_"_)_)_)_;
+
+       can be placed in the _._v_a_m_p_s_s_l  file  in  the  user's  home
+       directory.  Script files, however, should restore the pre-
+       vious pathlist before terminating.
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_t_r_i_n_s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       sspprriinnttff
+
+       _V_o_i_d _p_r_i_n_t_f_(_S_t_r_i_n_g _f_m_t_, _._._._, _I_n_t_e_g_e_r _N_)
+       _V_o_i_d _f_p_r_i_n_t_f_(_I_n_t_e_g_e_r _f_p_, _S_t_r_i_n_g _f_m_t_, _._._._, _I_n_t_e_g_e_r _N_)
+       _S_t_r_i_n_g _s_p_r_i_n_t_f_(_S_t_r_i_n_g _f_m_t_, _._._._, _I_n_t_e_g_e_r _N_)
+
+       Formatted printing cf. the C printf  family,  except  that
+       the  number  of  parameters  N  must  be given. printf and
+       fprintf return  nothing,  sprintf  returns  the  formatted
+       string.
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       ssrreeaaddlliinnee
+
+       _I_n_t _s_r_e_a_d_l_i_n_e
+
+       If  this  variable  is  1  vamps  runs in interactive mode
+       (readline initialized.). If this is set to 0  pressing  ^C
+       causes  Vamps  to  switch to interactive mode on unix sys-
+       tems.
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_i_t___s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+
+
+                    Version 0.99f -- Nov 1997                  31
+
+
+
+
+
+vamps(1)                                                 vamps(1)
+
+
+       ssssccaannff
+
+
+       Formatted variable assignment like  their  C  counterparts
+       (see  _s_c_a_n_f_(_3_)), except that the assigned values, followed
+       by the number of assignments are placed on the stack.  For
+       example:
+
+            _v_a_r_i_a_b_l_e _m_o_n_t_h_, _d_a_y_;
+            _i_f_(_s_s_c_a_n_f_(_"_D_e_c_e_m_b_e_r_, _5_\_n_"_, _"_%_[_A_-_Z _a_-_z_]_, _%_d_\_n_"_) _=_= _2_)
+            _{
+                 _(_m_o_n_t_h_, _d_a_y_) _= _(_)_;
+                 _._._.
+            _}
+
+       pushes a string followed by an integer on the stack.
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_t_r_i_n_s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       ssttaattss
+
+       _V_o_i_d _s_t_a_t_s
+
+       Initialize  statistical data analysis library. None of the
+       functions in _s_t_a_t_s_._s_l can be used before this  command  is
+       issued.
+
+       All statistical data analysis is performed on matrices (2D
+       floating point arrays) in which the data  are  column-wise
+       organized.
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       ssttrrvv
+
+       _A_r_r_a_y _s_t_r_v_(_S_t_r_i_n_g _s_t_r_, _S_t_r_i_n_g _s_e_p_)
+
+       Splits the string _s_t_r into fields separated by one or more
+       characters from the string _s_e_p. A terminating  newline  is
+       always  considered a field separator. Returns a vector (1D
+       array) of strings set to the individual fields.  For exam-
+       ple:
+
+            _v_a_r_i_a_b_l_e _f_i_d_, _i_, _s_, _v_;
+            _f_i_d _= _f_o_p_e_n_(_"_m_y___f_i_l_e_._d_a_t_"_, _"_r_"_)_;
+            _w_h_i_l_e_(_f_g_e_t_s_(_f_i_d_) _> _0_)
+            _{
+                 _s _= _(_)_;
+                 _v _= _s_t_r_v_(_s_, _" _\_t_"_)_;
+                 _f_o_r_(_i _= _0_; _i _< _a_s_i_z_e_(_v_)_; _i_+_+_)
+
+
+
+                    Version 0.99f -- Nov 1997                  32
+
+
+
+
+
+vamps(1)                                                 vamps(1)
+
+
+                      _p_r_i_n_t_f_(_"_%_1_6_s_\_n_"_, _v_[_i_]_, _1_)_;
+            _}
+
+       reads  an  entire data file of fields separated by runs of
+       whitespace characters and prints the  fields  on  standard
+       output.
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_t_r_i_n_s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       ssuubbpplloott
+
+       _V_o_i_d _s_u_b_p_l_o_t_(_x_, _y_, _i_n_d_e_x_)
+
+       Set  the plotting system for multiple plots on one page. _x
+       and _y are the number of plots in the  x  and  y  direction
+       respectively.  _i_n_d_e_x  denotes the number of the subplot in
+       which the next plot is drawn.  Numbering  starts  at  one.
+       The first plot is drawn in the upper left corner, the last
+       in the lower right. Currently subplot only works with gnu-
+       plot. See also _e_n_d_s_u_b_p_l_o_t.
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       ttrraannssppoossee
+
+       _A_r_r_a_y _t_r_a_n_s_p_o_s_e_(_A_r_r_a_y _m_t_x_)
+
+       Returns a transposed matrix of _m_t_x. The returned matrix is
+       a new one, the elements of _m_t_x are left unchanged.
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       ttss__eecchhoo
+
+       _V_o_i_d _t_s___e_c_h_o_(_o_b_j_)
+
+       Prints an ascii representation of obj, followed by a  new-
+       line  on standard output. Supported are: Character, Float,
+       Integer, String, and 1D and 2D Arrays for these types.  In
+       this  case  all  floats  and first columns of matrixes are
+       regarded in _t_s_(_5_) format
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       ttsstteepp__ttoopp
+
+       _t_s_t_e_p___t_o_p_(_t_s_t_e_p_j_e_)
+
+
+
+
+                    Version 0.99f -- Nov 1997                  33
+
+
+
+
+
+vamps(1)                                                 vamps(1)
+
+
+       Calculates   soilevaporation,   potential   transpiration,
+       interception and precipitation for each step at _t_s_t_e_p_j_e.
+
+       Return order should be: return(soilevap, pot-trans, inter-
+       cep, precipitation);
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       ttttyy
+
+       _I_n_t_e_g_e_r _t_t_y
+
+       Readonly variable set to _1 if standard output is a tty,  _2
+       if  standard  input is a tty, _3 if both standard input and
+       output are connected to a tty, else set to _0.
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_t_r_i_n_s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       uusseerrggeettssttrr
+
+       _c_h_a_r _*_u_s_e_r_g_e_t_s_t_r_(_c_h_a_r _*_p_r_o_m_p_t_)_;
+
+       Gets a string from user, resets tty for use in interactive
+       mode,  the  global  variable userstr_l gives the length of
+       the   user   string.   see   also   _S_l_a_n_g___r_e_s_e_t___t_t_y    and
+       _S_L_a_n_g___i_n_i_t___t_t_y
+
+       If  the first character of the string is a _'_:_' the remain-
+       ing part of the string is passed to _s_y_s_t_e_m_(_);
+
+       If the first character of the string is a _'_?_' the  remain-
+       ing part of the string is passed to _v_a_m_p_s___h_e_l_p_(_);
+
+       _I_f _t_h_e _f_i_r_s_t _c_h_a_r_a_c_t_e_r _o_f _t_h_e _s_t_r_i_n_g _i_s _a _'_@_' _t_h_e _r_e_m_a_i_n_i_n_g
+
+       part of the string is passed to _e_v_a_l_(_);
+
+       Returns: string
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       vv__ccuummbboott
+
+       _F_l_o_a_t _v___c_u_m_b_o_t
+
+       Cumulative  flow  trough bottom of profile calculated from
+       start of simulation (Read only)
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_i_t___s_._c
+
+
+
+                    Version 0.99f -- Nov 1997                  34
+
+
+
+
+
+vamps(1)                                                 vamps(1)
+
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       vv__ccuummeevvaa
+
+       _F_l_o_a_t _v___c_u_m_e_v_a
+
+       Cumulative evaporation (from wet canopy) (Read only)
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_i_t___s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       vv__ccuummiinnttcc
+
+       _F_l_o_a_t _v___c_u_m_i_n_t
+
+       Cumulative interception [cm] (Read only)
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_i_t___s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       vv__ccuummpprreecc
+
+       _F_l_o_a_t _v___c_u_m_p_r_e_c
+
+       Cumulative precipitation [cm] (Read only)
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_i_t___s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       vv__ccuummttoopp
+
+       _F_l_o_a_t _v___c_u_m_t_o_p
+
+       Cumulative flow trough  top  of  profile  calculated  from
+       start of simulation (Read only)
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_i_t___s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       vv__ccuummttrraa
+
+       _F_l_o_a_t _v___c_u_m_t_r_a
+
+       Cumulative  transpiration.  This is equal to _v___r_o_o_t_e_x_t_r_a_c_t
+       if transpiration reduction is not calculated (Read only)
+
+
+
+                    Version 0.99f -- Nov 1997                  35
+
+
+
+
+
+vamps(1)                                                 vamps(1)
+
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_i_t___s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       vv__ddtt
+
+       _F_l_o_a_t _v___d_t
+
+       Current timestep in interation process. The 'real' timeste
+       can be found in the _v___t_h_i_s_t_s_t_e_p variable (in days)
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_i_t___s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       vv__ggeettssppaarr
+
+       _F_l_o_a_t _v___g_e_t_s_p_a_r_(_i_n_t _n_r_, _c_h_a_r _*_d_e_s_)
+
+       Gets parameter from soil description structure
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_i_t___s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       vv__mmaassbbaall
+
+       _F_l_o_a_t _v___m_a_s_b_a_l
+
+       mass balance error in %. Read only.
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_i_t___s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       vv__ppoossttssooiill
+
+       _V_o_i_d _v___p_o_s_t_s_o_i_l
+
+       Cleans up after the soil module
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_i_t___s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       vv__pprreessooiill
+
+       _V_o_i_d _v___p_r_e_s_o_i_l_(_)
+
+
+
+
+                    Version 0.99f -- Nov 1997                  36
+
+
+
+
+
+vamps(1)                                                 vamps(1)
+
+
+       Initialize the soil moisture module
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_i_t___s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       vv__pprriinnttssttrr
+
+       _V_o_i_d _v___p_r_i_n_t_s_t_r_(_n_a_m_e_, _s_t_r_)
+
+       Stores  variable  _s_t_r  with  name _n_a_m_e in the output-file.
+       This function can be used in the _e_a_c_h___s_t_e_p function  only.
+       It's  purpose is to store extra information in the output-
+       file.
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_i_t___s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       vv__pprriinnttssuumm
+
+       _V_o_i_d _v___p_r_i_n_t_s_u_m_(_)
+
+       Prints actual water balance summary at _s_t_d_e_r_r
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_i_t___s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       vv__qqbboott
+
+       _F_l_o_a_t _v___q_b_o_t
+
+       Flow trough bottom of profile for current  timestep  (Read
+       only)
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_i_t___s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       vv__qqttoopp
+
+       _F_l_o_a_t _v___q_t_o_p
+
+       Flow  trough  top  of  profile  for current timestep (Read
+       only)
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_i_t___s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+
+                    Version 0.99f -- Nov 1997                  37
+
+
+
+
+
+vamps(1)                                                 vamps(1)
+
+
+       vv__rrooootteexxttrraacctt
+
+       _F_l_o_a_t _v___r_o_o_t_e_x_t_r_a_c_t
+
+       Cumulative amount of water extracted by the roots  (actual
+       transpiration) (Read only)
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_i_t___s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       vv__rruunn
+
+       _V_o_i_d _v___r_u_n_(_S_t_r_i_n_g _i_n_f_)
+
+       Starts a Vamps run with input file _i_n_f.
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       vv__ssaavvee__aallll__sseettss
+
+       _V_o_i_d _v___s_a_v_e___a_l_l___s_e_t_s _(_)
+
+       save  all  currently  loaded datasets to a file. The file-
+       names are created by prepending 'set_' to the name of  the
+       dataset
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       vv__sseettssppaarr
+
+       _V_o_i_d _v___s_e_t_s_p_a_r_(_i_n_t _n_r_, _c_h_a_r _*_d_e_s_, _v_a_l _d_o_u_b_l_e_)
+
+       set parameter in soil description structure
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_i_t___s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       vv__sshhooww__ddaattaa__sseettss
+
+       _V_o_i_d _v___s_h_o_w___d_a_t_a___s_e_t_s _(_)_;
+
+       shows all data set currently loaded
+
+       Returns: nothing
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+
+
+
+                    Version 0.99f -- Nov 1997                  38
+
+
+
+
+
+vamps(1)                                                 vamps(1)
+
+
+       vv__ssmmdd
+
+       _F_l_o_a_t _v___s_m_d
+
+       Soil moisture deficit for current timestep in cm
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_i_t___s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       vv__sstteeppss
+
+       _I_n_t _v___s_t_e_p_s
+
+       Number of steps in the current simulation (Read,only)
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_i_t___s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       vv__tt
+
+       _F_l_o_a_t _v___t
+
+       Current time in simulation (in days)
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_i_t___s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       vv__vvoollaacctt
+
+       _F_l_o_a_t _v___v_o_l_a_c_t
+
+       Actual  water content of the total soil profile [cm] (Read
+       only)
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_i_t___s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       vv__vvoollssaatt
+
+       _F_l_o_a_t _v___v_o_l_s_a_t
+
+       Water content of the  soil  profile  at  saturation  (read
+       only)
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_i_t___s_._c
+
+
+
+
+                    Version 0.99f -- Nov 1997                  39
+
+
+
+
+
+vamps(1)                                                 vamps(1)
+
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       vv__vvppdd
+
+       _F_l_o_a_t _v___v_p_d
+
+       Actual vapour pressure deficit in mbar (Read only)
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_i_t___s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       vvaammppss__hheellpp Void vamps_help(String key)
+
+       gets help on _k_e_y. See _'_?_' for further info.
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_i_t___s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       vveerrbboossee
+
+       _I_n_t _v_e_r_b_o_s_e
+
+       The  general verbose level in the current simulation. 0 is
+       quiet. A higher the number makes Vamps more verbose.  Ver-
+       bose levels above 1 are usefull for debugging only
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_i_t___s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       vveerrssiioonn
+
+       _I_n_t_e_g_e_r _v_e_r_s_i_o_n
+
+       Readonly variable holding the current _s_l_a_s_h version number
+       multiplied by 100.
+
+       from: _._._/_s_r_c_/_m_a_i_n_/_i_n_t_r_i_n_s_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       vvpprrooff
+
+       _[_A_r_r_a_y_]_, _I_n_t  _v_p_r_o_f_(_S_t_r_i_n_g _v_a_r_, _F_l_o_a_t _t_i_m_e_, _S_t_r_i_n_g _f_i_l_e_n_a_m_e_)
+
+       Returns -1 on failure or the number of rows in  the  array
+       and the array on success.
+
+
+
+                    Version 0.99f -- Nov 1997                  40
+
+
+
+
+
+vamps(1)                                                 vamps(1)
+
+
+       vprof  reads a profile variable from the Vamps output file
+       _f_i_l_e_n_a_m_e for a single timstep (time)  in  the  simulation.
+       Depth  is  placed  in  column 1 and the value in column 0.
+       See also _v_s_e_l
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       vvsseell
+
+       _[_a_r_r_a_y_]_, _I_n_t _v_s_e_l _(_p_a_r_n_a_m_e_, _l_a_y_e_r_, _f_i_l_e_n_a_m_e_)
+
+       Returns -1 on failure or the number of rows in  the  array
+       and  the array on success.  If _l_a_y_e_r _=_= _-_1 then all layers
+       are put into the array.  Example:
+
+       _v_a_r_i_a_b_l_e _a_r_;
+       _i_f _(_v_s_e_l_(_"_v_o_l_a_c_t_"_,_-_1_,_"_s_a_t_._o_u_t_"_) _!_= _-_1_)_{
+            _a_r _= _(_)_;
+       _}
+
+       See also the stand-alone _v_s_e_l program and _v_p_r_o_f.
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       vvssllooppee
+
+       _F_l_o_a_t _v_s_l_o_p_e_(_T_d_,_e_s_)_;
+
+       Calculates the slope of  the  saturation  vapour  pressure
+       curve  from  es and dry bulb temp for use in Penman Eo and
+       Penman-Montheith.   Required  input:  Td  (dry  bulb  temp
+       [oC]), es
+
+       Returns: slope of the vapour pressure curve
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+
+       wwrriitteemmeemmiinnii
+
+       _I_n_t _w_r_i_t_e_m_e_m_i_n_i_(_f_n_a_m_e_, _i_n_i_f_n_a_m_e_)
+
+       Writes  the file read into memory with the _r_i_n_m_e_m function
+       to a file. If _f_n_a_m_e is  "-"  output  is  send  to  stdout.
+       inifname if the name of the file in memory.
+
+       from: _._._/_s_r_c_/_d_e_f_f_i_l_e_._l_i_b_/_s_l___i_n_t_e_r_._c
+
+       from file: _v_a_m_p_s_d_o_c_._t_m_p
+
+EEXXAAMMPPLLEESS
+       Run  vvaammppss  with  the  file veluwe.inp in verbose mode and
+
+
+
+                    Version 0.99f -- Nov 1997                  41
+
+
+
+
+
+vamps(1)                                                 vamps(1)
+
+
+       output to the file veluwe.out:
+       vvaammppss --oo vveelluuwwee..oouutt --vv vveelluuwwee..iinnpp
+
+
+FFIILLEESS
+       Defaults are  read  from  .vampsrc  on  UNIX  systems  and
+       vamps.rc  on  MS-DOS  and  OS/2  FAT systems. This file is
+       first searched in the current directory. If it is not pre-
+       sent  in the current directory, the directory to which the
+       HOME environment variable  points  is  searched.  If  this
+       search  also  fails  the compiled in VAMPSLIB directory is
+       searched (usually /usr/local/lib/vamps).   Otherwise  com-
+       piled in defaults are used.
+
+       The  layout  of  this  files  is  the  same as that of the
+       input/output  files.  Only  one   section   ([vamps])   is
+       searched.  The  vvaammppss(5) manual page describes the allowed
+       variables in the vamps section.  A simple way to produce a
+       defaults  file  is  to  redirect the output of vvaammppss --ss to
+       .vampsrc (or vamps.rc).
+
+
+
+
+CCOOPPYYRRIIGGHHTT
+              Copyright (C) 1995 Jaap Schellekens.
+
+              This program is free software; you can redistribute it and/or modify
+              it under the terms of the GNU General Public License as published by
+              the Free Software Foundation; either version 2, or (at your option)
+              any later version.
+
+              This program is distributed in the hope that it will be useful, but
+              WITHOUT ANY WARRANTY; without even the implied warranty of
+              MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+              General Public License for more details.
+
+              You should have received a copy of the GNU General Public License
+              along with this program; see the file COPYING.  If not, write to the
+              Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+
+              (C) Jaap Schellekens
+              Faculty of Earth Sciences
+              Vrije Universiteit
+              De Boelelaan 1085
+              1081 HV Amsterdam
+              The Netherlands
+              E-mail: schj@geo.vu.nl
+                   schj@xs4all.nl
+
+              International Institute of Tropical Forestry
+              Rio Piedras, Puerto Rico
+
+              Parts of this program derived from swap.  The following is taken from
+
+
+
+                    Version 0.99f -- Nov 1997                  42
+
+
+
+
+
+vamps(1)                                                 vamps(1)
+
+
+              the swap Fortran code:
+
+                 Author : Jan G. Wesseling
+
+                                   Correspondence
+
+              This program uses the ideas and experiences of various researchers at
+              the Winand Staring Centre and the Wageningen Agricultural
+              University. Currently the program is maintained and documented in
+              cooperation by :
+
+                   Dept. of Agrohydrology             Dept. of Water Resources
+                   Winand Staring Centre              Wageningen Agricultural University
+                   Marijkeweg 11/22                   Nieuwe Kanaal 11
+                   6700 AC  Wageningen                6709 PA  Wageningen
+                    The Netherlands                    The Netherlands
+                   Fax: +31 8370 24812                Fax: +31 8370 84885
+
+
+
+SSEEEE AALLSSOO
+       vvaammppss(5), vvsseell(1), iisssseecc(1), ggeettssttrr(1).
+
+
+AAUUTTHHOORR
+       J. Schellekens
+       schj@geo.vu.nl
+       schj@xs4all.nl
+
+
+
+BBUUGGSS
+       There are quite a lot I suspect. Please report them to  me
+       if  you  encounter  one.  Some bugs might be 'features' as
+       vvaammppss will not always behave very logical ;-).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    Version 0.99f -- Nov 1997                  43
+
+

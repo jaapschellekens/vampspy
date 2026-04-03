@@ -1,0 +1,111 @@
+.TH vangenu 1 "Version VERSION"
+.ds -- \-\^\-
+.ds b[ \fR[\|\fP
+.ds b] \fR\|]\fP
+
+.SH NAME
+vangenu \- determine van Genuchten parameters from a pF curve
+
+.SH SYNOPSIS
+.B getstr
+.B \*(b[\*(--help\*(b]
+.B \*(b[\*(--Header\*(b]
+.B \*(b[\*(--copyright\*(b]
+.B \*(b[\*(--license\*(b]
+.BI \*(b[\*(--alpha\   alpha\*(b]
+.BI \*(b[--n\   n\*(b]
+.BI \*(--thetar\   "residual_theta"
+.BI \*(--thetas\   "theta_at_saturation"
+.I filename
+
+.SH DESCRIPION
+.B vangenu
+can determine the van Genuchten parameters alpha and n from pairs
+of pF theta values. It uses Marquardt's non-linear regression to
+do so.
+
+Input is read from either 
+.I filename
+or standard input. If 
+.I filename
+is specified as a single dash
+.RB `` \- '',
+it is taken from standard input. Output is written to the standard
+output. 
+
+The input file must contain two columns, containing pF in the
+first column and the corresponding theta value in the second.
+The following shows an example:
+.PP
+.RS
+.nf
+.ft CW
+0.4 0.370
+1.0 0.360
+1.4 0.34
+1.7 0.30
+2.0 0.28
+2.4 0.24
+2.7 0.23
+.ft R
+.fi
+.RE
+
+.SH OPTIONS
+Options may be given as either standard
+one-letter options, or GNU style long options. Long options start with
+two dashes
+.RB `` \*(-- ''
+and may be truncated to any unambiguous abbreviation.
+
+.TP
+.B \*(--copyright
+Show copyright information and exit
+
+.TP
+.B \*(--Header
+Omit headers from output.
+
+.TP
+.B \*(--license
+Print license information and exit.
+
+.TP
+.B \*(--help
+Print help text and exit.
+
+.TP
+.BI \*(--alpha\   valua_for_alpha
+Give the initial value for alpha. Note that unrealistic values can
+cause the fitting process to crash.
+
+.TP
+.BI \*(--n\   value_for_n
+Give the initial value for n. Note that unrealistic values can
+cause the fitting process to crash.
+
+
+.SH USAGE
+All options cane be entered as GNU style long options or abbriviated
+to the first letter op the option.
+
+.SH EXAMPLES
+
+vangenu ---alpha 0.04 -n 1.3 -thetas 0.46 -thetar 0.04 mydata.dat
+
+.SH SEE ALSO
+.BR vamps (1),
+.BR vamps (5).
+
+
+.SH AUTHOR
+J. Schellekens
+.br
+schj@geo.vu.nl
+.br
+schj@xs4all.nl
+
+
+.SH BUGS
+The fitting process can crash if initial values deviate to much
+from the optimal ones.

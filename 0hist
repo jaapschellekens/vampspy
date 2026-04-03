@@ -1,0 +1,267 @@
+Some history -- most of the changes are _not_ documented
+here, but are included in the RCS stuff.
+---------------------------------------------------------
+Thu Jan 26 14:04:23 MET 1995
+	Started on framework version 0.1
+
+Fri Jan 27 14:24:52 MET 1995
+	Made old2new
+	soil.c was added, the program can now read
+	all the soil input vars from the new file format.
+
+Wed Feb  1 09:27:32 MET 1995
+	Rearranged datastructure of time series, all data are
+	stored in a giant, growing, structure containing seperate arrays
+	of structures for each data-set
+
+Thu Feb  2 15:59:11 MET 1995
+	Added getopt from gzip, program now also uses long
+	options. tailor.h commented out.
+	Used #ifndef PI. Not defined in sun libc, but included
+	in gnulibc.
+
+Sat Feb  4 11:37:58 GMT+0100 1995
+	Added -Output option. All datasets can now be printed
+	by specifying their name in the -Output option
+	Programmed getsetbyname()
+	Renamed environ.c to dataset.c. Added output.c which
+	maintains the list of sets that should be printed.
+
+Mon Feb 27 13:36:28 MET 1995
+	cprosper: used __P macro, updated for ts2.1 
+	removed pro_alloc.c
+
+Sat Apr 22 17:35:35 MET DST 1995 (Puerto Rico)
+	dumpset now dumps to a file with the name of
+	the set if no stream is given.
+
+Mon Jun 26 11:37:10 MET DST 1995
+	changed command line syntax (prosper.c)
+	moved different parts of program in separate directories
+	added rutter stuff using JS brute force solution
+	program now reads an .cprosper defaults file
+	input files can now be read into memory for faster processing
+	started on manual in LaTeX format
+
+Thu Aug  3 16:30:27 MET DST 1995
+	added 'benny' richards stuff (obsolute)
+	added about 60% of swatr91 soil stuff
+	bug in libm.so.4 requires static linking under Linux (SUNOS ok)
+
+Tue Oct 24 10:55:21 MET 1995
+	most history now in RCS stuff
+	added os2 (emx) support
+	this version actually works and produces the same results 
+	as swap94 (20% faster!)
+
+Tue Dec  5 08:56:59 MET 1995
+	- added look-up tables option, speed inprovements (i486DX) up
+	  to 50%
+	- This is version 0.95
+
+Sun Dec 17 23:10:42 MET 1995
+	look up tables work sometimes
+	lots of small improvements
+	This is version 0.96
+
+Thu Feb  8 09:11:38 MET 1996
+	- This is version 0.97
+	- Added support for eading TOPOG soil tables
+	- Started on doc
+	- Timestep no longer fixed, but determined from x-column in 
+	  precipitation file. Compile with -DTRY_SUBDAY to get this
+	  At present this work correct _only_ for the soil module,
+	  precipittion and interception. The rest can be used from the
+	  ts section, but must be calculated otherwise.
+	  
+Mon Feb 19 11:05:39 MET 1996
+	- version 0.975 removing cc (sun) support, only  ANSI C allowed
+
+This is version 0.98
+--------------------
+Sun Mar 24 20:37:47 MET 1996
+	- version 0.98 subdaily seems to work, remove -DTRY_SUBDAY
+	- added band diagonal solution when zero pivot occurs 
+	- added saturation hack (works!)
+
+This is version 0.99
+--------------------
+Thu Aug  8 10:48:56 MET DST 1996
+	- version 0.99 added S-Lang support, uses begin, per-timestep
+	  and an end function defined in vamps.sl (or other name if set
+	  in defaults file) Vamps should now be _very_ flexible!!
+	- if the -I option is specified vamps will perform as an S-Lang
+	  interpreter of the file given in the last argument on the
+	  command line.
+
+Thu Sep 19 14:16:32 MET DST 1996
+	- Added the -F option for a completely interactive mode. The main()
+	  function in vamps.c can now be substituted for a S-Lang function 
+	  (see run.sl for an example).
+	- changed layout of soilut stuff. Which theta2k function called
+	  is now determined by a function pointer in the soilparm structure
+	  (for each layer). This saves a few if statements in the inner loop
+	  and facilitated adding new soil methods.
+
+Wen Sep 25 14:16:32 MET DST 1996
+	- Added experimental support for fitting using the marquardt lib
+
+Sun Nov 10 11:12:49 MET 1996
+	- added some S-Lang scripts for use as input file generator
+	- mass balance and qtop now OK if profile saturated!
+
+Tue Nov 19 14:42:22 MET 1996
+	- Changed filltable to account for slope of theta versus k
+	  relation (using ts_slopes). Seems to work although 
+	  sensitive for amount of oversaturation.
+
+Fri Nov 29 10:27:00 MET 1996
+ 	- fixed mass balance calculation (actually qtop in headcalc) with
+	  zero flow bottom and complete saturation. Lysimeter setup with
+	  zero flow bottom and horizontal drainage in bottom node now
+	  possible.
+	- started macro-pore setup. Should be completely seperate (code-wise)
+	  from 'normal' flow. At present all between MPORE ifdefs. Proposed
+	  setup described in soil/mpore.c
+
+This is version 0.99b
+---------------------
+Mon Dec  9 11:35:13 MET 1996
+	- add sp struct which contains all soil specific info.
+	- renamed soilparm to node. Struc contains pointer to soiltype (sp)
+	- inputfile changed. Soil specific stuff no langer in layer_n but
+	  in seperate soiltype sections
+	- updated vamps.5 and userg.tex to reflect input file changes
+
+Sat Dec 21 21:19:51 MET 1996
+	- added slpath and evalfile/autoload from slasl 0.40
+	- started source and S-Lang code documutation using sldoc
+
+Tue Dec 31 15:04:23 MET 1996
+	- added support for S-Lang theta/head/dmc/k_unsat functions
+	  the file func.sl in sllib contains an example. Best to use
+	  mktable with this option to prevent Vamps from becoming
+	  _VERY_ slow.
+	  
+	  
+This is version 0.99c
+---------------------
+
+Tue Jan 21 00:44:55 MET 1997
+	- removed goto labels from headcalc.c
+	- started reducing number of global vars in soil module.
+	  Results in larges function headers
+	- removed unit bugs from actevap and potevap stuff
+	  Both files should be cleared up en documentation should be
+	  updated.
+
+Fri Jan 24 13:45:06 MET 1997
+	- added support for picking columns
+		filename,xcol,ycol in ts input section
+
+Sun Jan 26 20:46:43 MET 1997
+	- checked bottom condition 1, given qbot -> seems to work, 
+	  maybe some roundoff problems.
+
+Mon Jan 27 10:47:32 MET 1997
+	- checked bottom condition 4, given h at bottom node
+
+Tue Jan 28 20:06:26 MET 1997
+	- added support for drytime given by user
+
+Mon Feb  3 20:09:10 MET 1997
+	- added h_itt in headcalc.c. Removes solvebyband variable and
+	  replaced it with solvemet variable
+	- Most array and matrix vars now allocated with nrutil.c stuff
+
+Wed Apr  2 14:15:41 MET DST 1997
+	- start which implementation new topsystem. script and precalculated
+	  systems seem to work. Enable with TRY_TOPSYS define. Example in
+	  example/lys dir.
+
+Wed Apr 23 09:04:15 MET DST 1997
+	- renamed the lib dirs (ending now in .lib)
+	- new topsys near completion
+	- added penman.slx script
+	- C function documentation in all subdirs (via sldoc)
+
+Fri May  9 11:24:51 MET DST 1997
+	- added new convergence check in headcalc.c using a simple
+	  mass balance check. seems to work well in same cases.
+	  Enable with: [soil] mbck = 1
+	- changed some for loops in headcalc.c to memcpy. Only used
+	  if HASMEMCPY is defined. Some speedup.
+	- major changes in internal structure deffile.lib. Uses
+	  less memory now and should be more statble. Multiple
+	  files can now be kept in memory
+	- snapshot release of 0.99c. Documentation is _NOT_ up to
+	  date. 0.99d should be the final version before 1.0!
+	
+This is version 0.99d
+---------------------
+        - added S-Lang based keypressed check in main loop because
+	  signals under djgpp do not seem to work with my code. Pressing
+	  spacebar in a run cuases the program to switch to interactive
+	  mode
+
+	  
+This is version 0.99e
+---------------------
+	- configure now used to generate Makefiles and vconfig.h
+	- added AGL graphics lib S-Lang interface
+	- added libplot test graphics (internal and external)
+	- added graphics interface to gnuplot. This is the main
+	  graphics mode. On systems without the popen call AGL
+	  graphics can be used.
+	- Released SunOS and Linux bin. Both seem to work
+
+Thu Oct 30 19:52:04 MET 1997
+	- refined configure.in
+	- added some high level plotting functions (subplot)
+	- fixed some typo's in 0* files
+	- updated makefile in doc/ subdir
+
+Wed Nov 19 09:03:58 MET 1997
+	- tried to fix bugs reported by R.V, most related to
+	  configure on HP
+
+
+This is version 0.99f
+---------------------
+Fri Nov 21 08:55:28 MET 1997
+	- started on nhc.c -> rewritten soil moisture module. Uses the
+	  TOPOG approach with the U translation.
+
+Fri Dec 12 22:33:21 MET 1997
+	- optimized getval -> included hunting phase. Is now +- 20 % faster
+
+Wed Jan 14 09:05:49 MET 1998
+	- fixed bug in sl interface of ra in lib.met (gave wrong answers)
+-------------- Development frozen a new 1.0 tree is started, only bug fixes
+-------------- from now
+______________ These should got to 1.0 as well!!!!!!!
+Wed Jan 28 21:18:50 MET 1998
+	- fixed double close bug in closedef (actually a hack)
+	- added soil plot code (in Slang) see demo.sl
+
+Fri Jan 30 14:56:53 MET 1998
+	- added default and override lists in deffile.lib
+
+Nov 30 1998
+	- added _cumtra et al to correct rounding problems (see 
+	  swatsoil.c and integral .c)
+
+Wed Jan 6 14:44:49 1999
+	- renamed to 0.99g to reflect bug fixes
+	- oops fixed bug introduced by _cumtra etc 	
+
+-------------- Tue Dec 16 10:46:52 MET 1997 ---> version 1.0
+
+
+Wed Feb 16 08:46:41 MET 2000
+	- version 0.99h, added slang0.99.38 to dist
+
+Wed Nov 16 08:46:41 MET 2001
+	- version 0.99i, vampsfit additions
+	- updated address and version information since i
+	no longer work at the VU Amsterdam

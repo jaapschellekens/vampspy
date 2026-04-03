@@ -1,0 +1,1176 @@
+% -*- LaTeX -*-
+
+\part{User's guide}
+
+\chapter{Installation of \vamps}
+Because \vamps\ runs on several quite different platforms installation
+requires some things to be set. \vamps\ is distributed as source code
+only or as source code plus binaries. As I only have access to MS-DOS,
+Linux, Sun-OS and OS/2 systems these are the only binaries I can make.
+
+In the case of a {\sc unix} system installation from source
+code the following steps are required:
+\begin{enumerate}
+\item First read the files \fname{0readme} and \fname{0install}.
+
+\item 
+Run the \fname{configure} script in the \dirname{src} directory. If you
+don't want to install \vamps\ in \dirname{/usr/local} make sure to run
+the \fname{configure} script with the
+\fname{--prefix=/your/installdir} option. If you have the agl or
+\slang\ library installed in a non-standard place set the LDFLAGS
+environment variable so that \fname{configure} can find them
+(e.g. \fname{setenv LDFLAGS -L/home/schj/lib}). If you don't have
+\slang\ now would be a good time to install it.
+
+\item Check the top part of the Makefile in the {\sc src} directory
+
+\item Run make lib, make all and make install.
+\end{enumerate}
+
+In case of an MS-DOS system (it should be a 386Sx at least) it is
+sufficient to copy all the .exe files to a directory in your
+search-path. You should also copy the default {\tt \Index{vamps.rc}}
+and {\tt \Index{vamps.sl}} files -- all located in the sllib directory
+-- to a place where \vamps\ can find them (set the {\tt \Index{HOME}}
+or {\tt VAMPSLIB} environment variable to the directory in which these
+files reside).
+
+You will need to have the \slang{} library installed if you want to
+compile the program from source. The \slang\ library can be found at
+{\tt ftp://space.mit.edu/pub/davis/slang}.
+
+%---------------------------------------------------------------------
+\chapter{Program organization}
+
+\section{Introduction}
+The main module of \vamps\ is the \vamps\ program itself. It uses a
+series of equations to describe the flow of water through a forested
+ecosystem.  Preparing input for the \vamps\ program takes quite a
+while and is by no means a trivial task. Some 'basic' understanding of
+the functioning of forested ecosystems is needed.
+
+REWRITE THIS !!!
+
+To facilitate the data pre- and post-processing some tools are
+included: The {\bf \Index{wrini}}(1) program can be used to create
+input files at a basic level.  It is mostly used in scripts. The {\bf
+\Index{issec}}(1) and {\bf \Index{getstr}}(1) programs can be used to
+extract part of output files. For general post-processing however, the
+{\bf \Index{vsel}}(1) program is recommend.  This program can produce
+data the can be fed directly to plotting programs such as {\bf
+\Index{gnuplot}}(1) and {\bf \Index{graph}}(1). {\bf vsel} output can
+also be imported into popular spreadsheet programs.
+\footnote{Using \slang{} it should be fairly easy to write custom
+postprocess-functions. For example the following command gets the
+variable {\tt volact} from an output file for all timesteps and
+write a two column ascii file that can be read into spreadsheet
+software: {\tt mwrite(getts("volact","vamps\_output\_file",-1),"columnfile");}
+}
+
+\vamps{} can crash in certain situations. This can have three reasons: {\em
+(1)} I have made an error, causing you to discover a genuine bug, (2)
+the situation you want to model is beyond the capabilities of \vamps{},
+{\em (3)} the timestep estimate done by \vamps{} is not right. The
+method that is used to solve Richards equation is rather stable but can
+go bezerk given the right combination of boundary conditions and soil
+parameters. A lot of precipitation on a {\em very} clayey soil is a
+recipe for disaster.  There are some options you can use to circumvent
+some problems. They are described in section~\ref{sec:troubles}
+
+
+\section{System requirements}
+
+If you are not in a hurry a 386Sx MS-DOS based computer with a 1.44Mb
+floppy drive is the minimum you need for running \vamps. As most
+calculations are done with floating point numbers, a 387 co-processor
+will speed up things a lot\footnote{Dramatically might be a better word
+as I found out myself}. Djgpp\footnote{A MS-DOS port of the GNU C/C++
+compiler which I used to create the .EXE files.} compiled programs
+require a {\sc \Index{dpmi}} server\footnote{A freeware {\sc dpmi}
+server is included in the distribution. Note that a windows or OS/2
+MS-DOS box can also provide {\sc dpmi} service.} and should run with 512
+Kb of memory, although 1Mb should be considered a minimum. You need
+some disk space as well. The \vamps\ binary does not use a lot of it,
+but your input (and certainly output) data will probably by the
+biggest users of disk space. \vamps\ is known to run with several
+\Index{operating systems}: MS-DOS, Linux, Net-BSD, Sun-OS, AIX 3.2 and OS/2
+Warp. 
+
+\section{Defaults file}
+%I:DEFAULTS
+REWRITE!! Several layers!
+
+Some settings which you want to use in several sessions can be added
+to the \vamps\ defaults file. The name of this file is {\tt .vampsrc} on
+unix systems or {\tt vamps.rc} or FAT based (MS-DOS or OS/2) systems.
+\vamps\ first searches for this file in the current directory, if
+this fails the directory to which the HOME environment variable is set
+is searched.  After this the directory to which the VAMPSLIB
+environment variable is set is searched. If this also fails the
+compiled-in {\tt vampslib} directory is searched.  If no defaults file
+is found compiled-in defaults will be used. The syntax of the defaults
+file is the same as the general input file. Allowed sections and
+variables are described in section~\ref{section:defaults} on
+page~\pageref{section:defaults}.
+
+If \vamps\ is compiled with \slang\ support it also needs to load
+several \slang\ files at startup. These must be present in the
+VAMPSLIB directory. If (this is an MS-DOS example) you have installed
+\vamps\ in c:\verb-\-vamps you should use the following command to let
+\vamps\ find it's files:
+\begin{quote}
+{\tt set VAMPSLIB=c:\verb-\-vamps}
+\end{quote}
+In {\sc unix} the command to set an environment variable differs
+per shell used, in the c-shell you could use: 
+\begin{quote}
+{\tt setenv VAMPSLIB /home/usr-x/lib/vamps}
+\end{quote}
+%E:
+
+\section{Time series and time steps}\label{sec:tstep}
+Time series are values of certain variables over time that \vamps\
+uses as input. An example of a time series is precipitation.  All time
+series \footnote{Time series files must contain two columns, time and
+value. Lines starting with \# are regarded as comments (see {\bf
+ts(5))}.}  must be listed in the ts section of the input file.
+
+The precipitation time series is quite special because it {\em must} be
+present. This is because this time series determines the time steps
+that \vamps\ make with it's x-column. This column should be in days or
+fractions of day (i.e. 1.5 is halfway day 1). Time steps may vary
+within one run. The following example of a precipitation input file
+shows how this is done:
+\begin{verbatim}
+# This is a comment
+# Precipitation from the no-name site 
+# time in days         amounts in cm/day (intensity!)
+0.5		0.6
+1.0		0.9
+2.0		0.7
+2.1		0.9
+2.2		0.7
+2.3		0.5
+3.0		0.8
+3.5		0.0
+\end{verbatim}
+In this case 0.9 cm/day fell between day 2.0 and day 2.1 amounting to
+$ 0.9  (2.1 - 2.0 = 0.09)$ cm.  There are
+several things that must be remembered with respect to time-steps and
+input-files in \vamps{}:
+\begin{enumerate}
+\item Units are in cm/day. With precipitation you might have to convert
+your data to intensities.
+\item The time in the x-column is the {\em end} of an interval. In
+of the above example output given at time 3.0 is calculated from the
+situation at time 2.3 after including the precipitation
+from time 3.0.  The duration of this time-step is 0.7 days (3.0 - 2.3). This
+implies that in the case of the first record no duration of the time-step is
+known. \vamps\ defaults to one day for the first time-step. You can change
+this using the \inivar{firststep} variable in the \inisec{time} section of the
+input file.
+\item At present the x-column in all files but the precipitation-file
+is ignored (that is, it must be present, but \vamps\ does not check
+the time-values).
+\end{enumerate}
+
+
+\section{The principle of layers in the soil section}\label{sec:physlay}
+The \inivar{layers} variable in the \inisec{soil} section determines the
+number of layers used by \vamps\ in the {\em calculations}
+\footnote{Actually {\bf nodes} would be a better name for this
+variable}. The number of {\em physical} layers (with different
+$K_{sat}$ for example) is determined by the number of \inisec{layer\_n}
+sections you have. Figure~\ref{fig:layers} shows this principle.  The
+users specifies the first layer of each physical layer. Any layer that
+is not specified automatically inherits the settings from the
+overlying layer.
+
+\begin{figure}
+\centerline{\includegraphics{psfig/layers.eps}}
+\caption{Relation between the layers variable in the soil section and
+the amount of physical layers.}
+\label{fig:layers}
+\end{figure}
+
+
+\chapter{The input file}
+
+\section{introduction}
+
+\vamps\ reads it's options and  most of the  data needed for  modelling
+from the input file. This file is in plain ascii format and is divided in
+several sections. The exact format of this file is described in
+section~\ref{sec:inputfileformat}.  An input file must be created before
+running \vamps.  There are two way of creating an input file for \vamps.
+{\em (1)} Use the (not finished) \vamps\ preprocessor. This
+preprocessor\footnote{The use of this preprocessor is described in a
+seperate manual} will let you choose from menu items to select all the
+options that are set in the input file and generate an input file for you
+once you are finished. Or you can {\em (2)} use an ascii editor or a
+word-processing package to create this file.
+
+
+
+\section{Input file format}\label{sec:inputfileformat}
+The input file format for \vamps\ is much like Microsoft Windows {\tt .ini}
+files.  All names and sections are case insensitive.  The case of string
+variables is unaltered so filenames are case-sensitive if the operating
+system is. The file is divided into sections which each contain variables
+that have some connection with each other.  Each variable name is followed
+by an equal sign ({\tt =}), after which the value of the variable is placed.
+Example:
+
+\begin{verbatim}
+[vamps] 
+verbose = TRUE 
+# This is a comment
+
+[environment]
+caseid = Interception test file. Bisley catchment.\
+Summer of 1995
+\end{verbatim}
+
+The \verb \ character may be use to break up long strings over more
+than one line\footnote{The character itself is converted to a
+space}. The \verb # sign at the start of a line is used to denote a comment
+Only the first '=' sign is significant. Spaces within the names are
+copied verbatim, and thus become part of the name. This makes the
+following construction legal:
+\begin{verbatim}
+[vamps]
+output mode = This is ('=') a nonsense\
+example.
+\end{verbatim}
+
+In this case the variable 'name' in section 'vamps' is 'output mode'
+and it's value is 'This is ('=') a nonsense example'.
+
+\footnote{If you want you can change this character using the 
+\inivar{commentchar} variable in the \inisec{vamps} section or the -C
+command-line option.  Usually there should be no reason to do so}.
+
+\vamps\ uses six types of variables: {\em (1)} \Index{floats} (floating point
+numbers), {\em (2)} \Index{arrays} (a row of floating point numbers
+separated by whitespace), {\em (3)} \Index{strings} (a series of
+characters), {\em (4)} \Index{integers} (whole signed numbers), {\em
+(5)} \Index{characters} (a single printable character) and {\em (6)}
+\Index{boolean} (special kind of integer, either 0 or 1 -- FALSE of TRUE, NO or YES).
+
+
+\section{Available sections and variables}\label{sec:sections}
+All sections with available variables and their defaults values as
+well as the type of the variable are listed below.  The most up to
+date list is presently found in the {\bf vamps(5)} manual page.  You
+will need this list badly when you construct an input file for
+\vamps\. Once the graphical preprocessor is finished things will
+become a little easier.
+
+\vamps\ has been developed using the {\bf swap94} {\sc Fortran} code as a 
+starting point.  Most names of variables have been changed (sorry) but
+some of the variable names as well  as their physical meaning have not
+been altered.
+
+
+\subsection{[vamps]}\label{section:defaults}
+\begin{description}
+\item[verbose] If set to FALSE \vamps\ will be  silent, if set to
+TRUE \vamps\ will display progress information
+
+\item[header]\footnote{See also the -\,-Header option in \vamps\ (1)}
+Is set to FALSE  no header in will be added to the output, if
+set to TRUE an  header will be added to the output. Defaults is FALSE
+
+\item[logging] FALSE = no logging is done, TRUE = logging is on
+
+\item[logfilename] name of the file to which logging is performed
+
+\item[iniinmem]
+TRUE = the input file is read into memory (some speedup), FALSE = the
+input file is not read into memory
+
+\item[progstr]
+String which is used to display progress information (use 0, 1 or 2
+for build in strings).  0 will show calculation time and estimated
+time to go. 1 will show a percentage finished bar and 2 will show
+'calculating'.
+
+You can define your own such as:
+\begin{quote}
+{\tt Vamps is running, please wait......................}
+\end{quote}
+
+%\item[showgraph] TRUE = if you are running UNIX and X11 or OS/2 and 
+%{\tt gnuplot} is installed program progress is displayed graphically.
+%FALSE = no graphical progress information.
+
+\item[graphcommand] full path to {\tt gnuplot}
+with optional command line options. In OS/2 only gnuplot.exe should be
+specified here. This seems to be a 'bug' in the emx library which I used
+to make the binaries.
+
+\item[commentchars]
+Character(s) that denotes the start of a comment. This defaults to \#\%
+and the first character should {\em not} be changed unless you have a
+very good reason to do so.
+
+\item[xtrasl]
+comma seperated  list of \slang\ files to be loaded a startup
+\end{description}
+
+\subsection{[time]}\label{section:time}
+
+\vamps\ will not run without a time section in the input file with at
+least the \inivar{steps} variable set\footnote{This will change in the beta
+version in which time-steps will be determined by the time column in the
+input file}.  
+
+\begin{description}
+\item[steps] Integer value specifying the number of steps in the 
+current simulation.  This value should be smaller or equal to the
+number of entries in the precipitation file.
+
+\item[startpos] Position (line) in the precipitation input file used as
+start. Counting starts at zero.
+
+\item[starttime] 
+day at which the simulation should start If this value is not
+specified simulation starts at the first step in the precipitation
+input file.  If both starttime and startpos are specified starttime
+will be used.
+\end{description}
+
+\subsection{[run]}
+\begin{description}
+\item[outputfile]
+Filename to save output to. You can override this with the \-o command
+line option.
+
+\item[runid]
+No used at moment
+\end{description}
+
+\subsection{[xout]}\label{section:xout}
+\begin{description}
+\item[filename]
+Filename for extra output in column type format. No extra output is generated if
+this variable is not present.
+\end{description}
+
+
+\subsection{[determine]}\label{section:determine}
+
+\begin{description}
+\item[canopy]
+determine canopy (see section canopy)
+
+\item[evaporation]
+determine actual evaporation (see section evaporation)
+
+\item[pevaporation]
+determine potential evaporation (see section pevaporation)
+
+%\item[interception]
+%determine interception (see section interception)
+
+\item[soilmoisture]
+determine soilmoisture profile (see section soil)
+
+\item[fit]
+Use non-linear regression to try and fit to measured data (see fit section)
+\end{description}
+
+\subsection{[pevaporation]}\label{section:pevaporation}
+\begin{description}
+\item[method]
+0 = potential evaporation via Penman E0 (Need: refrad, netrad, rhumid,
+windspeed, temp, inrad),
+1 =  potential evaporation   via  Penman E0 (using   sunratio)  (Need:
+sunratio, rhumid, windspeed, temp, inrad),
+2 and 3 = not yet done,
+4 =  potential evaporation using    Makkink (Need: rhumid,  windspeed,
+temp, inrad)
+\end{description}
+
+\subsection{[evaporation]}\label{section:evaporation}
+\begin{description}
+\item[method]
+0 = evaporation equal to potential evaporation,
+1 = multiply potential evaporation by a crop factor (need cropfac),
+2 = calculate actual evaporation using the Penman-Montheith formula
+
+\item[cropfac]
+A  floating point number  representing the crop  factor with which the
+potential evaporation is to be multiplied to yield actual evaporation.
+\end{description}
+
+\subsection{[interception]}\label{section:interception}
+\begin{description}
+\item[method]
+0, 1 , 2, 3.
+gash, rutter laifrac or calder
+
+\item[gamma]
+gamma in calder equation
+
+\item[delta]
+delta in calder equation
+
+\item[E\_avg/R]
+Evaporation/Average Rainfall during a storm   in gash. If this is  not
+set penman/Montheith will be used with $R_a$ set to zero.
+
+\item[p\_tr]
+Fraction of water diverted to the trunk (gash, rutter)
+
+\item[p\_f]
+Free throughfall coefficient (gash, rutter)
+
+\item[S]
+Canopy storage in cm (gash, rutter)
+
+\item[gashm]
+Either 1 or 0. If set to 1 an adapted version of gash is used. This
+version should work for time-steps smaller then 1 day. Default = 0
+
+\item[laifrac]
+the canopy interception coefficient
+
+\item[lai]
+The canopy leaf area index. This is needed for the laifrac method. If
+it is not present it is searched in the canopy section.
+\end{description}
+
+
+\subsection{[canopy]}\label{section:canopy}
+
+Although you don't have to use the canopy module it is recommend that
+you do so if possible. The other methods of determining transpiration,
+interception etc. don't have a close interaction with the soil modules
+and usually provide poorer results.
+
+
+\begin{description}
+\item[layers]
+Number of canopy layers (this is largely determined by the accuracy of your
+LAI profile). At the moment only one layer is allowed.
+
+\item[Rnet\_absorb]
+The fraction of the total radiation absorbed by the canopy ($0\le
+Rnet\_absorb \le 1$). The remaining amount will be used for soil
+evaporation.
+
+\item[transpiration]
+Which transpiration equation should be used.
+\\
+2 = penman Montheith
+\item[z]
+Height of the canopy (m)
+
+\item[z\_0]
+Aerodynamic roughness length (m)
+
+\item[d]
+Zero plane displacement length (m)
+
+\item[rs]
+Canopy resistance (s/m). If this is not specified the user defined regression 
+equation {\bf estrs()} will be used.
+
+\item[drytime]
+If this variable is set this value (in days) will be used to determine
+how long it takes for the canopy to dry. 
+
+\item[wetevap]
+If this variable is set this value (in cm/day) will be used to determine
+the canopy wat evaporation rate in stead of Penman-Montheith with
+Rs set to zero.
+\end{description}
+
+\subsection{[roots]}\label{section:roots}
+\begin{description}
+\item[depth]
+depth of the root zone in cm. If you want rooting depth to change in
+time you should use the \inivar{drootz} variable in the \inisec{ts}
+section.
+
+\item[swsink]
+0 = sink term according to Feddes. (Need: hlim1 hlim2u hlim2l hlim3h
+hlim3l hlim4)\\ 
+1 = sink term according to Hoogland. (Need: hlim1
+hlim2u hlim2l hlim3 hlim4) 
+
+\item[swhypr] 0 = linear relation between
+the points hlim3 and hlim4 of the sink term.\\
+1 = hyperbolic
+relation between the points hlim3 and hlim4 of the sink term.
+
+\item[swupfu]
+0 = water uptake function according to Feddes.\\
+1 = water uptake function according to Hoogland.\\
+2 = water uptake function according to Prasad (1988).
+
+\item[cofsza] Intercept a in Feddes et. al 1988 (only needed if swupfu =1).
+
+\item[cofszb] Slope b in Feddes et. al. 1988. (only needed if .B swupfu =1).
+
+\item[hlim1] 
+Pressure head value (cm) below which roots start to extract water from
+the upper soil layer (starting point).
+
+\item[hlim2u]
+Pressure head
+value (cm) below which roots start to extract water optimally from the
+upper soil layer.
+
+\item[hlim2l] 
+As above, but for all lower soil layers.
+
+\item[hlim3h]
+Pressure head value (cm) below which roots cannot extract water
+optimally any more, for a High pot. transpiration rate equal to 0.5
+cm/d (limiting point).
+
+\item[hlim3l] 
+As above, but for low pot. transpiration rate equal to 0.1 cm/d.
+
+\item[hlim3]
+Pressure head value (cm) below which roots cannot extract water any
+more (limiting point).
+
+\item[hlim4]
+Pressure head value (cm) below which no water uptake by roots is
+possible (wilting point).
+\end{description}
+
+\subsection{[ts]}\label{section:ts}
+The ts section has one entry that {\em must} be present:
+precipitation.  The precipitation file is important because it also
+determines the time-steps at which output is calculated. More
+information about time-steps can be found in
+section~\ref{sec:tstep}. 
+\begin{figure}
+\includegraphics{psfig/soilr.eps}
+\end{figure}
+
+The file format consists of colums separeted by whitespace (space
+or tabs).  \vamps\ assumes the first column to hold the time and the
+second column to hold the value. You can override these assumptions by
+appending {\tt ,xcol,ycol} to the filename\footnote{This implies that a comma
+is {\em not} allowed in a filename}. Counting begins at zero.
+
+The ts section can be handy if you don't like the method(s) which
+\vamps\ can use for determining things like potential evaporation.
+Simply put them in here and \vamps\ will use the values you supplied
+instead.
+
+\begin{description}
+\item[pevaporation]
+Name of file with potential evaporation data (if not calculated)
+
+\item[ptranspiration]
+Name of file with potential transpiration data (if not calculated)
+
+\item[interception]
+Name of the file with interception data (if not calculated)
+
+\item[precipitation]
+Name of file with precipitation data. This file file also determines
+the time-steps at which output is calculated. See section~\ref{sec:tstep}
+for more information.
+
+\item[drootz]
+Name of file with rooting depth (cm) in time. You need to specify at
+least three points. Other points will be interpolated using a spline
+if they don't exist. See the file {\tt src/tc/ts\_spl.c} for the
+interpolation routine.
+\end{description}
+
+\subsection{[soil]}\label{section:soil}
+\begin{description}
+\item[outskip]
+Skip outskip timesteps in soil output. Used to reduce
+outputfile size.
+
+\item[initprof]
+0 = water content profile (need theta\_initial array),
+1 = pressure head profile (need h\_initial array) and
+2 = Calculate pressure head profile (need gw\_initial in soil section).
+
+\item[gw\_initial]
+initial ground-water level in cm below field-level (needed if 
+initprof = 2)
+
+\item[swredu]
+Reduction of soil evaporation \\
+0 = no reduction, 1 = the Black (1969) model is used,
+2 = the Boesten (1986) model is used and
+3 = an adapted version of the Boesten (1986) model is used. 
+This version takes into
+account the actual moisture condition of the soil surface.
+
+\item[cofred]
+The factor alfa in Black or Beta in Boesten. This is not needed for
+swredu = 0.  
+\item[bottom]
+Bottom boundary condition:
+0 = daily ground-water table depth (cm) is input,
+1 = Given flux,
+2 = seepage or infiltration from/to deep ground-water,
+3 = Flux calculated as a function of h,
+4 = interpolation between daily values of given pressure head,
+5 = Zero flux at bottom,
+6 = Free drainage.
+
+\item[smooth]
+Integer value giving the size of the running average used for smoothing 
+the ksat, theta\_saturation and residual\_water profile. 
+Set to zero for no smoothing (default).
+
+\item[layers]]
+Number of soil layers in calculation (how many real (physical) layers
+exist is specified by the amount of layers\_{\em n} sections\footnote{
+see also section~\ref{sec:physlay} on page~\pageref{sec:physlay}})
+
+\item[pondmx]
+Maximum amount of ponding (in cm) allowed at the top of the profile,
+defaults to 0.0.
+
+\item[gwlevel]
+Water level at bottom of profile, needed
+if bottom = 4 
+
+\item[dtmax]
+Maximum time-step (in days) in soil module
+
+\item[dtmin]
+Minimum time-step (in days) in soil module. Both dtmax and dtmin
+should probably be left alone. By setting dtmin and dtmax to the 
+same value \vamps\ can be forced to use a fixed time-step.
+
+
+\item[speed]
+Integer value ranging from 1 (slow) to 6 (fastest) determining
+the tradeoff between calculation accuracy and speed. This options
+combines the settings in dtmin, thetol, solvemet, mktable,
+maxitr and swnums.
+
+If you also specify one of these variables seperately the settings
+from speed are overridden. Default  for speed is 3.
+
+\item[maxitr]
+Maximum number of iterations in the soil module. Iterations
+are only performed if swnums == 1.
+
+\item[thetol]
+Theta tolerance. If swnums != 1 (by default) 
+\vamps\
+will use this value to check if the solution is good enough and
+perform iterations if needed. Setting this value to high or low
+gives poor results. The default value usually works fine. If
+you have no problems you better leave this one alone. Usually
+this variable should be between 1.0E-2 and 1.0E-5.
+
+\item[solvemet]
+Determines how vamps solves the equation matrix.
+If set to 0 the default (tridiagonal) solution is used.
+If set to 1 the soil module will always treat the solution as a band-diagonal
+matrix. If set to 2 a very general solution is used. This solution
+includes a step to regain full machine precision but is rather slow.
+
+\item[swnums]
+If set to 1 the soil module won't check for convergence of solution.
+It assumes that the initial maximum dt is a good guess. Things can be
+quit a lot faster in all cases but can give poor results in most cases
+as well.
+
+\item[mktable]
+if set to true 
+\vamps\
+will create look up tables for the theta vs K relation, and use those
+in stead of the function during iteration.  By default this option is
+set to false. Set to true to speed up calculation. The solution can
+become instable at high suction heads. In stead of letting 
+\vamps\
+generate the look-up tables you can also read pre-made tables
+using the method option in the layer\_n section.
+
+
+Depending on the problem, the amount of memory you have installed, the
+floating-point performance of you CPU and the optimizations your
+compiler can make, this can speed up calculations by 50\%. You will
+lose some precision in the process. By default the program uses 300
+points long look-up tables. Use the \inivar{tablesize} variable in the
+\inisec{soil} section to change this value.
+
+There is no exact way to determine the speed increase you will
+get. For example, on a 66MHz 486DX2 running Linux, a 25\% speed
+increase was established without compiler optimization (gcc) while a
+50\% speed increase was measured when de program was compiled with
+optimization. It seems that gcc does a better job optimizing the look
+up procedure than the intensive floating point calculations in the van
+Genuchten equation\footnote{actually the all important thing here is
+how fast your compiler/CPU combo can execute the pow() function
+as this usually account for 90\% of the CPU time!}. 
+On a RISC processor with better floating point
+performance this balance may be different, and you probably won't get
+speed increases of 50\%. On a rs6000 365 running AIX 3.2 the mktables
+option resulted in a 23\% speed increase.
+
+\item[estdmc]
+if set to true and the \inivar{mktable} variable is also true the dmc
+table will be made using ts\_slopes and the Pf curve in stead of the
+\slfunc{h2dmc} function. If you use \slang\ soil functions and you define
+\inivar{estdmc} to be true you don't need the \slfunc{h2dmc} function.
+
+
+\item[tablesize]
+Sets the size of the look-up tables. Defaults to 300. Increase this
+for better accuracy at a penalty of using more memory and some
+performance loss. Provided the program fits in physical memory table
+sizes up to 1200 (very large) points still give some speed
+improvements compared to not using the look-up tables.  Sometimes
+decreasing this to 80 or so can be done without much loss of accuracy
+or stability.
+
+\item[dumptables]
+If set to true the look up tables will be dumped to the initial
+section of the output-file; x and y in separate array type  variables for each
+layer. This can be handy for plotting pF curves for example.
+
+\item[verbose]
+Verbose level in soil module (0 = silent). I recommend a setting
+of 1 (default) which will show you how long \vamps\ will run.
+
+\item[smddepth]
+If this variable is set the SMD (soil moisture deficit) will
+be calculated until this depth. Otherwise the rooting depth
+will be taken.
+\item[fieldcap]
+Head in cm at which the soil is at field capacity. Needed for
+determination of soil moisture deficit. Default = -100.0
+
+\end{description}
+
+\subsection{[drainage]}\label{section:drainage}
+This is presently in a very experimental stage. One day when \vamps\
+will be two-dimensional this will become more important.
+
+\begin{description}
+\item[method]
+Variable which controls the type of lateral drainage.\\
+\centerline{
+\begin{tabular}{ll}
+Value & Description \\ \hline
+0 & No lateral drainage (default) \\
+1 & TOPOG type drainage (only at saturation) and \\
+2 & Allow also unsaturated lateral flow \\
+\end{tabular}}
+If the \inivar{drainage} variable is larger than zero the
+\inivar{slope} variable must be set also.
+
+\item[slope]
+Slope used in the calculation of lateral drainage (floating point value).
+ 
+\item[exclude]
+Array with layers in which lateral drainage is not allowed. 
+0 <= value < layers  
+example:
+\begin{verbatim}
+exclude = 12 1 23 45
+\end{verbatim}
+You can use a construction like this and a no-flow bottom boundary
+to simulate a lysimeter.
+
+\end{description}
+
+\subsection{[{\em soilsectionname}]}\label{section:soilsectionname}
+This section can have {\em any} name and contains the soil specific
+info.  The \inivar{soilsection} variable in the \inisec{layer\_n}
+section refers to the name of this section.
+
+\begin{description}
+\item[method]
+
+Method for k vs theta relation:\\
+\centerline{
+\begin{tabular}{ll}
+Value & Description \\ \hline
+0 & clapp/hornberger\\
+1 & van Genuchten\\
+2 & not yet implemented\\
+3 & van Genuchten parameters are determined from theta vs pf
+pairs\\
+4 & read TOPOG \_soil soil tables\\
+5 & user defined S-Lang functions\\
+\end{tabular} 
+}
+
+\begin{description}
+\item[ad 3)] Given values of alpha and n are used as initial
+guesses. Required variables: \inivar{theta} (array of values) and
+\inivar{pf} (array of values). Optional: \inivar{alpha} and \inivar{n}.  
+The exponent l is set to 0.5,
+
+\item[ad 4)] \vamps\ has the ability to read
+and use soil tables generated by the TOPOG \_soil program. It will
+then use these look-up tables in stead of using direct
+calculations. In future \vamps\ will be distributed with it's own
+version of the \_soil program
+
+\item[ad 5)]
+In this case the user must define the following S-Lang functions:
+
+\vspace{0.5cm}
+\centerline{
+\begin{tabular}{ll}\hline\hline
+  Function & Description \\ \hline
+  {\tt Void getspar(char *section, Int nr)} & \parbox[t]{4.5cm}{called to get additional parameters from the input file} \\
+  {\tt Float h2dmc(Int nr, Float head)} &  \parbox[t]{4.5cm}{calculates suction head to differential moisture capacity} \\
+  {\tt Float t2k(Int nr, Float theta)} & \parbox[t]{4.5cm}{calculates $k_{unsat}$ from moisture content (theta)} \\
+\parbox[t]{6.5cm}{\tt Float t2h(Int nr, Float theta, Float depth)} & \parbox[t]{4.5cm}{calculates suction head from  moisture content (theta)} \\
+  {\tt Float h2t(Int nr, Float head)} & \parbox[t]{4.5cm}{calculates moisture content from suction head} \\ \hline
+\end{tabular}
+}\vspace{0.5cm}
+
+If you use this option you should either have a {\em very} fast computer or
+use the \inivar{mktable} option in the \inisec{soil} section. The following
+tables list some example excecution time when using the some method coded
+in C and \slang{}.
+
+\vspace{0.5cm}
+\centerline{
+\begin{tabular}{ll}\hline \hline
+Method & time [sec] \\ \hline
+C -- no tables & 25.37 \\
+C -- tables & 18.52 \\
+SL -- no tables & 393.90 \\
+SL -- tables & 19.49 \\ \hline
+\end{tabular}
+}\vspace{0.5cm}
+
+An example can be found in the file func.sl in the vampslib directory.
+\end{description}
+
+\item[description]
+An optional description of the soil layer.
+
+\item[ksat]
+Saturated hydraulic conductivity of the layer.
+
+\item[kh/kv]
+Ratio of $K_{sat}$ horizontal divided by $K_{sat}$ vertical. This
+is only used if you use lateral drainage (see drainage section).
+By default this is set to one.
+
+\item[thetas]
+Theta at saturation (porosity).
+
+\item[psisat]
+Head at saturation (air entry value) needed for Clapp/Hornberger
+
+\item[b]
+Factor b in Clapp/Hornberger
+
+\item[theta\_residual]
+Residual amount of soil moisture.
+
+\item[alpha]
+Alpha in van Genuchten.
+
+\item[l]
+l in van Genuchten (use 0.5 if not determined). Normally (unless you
+have determined a theta vs $K_{unsat}$ relation) you don't
+have this information.
+
+\item[n]
+n in van Genuchten.
+
+
+\item[tablefile]
+File from which the soil table should be read. Use this if method = 4.
+
+\item[tablefiletype]
+Type of the table-file. All filetypes can have comment-lines starting with \#.
+\\
+\centerline{
+\begin{tabular}{ll}
+Value & Description \\ \hline
+1 & TOPOG-type \vamps\ only uses columns 1, 3 4 and 5\\
+2 & White space separated columns (psi theta k)\\
+3 & White space separated columns (psi theta k diff\_moist) \\
+\end{tabular}
+}
+ad 2) In this case the differential
+moisture capacity (d\_theta/d\_phi) is estimated.
+
+Note that all tables should be made with {\em descending}
+theta values.
+\end{description}
+
+\subsection{[layer\_{\em n}]}\label{section:layers}
+Only the \inisec{layer\_0} section is a must. The rest is only needed if you
+have more than one physical soil layer.
+
+\begin{description}
+
+\item[thickness]
+Thickness of the layer (in cm).
+
+\item[soilsection]
+Name of the section that contains the soiltype info for this layer (node).
+
+\end{description}
+
+\subsection{[fit]}\label{section:fit}
+\begin{description}
+\item[fit]
+Data-set used in fitting
+
+\item[fitto]
+Name of a time serie (must be specified in the ts section) with
+actual measurements
+
+\item[n]
+(n = 0 ... n= MAXPAR)
+Add a new parameter to the fitting list.
+At present the following
+parameters are available:
+\\
+1 (n)
+\\
+2 (alpha)
+\\
+3 (ksat)
+\\
+4 (b)
+\\
+5 (psisat)
+\\
+6 (l)
+\\
+7 (residual\_water)
+\\
+8 (thetas)
+
+\item[layer]
+Physical layer to use in fitting.
+\end{description}
+
+
+
+\subsection{Valid datasets}
+\vamps\ recognizes the following datasets:\footnote{Used in the ts section
+and the -\,-Output option.}
+\begin{itemize}
+\item[pre] precipitation [cm]
+\item[rlh] relative humidity [%]
+\item[hea] head at bottom [cm] 
+\item[rdp] rooting depth [cm] 
+\item[tem] dry bulb temp [oC] 
+\item[gwt] ground-water table [cm] 
+\item[inr] interception [cm] 
+\item[trf] troughfall   [cm] 
+\item[stf] stemflow     [cm] 
+\item[pev] potential evaporation [cm] 
+\item[spe] potential soil evaporation [cm] 
+\item[ptr] potential transpiration [cm] 
+\item[qbo] flow through bottom of profile [cm] 
+\item[vol] actual water content [cm] 
+\item[avt] average theta in profile 
+\item[lai] leaf area index 
+\item[sca] canopy storage [cm???] 
+\item[ira] incoming radiation [W/m2] 
+\item[nra] net radiation [W/m2] 
+\item[ref] reflected radiation [W/m2] 
+\item[win] windspeed [m/s] 
+\item[sur] sunratio [n/N] 
+\end{itemize}
+
+\section{Interception}
+\vamps\ can determine interception loss via several methods. The
+Calder method \cite{calder1986171}, the Gash analytical method (see
+paragraph~\ref{par:gash}) and Rutter's
+\cite{rutter1971174} numerical method. For the Rutter method you will need
+precipitation data with hourly or shorter intervals.  All parameters
+needed for interception calculation are set in the interception section
+of the input file. Each method has it's own set of required and optional
+arguments. In addition you also need at least one time-series
+(precipitation). Figure~\ref{fig:ex:gash} and Figure~\ref{fig:ex:calder}
+show a part of a input file which calculates interception using the Gash
+and the Calder method respectively. A description of all allowed variables
+in the interception section is given in section~\ref{sec:sections} on
+page~\pageref{section:interception}.
+
+%-----------------------------------------------------------------------
+\chapter{Running \vamps}
+Although you don't have to use the canopy module it is recommend that
+you do so if possible. The other methods of determining transpiration,
+interception etc. don't have a close interaction with the soil modules
+and usually provide poorer results.
+
+
+\section{Command line options}
+Options may be given as either standard one-letter options, or GNU style
+long options. Long options start with two dashes '\-\-' and may be truncated
+to any unambiguous abbreviation.
+
+\begin{description}
+\item[-\,-Header]
+Omit the headers in output.
+
+\item[-\,-copyright]
+Show copyright information and exit
+
+\item[-\,-license]
+Print license information and exit.
+
+\item[-\,-help]
+Print help text and exit.
+
+\item[-\,-verbose]
+Enter verbose mode, program progress is displayed on stderr.
+Default is silent.
+
+\item[-\,-noinputdump]
+By default the contents of the inputfile is also included in the 
+output. Use this option to alter this behaviour.
+
+\item[-\,-Output  {\em setname}]
+Dump the specified 
+{\em setname}
+to a seperate file in
+{\bf ts}(5)
+format. See
+{\bf vamps}(5)
+for a list of allowed setnames.
+
+\item[-\,-Determine {\em variable}]
+Determine variable (can be a single variable or a time series).
+See {\bf vamps}(5)
+for a list of allowed variables.
+
+\item[-\,-Logfile {\em filename}]
+Log this session to the file {\em filename}.
+
+\item[-\,-Setvar {\em section name value}]
+Set the value of variable {\em name}
+in section {\em section} to value {\em value}.
+This overrides the setting in the input file.
+
+\item[-\,-Comment {\em commentchar}]
+Set the commentchar to char {\em commentchar}.
+
+\item[-\,-showdef]
+Send program defaults to stdout. This can be used to create a
+default file from scratch.
+
+
+\item[-\,-output {\em filename}]
+Send output to {\em filename}
+in stead of stdout.
+
+\item[filename]
+Read input from {\em filename}
+\end{description}
+
+\section{Manipulation of time series}
+Links to the ts*(1) stuff
+
+\section{graphically displaying \vamps\ results}
+Links to the graph(1) stuff
+
+
+\section{Troubles..}\label{sec:troubles}
+OK, you have problems running \vamps. You are not alone!
+I will describe some problems that you can encounter
+using \vamps. Some have an easy solution, others not.
+
+\subsection{Variable missing}
+If \vamps\ issues a message like:
+
+\begin{verbatim}
+deffile.c: Fatal:	could not find	->steps<-
+	in section		->time<-
+	in file			->example1.inp<-
+deffile.c:	error message:
+	from: $Id: deffile.c,v 1.23 1996/03/18 09:24:50 schj Exp $
+	description: Var not found or invalid, see above.
+\end{verbatim}
+
+you have not specified a variable in the input file which \vamps\ {\em
+needs} to run properly. This can be a variable which is needed always
+or one that is needed is you have specified so in an other variable.
+For example, if you specify the Gash method for determining interception
+you {\em must} also specify the variable \inivar{S} in the \inisec{interception}
+section.
+
+
+\subsection{Mass-balance error warning}
+
+\vamps\ issues a warning when large jumps in the mass-balance error
+are encountered. You can ignore them providing you keep in mind that
+the solution is not very optimal. At present the mass-balance is {\em
+not} calculated properly is you use lateral drainage, beware! In most
+circumstances decreasing the \inivar{dtmax} variable helps, it 
+prevents \vamps\ from making mistakes in estimating the max timestep.
+Descreasing the \inivar{dtmin} and/or the \inivar{thetol} variable should
+be next on your list followed by increasing the \inivar{maxitr} variable.
+
+
+
+%--------------------------------------------------------------------------
+\chapter{Using \slang{} with \vamps{}}
+
+\section{Introduction}
+To allow users to change functions that \vamps\ uses to determine
+like converting incoming radiation to net radiation as well as other
+emperical equations, \vamps{} includes the \slang{} stack based
+interpreter. \citeasnoun{davis1995282} describes \slang{} as:
+\begin{quote}
+\slang{} (pronounced ``sssslang'') is a powerful stack based interpreter
+   that supports a C-like syntax.  It has been designed from the beginning
+   to be easily embedded into a program to make it extensible. \slang{} also
+   provides a way to quickly develop and debug the application embedding it
+   in a safe and efficient manner.  Since \slang{} resembles C, it is easy to
+   recode \slang{} procedures in C if the need arises.
+\end{quote}
+The actual syntax of \slang{} is not described here -- see
+\cite{davis1995282,davis1995283} for that -- but the way \vamps{} uses
+\slang{} for it's extensions. Also \vamps{} specific \slang{} functions
+and variables are described here.
+
+
+\section{How \vamps{} interfaces with \slang{}}
+
+For speed reasons \vamps\ only uses the \slang{} interpreter at
+specific locations in the program:
+
+\begin{enumerate}
+\item at startup \vamps\ loads a file (usually {\tt vamps.sl}) with
+the function definitions of functions that \vamps\ uses.
+\item at the start of the program -- after the input file is read -- \vamps\
+executes the {\tt at\_start} function
+\item after each timestep the {\tt each\_step} is executed
+\item after all calculations are done -- but before data is flushed
+from memory -- the {\tt at\_end} function is executed
+\item a series of regression equations and relations between variables
+can be programmed in \slang{}. \vamps\ checks is a certain \slang{} function
+exits and executes that in stead of the build in function. at present the
+following functions can be programmed in \slang{}:
+\begin{itemize}
+\item {\tt lai\_to\_s (lai)} -- returns s (canopy storage) for a given lai (leaf area
+index)
+\item ......
+\end{itemize}
+\end{enumerate}
+
+
+
+\chapter{\vamps\ specific functions and variables}
+\section{Intrinsic functions (programmed in C)}
+\input{intrin.tex}
+\section{User defined functions (written in \slang{})}
+\input{intrinsl.tex}
+

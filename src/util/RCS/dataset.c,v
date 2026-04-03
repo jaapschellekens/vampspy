@@ -1,0 +1,1527 @@
+head	1.20;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.20
+date	99.01.06.12.13.01;	author schj;	state Alpha;
+branches;
+next	1.19;
+
+1.19
+date	99.01.06.12.07.49;	author schj;	state Alpha;
+branches;
+next	1.18;
+
+1.18
+date	97.09.09.08.39.10;	author schj;	state Exp;
+branches;
+next	1.17;
+
+1.17
+date	97.01.16.15.06.27;	author schj;	state Exp;
+branches;
+next	1.16;
+
+1.16
+date	96.11.10.10.24.08;	author schj;	state Exp;
+branches;
+next	1.15;
+
+1.15
+date	96.11.05.14.59.13;	author schj;	state Alpha;
+branches;
+next	1.14;
+
+1.14
+date	96.10.22.17.39.30;	author schj;	state Exp;
+branches;
+next	1.13;
+
+1.13
+date	96.03.25.07.53.39;	author schj;	state alpha;
+branches;
+next	1.12;
+
+1.12
+date	96.02.27.11.36.51;	author schj;	state Exp;
+branches;
+next	1.11;
+
+1.11
+date	95.12.17.21.56.31;	author schj;	state Exp;
+branches;
+next	1.10;
+
+1.10
+date	95.12.05.03.07.00;	author schj;	state Exp;
+branches;
+next	1.9;
+
+1.9
+date	95.10.30.13.54.33;	author schj;	state Exp;
+branches;
+next	1.8;
+
+1.8
+date	95.10.23.07.52.03;	author schj;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	95.09.26.21.20.22;	author schj;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	95.09.19.13.42.39;	author schj;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	95.09.01.11.43.50;	author schj;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	95.08.24.14.14.08;	author schj;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	95.08.24.12.47.38;	author schj;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	95.08.24.12.25.38;	author schj;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	95.08.23.13.22.08;	author schj;	state Beta;
+branches;
+next	;
+
+
+desc
+@all dataset manipulation routines
+@
+
+
+1.20
+log
+@Version: 0.99g
+@
+text
+@/* $Header: /home/schj/src/vamps_0.99g/src/util/RCS/dataset.c,v 1.19 1999/01/06 12:07:49 schj Alpha $ */
+
+/*  $RCSfile: dataset.c,v $
+ *  $Author: schj $
+ *  $Date: 1999/01/06 12:07:49 $ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <float.h>
+#include "vamps.h"
+#include "deffile.h"
+
+static char RCSid[] =
+"$Id: dataset.c,v 1.19 1999/01/06 12:07:49 schj Alpha $";
+
+#ifdef PATH_MAX
+#define MAXPATHLEN PATH_MAX
+#endif
+#ifndef MAXPATHLEN
+#define MAXPATHLEN 78
+#endif
+
+ID	id;
+dataset *data = (dataset *) NULL;	/* data sets */
+int sets = 0;			/* number of datasets */
+char outdir[MAXPATHLEN];
+
+/*
+typedef struct {
+	char *setname;
+	char *desc;
+	char *unit;
+} st;
+
+st validsets[] = {
+	{"pre","precipitation", "cm" },
+	{"rlh",	"relative humidity","%"},
+	{"hea","head at bottom","cm"},
+	{"rdp","rooting depth","cm"},
+	{"tem","dry bulb temp","oC"},
+	{"gwt","ground-water table","cm"}
+}
+	inr;	interception	[cm] 
+	trf;	troughfall	[cm]
+	stf;	stemflow	[cm]
+	pev;	potential evaporation [cm]
+	spe;	potential soil evaporation [cm]
+	ptr;	potential transpiration [cm]
+	qbo;	flow through bottom of profile [cm]
+	vol;	actual water content [cm]
+	avt;	average theta in profile
+	fit;	set in fitting
+	lai;	leaf area index
+	sca;	canopy storage [cm???]
+	ira;	incoming radiation [W/m2]
+	nra;	net radiation [W/m2]
+	ref;	reflected radiation [W/m2]
+	win;	windspeed [m/s]
+	sur;	sunratio (n/N)
+*/
+
+/*C:getsetbyname 
+ *@@ int getsetbyname(char *s)
+ *
+ * returns the number of a named set
+ * searches for a set named name, returns -1 on error
+ * empty positions (xy = NULL ) are skipped
+ */
+int
+getsetbyname (char *s)
+{
+	int i;
+
+	if (sets > 0)
+		for (i = 0; i < sets; i++){
+			if (strcmp (s, data[i].name) == 0 && data[i].xy != NULL)
+				return i;
+		}
+
+	return -1;
+}
+
+/*C:del_set
+ *@@ int del_set(int nr)
+ *
+ * deletes dataset from mem and list and frees the memory allocted to the
+ * actual data. Use @@getsetbyname()@@ to find the sets
+ *
+ * The entry in the data struct will remain but the pointer to xy will be
+ * set to @@NULL@@, indicating the place is free. 
+ */
+int
+del_set (int nr)
+{
+	char cc[1024];
+
+	sprintf (cc, "deleting set %d (%s)", nr, data[nr].name);
+	showit ("del_set",MESG,cc,2,verbose);
+  
+	free (data[nr].xy);
+	data[nr].xy = NULL;
+
+	strcpy (data[nr].fname, "deleted");
+	strcpy (data[nr].name, "deleted");
+	data[nr].points = 0;
+	data[nr].vunit = -1;
+	data[nr].tunit = -1;
+	data[nr].xsum = MISSVAL;
+	data[nr].ysum = MISSVAL;
+	data[nr].xmax = MISSVAL;
+	data[nr].ymax = MISSVAL;
+	data[nr].ymin = MISSVAL;
+	data[nr].xmin = MISSVAL;
+
+	return 0;
+}
+
+/*C:dell_all_sets
+ *@@ void dell_all_sets()
+ *
+ * deletes all datasets from memory
+ */
+void
+del_all_sets ()
+{
+	int i;
+
+	if (sets > 0){
+		for (i = sets-1; i >= 0; i--){
+			if (verbose > 1)
+				fprintf (stderr, "dataset.c: deleting set %d: %s\n", i, data[i].name);
+			if (data[i].xy) /* could be an empty pos */
+				free (data[i].xy);
+		}
+		free (data);
+		sets = 0;
+	}
+}
+
+
+/*C:add_set
+ *@@ int add_set(xy *XY,char *name,char *fname,int points,int vunit,int tunit);
+ * 
+ * Adds an XY structure to the data structure and list returns the number
+ * of the set made. If @@xy == NULL@@ the XY structure is allocate with
+ * @@points@@ points. x and Y values are filled with zeros.
+ *
+ */
+int
+add_set (XY *xy,char  *name,char *fname,int  points,int vunit,int tunit)
+{
+	int i,j;
+	char cc[1024];
+	XY *tmpxy = NULL;
+
+	j = 0;
+
+	sprintf (cc, "set %s with fname %s, points %d, vunit %d, tunit %d",
+			name, fname, points, vunit, tunit);
+	showit ("add_set",MESG,cc,2,verbose);
+
+	/* allocate memory if xy is empty */
+	if (xy == NULL){
+	showit ("add_set",MESG,"allocating memory",2,verbose);
+		tmpxy = (XY *)ts_memory ((void *) NULL,
+				points * sizeof (XY), progname);
+		/* Fill with values if id.pre present */
+			for (i = 0; i < points; i++){
+				tmpxy[i].x = 0.0;
+				tmpxy[i].y = 0.0;
+			}
+	}
+	showit ("add_set",MESG,"using pre-allocated memory",2,verbose);
+
+	if (sets <= 0)
+		data = (dataset *)
+			ts_memory ((void *) data, sizeof (dataset), progname);
+
+	if ((j = getsetbyname (name)) > 0){ /* update existing set with same name */
+		showit ("add_set",WARN,"updating existing set",2,verbose);
+		free(data[j].xy);
+		if (xy != NULL)
+			data[j].xy = xy;
+		else
+			data[j].xy = tmpxy;
+		if (name)
+			strcpy (data[j].name, name);
+		if (fname)
+			strcpy (data[j].fname, fname);
+		data[j].points = points;
+		data[j].vunit = vunit;
+		data[j].tunit = tunit;
+		data[j].xsum = MISSVAL;
+		data[j].ysum = MISSVAL;
+		data[j].xmax = MISSVAL;
+		data[j].ymax = MISSVAL;
+		data[j].ymin = MISSVAL;
+		data[j].xmin = MISSVAL;
+	}else{
+		/* first check for an empty set */
+		for (i=0; i<sets; i++)
+			if (data[i].xy == NULL)
+				break;
+
+		/* no free pos, let data grow */
+		if ( i == sets ){
+			sets++;
+			j = sets - 1;
+			showit ("add_set",MESG,"creating new set",2,verbose);
+			data = (dataset *)
+				ts_memory ((void *) data, sets * sizeof (dataset), progname);
+
+		}else{/* fill in free pos */
+			j = i;
+			showit ("add_set",WARN,"creating new set (old pos, untested!!)",2,verbose);
+		}
+			
+	
+		if (xy !=NULL)
+			data[j].xy = xy;
+		else
+			data[j].xy = tmpxy;
+		strcpy (data[j].name, name);
+		if (fname)
+			strcpy (data[j].fname, fname);
+		else
+			strcpy (data[j].fname, data[j].name);
+		data[j].points = points;
+		data[j].vunit = vunit;
+		data[j].tunit = tunit;
+		data[j].xsum = MISSVAL;
+		data[j].ysum = MISSVAL;
+		data[j].xmax = MISSVAL;
+		data[j].ymax = MISSVAL;
+		data[j].ymin = MISSVAL;
+		data[j].xmin = MISSVAL;
+	}
+
+	return j;
+}
+
+/*C:mksetstats
+ *@@ void mksetstats(int dset)
+ * 
+ * Fill the simple statistics fields in dataset @@dset@@. These fields are:
+ * xmin
+ * xmax
+ * ymin
+ * ymax
+ * xsum
+ * ysum
+ */ 
+void
+mksetstats(int dset)
+{
+	int i;
+
+	data[dset].xsum =0.0; data[dset].ysum =0.0;
+	data[dset].ymax = -1.0 * DBL_MAX; data[dset].ymin = DBL_MAX;
+	data[dset].xmax = -1.0 * DBL_MAX, data[dset].xmin = DBL_MAX;
+
+	for (i = 0; i < data[dset].points; i++){
+		data[dset].xmin = data[dset].xmin > data[dset].xy[i].x ? data[dset].xy[i].x : data[dset].xmin;
+		data[dset].ymin = data[dset].ymin > data[dset].xy[i].y ? data[dset].xy[i].y : data[dset].ymin;
+		data[dset].ymax = data[dset].ymax < data[dset].xy[i].y ? data[dset].xy[i].y : data[dset].ymax;
+		data[dset].xmax = data[dset].xmax < data[dset].xy[i].x ? data[dset].xy[i].x : data[dset].xmax;
+		data[dset].xsum += data[dset].xy[i].x;
+		data[dset].ysum += data[dset].xy[i].y;
+	}
+}
+
+/*C:get_data
+ *@@ int get_data(char *fname,char *name,int minpt)
+ *
+ * Gets data_point(s) from file fname. The data will be added to the
+ * dataset stuff using @@add_set@@. Columns can be given at the end of the
+ * filename separated by comma's. i.e. @@afilename,1,3@@ would tell
+ * @@get_data@@ the get the data from afilename and use column 1 for X and
+ * column 3 for Y.
+ *
+ * If @@minpt > 0@@ then the function will exit if less then minpt are read
+ * from @@fname@@.
+ * 
+ * Returns: number of points read
+*/
+
+int
+get_data (char *fname,char *name,int minpt)
+{
+	int i = 0;
+#ifdef NEWSET
+	int nc;
+	double **rc;
+#endif
+	int xcol = 0,ycol = 1;
+	FILE *datfile;
+	char s[1024];
+	XY *tmpxy = (XY *) NULL;
+	int nr = 0;
+	char **strv;
+#ifndef HAVE_LIBSLANG
+	char *ll;
+#endif
+#ifdef HAVE_LIBSLANG
+  	extern char **sl_make_strv(char *str, char *sep, int *vlen);
+ 	extern void sl_free_strv(char **strv);
+
+	strv = sl_make_strv(fname,",",&nr);
+
+	if (nr == 3){ /* two columns are given */
+		xcol = atoi(strv[1]);
+		ycol = atoi(strv[2]);
+
+		(void)sprintf(s,"using col %d and %d from %s",xcol,ycol,strv[0]);
+		showit ("get_data",MESG,s,2,verbose);
+	}
+#else
+	xcol = 0;
+	ycol = 1;
+	strv = (char **)malloc(1 * sizeof(char *));
+	if((strv[0] = strdup(fname)) == NULL)
+		perror(RCSid);
+	if( (ll = strchr(strv[0],',')) != NULL)
+		ll[0] = '\0';
+#endif
+
+	/* Get from seperate file using the ts_readf function */
+	if ((datfile = fopen (strv[0], "r")) == NULL){
+		Perror (progname, 1,1, RCSid, "Error opening:", strv[0]);
+	}
+
+#ifdef NEWSET
+	rc = nr_dmread(strv[0],&i,&nc);
+#endif	
+
+	(void)sprintf(s,"getting data from %s",fname);
+	showit ("get_data",MESG,s,1,verbose);
+	tmpxy = ts_readf (&i, datfile, "vamps",xcol,ycol, verbose);
+	if (i < minpt && minpt > 0)
+		Perror (progname, 1,0, RCSid, "To little points in:", strv[0]);
+	fclose (datfile);
+	mksetstats(add_set (tmpxy, name, fname, i, 0, 0));
+
+#ifdef HAVE_LIBSLANG
+	sl_free_strv(strv);
+#else
+	free(strv[0]);
+	free(strv);
+#endif
+
+
+      return i;
+}
+
+
+int header = TRUE;
+
+/*C:dumpset
+ *@@ int dumpset (int nr, FILE *stream)
+ *
+ * Dumps set @@nr@@ to stream @@stream@@.
+ */
+
+int
+dumpset (int nr,FILE  *stream)
+{
+	int i;
+	int check = 0;
+	char s[1024];
+	char dumpname[1024];
+
+	if (nr < 0 || nr >= sets)	/* check for unrealistic values */
+		return 0;
+
+	if (!stream){	/* Generate filename from fname of dataset */
+		if (data[nr].fname){
+			strcpy (dumpname, data[nr].fname);
+		}else{
+			strcpy (dumpname, data[nr].name);
+		}
+		if ((stream = fopen (dumpname, "w")) == NULL){
+			stream = stdout;
+			strcpy (dumpname, "stdout");
+		}else
+			check++;
+	}
+	else
+		strcpy (dumpname, "???");
+
+	sprintf (s, "dumping set %s to file %s", data[nr].name, dumpname);
+	showit ("dumpset",MESG,s,1,verbose);
+
+	/* determine some set statistics if they are no set*/
+	if (data[nr].xmax == MISSVAL)
+		mksetstats(nr);
+
+	/*first print a small header */
+	if (header){
+		(void) fprintf (stream, "%cname: %s\n", commchar[0], data[nr].name);
+		(void) fprintf (stream, "%cfname: %s\n", commchar[0], data[nr].fname);
+		(void) fprintf (stream, "%cpoints: %d\n", commchar[0], data[nr].points);
+		(void) fprintf (stream, "%ctime unit: %d\n", commchar[0], data[nr].tunit);
+		(void) fprintf (stream, "%cvalue unit: %d\n", commchar[0], data[nr].vunit);
+		(void) fprintf (stream, "%cxmax: %f\n", commchar[0], data[nr].xmax);
+		(void) fprintf (stream, "%cxmin: %f\n", commchar[0], data[nr].xmin);
+		(void) fprintf (stream, "%cymin: %f\n", commchar[0], data[nr].ymin);
+		(void) fprintf (stream, "%cymax: %f\n", commchar[0], data[nr].ymax);
+		(void) fprintf (stream, "%cysum: %f\n", commchar[0], data[nr].ysum);
+		(void) fprintf (stream, "%cxsum: %f\n", commchar[0], data[nr].xsum);
+	}
+
+	for (i = startpos; i < data[nr].points; i++){ /* dump the actual points */
+		(void) fprintf (stream, "%f %f\n", data[nr].xy[i].x, data[nr].xy[i].y);
+	}
+
+	if (check)
+		fclose (stream);
+
+	return 1;
+}
+@
+
+
+1.19
+log
+@Version: 0.99g
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99e/src/util/RCS/dataset.c,v 1.18 1997/09/09 08:39:10 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1997/09/09 08:39:10 $ */
+d15 1
+a15 1
+"$Id: dataset.c,v 1.18 1997/09/09 08:39:10 schj Exp $";
+@
+
+
+1.18
+log
+@0.99e version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99c/src/util/RCS/dataset.c,v 1.17 1997/01/16 15:06:27 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1997/01/16 15:06:27 $ */
+d15 1
+a15 1
+"$Id: dataset.c,v 1.17 1997/01/16 15:06:27 schj Exp $";
+d155 1
+a155 1
+	XY *tmpxy;
+d301 2
+d304 1
+a304 1
+	char **strv;
+d322 2
+a323 1
+	strv[0] = strdup(fname);
+d330 1
+a330 1
+		Perror (progname, 1, RCSid, "Error opening:", strv[0]);
+d341 1
+a341 1
+		Perror (progname, 1, RCSid, "To little points in:", strv[0]);
+@
+
+
+1.17
+log
+@layout + stuff
+@
+text
+@d1 3
+a3 3
+/* $Header: /home/schj/src/vamps_0.99/src/util/RCS/dataset.c,v 1.16 1996/11/10 10:24:08 schj Exp $ */
+/*
+ *  $RCSfile: dataset.c,v $
+d5 2
+a6 2
+ *  $Date: 1996/11/10 10:24:08 $
+ */
+d10 1
+a10 1
+#include <malloc.h>
+a13 1
+
+d15 1
+a15 1
+"$Id: dataset.c,v 1.16 1996/11/10 10:24:08 schj Exp $";
+d17 2
+a18 2
+#ifndef PATH_MAX
+#define PATH_MAX 78
+d24 1
+d27 35
+a61 1
+char outdir[MAXPATHLEN] = "";
+d63 2
+a64 2
+/*-
+ * getsetbyname - returns the number of a named set
+d66 1
+a66 1
+ * int getsetbyname(char *s)
+d69 1
+a69 1
+ -*/
+d73 1
+a73 1
+  int i;
+d75 5
+a79 6
+  if (sets > 0)
+    for (i = 0; i < sets; i++)
+      {
+	if (strcmp (s, data[i].name) == 0 && data[i].xy != NULL)
+	  return i;
+      }
+d81 1
+a81 1
+  return -1;
+d84 2
+a85 2
+/*-
+ * del_set - deletes the specified set from list and frees mem
+d87 2
+a88 1
+ * int del_set(int nr)
+d90 3
+a92 7
+ * deletes dataset from mem and list.
+ * Use getsetbyname() to find the sets
+ * The entry in the data struct will remain but the pointer to xy
+ * will be set to NULL, indicating the place is free. At present
+ * this is ignored by add_set!!!
+ -*/
+
+d96 1
+a96 1
+  char cc[1024];
+d98 2
+a99 2
+  sprintf (cc, "deleting set %d (%s)", nr, data[nr].name);
+  showit ("del_set",MESG,cc,2,verbose);
+d101 14
+a114 2
+  free (data[nr].xy);
+  data[nr].xy = NULL;
+d116 1
+a116 1
+  return 0;
+d119 2
+a120 2
+/*-
+ * void dell_all_sets()
+d123 1
+a123 1
+ -*/
+d127 1
+a127 1
+  int i;
+d129 10
+a138 10
+  if (sets > 0){
+  for (i = sets-1; i >= 0; i--)
+    {
+      if (verbose > 1)
+	fprintf (stderr, "dataset.c: deleting set %d: %s\n", i, data[i].name);
+      free (data[i].xy);
+    }
+  free (data);
+  sets = 0;
+  }
+d142 6
+a147 2
+/*-
+ * add_set - adds an XY structure to the data structure and list
+d149 1
+a149 4
+ * int add_set(xy *XY,char *name,char *fname,int points,int vunit,int tunit);
+ * returns the number of the set made
+ *
+ -*/
+d153 22
+a174 2
+  int j;
+  char cc[1024];
+d176 63
+a238 1
+  j = 0;
+d240 1
+a240 43
+  sprintf (cc, "set %s with fname %s, points %d, vunit %d, tunit %d",
+	   name, fname, points, vunit, tunit);
+  showit ("add_set",MESG,cc,2,verbose);
+
+  if (sets <= 0)
+    data = (dataset *)
+      ts_memory ((void *) data, sizeof (dataset), progname);
+
+  if ((j = getsetbyname (name)) > 0)	/* update existing set */
+    {
+      showit ("add_set",WARN,"updating existing set",2,verbose);
+      if (xy)
+	data[j].xy = xy;
+      if (name)
+	strcpy (data[j].name, name);
+      if (fname)
+	strcpy (data[j].fname, fname);
+      if (points)
+	data[j].points = points;
+      if (vunit)
+	data[j].vunit = vunit;
+      if (tunit)
+	data[j].tunit = tunit;
+    }
+  else
+    {
+      showit ("add_set",MESG,"creating new set",2,verbose);
+      sets++;			/* extra dataset */
+      data = (dataset *)
+	ts_memory ((void *) data, sets * sizeof (dataset), progname);
+      j = sets - 1;
+      data[j].xy = xy;
+      strcpy (data[j].name, name);
+      if (fname)
+	strcpy (data[j].fname, fname);
+      else
+	strcpy (data[j].fname, getdefstr ("output", name, name, infilename, FALSE));
+      data[j].points = points;
+      data[j].vunit = vunit;
+      data[j].tunit = tunit;
+    }
+
+  return j;
+d243 15
+d259 13
+d273 8
+a280 2
+/*-
+ * get_data - gets datapoints from ts-type file
+d282 5
+a286 5
+ * int get_data(char *fname,char *name)
+ * Gets data_point(s) from file fname. 
+ * The data will be added to the dataset stuff using
+ * add_set.
+ -*/
+d289 1
+a289 1
+get_data (char *fname,char *name)
+d291 37
+a327 10
+  int i = 0;
+  FILE *datfile;
+  char s[1024];
+  XY *tmpxy = (XY *) NULL;
+
+    /* Get from seperate file using the ts_readf function */
+    {
+      if ((datfile = fopen (fname, "r")) == NULL)
+	{
+	  Perror (progname, 1, RCSid, "Error opening:", fname);
+d329 21
+a349 5
+      (void)sprintf(s,"getting data from %s",fname);
+      showit ("get_data",MESG,s,1,verbose);
+      tmpxy = ts_readf (&i, datfile, "vamps", verbose);
+      fclose (datfile);
+      add_set (tmpxy, name, fname, i, 0, 0);
+a350 1
+    }
+d356 2
+a357 2
+/*-
+ * int dumpset (int nr, FILE *stream)
+d359 2
+a360 1
+ -*/
+d365 19
+a383 13
+  int i;
+  int check = 0;
+  char s[1024];
+  char dumpname[1024];
+
+  if (nr < 0 || nr >= sets)	/* check for unrealistic values */
+    return 0;
+
+  if (!stream)
+    {				/* Generate filename from fname of dataset */
+      if (data[nr].fname)
+	{
+	  strcpy (dumpname, data[nr].fname);
+d385 23
+a407 3
+      else
+	{
+	  strcpy (dumpname, data[nr].name);
+d409 3
+a411 4
+      if ((stream = fopen (dumpname, "w")) == NULL)
+	{
+	  stream = stdout;
+	  strcpy (dumpname, "stdout");
+a412 23
+      else
+	check++;
+    }
+  else
+    strcpy (dumpname, "???");
+
+  sprintf (s, "dumping set %s to file %s", data[nr].name, dumpname);
+  showit ("dumpset",MESG,s,1,verbose);
+  
+  /*first print a small header */
+  if (header)
+    {
+      (void) fprintf (stream, "%cname: %s\n", commchar, data[nr].name);
+      (void) fprintf (stream, "%cfname: %s\n", commchar, data[nr].fname);
+      (void) fprintf (stream, "%cpoints: %d\n", commchar, data[nr].points);
+      (void) fprintf (stream, "%ctime unit: %d\n", commchar, data[nr].tunit);
+      (void) fprintf (stream, "%cvalue unit: %d\n", commchar, data[nr].vunit);
+    }
+
+  for (i = startpos; i < data[nr].points; i++) /* dump the actual points */
+    {
+      (void) fprintf (stream, "%f %f\n", data[nr].xy[i].x, data[nr].xy[i].y);
+    }
+d414 2
+a415 2
+  if (check)
+    fclose (stream);
+d417 1
+a417 1
+  return 1;
+a418 8
+
+
+
+
+
+
+
+
+@
+
+
+1.16
+log
+@added fname to header, removed backup stuff in dumpset
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/util/RCS/dataset.c,v 1.15 1996/11/05 14:59:13 schj Alpha $ */
+d5 1
+a5 1
+ *  $Date: 1996/11/05 14:59:13 $
+d16 1
+a16 1
+"$Id: dataset.c,v 1.15 1996/11/05 14:59:13 schj Alpha $";
+d35 1
+a35 1
+ */
+d61 1
+a61 1
+ */
+d81 1
+a81 1
+ */
+d106 1
+a106 1
+ */
+d169 1
+a169 1
+ */
+d200 1
+a200 1
+ */
+@
+
+
+1.15
+log
+@Updated to Alpha version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/util/RCS/dataset.c,v 1.14 1996/10/22 17:39:30 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1996/10/22 17:39:30 $
+d16 1
+a16 1
+"$Id: dataset.c,v 1.14 1996/10/22 17:39:30 schj Exp $";
+d59 2
+a60 1
+ * will be set to NULL, indicating the place is free
+a196 3
+#define bkname "cp"
+#define bkopt "-f"
+
+a215 5
+	sprintf (s, "%s %s %s %s.bk", bkname, bkopt, data[nr].fname, data[nr].fname);
+      else
+	sprintf (s, "%s %s %s %s.bk", bkname, bkopt, data[nr].name, data[nr].name);
+      system (s);		/* Make a backup first */
+      if (data[nr].fname)
+d241 1
+d257 8
+@
+
+
+1.14
+log
+@lots of changes, mainly small fixes
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.98/src/util/RCS/dataset.c,v 1.13 1996/03/25 07:53:39 schj alpha $ */
+d5 1
+a5 1
+ *  $Date: 1996/03/25 07:53:39 $
+d16 1
+a16 1
+"$Id: dataset.c,v 1.13 1996/03/25 07:53:39 schj alpha $";
+@
+
+
+1.13
+log
+@version 0.98
+@
+text
+@d1 2
+a2 3
+/* dataset.c */
+/* $Header: /home/schj/src/vamps_0.975/src/util/RCS/dataset.c,v 1.12 1996/02/27 11:36:51 schj Exp $ */
+/*-
+d5 1
+a5 25
+ *  $Date: 1996/02/27 11:36:51 $
+ *  $Log: dataset.c,v $
+ *  Revision 1.12  1996/02/27 11:36:51  schj
+ *  Revamped get_data
+ *
+ * Revision 1.11  1995/12/17  21:56:31  schj
+ * added suppport for start at nonzero
+ *
+ *  Revision 1.10  1995/12/05 03:07:00  schj
+ *  changed include paths
+ *
+ * Revision 1.9  1995/10/30  13:54:33  schj
+ * added deffile.h
+ *
+ * Revision 1.8  1995/10/23  07:52:03  schj
+ *
+ * Revision 1.7  1995/09/26  21:20:22  schj
+ * updated issection
+ *
+ * Revision 1.6  1995/09/19  13:42:39  schj
+ * updated exitonerror
+ *
+ * Revision 1.5  1995/09/01  11:43:50  schj
+ * updated header
+ *
+d16 1
+a16 1
+"$Id: dataset.c,v 1.12 1996/02/27 11:36:51 schj Exp $";
+d67 3
+a69 6
+  if (verbose > 1)
+    {
+      sprintf (cc, "del_set: deleting set %d (%s)", nr, data[nr].name);
+      showit (cc);
+    }
+
+d77 1
+a77 1
+ *  void dell_all_sets()
+d79 1
+a79 1
+ *  deletes all datasets from memory
+d86 1
+d95 1
+d109 1
+a109 1
+  int i, j;
+d112 1
+a112 1
+  j = i = 0;
+d114 3
+a116 6
+  if (verbose > 1)
+    {
+      sprintf (cc, "add_set: set %s with fname %s, points %d, vunit %d, tunit %d",
+	       name, fname, points, vunit, tunit);
+      showit (cc);
+    }
+d122 1
+a122 1
+  if ((i = getsetbyname (name)) > 0)	/* update existing set */
+d124 1
+a124 2
+      if (verbose > 1)
+	showit ("add_set: Updating existing set");
+d126 1
+a126 1
+	data[i].xy = xy;
+d128 1
+a128 1
+	strcpy (data[i].name, name);
+d130 1
+a130 1
+	strcpy (data[i].fname, fname);
+d132 1
+a132 1
+	data[i].points = points;
+d134 1
+a134 1
+	data[i].vunit = vunit;
+d136 1
+a136 1
+	data[i].tunit = tunit;
+d140 1
+a140 2
+      if (verbose > 1)
+	showit ("add_set: Creating new set");
+d162 1
+a162 1
+ * get_data - gets datapoints from inputfile or external file
+d166 2
+a167 5
+ * otherwise a separate file consisting of two columns (time value)
+ * will be assumed and opened. These files are described in the ts
+ * package.
+ * Data will contain an array of structures, int the number of points
+ * read.
+d175 1
+d184 2
+a185 2
+      if (verbose)
+	showit (fname);
+d188 1
+a188 1
+      add_set (tmpxy, name, NULL, i, 0, 0);
+d241 3
+a243 6
+  if (verbose)
+    {
+      sprintf (s, "Dumping set %s to file %s", data[nr].name, dumpname);
+      showit (s);
+    }
+
+@
+
+
+1.12
+log
+@Revamped get_data
+@
+text
+@d2 1
+a2 1
+/* $Header: /homes/schj/src/vamps_0.96/src/util/RCS/dataset.c,v 1.11 1995/12/17 21:56:31 schj Exp $ */
+d6 1
+a6 1
+ *  $Date: 1995/12/17 21:56:31 $
+d8 3
+d41 1
+a41 1
+"$Id: dataset.c,v 1.11 1995/12/17 21:56:31 schj Exp $";
+@
+
+
+1.11
+log
+@added suppport for start at nonzero
+@
+text
+@d2 1
+a2 1
+/* $Header: /home/schj/src/vamps_0.95/src/util/RCS/dataset.c,v 1.10 1995/12/05 03:07:00 schj Exp $ */
+d6 1
+a6 1
+ *  $Date: 1995/12/05 03:07:00 $
+d8 3
+a31 1
+#include <sys/param.h>
+d38 8
+a45 1
+"$Id: dataset.c,v 1.10 1995/12/05 03:07:00 schj Exp $";
+d59 1
+a59 2
+getsetbyname (s)
+     char *s;
+d85 1
+a85 2
+del_set (nr)
+     int nr;
+d111 1
+a111 1
+  for (i = 0; i < sets; i++)
+d130 1
+a130 7
+add_set (xy, name, fname, points, vunit, tunit)
+     XY *xy;
+     char *name;
+     char *fname;
+     int points;
+     int vunit;
+     int tunit;
+d192 2
+a193 3
+ * int get_data(char *fname,char *section,char *name)
+ * Gets data_point(s) from file fname. If section!=NULL the data are
+ * assumed to reside in section *section from a vamps data file,
+d202 1
+a202 4
+get_data (fname, section, name)
+     char *fname;
+     char *section;
+     char *name;
+a204 3
+  int step = 1024;
+  int done = 0;
+  char s[1024];
+a207 28
+  if (section)			/* get from input file if this section exists */
+    {
+      do
+	{
+	  if (verbose)
+	    showit (section);
+	  i++;
+	  if (i == 1)
+	    {
+	      tmpxy = (XY *) ts_memory ((void *) tmpxy, step * sizeof (XY), progname);
+	      done = step;
+	    }
+	  else if (i > done)
+	    {
+	      tmpxy = (XY *) ts_memory ((void *) tmpxy, (step + done) * sizeof (XY), progname);
+	      done = done + step;
+	    }
+	  (void) sprintf (s, "time_%d", i);
+	  tmpxy[i - 1].x = getdefdoub (section, s, MISSVAL, fname, TRUE);
+	  (void) sprintf (s, "val_%d", i);
+	  tmpxy[i - 1].y = getdefdoub (section, s, MISSVAL, fname, TRUE);
+	}
+      while (tmpxy[i - 1].y != MISSVAL);
+      i--;
+      add_set (tmpxy, name, NULL, i, 0, 0);
+      return i;
+    }
+  else
+d235 1
+a235 3
+dumpset (nr, stream)
+     int nr;
+     FILE *stream;
+@
+
+
+1.10
+log
+@changed include paths
+@
+text
+@d2 1
+a2 1
+/* $Header: /homes/schj/src/vamps_0.91/RCS/dataset.c,v 1.9 1995/10/30 13:54:33 schj Exp $ */
+d6 1
+a6 1
+ *  $Date: 1995/10/30 13:54:33 $
+d8 3
+a12 1
+ * ,
+a14 1
+ * *** empty log message ***
+d36 1
+a36 1
+"$Id: dataset.c,v 1.9 1995/10/30 13:54:33 schj Exp $";
+d39 2
+a40 2
+int     sets = 0;		/* number of datasets */
+char    outdir[MAXPATHLEN] = "";
+d51 1
+a51 1
+char   *s;
+d53 1
+a53 1
+  int     i;
+d78 1
+a78 1
+int     nr;
+d80 1
+a80 1
+  char    cc[1024];
+d95 21
+d124 6
+a129 6
+XY     *xy;
+char   *name;
+char   *fname;
+int     points;
+int     vunit;
+int     tunit;
+d131 2
+a132 2
+  int     i, j;
+  char    cc[1024];
+d203 3
+a205 3
+char   *fname;
+char   *section;
+char   *name;
+d207 6
+a212 6
+  int     i = 0;
+  int     step = 1024;
+  int     done = 0;
+  char    s[1024];
+  FILE   *datfile;
+  XY     *tmpxy = (XY *) NULL;
+d214 1
+a214 1
+  if (section)			/* get from input file if this section exists*/
+d242 1
+a242 1
+    /* Get from seperate file using the ts_readf function*/
+d258 1
+a258 1
+int     header = TRUE;
+d270 2
+a271 2
+int     nr;
+FILE   *stream;
+d273 4
+a276 4
+  int     i;
+  int     check = 0;
+  char    s[1024];
+  char    dumpname[1024];
+d313 1
+a313 1
+  /*first print a small header*/
+d322 1
+a322 1
+  for (i = 0; i < data[nr].points; i++)	/* dump the actual points */
+@
+
+
+1.9
+log
+@added deffile.h
+,
+@
+text
+@d2 1
+a2 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.9/util/RCS/dataset.c,v 1.8 1995/10/23 07:52:03 schj Exp $ */
+d6 1
+a6 1
+ *  $Date: 1995/10/23 07:52:03 $
+d8 4
+d30 2
+a31 2
+#include "../include/vamps.h"
+#include "../include/deffile.h"
+d35 1
+a35 1
+"$Id: dataset.c,v 1.8 1995/10/23 07:52:03 schj Exp $";
+@
+
+
+1.8
+log
+@*** empty log message ***
+@
+text
+@d2 1
+a2 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/util/RCS/dataset.c,v 1.7 1995/09/26 21:20:22 schj Exp $ */
+d6 1
+a6 1
+ *  $Date: 1995/09/26 21:20:22 $
+d8 3
+d27 1
+d31 1
+a31 1
+"$Id: dataset.c,v 1.7 1995/09/26 21:20:22 schj Exp $";
+@
+
+
+1.7
+log
+@updated issection
+@
+text
+@d2 3
+a4 2
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/util/RCS/dataset.c,v 1.6 1995/09/19 13:42:39 schj Exp $ */
+/*- $RCSfile: dataset.c,v $
+d6 1
+a6 1
+ *  $Date: 1995/09/19 13:42:39 $
+d8 3
+d26 2
+a27 2
+static  char RCSid[] =
+"$Id: dataset.c,v 1.6 1995/09/19 13:42:39 schj Exp $";
+d31 1
+a31 1
+char	outdir[MAXPATHLEN]="";
+d71 1
+a71 1
+char	cc[1024];
+d73 4
+a76 3
+    if (verbose >1){
+        sprintf(cc,"del_set: deleting set %d (%s)",nr,data[nr].name);
+	showit(cc);
+d102 1
+a102 2
+  char cc[1024];
+  j=i=0;
+d104 8
+a111 5
+  if (verbose >1){
+     sprintf(cc,"add_set: set %s with fname %s, points %d, vunit %d, tunit %d",
+     	name,fname,points,vunit,tunit);
+     showit(cc);
+     }
+d119 2
+a120 2
+      if (verbose >1)
+      	showit("add_set: Updating existing set");
+d136 6
+a141 26
+      if (verbose >1)
+      	showit("add_set: Creating new set");
+      if (sets > 0)
+	{
+	  for (i = 0; i < sets; i++)
+	    {
+	      if (data[i].xy == NULL)
+		{		/* we have an empty position, fill that */
+		  j = i;
+		}
+	      else
+		{
+		  sets++;	/* extra dataset */
+		  data = (dataset *)
+		    ts_memory ((void *) data, sets * sizeof (dataset), progname);
+		  j = sets - 1;
+		}
+	    }
+	}
+      else
+	{
+	  sets++;		/* extra dataset */
+	  data = (dataset *)
+	    ts_memory ((void *) data, sets * sizeof (dataset), progname);
+	  j = sets - 1;
+	}
+d147 1
+a147 1
+	strcpy (data[j].fname, getdefstr ("output", name, name, infilename,FALSE));
+d167 1
+a167 1
+ * Data will contain an array of structures, int the number of points 
+d202 1
+a202 1
+	  tmpxy[i - 1].x = getdefdoub (section, s, MISSVAL, fname,TRUE);
+d204 1
+a204 1
+	  tmpxy[i - 1].y = getdefdoub (section, s, MISSVAL, fname,TRUE);
+d216 1
+a216 1
+	  Perror (1,RCSid,"Error opening:",fname);
+d258 8
+a265 5
+      if (data[nr].fname){
+	strcpy (dumpname, data[nr].fname);
+      }else{
+	strcpy (dumpname, data[nr].name);
+      }
+@
+
+
+1.6
+log
+@updated exitonerror
+@
+text
+@d2 1
+a2 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/util/RCS/dataset.c,v 1.5 1995/09/01 11:43:50 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1995/09/01 11:43:50 $
+d7 3
+d23 1
+a23 1
+"$Id: dataset.c,v 1.5 1995/09/01 11:43:50 schj Exp $";
+d227 1
+a227 1
+      if ((datfile = fopen (fname, "r")) == (FILE *) NULL)
+d234 1
+@
+
+
+1.5
+log
+@updated header
+@
+text
+@d2 2
+a3 2
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/soil/RCS/swatsoil.c,v 1.10 1995/09/01 06:14:26 schj Exp $ */
+/*- $RCSfile: swatsoil.c,v $
+d5 5
+a9 2
+ *  $Date: 1995/09/01 06:14:26 $
+ *  $Log$
+d20 1
+a20 1
+"$Id: dataset.c,v 1.4 1995/08/24 14:14:08 schj Exp $";
+a94 1
+  int oldstate;
+a96 3
+  oldstate = exitonerror;
+  exitonerror=FALSE;
+
+d157 1
+a157 1
+	strcpy (data[j].fname, getdefstr ("output", name, name, infilename));
+a162 1
+  exitonerror=oldstate;
+d212 1
+a212 1
+	  tmpxy[i - 1].x = getdefdoub (section, s, MISSVAL, fname);
+d214 1
+a214 1
+	  tmpxy[i - 1].y = getdefdoub (section, s, MISSVAL, fname);
+@
+
+
+1.4
+log
+@*** empty log message ***
+@
+text
+@d2 6
+d17 1
+a17 1
+"$Id: dataset.c,v 1.3 1995/08/24 12:47:38 schj Exp $";
+@
+
+
+1.3
+log
+@included use of perror
+@
+text
+@d10 2
+a11 2
+static const char RCSid[] =
+"$Id: dataset.c,v 1.2 1995/08/24 12:25:38 schj Exp $";
+d222 1
+a222 1
+	  perror (1,RCSid,"Error opening:",fname);
+@
+
+
+1.2
+log
+@added RCSid
+@
+text
+@d10 2
+a11 2
+static char RCSid[] =
+"$Id$";
+d222 1
+a222 2
+	  (void) fprintf (stderr, "Error opening: %s\n", fname);
+	  exit (1);
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d9 4
+@

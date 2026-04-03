@@ -1,0 +1,15 @@
+SHELL = /bin/sh
+
+
+CC	= @CC@
+CFLAGS	= @CFLAGS@
+INC	= @top_srcdir@
+AGLOBJ	= @AGLOBJ@
+OBJDIR	= @top_srcdir@/objs@OS@
+INC	= -I@top_srcdir@/include -I@top_srcdir@
+DEFS	= @DEFS@
+
+all:	$(AGLOBJ)
+
+${OBJDIR}/agl_sl.o: agl_sl.c
+	${CC} ${CFLAGS} ${INC} -c ${DEFS} -o $@ agl_sl.c

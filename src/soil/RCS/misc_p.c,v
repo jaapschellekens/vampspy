@@ -1,0 +1,363 @@
+head	1.7;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.7
+date	99.01.06.12.13.01;	author schj;	state Alpha;
+branches;
+next	1.6;
+
+1.6
+date	99.01.06.12.07.49;	author schj;	state Alpha;
+branches;
+next	1.5;
+
+1.5
+date	97.09.09.08.39.39;	author schj;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	97.01.16.15.04.25;	author schj;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	96.11.10.15.12.29;	author schj;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	96.11.05.15.03.36;	author schj;	state Alpha;
+branches;
+next	1.1;
+
+1.1
+date	96.10.22.17.55.42;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@misc functions used in swatsoil
+@
+
+
+1.7
+log
+@Version: 0.99g
+@
+text
+@/* $Header: /home/schj/src/vamps_0.99g/src/soil/RCS/misc_p.c,v 1.6 1999/01/06 12:07:49 schj Alpha $ */
+/*  $RCSfile: misc_p.c,v $
+ *  $Author: schj $
+ *  $Date: 1999/01/06 12:07:49 $
+ */
+
+#ifdef DEBUG
+static  char RCSid[] =
+"$Id: misc_p.c,v 1.6 1999/01/06 12:07:49 schj Alpha $";
+#endif
+
+#include <math.h>
+#include "swatsoil.h"
+
+/*C:dethowsat
+ *@@ void dethowsat
+ *
+ *  Description: Determines relative saturation
+ *
+ *  Returns: nothing */
+void
+dethowsat()
+{
+	register int	i;
+	
+	for (i=0; i < layers; i++)
+		howsat[i]=1-(node[i].sp->thetas-theta[i]);
+}
+
+/*C:detavgthet
+ *@@ double detavgtheta(int layr)
+ * 
+ * Description: determine average theta until (not including) layer layr
+ *
+ * Returns: weighted average theta */
+double
+detavgtheta(int layr)
+{
+	register int i;
+	double ttavgtheta=0.0;
+   
+	for (i=0; i < layr && i< layers; i++)
+		ttavgtheta += fabs(dz[i]/dsoilp)*theta[i];
+
+	return ttavgtheta;
+}
+
+/*C:smd
+ *@@  double smd(double drz,doubel fieldh)
+ * 
+ *  calculates the soil moisture deficit until depth drz
+ *  (usually rooting depth) with fieldcapacity at fieldh
+ *
+ *  Returns:  soil moisture deficit */
+
+double 
+smd(double drz, double fieldh)
+{
+	register int i=0;
+	double ttsmd=0;
+	double thetadf=0;
+
+	while (i < layers && fabs(z[i]) < fabs(drz)){
+		thetadf = node[i].sp->h2t(node[i].soiltype,fieldh) - theta[i];
+		if (thetadf > 0.0)
+			ttsmd -= thetadf * dz[i];
+		i++;
+	}
+
+	return ttsmd;
+}
+@
+
+
+1.6
+log
+@Version: 0.99g
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99e/src/soil/RCS/misc_p.c,v 1.5 1997/09/09 08:39:39 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1997/09/09 08:39:39 $
+d9 1
+a9 1
+"$Id: misc_p.c,v 1.5 1997/09/09 08:39:39 schj Exp $";
+@
+
+
+1.5
+log
+@0.99e version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99c/src/soil/RCS/misc_p.c,v 1.4 1997/01/16 15:04:25 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1997/01/16 15:04:25 $
+d9 1
+a9 1
+"$Id: misc_p.c,v 1.4 1997/01/16 15:04:25 schj Exp $";
+@
+
+
+1.4
+log
+@layout + stuff
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/soil/RCS/misc_p.c,v 1.3 1996/11/10 15:12:29 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1996/11/10 15:12:29 $
+d9 1
+a9 1
+"$Id: misc_p.c,v 1.3 1996/11/10 15:12:29 schj Exp $";
+d15 2
+a16 3
+/*+Name: dethowsat
+ *
+ *  Prototype: void dethowsat
+d20 1
+a20 1
+ *  Returns: nothing+*/
+d24 4
+a27 4
+  register int	i;
+
+  for (i=0; i < layers; i++)
+    howsat[i]=1-(node[i].sp->thetas-theta[i]);
+d30 2
+a31 3
+/*+Name: detavgthet
+ *
+ *  Prototype:  double detavgtheta(int layr)
+d33 1
+a33 1
+ *  Description:   determine average theta until (not including) layer layr
+d35 1
+a35 1
+ *  Returns:  weighted average theta+*/
+d39 2
+a40 2
+  register int i;
+  double ttavgtheta=0.0;
+d42 2
+a43 2
+  for (i=0; i < layr && i< layers; i++)
+    ttavgtheta += fabs(dz[i]/dsoilp)*theta[i];
+d45 1
+a45 1
+  return ttavgtheta;
+d48 2
+a49 3
+/*+Name: smd
+ *
+ *  Prototype:  double smd(double drz,doubel fieldh)
+d51 2
+a52 2
+ *  Description:  calculates the soil moisture deficit until depth drz
+ *  (usually rooting) with fieldcapacity at fieldh
+d54 1
+a54 1
+ *  Returns:  soil moisture deficit+*/
+d59 12
+a70 12
+  register int i=0;
+  double ttsmd=0;
+  double thetadf=0;
+  
+  while (fabs(z[i]) < fabs(drz) && i< layers){
+    thetadf = node[i].sp->h2t(node[i].soiltype,fieldh) - theta[i];
+    if (thetadf > 0.0)
+      ttsmd -= thetadf * dz[i];
+    i++;
+   }
+  
+  return ttsmd;
+@
+
+
+1.3
+log
+@cleaned
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/soil/RCS/misc_p.c,v 1.2 1996/11/05 15:03:36 schj Alpha $ */
+d4 1
+a4 1
+ *  $Date: 1996/11/05 15:03:36 $
+d9 1
+a9 1
+"$Id: misc_p.c,v 1.2 1996/11/05 15:03:36 schj Alpha $";
+d15 1
+a15 2
+/*-
+ * void dethowsat
+d17 5
+a21 2
+ *	Determines relative saturation
+ */
+d28 1
+a28 1
+    howsat[i]=1-(soilparm[i].thetas-theta[i]);
+d31 3
+a33 2
+/*-
+ * souble detavgtheta(int layr)
+d35 3
+a37 2
+ *   determine average theta until (not including) layer layr
+ */
+d50 3
+a52 2
+/*-
+ * double smd(double drz,doubel fieldh)
+d54 4
+a57 3
+ * calculates the soil moisture deficit until depth drz (usually rooting)
+ * with fieldcapacity at fieldh.
+ */
+d67 1
+a67 1
+    thetadf = soilparm[i].thenodeF(i,fieldh) - theta[i];
+@
+
+
+1.2
+log
+@Updated to Alpha version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/soil/RCS/misc_p.c,v 1.1 1996/10/22 17:55:42 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1996/10/22 17:55:42 $
+d7 1
+a7 1
+#ifdef DDEBUG
+d9 1
+a9 1
+"$Id: misc_p.c,v 1.1 1996/10/22 17:55:42 schj Exp $";
+d11 1
+d23 1
+a23 1
+int	i;
+d25 2
+a26 3
+for (i=0; i < layers; i++){
+	howsat[i]=1-(soilparm[i].thetas-theta[i]);
+}
+d32 1
+a32 1
+ *   detavgtheta until layer layr
+d37 1
+a37 1
+  int i;
+d40 1
+a40 1
+  for (i=0; i < layr; i++){
+d42 1
+a42 1
+  }
+d49 1
+a49 1
+ * calculates the soil moisture deficit until depth drz (rooting)
+d56 9
+a64 9
+   int i=0;
+   double ttsmd=0;
+   double thetadf=0;
+   
+   while (fabs(z[i]) < fabs(drz) && i< layers){
+      thetadf = soilparm[i].thenodeF(i,fieldh) - theta[i];
+      if (thetadf > 0.0)
+	ttsmd -= thetadf * dz[i];
+      i++;
+d66 2
+a67 2
+   
+   return ttsmd;
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 2
+a2 2
+/* $Header: /homes/schj/src/vamps_0.98/src/soil/RCS/howsat.c,v 1.3 1996/04/09 12:07:54 schj Exp $ */
+/*  $RCSfile: howsat.c,v $
+d4 1
+a4 1
+ *  $Date: 1996/04/09 12:07:54 $
+d9 1
+a9 1
+"$Id: howsat.c,v 1.3 1996/04/09 12:07:54 schj Exp $";
+@

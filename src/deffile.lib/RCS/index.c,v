@@ -1,0 +1,705 @@
+head	1.9;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.9
+date	99.01.06.12.13.01;	author schj;	state Alpha;
+branches;
+next	1.8;
+
+1.8
+date	99.01.06.12.07.49;	author schj;	state Alpha;
+branches;
+next	1.7;
+
+1.7
+date	97.09.09.08.43.02;	author schj;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	97.05.09.09.26.35;	author schj;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	97.05.07.11.05.44;	author schj;	state Sta;
+branches;
+next	1.4;
+
+1.4
+date	97.05.07.11.00.29;	author schj;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	97.04.10.09.32.11;	author schj;	state Sta;
+branches;
+next	1.2;
+
+1.2
+date	96.11.05.15.06.48;	author schj;	state Alpha;
+branches;
+next	1.1;
+
+1.1
+date	96.10.22.17.59.03;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@support for index files (pointers to sections)
+@
+
+
+1.9
+log
+@Version: 0.99g
+@
+text
+@/* $Header: /home/schj/src/vamps_0.99g/src/deffile.lib/RCS/index.c,v 1.8 1999/01/06 12:07:49 schj Alpha $ 
+*/
+
+/*  $RCSfile: index.c,v $
+ *  $Author: schj $
+ *  $Date: 1999/01/06 12:07:49 $ */
+
+/*F:index.c
+ *
+ * This file contains functions to maintain a list of pointers
+ * to sections in a (large) vamps output file. It is only usefull
+ * if you process large files that need to be accessed in a more
+ * or less random way.
+ *
+ * An index can be created using @@makeindex@@ saved to a file with
+ * @@saveindex@@ and read from a file with @@readindex@@.
+ * If an index is present the @@pro_getdefault@@ function will try
+ * and use this. At present an index can only be in memory for one
+ * file at a time.
+ * */
+
+static char RCSid[] =
+"$Id: index.c,v 1.8 1999/01/06 12:07:49 schj Alpha $";
+
+#include <stdio.h>
+#include <ctype.h>
+#include <string.h>
+#include <math.h>
+#include <stdlib.h>
+#include "deffile.h"
+
+extern void *defmem (void *ptr, size_t size, char *prog);
+sectionlistt *sectionlist=NULL; /* list with pointers to sections */
+int nrsectionlist=0;/* number of items in section list */
+int usesecptr = 1;
+int firstpass=1;
+
+/*
+typedef struct {
+	char *fname;
+	sectionlistt  *sectionlist;
+}findext;
+*/
+
+/*C:getsecpos
+ *@@ long int getsecpos(const char *section)
+ *
+ * Searches for the start of @@section@@ in the current
+ * indexlist. Use only in @@pro_getdefault@@
+ *
+ * Returns offset that can be passed to @@fseek@@ or -1 if the section
+ * is not found */
+long int
+getsecpos(const char *section)
+{
+	int i;
+
+	for (i=0;i<nrsectionlist;i++)
+		if (Strcasecmp(sectionlist[i].section,section) == 0){
+			return sectionlist[i].secptr;
+		}
+
+	return -1;
+}
+
+/*C:savesecpos
+ *@@void savesecpos(const char *section, long int nowpos)
+ *
+ * Adds @@section@@ with position @@nowpos@@ to the indexlist and
+ * allocates nen memory to the seclist structure
+ *
+ * Returns: nothing
+ *
+ * Remarks: To avoid memory fragmentation new mem is allocated in
+ * @@atime@@ blocks */
+void
+savesecpos(const char *section,long int nowpos)
+{
+	const int atime = 128;
+
+	if (nrsectionlist == 0 || nrsectionlist % atime == 0){
+		sectionlist = 
+			(sectionlistt *)defmem((void *)sectionlist, 
+					       (((nrsectionlist+atime)/atime)
+						*atime) * sizeof(sectionlistt)
+					       , defprog);
+	}
+	strcpy(sectionlist[nrsectionlist].section,section);
+	sectionlist[nrsectionlist].secptr=nowpos;
+	nrsectionlist++;
+}
+
+/*C:saveindex
+ *@@ int saveindex(char *fname)
+ *
+ * Saves the current index to a file. This file can be
+ * read with @@readindex@@
+ *
+ * Returns: 0 on failure, 1 on success */
+int 
+saveindex(char *fname)
+{
+	FILE *sfile;
+	int i;
+
+	if ((sfile = fopen(fname,"w"))){
+		for (i = 0 ; i< nrsectionlist; i++){
+			(void)fprintf(sfile,"%s %ld\n",sectionlist[i].section,sectionlist[i].secptr);
+		}
+	}else{
+		(void)fprintf(stderr,"(%s) coudld not open %s\n",RCSid,fname);
+		return 0;
+	}
+
+(void)fclose(sfile);
+return 1;
+}
+
+/*C:delseclist
+ *@@ void delseclist(void)
+ *
+ * Resets the @@nrsectionlist@@ counter and frees the
+ * sectionlist memory
+ *
+ * Returns: nothing */
+void
+delseclist(void)
+{
+	if (nrsectionlist > 0 && sectionlist){
+		free(sectionlist);
+		nrsectionlist = 0;
+		sectionlist = NULL;
+	}
+}
+
+/*C:readindex
+ *@@ int readindex(char *fname)
+ *
+ * Reads an index (saved with @@saveindex@@) from a
+ * file and constructs a sectionlist
+ *
+ * Returns: 0 on error, 1 on success */
+int 
+readindex(char *fname)
+{
+	FILE *sfile;
+	sectionlistt tmpsec;
+	const int atime=128;
+
+	if ((sfile = fopen(fname,"r"))){
+		delseclist();
+		while (fscanf(sfile,"%s %ld",tmpsec.section,&tmpsec.secptr)
+				!= EOF){
+			if (nrsectionlist == 0 || nrsectionlist % atime == 0){
+				sectionlist = (sectionlistt *)
+					defmem((void *)sectionlist,
+							(((nrsectionlist+atime)
+							  /atime)*atime)
+							*sizeof(sectionlistt),
+							defprog);
+			}
+			strcpy(sectionlist[nrsectionlist].section,
+					tmpsec.section);
+			sectionlist[nrsectionlist].secptr = tmpsec.secptr;
+			nrsectionlist++;
+		}
+	}else{
+		if (defverb)
+			(void)fprintf(stderr,"(%s) could not open %s\n",
+				      RCSid,fname);
+		return 0;
+	}
+
+	(void)fclose(sfile);
+	return 1;
+}
+
+
+/*C:makeindex
+ *@@ int makeindex(char *fname)
+ *
+ * Description: Creates a section index from the file fname
+ *
+ * Returns: 0 on error, 1 on success
+ *
+ * Remarks:The index can be saved with \myref{saveindex} */
+int 
+makeindex(char *fname)
+{
+	FILE *thef;
+	char *cp,*rp;
+	long int lastpos;
+
+	/* first clear old index */
+	delseclist();
+	if (!(thef = fopen(fname,"r")))
+		return 0;
+
+	/* while ((cp = Fgets (buf, LBUFF, thef)) != (char *) NULL){ */
+	while ((cp = fgetl (thef)) != (char *) NULL){
+		while (isspace (*cp))
+			cp++;
+		if (*cp && !strchr(commchar,*cp)){
+			if (*cp == '[' && (rp = strchr (cp, ']')) != (char *) NULL) {
+				*rp = '\0';
+				cp++;
+				/* save position information */
+				/* We have to account for ^M   */
+#if defined(msdos) || defined(os2) || defined(__MSDOS__) || defined(__FAT__) || defined(__GO32__)
+				lastpos = ftell (thef) - strlen (cp) - 4;
+#else
+				lastpos = ftell (thef) - strlen (cp) - 3;
+#endif
+				savesecpos(cp,lastpos);
+				if (defverb)
+					(void)fprintf(stderr,"Indexing: %s\r",cp);
+			}
+		}
+	}
+
+	(void)fclose(thef);
+
+	if (defverb)
+		(void)fprintf(stderr,"\nDone indexing.\n");
+
+	return 1;
+}
+@
+
+
+1.8
+log
+@Version: 0.99g
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99e/src/deffile.lib/RCS/index.c,v 1.7 1997/09/09 08:43:02 schj Exp $ 
+d6 1
+a6 1
+ *  $Date: 1997/09/09 08:43:02 $ */
+d23 1
+a23 1
+"$Id: index.c,v 1.7 1997/09/09 08:43:02 schj Exp $";
+@
+
+
+1.7
+log
+@0.99e version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99c/src/deffile.lib/RCS/index.c,v 1.6 1997/05/09 09:26:35 schj Exp $ 
+d6 1
+a6 1
+ *  $Date: 1997/05/09 09:26:35 $ */
+d23 1
+a23 1
+"$Id: index.c,v 1.6 1997/05/09 09:26:35 schj Exp $";
+@
+
+
+1.6
+log
+@Updated to use fgetl in stead of Fgets. No more buffer needed.
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99c/src/deffile.lib/RCS/index.c,v 1.5 1997/05/07 11:05:44 schj Sta $ 
+d6 1
+a6 1
+ *  $Date: 1997/05/07 11:05:44 $ */
+d17 3
+d23 1
+a23 1
+"$Id: index.c,v 1.5 1997/05/07 11:05:44 schj Sta $";
+d38 7
+d209 1
+a209 1
+#if defined(msdos) || defined(os2) || defined(__MSDOS__) || defined(__FAT__)
+@
+
+
+1.5
+log
+@Stable version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99c/src/deffile.lib/RCS/index.c,v 1.4 1997/05/07 11:00:29 schj Exp $ 
+d6 1
+a6 1
+ *  $Date: 1997/05/07 11:00:29 $ */
+d20 1
+a20 1
+"$Id: index.c,v 1.4 1997/05/07 11:00:29 schj Exp $";
+a182 1
+	static char buf[LBUFF];
+d189 2
+a190 1
+	while ((cp = Fgets (buf, LBUFF, thef)) != (char *) NULL){
+@
+
+
+1.4
+log
+@Updated to reflect changes in memlist.c
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99c/src/deffile/RCS/index.c,v 1.3 1997/04/10 09:32:11 schj Sta $ 
+d6 1
+a6 1
+ *  $Date: 1997/04/10 09:32:11 $ */
+d20 1
+a20 1
+"$Id: index.c,v 1.3 1997/04/10 09:32:11 schj Sta $";
+@
+
+
+1.3
+log
+@changed layout + doc
+@
+text
+@d1 4
+a4 5
+/*
+ * $Header: /home/schj/src/vamps_0.99/src/deffile/RCS/index.c,v 1.2 1996/11/05 15:06:48 schj Alpha $ 
+ */
+/* 
+ *  $RCSfile: index.c,v $
+d6 12
+a17 2
+ *  $Date: 1996/11/05 15:06:48 $
+ */
+d20 1
+a20 1
+"$Id: index.c,v 1.2 1996/11/05 15:06:48 schj Alpha $";
+d36 1
+a36 1
+ *@@ long int getsecpos(const char *section
+d38 2
+a39 2
+ * Description: Searches for the start of section in the current
+ * indexlist
+d41 2
+a42 2
+ * Returns: offset that cann be passed to fseek or -1 if the section
+ * is not found +*/
+d52 1
+a52 1
+  
+d59 1
+a59 1
+ * Description: Adds section with position nowpos to the indexlist and
+d65 1
+a65 1
+ * @@atime@@ blocks +*/
+d70 1
+a70 1
+  
+d86 2
+a87 2
+ * Description: Saves the current index to a file. This file can be
+ * read with \ref{readindex}
+d95 1
+a95 1
+   
+d104 3
+a106 3
+   
+	(void)fclose(sfile);
+	return 1;
+d112 1
+a112 1
+ * Description: Resets the \myref{nrsectionlist} counter and frees the
+d115 1
+a115 1
+ * Returns: nothing +*/
+d129 1
+a129 1
+ * Description: Reads an index (saved with \myref{saveindex}) from a
+d132 1
+a132 1
+ * Returns: 0 on error, 1 on success +*/
+d139 1
+a139 1
+  
+d142 2
+a143 1
+		while (fscanf(sfile,"%s %ld",tmpsec.section,&tmpsec.secptr) != EOF){
+d146 5
+a150 4
+					defmem((void *)sectionlist, 
+					       (((nrsectionlist+atime)/atime)
+						*atime) *sizeof(sectionlistt),
+					       defprog);
+d153 1
+a153 1
+			       tmpsec.section);
+d158 3
+a160 1
+		(void)fprintf(stderr,"(%s) coudld not open %s\n",RCSid,fname);
+d176 1
+a176 1
+ * Remarks:The index can be saved with \myref{saveindex} +*/
+d189 1
+a189 1
+  
+d193 1
+a193 1
+		if (*cp && *cp != '#'){
+d210 1
+a210 1
+  
+d212 1
+a212 1
+	
+@
+
+
+1.2
+log
+@Updated to Alpha version
+@
+text
+@d2 1
+a2 1
+ * $Header: /home/schj/src/vamps_0.99/src/deffile/RCS/index.c,v 1.1 1996/10/22 17:59:03 schj Exp $ 
+d7 1
+a7 1
+ *  $Date: 1996/10/22 17:59:03 $
+a9 1
+
+d11 1
+a11 1
+"$Id: index.c,v 1.1 1996/10/22 17:59:03 schj Exp $";
+d26 8
+d37 1
+a37 1
+  int i;
+d39 4
+a42 4
+  for (i=0;i<nrsectionlist;i++)
+    if (Strcasecmp(sectionlist[i].section,section) == 0){
+      return sectionlist[i].secptr;
+    }
+d44 1
+a44 1
+  return -1;
+d47 10
+d60 1
+a60 1
+  const int atime = 128;
+d62 10
+a71 9
+  if (nrsectionlist == 0 || nrsectionlist % atime == 0){
+    sectionlist = 
+      (sectionlistt *)defmem((void *)sectionlist, 
+			     (((nrsectionlist+atime)/atime)*atime) 
+			     * sizeof(sectionlistt), defprog);
+     }
+  strcpy(sectionlist[nrsectionlist].section,section);
+  sectionlist[nrsectionlist].secptr=nowpos;
+  nrsectionlist++;
+d74 7
+d84 2
+a85 2
+   FILE *sfile;
+   int i;
+d87 8
+a94 6
+   if ((sfile = fopen(fname,"w"))){
+      for (i = 0 ; i< nrsectionlist; i++){
+	(void)fprintf(sfile,"%s %ld\n",sectionlist[i].section,sectionlist[i].secptr);
+      }
+   }else
+       return 0;
+d96 2
+a97 2
+   (void)fclose(sfile);
+   return 1;
+d100 7
+d108 1
+a108 1
+delseclist()
+d110 5
+a114 5
+  if (nrsectionlist){
+    free(sectionlist);
+    nrsectionlist = 0;
+    sectionlist = NULL;
+  }
+d117 7
+d127 3
+a129 3
+  FILE *sfile;
+  sectionlistt tmpsec;
+  const int atime=128;
+d131 22
+a152 17
+  if ((sfile = fopen(fname,"r"))){
+    delseclist();
+    while (fscanf(sfile,"%s %ld",tmpsec.section,&tmpsec.secptr) != EOF){
+      if (nrsectionlist == 0 || nrsectionlist % atime == 0){
+    	sectionlist = 
+	  (sectionlistt *)defmem((void *)sectionlist, 
+				 (((nrsectionlist+atime)/atime)*atime) * 
+				 sizeof(sectionlistt), defprog);
+      }
+    strcpy(sectionlist[nrsectionlist].section,tmpsec.section);
+    sectionlist[nrsectionlist].secptr = tmpsec.secptr;
+    nrsectionlist++;
+    }
+  }else
+    return 0;
+  (void)fclose(sfile);
+  return 1;
+d156 8
+a163 1
+ 
+d167 9
+a175 9
+  FILE *thef;
+  char *cp,*rp;
+  long int lastpos;
+  static char buf[LBUFF];
+
+  /* first clear old index */
+  delseclist();;
+  if (!(thef = fopen(fname,"r")))
+    return 0;
+d177 9
+a185 14
+  while ((cp = Fgets (buf, LBUFF, thef)) != (char *) NULL)
+    {
+      while (isspace (*cp))
+	cp++;
+      if (*cp && *cp != '#')
+	{
+	  if (*cp == '[' && (rp = strchr (cp, ']')) != (char *) NULL)
+	    {
+	      *rp = '\0';
+	      cp++;
+	      /* save position information */
+	      /*
+	       * We have to account for ^M 
+	       */
+d187 1
+a187 1
+	      lastpos = ftell (thef) - strlen (cp) - 4;
+d189 1
+a189 1
+	      lastpos = ftell (thef) - strlen (cp) - 3;
+d191 5
+a195 4
+	      savesecpos(cp,lastpos);
+	      if (defverb)
+		(void)fprintf(stderr,"Indexing: %s\r",cp);
+	    }
+a196 1
+    }
+d198 6
+a203 4
+  (void)fclose(thef);
+  if (defverb)
+     (void)fprintf(stderr,"\nDone indexing.\n");
+  return 1;
+a204 7
+
+
+
+
+
+
+
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d2 1
+a2 1
+ * $Header: /homes/schj/src/vamps_0.99/src/deffile/RCS/deffile.c,v 1.25 1996/09/06 12:24:18 schj Exp $ 
+d5 1
+a5 1
+ *  $RCSfile: deffile.c,v $
+d7 1
+a7 3
+ *  $Date: 1996/09/06 12:24:18 $
+ *  $Log: deffile.c,v $
+ * 
+d12 1
+a12 1
+"$Id: deffile.c,v 1.25 1996/09/06 12:24:18 schj Exp $";
+d21 2
+a22 2
+#define MAXSEC 9128
+sectionlistt sectionlist[MAXSEC]; /* list with pointers to sections */
+d43 11
+a53 5
+  if (nrsectionlist<MAXSEC && getsecpos(section) == -1){
+    strcpy(sectionlist[nrsectionlist].section,section);
+    sectionlist[nrsectionlist].secptr=nowpos;
+    nrsectionlist++;
+  }
+d73 10
+d86 21
+a106 11
+   FILE *sfile;
+   int i=0;
+   
+   if ((sfile = fopen(fname,"r"))){
+      while (i < MAXSEC && fscanf(sfile,"%s %ld",sectionlist[i].section,&sectionlist[i].secptr) != EOF)
+	i++;
+   }else
+     return 0;
+   nrsectionlist = i;
+   (void)fclose(sfile);
+   return 1;
+a109 1
+static char buf[LBUFF];
+d117 1
+d120 1
+a120 1
+  nrsectionlist = 0;
+d138 1
+a138 1
+#if defined(msdos) || defined(os2) || defined(__MSDOS__)
+d152 1
+a152 1
+     (void)fprintf(stderr,"\ndone indexing.\n");
+@

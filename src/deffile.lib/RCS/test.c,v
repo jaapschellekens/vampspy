@@ -1,0 +1,135 @@
+head	1.5;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.5
+date	99.01.06.12.13.01;	author schj;	state Alpha;
+branches;
+next	1.4;
+
+1.4
+date	99.01.06.12.07.49;	author schj;	state Alpha;
+branches;
+next	1.3;
+
+1.3
+date	97.09.09.08.43.02;	author schj;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	97.05.09.09.26.35;	author schj;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	97.05.07.11.00.29;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@Testing prog
+@
+
+
+1.5
+log
+@Version: 0.99g
+@
+text
+@#include <stdio.h>
+#include "deffile.h"
+
+char tf1[] = "test1.ini";
+char tf2[] = "test2.ini";
+char tf3[] = "test3.ini";
+char tfo1[] = "test1.out";
+char tfo2[] = "test2.out";
+char tfo3[] = "test3.out";
+main ()
+{
+	defverb = 3;
+	(void)rinmem(tf1);
+	(void)rinmem(tf2);
+	(void)rinmem(tf3);
+	(void)writememini (tfo1, tf1,NULL);
+	(void)writememini (tfo2, tf2,NULL);
+	(void)writememini (tfo3, tf3,NULL);
+	delfile(tf3);
+	delfile(tf2);
+	delfile(tf1);
+	makeindex(tf2);
+	saveindex("test2.idx");
+	delseclist();
+	makeindex(tf1);
+	saveindex("test1.idx");
+	delseclist();
+	makeindex(tf3);
+	saveindex("test3.idx");
+	delseclist();
+}
+@
+
+
+1.4
+log
+@Version: 0.99g
+@
+text
+@@
+
+
+1.3
+log
+@0.99e version
+@
+text
+@@
+
+
+1.2
+log
+@no change
+@
+text
+@d4 7
+a10 6
+/*
+[test]
+tvar = Yes, found it
+this one = Yes, found it to
+*/
+main()
+d12 19
+a30 14
+	rinmem("1");
+	writememini("tt","1",NULL);
+	printf("Now reading 1...\n");
+	rinmem("1");
+	printf("Now deleting 1...\n");
+	delmemlist();
+	printf("Now reading 1...\n");
+	rinmem("1");
+	printf("Now deleting 1...\n");
+	delmemlist();
+	printf("Now reading 2...\n");
+	rinmem("2");
+	printf("Now deleting 2...\n");
+	delmemlist();
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d11 2
+a12 2
+	rinmem("2");
+	writememini("tt","2",NULL);
+@

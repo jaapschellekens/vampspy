@@ -1,0 +1,117 @@
+head	1.3;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.3
+date	99.01.06.12.13.01;	author schj;	state Alpha;
+branches;
+next	1.2;
+
+1.2
+date	99.01.06.12.07.49;	author schj;	state Alpha;
+branches;
+next	1.1;
+
+1.1
+date	97.04.07.19.43.25;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@header fot topsystem
+@
+
+
+1.3
+log
+@Version: 0.99g
+@
+text
+@/* $Header: /home/schj/src/vamps_0.99g/src/topsys/RCS/topsys.h,v 1.2 1999/01/06 12:07:49 schj Alpha $ */
+/* 
+ *  $RCSfile: topsys.h,v $
+ *  $Author: schj $
+ *  $Date: 1999/01/06 12:07:49 $ */
+
+#ifdef DEBUG
+static char RCSid[] =
+"$Id: topsys.h,v 1.2 1999/01/06 12:07:49 schj Alpha $";
+#endif
+
+/* Topsys functions to be called from main() */
+
+extern void init_top(int toptype);
+extern void (*tstep_top) (int tstep, double *precipitation,
+		double *interception, double *transpiration,
+		double *soilevaporation);
+extern void (*pre_top) ();
+extern void (*post_top) ();
+
+#define TOP_NOOP 0	/* EMPTY SYSTEM */
+#define TOP_SOIL 1	/* bare soil */
+#define TOP_FUL_CANOP 2	/* full canopy */
+#define TOP_PAR_CANOP 3	/* partial canopy */
+#define TOP_SCRIPT 4	/* scripting language base top-system */
+#define TOP_PRE_CANOP 5	/* all canopy stuff precalculated */
+#define TOP_OCANOP 6	/* old (0.99b) canopy.c */
+
+typedef struct {
+	unsigned int	id; /* is actually redundant ...*/
+	char	desc[128];
+	void (*tstep_top) (int tstep, double *precipitation,
+				double *interception, double *transpiration,
+				double *soilevaporation);
+	void (*pre_top) ();
+	void (*post_top) ();
+} ttop;
+
+#define NRTOPSYS (sizeof  toptype / sizeof toptype[0])
+@
+
+
+1.2
+log
+@Version: 0.99g
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99c/src/topsys/RCS/topsys.h,v 1.1 1997/04/07 19:43:25 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1997/04/07 19:43:25 $ */
+d9 1
+a9 1
+"$Id: topsys.h,v 1.1 1997/04/07 19:43:25 schj Exp $";
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99c/src/environ/RCS/envout.c,v 1.5 1997/01/16 15:01:32 schj Exp $ */
+d3 1
+a3 1
+ *  $RCSfile: envout.c,v $
+d5 1
+a5 1
+ *  $Date: 1997/01/16 15:01:32 $ */
+d9 1
+a9 1
+"$Id: envout.c,v 1.5 1997/01/16 15:01:32 schj Exp $";
+d21 19
+a39 5
+#define TOP_SOIL 0	/* bare soil */
+#define TOP_FUL_CANOP 1	/* full canopy */
+#define TOP_PAR_CANOP 2	/* partial canopy */
+#define TOP_SCRIPT 3	/* scripting language base top-system */
+#define TOP_PRE_CANOP 4	/* all canopy stuff precalculated */
+@

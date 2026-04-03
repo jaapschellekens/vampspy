@@ -1,0 +1,1188 @@
+.TH vamps 5 "Version VERSION"
+
+.SH NAME
+* \- files in vamps output/input format
+
+.SH DESCRIPTION
+.B vamps
+(see
+.BR vamps (1)
+for a description) reads it's options and most of the data needed for
+modeling from the input file. This file is in plain ascii format and
+is divided in several sections.  An input file must be created before
+running
+.BR vamps .
+An ascii editor or a word-processing package can be used to create the
+input file.  This manual page can be used a a reference when creating
+an input file for vamps. You probably can have a faster start by
+looking in the examples directory and taking one of the example files
+as a start.
+
+The input file format for vamps is much like Microsoft Windows .ini
+files.  All names and sections are case insensitive.  The case of
+string variables is unaltered so filenames are case-sensitive if the
+operating system is.  The file is divided into sections which each
+contain variables that have some connection with each other.  Each
+variable name is followed by an equal sign ('=') after which the value
+of the variable is placed.  Example:
+
+.br
+[vamps]
+.br
+verbose = TRUE
+.br
+# This is a comment
+.br
+[environment]
+.br
+caseid = Interception test file. Bisley catchment.\\
+.br
+Summer of 1995
+.br
+
+The \\ character may be use to break up long strings over more than
+one line. Only the first '=' sign is significant. Spaces within the
+names are copied verbatim, and thus become part of the name. This
+makes the following construction  legal:
+
+.br
+[vamps]
+.br
+output mode = This is ('=') a nonsense\
+.br
+example.
+.br
+
+In this case the variable name in section 'vamps' is 'output mode' and
+it's value is 'This is ('=') a nonsense example'.
+
+.B  vamps
+uses six types of variables: 
+.I (1)
+floats (floating point
+numbers), 
+.I (2)
+arrays (a row of floating point numbers separated
+by whitespace), 
+.I (3) 
+strings (a series of characters), 
+.I (4)
+integers (whole signed numbers),
+.I (5)
+characters ( a single printable character) and 
+.I (6)
+boolean (special kind
+of integer, either 0 or 1 (FALSE of TRUE), NO or YES). 
+
+.SH ALLOWED SETNAMES
+.TP
+.B pre
+precipitation [cm/day] 
+.TP
+.B rlh
+relative humidity [%] 
+.TP
+.B hea
+head at bottom [cm] 
+.TP
+.B rdp
+rooting depth [cm] 
+.TP
+.B tem
+dry bulb temp [oC] 
+.TP
+.B gwt
+ground-water table [cm] 
+.TP
+.B inr
+interception [cm/day] 
+.TP
+.B pev
+potential evaporation [cm/day] 
+.TP
+.B spe
+potential soil evaporation [cm/day] 
+.TP
+.B ptr
+potential transpiration [cm/day] 
+.TP
+.B qbo
+flow through bottom of profile [cm/day] 
+.TP
+.B vol
+actual water content [cm] 
+.TP
+.B avt
+average theta in profile 
+.TP
+.B lai
+leaf area index 
+.TP
+.B sca
+canopy storage [cm???] 
+.TP
+.B ira
+incoming radiation [W/m2] 
+.TP
+.B nra
+net radiation [W/m2] 
+.TP
+.B win
+windspeed [m/s] 
+
+
+.SH SUMMARY OF INPUT FILE
+This section list all the variables and section recognized by the
+.B vamps
+model. You will need this list badly when  you construct an input file
+for vamps. Once the  graphical  preprocessor is finished  things  will
+become a little easier.
+
+.B vamps
+has been developed using the
+.B swap94
+FORTRAN  code as a starting point.   Most names of  variables have been
+changed (sorry) but  some  of  the variable names   as well  as  their
+physical meaning have not altered.
+
+
+.SH [time]
+.TP 
+.B steps
+integer value specifying the number of steps in the current simulation.
+This value should be smaller or equal to the number of entries in the
+precipitation file.
+.TP
+.B starttime
+day at   which  the simulation   should start  If this  value   is not
+specified simulation starts at   the  first step in  the  precipitation
+input file. If both starttime and startpos are specified starttime
+will be used. (NOT WORKIING AT PRESENT)	
+.TP
+.B startpos
+position  (line) in precipitation  input used as  start (note that the
+first line is number 0) (NOT WORKIING AT PRESENT) 
+
+.SH [run]
+.TP
+.B outputfile
+Filename to save output to. You can override this with the \-o command
+line option.
+.TP
+.B runid
+Not used at moment
+.B description
+String with some sort of description
+
+.SH [xout]
+.TP
+.B filename
+Filename for extra output in column-type format. No xtra output is generated
+if this variable is not present.
+
+.SH [determine]
+.TP
+.B canopy
+determine canopy (see section canopy)
+.TP
+.B evaporation
+determine actual evaporation (see section evaporation)
+.TP
+.B pevaporation
+determine potential evaporation (see section pevaporation)
+.TP
+.B soilmoisture
+determine soil-moisture profile (see section soil)
+
+.SH [pevaporation]
+.TP 
+.B method
+0 = potential evaporation via Penman E0 (Need: refrad, netrad, rhumid,
+windspeed, temp, inrad)
+.br
+1 =  potential evaporation   via  Penman E0 (using   sunratio)  (Need:
+sunratio, rhumid, windspeed, temp, inrad)
+.br
+2 and 3 = not yet done
+.br
+4 =  potential evaporation using    Makkink (Need: rhumid,  windspeed,
+temp, inrad)
+
+.SH [evaporation]
+.TP
+.B method
+0 = evaporation equal to potential evaporation
+.br
+1 = multiply potential evaporation by a crop factor (need cropfac)
+.br
+2 = calculate actual evaporation using the Penman-Montheith formula
+.TP
+.B cropfac
+A  floating point number  representing the crop  factor with which the
+potential evaporation is to be multiplied to yield actual evaporation.
+
+
+.SH [interception]
+.TP
+.B method
+0, 1 , 2, 3
+.br
+gash, rutter laifrac or calder
+.TP
+.B gamma
+gamma in calder equation
+.TP
+.B delta
+delta in calder equation
+.TP
+.B E_avg/R
+Evaporation/Average Rainfall during a storm   in gash. If this is  not
+set penman/Montheith will be used with Ra set to zero.
+.TP
+.B p_tr
+Fraction of water diverted to the trunk (gash, rutter)
+.TP
+.B p_f
+Free throughfall coefficient (gash, rutter)
+.TP
+.B S
+Canopy storage in cm (gash, rutter)
+.TP
+.B gashm
+Either 1 or 0. If set to 1 an adapted version of gash is used. This
+version should work for time-steps smaller then 1 day. Default = 0
+.TP
+.B laifrac
+the canopy interception coefficient
+.TP
+.B lai
+The canopy leaf area index. This is needed for the laifrac method or
+for gash if the gash parameters are given per unit lai. If
+it is not present it is searched in the canopy section.
+
+.SH [top]
+.TP
+.B system
+Integer number specifying the topsystem to use.
+.br
+0: Empty topsystem
+.br
+1: Bare soil
+.br
+2: Full canopy
+.br
+3: Partial canopy
+.br
+4: All canopy stuff precalculated
+.br
+5: Old canopy.c topsystem
+.br
+6: Scripting language based top-system
+.br
+.TP
+.B soilevaporation 
+Method for determining soilevaporation (if the notree topsystem is used).
+In this case interception and
+transpiration are always zero. All available energy is used for soil
+evaporation. At the moment soilevaporation can be calculated using one of
+the folowing methods:
+.br
+0	E0SUNRAD
+.br
+1	E0NETRAD
+.br
+2	PENMON_NOSOIL
+.br
+3	PENMON_SOIL
+.br
+4	MAKKINK
+.br
+
+The following datasets are
+.I always
+needed: rlh, tem.  For MAKKINK: ira. For E0SUNRAD: ira, win, sur.
+For E0NETRAD: ira, ref, win, nra. 	
+
+
+.SH [canopy]
+Although you don't have to use the canopy module it is recommend that
+you do so if possible. The other methods of determining transpiration,
+interception etc. don't have a close interaction with the soil modules
+and usually provide poorer results.
+
+.TP
+.B layers
+Number of canopy layers (this is largely determined by the accuracy of your
+LAI profile). At the moment only one layer is allowed.
+.TP
+.B Rnet_absorb
+The fraction of the total radiation absorbed by the canopy (0< <1). The remaining
+amount will be used for soil evaporation.
+.TP
+.B transpiration
+Which transpiration equation should be used.
+.br
+2 = penman Montheith
+.br
+3 = read from ptr in the ts section
+.br
+.TP
+.B z
+Height of the canopy (m)
+.TP
+.B z_0
+Aerodynamic roughness length (m)
+.TP
+.B d
+Zero plane displacement length (m)
+.TP
+.B rs
+Canopy resistance (s/m). If this is not specified the user defined regression 
+equation 
+.B estrs()
+will be used.
+
+.TP
+.B drytime
+If this variable is set this value (in days) will be used to determine
+how long it takes for the canopy to dry. 
+
+.TP
+.B wetevap
+If this variable is set this value (in cm/day) will be used to determine
+the canopy wat evaporation rate in stead of Penman-Montheith with
+Rs set to zero.
+
+.SH [roots]
+.TP 
+.B depth
+depth of the root zone in cm. If you want rooting depth to change
+in time you should  use the drootz variable in the ts section.
+.TP
+.B swsink
+0 = sink term according to Feddes. (Need: 
+.BR hlim1\ hlim2u\ hlim2l\ hlim3h\ hlim3l\ hlim4 )
+.br
+1 = sink term according to Hoogland. (Need:
+.BR hlim1\ hlim2u\ hlim2l\ hlim3\ hlim4 )
+.TP
+.B swhypr
+0 = linear relation between the points 
+.B hlim3
+and 
+.B hlim4 
+of the sink term.
+.br
+1 = hyperbolic relation between the points 
+.B hlim3
+and
+.B hlim4
+of the sink term.
+.TP
+.B swupfu
+0 = water uptake function according to Feddes.
+.br
+1 = water uptake function according to Hoogland.
+.br
+2 = water uptake function according to Prasad (1988).
+.br
+3 = simple uptake function (no reduction but according to rootfrac)
+.TP
+.B cofsza
+Intercept a in Feddes et. al 1988 (only needed if 
+.B swupfu 
+=1.
+.TP
+.B cofszb
+slope b in Feddes et. al. 1988. (only needed if 
+.B swupfu 
+=1.
+.TP
+.B hlim1
+pressure head value (cm) below which roots start to extract water from
+the upper soil layer (starting point).
+.TP
+.B hlim2u
+pressure head value (cm) below which roots start to extract water optimally from
+the upper soil layer.
+.TP
+.B hlim2l
+as above, but for all lower soil layers.
+.TP
+.B hlim3h
+pressure head value (cm) below which roots cannot extract water optimally any more,
+for a High pot. transpiration rate equal to 0.5 cm/d (limiting point).
+.TP
+.B hlim3l
+as above, but for low pot. transpiration rate equal to 0.1 cm/d.
+.TP
+.B hlim3
+pressure head value (cm) below which roots cannot extract water any more (limiting point).
+
+.TP
+.B hlim4
+pressure head value (cm) below which no water uptake by roots is possible (wilting point).
+
+.SH [ts]
+The ts section has one entry that 
+.I must
+be present:
+pre.  This set contains the precipitation data. The precipitation file
+is important because it also determines the time-steps at which output
+is calculated. 
+
+The file format consists of colums separeted by whitespace (space
+or tabs).  
+.B Vamps
+assumes the first column to hold the time and the
+second column to hold the value. You can override these assumptions by
+appending  ,xcol,ycol to the filename. Counting begins at zero.
+
+The ts section can be handy if you don't like the method(s) which
+.B vamps
+can use for determining things like potential evaporation.
+Simply put them in here and
+.B vamps
+will use the values you supplied
+instead.
+
+The following sets are allowed in the ts section:
+
+.TP
+.B pev
+name of file with potential evaporation data [cm] (if not calculated)
+.TP
+.B ptr
+name of file with potential transpiration data [cm] (if not calculated)
+.TP
+.B pre
+name of file with precipitation data [cm]
+.TP
+.B rdp
+name of file with rooting depth [cm] in time. You need to specify
+at least three points. Other points will be interpolated using
+a spline is they don't exist. See the file ts_spl.c for the
+interpolation routine.
+.TP
+.B qbo
+name of the file with given flux at bottom node [cm] (bottom condition
+1). You need to specify at least three points. Other points will be
+interpolated using a spline is they don't exist. See the file ts_spl.c
+for the interpolation routine.
+.TP
+.B hea
+name of the file with given head at bottom node [cm] (bottom condition 
+4). You need to specify at least three points. Other points will be
+interpolated using a spline is they don't exist. See the file ts_spl.c
+for the interpolation routine.
+.TP
+.B gwt
+name of the file with given groundwater level [cm] (bottom condition 
+0). You need to specify at least three points. Other points will be
+interpolated using a spline is they don't exist. See the file ts_spl.c
+for the interpolation routine.
+.TP
+.B rlh
+name of the file containing relative humidity data [%].
+.TP
+.B tem
+name of the file containing temperature data [oC].
+.TP
+.B inr
+name of the file containing incoming radiation data [W/m2]
+.TP
+.B spe
+name of the file containing potential soil evaporation data [cm]
+.TP
+.B lai
+name of the file containing leaf area index information
+.TP
+.B sca
+name of the file containing canopy storage information [cm?]
+.TP
+.B win
+name of the file containing windspeed data [m/s]
+.TP
+.B nra
+name of the file containing net radiation data [W/m2]
+
+
+
+
+.SH [soil]
+.TP
+.B outskip
+Skip every
+.B outskip
+time-steps in output
+.TP
+.B bottom
+Bottom boundary condition:
+.br
+0 = daily groundwater table depth (cm) is input
+.br
+1 = Given flux 
+.br
+2 = seepage or infiltration from/to deep groundwater
+.br
+3 = Flux calculated as a function of h
+.br
+4 = given pressure-head (gwlevel) at bottom
+.br
+5 = Zero flux at bottom
+.br
+6 = Free drainage
+.TP
+.B initprof
+0 = water content profile (need theta_initial array in the soil section) 
+.br
+1 = pressure head profile (need h_initial array in the soil section) 
+.br
+2 = Calculate pressure head profile (need gw_initial in soil section)
+.TP
+.B gw_initial
+initial ground-water level in cm below field-level (needed if 
+.B 
+initprof = 2)
+.TP
+.B swredu
+Reduction of soil evaporation 
+.br
+0 = no reduction 
+.br
+1 = the Black (1969) model is used
+.br
+2 = the Boesten (1986) model is used
+.br
+3 = an adapted version of the Boesten (1986) model is used. This version takes into
+account the actual moisture condition of the soil surface.
+.TP
+.B cofred
+the factor alfa in Black or Beta in Boesten. This is not needed for swredu = 0.
+.TP
+.B smooth
+Integer value giving the size of the running average used for smoothing 
+th ksat, theta_saturation and residual_water profile. Set to zero for no smoothing.
+.TP
+.B gwlevel
+water level at bottom of profile, needed if bottom = 4
+.TP
+.B layers
+number of soil layers in calculation (how many real (physical) layers
+exist is specified in the layers_n sections)
+.TP
+.B pondmx
+maximum amount of ponding (in cm) at the top of the profile, defaults to 0.0.
+.TP
+.B speed
+Integer value ranging from 1 (slow) to 6 (fastest) determining
+the trade-of between calculation accuracy and speed. This options
+combines the settings in dtmin, thetol, solvemet, mktable,
+maxitr and noit.
+If you also specify one of these variables seperately the settings
+from speed are overridden. Default  for speed is 3.
+.TP
+.B dtmax
+maximum timestep (in days) in soil module. Lower this one if you
+experience large mass balance errors. 
+.TP
+.B tm_mult
+Multiplier used in estimating dt. Default = 3. Lower this if you have
+large mass balance errors.
+.TP
+.B dtmin
+minimum timestep (in days) in soil module. If you set dtmin and
+dtmax to equal values 
+.B vamps
+is forced to use a fixed timestep.
+If you suspect
+.B vamps
+could run faster increasing this variable could help. On the other
+hand itterations in vamps are very expensive (in time) so if vamps
+starts itterating a lot to get convergence you'll end up with
+a slow run.
+.TP
+.B maxitr
+Maximum number of iterations in the soil module. Iterations
+are only performed if noit != 1.
+.TP
+.B thetol
+Theta tolerance. If noit != 1 (by default) 
+.B vamps
+will use this value to check if the solution is good enough and
+perform iterations if needed. Setting this value to high or low
+gives poor results. The default value usually works fine. If
+you have no problems you better leave this one alone. Usually
+this variable should be between 1.0E-2 and 1.0E-5.
+See also
+.B mbck
+.TP
+.B mbck
+If set to one
+.B vamps
+uses a simple mass balance calculation to check convergence in stead
+of using
+.B thetol.
+This method is experimental but it is usually faster (depending on the
+.B mbalerr
+variable) for the same accuracy as the original method (usign thetol).
+The thetol variable is still used in estimating the initial
+timestep.
+See also
+.B mbalerr
+.TP
+.B mbalerr
+If 
+.B mbck
+is set you can use this variable to determine than required mass
+balance accuracy at each timestep. A value between 1.0E-2 and 1.0E-5 is
+usually the best. Default is 0.5E-3
+.TP
+.B solvemet
+Determines how vamps solves the equation matrix.
+If set to 0 the default (tridiagonal) solution is used.
+If set to 1 the soil module will always treat the solution as a band-diagonal
+matrix. If set to 2 a very general solution is used. This solution
+includes a step to regain full machine precision but is rather slow.
+.TP
+.B noit
+If set to 1 the soil module won't check for convergence of solution.
+It assumes that the initial maximum dt is a good guess. Things can be
+quit a lot faster in all cases but can give poor results in some cases.
+.TP
+.B mktable
+if set to true 
+.B vamps
+will create look up tables for the theta vs K relation, and use those
+in stead of the function during iteration.  By default this option is
+set to false. Set to true to speed up calculation. The solution can
+become instable at high suction heads. In stead of letting 
+.B vamps
+generate the look-up tables you can also read pre-made tables
+using the method option in the layer_n section.
+
+Depending on the problem, the amount of memory you have installed, the
+floating-point performance of you CPU and the optimizations your
+compiler can make, this option can speed up calculations by 50%. You will
+lose some precision in the process. By default the program uses 300
+points long look-up tables. Use the tablesize variable in the soil
+section to change this value.
+
+There is no exact way to determine the speed increase you will
+get. For example, on a 66Mhz 486DX2 running Linux, a 25% speed
+increase was established without compiler optimization (gcc) while a
+50% speed increase was measured when de program was compiled with
+optimization. It seems that gcc does a better job optimizing the look
+up procedure than the intensive floating point calculations in the van
+Genuchten equation. On a RISC processor with better floating point
+performance this balance will be different, and you probably won't get
+speed increases of 50%. On a rs6000 365 running AIX 3.2 the mktables
+option resulted in a 23% speed increase.
+
+.TP
+.B estdmc
+if set to true and the mktable var is also true the dmc table will be
+made using ts_slopes and the Pf curve in stead of the h2dmc function. If
+you use S-Lang soil functions and you define estdmc to be true you don't
+need the h2dmc function.
+
+.TP
+.B tablesize
+Sets the size of the look-up tables. Defaults to 300. Increase this
+for better accuracy at a penalty of using more memory and some
+performance loss. Provided the program fits in physical memory table
+sizes up to 1200 points still give some speed improvements compared to
+not using the look-up tables.  Sometimes decreasing this to 80 or so
+can be done without much loss of accuracy.
+.TP
+.B dumptables
+If set to true the look up tables will be dumped to the initial
+section of the output-file; x and y in separate variables.
+.TP
+.B verbose
+verbose level in soil module (0 = silent)
+.TP
+.B smddepth
+If this variable is set the SMD (soil moisture deficit) will
+be calculated until this depth. Otherwise the rooting depth
+will be taken.
+.TP
+.B fieldcap
+Head in cm at which the soil is at field capacity. Needed for
+determination of soil moisture deficit. Default = -100.0
+.SH [drainage]
+.TP
+.B method
+Variable which controls the type of lateral drainage.
+.br
+0 = no lateral drainage
+.br
+1 = TOPOG type drainage (only at saturation)
+.br
+2 = allow also unsaturated lateral flow
+.br
+If the drainage variable is larger then zero the 
+.B slope
+variable must be set also.
+.TP
+.B slope
+Slope used in the calculation of lateral drainage
+.TP
+.B exclude
+Array with layers in which lateral drainage is not allowed. 
+0 <= value < layers
+example:
+.br
+exclude = 12 1 23 45
+.br
+You can use a construction like this and a no-flow bottom boundary
+to simulate a lysimeter.
+
+.SH [soilsectionname]
+This section can have 
+.I any
+name and contains the soil specific info.  The soilsection variable
+in the layer_n section refers to this section.
+.TP
+.B method
+method for k vs theta relation:
+.br 
+0 = clapp/hornberger 
+.br
+1 = van Genuchten 
+.br
+2 = not yet implemented
+.br
+3 = van Genuchten parameters are determined from theta vs pf
+pairs. Given values of alpha and n are used as initial
+guesses. Required variables: theta (array of values) and pf (array of
+values). Optional: alpha and n.  The exponent l is set to 0.5.
+.br
+4 = read 
+.B TOPOG 
+.B _soil 
+soil tables. 
+.B vamps
+Has the ability to read and use soil tables generated by the 
+.B TOPOG
+.B _soil 
+program. It will then use these look-up tables in stead of
+using direct calculations. In future 
+.B vamps 
+will be distributed with it's own version of the 
+.B _soil 
+program
+.br
+5 = user defined S-Lang functions
+.br
+See the file soilf.sl in the lib directory for more info.
+In this case the user must define the following functions:
+.br
+thenode...
+
+.TP
+.B description
+an optional description of the soil layer
+.TP
+.B ksat
+saturated hydraulic conductivity of the layer
+.TP
+.B kh/kv
+Ratio of Ksat horizontal divided by Ksat vertical. This
+is only used if you use lateral drainage (see drainage section).
+By default this is set to one.
+.TP
+.B thetas
+theta at saturation (porosity)
+.TP 
+.B psisat
+Head at saturation (air entry value) needed for Clapp/Hornberger
+.TP
+.B b
+Factor b in Clapp/Hornberger
+.TP 
+.B theta_residual
+residual amount of soil moisture
+.TP
+.B alpha
+alpha in van Genuchten
+.TP
+.B l
+l in van Genuchten (use 0.5 if not determined)
+.TP
+.B n
+n in van Genuchten
+.TP
+.B tablefile
+File from which the soil table should be read. Only needed if method = 3.
+.TP
+.B tablefiletype
+Type of the table-file. All filetypes can have comment-lines starting with #
+.br
+1) TOPOG 
+.B vamps
+only uses columns 1, 3 4 and 5.
+.br
+2) White space separated columns (psi theta k) in this case the differential
+moisture capacity (d_theta/d_phi) is estimated using ts_slopes.
+.br
+3) White space separated columns (psi theta k diff_moist)
+.br
+Note that all tables should be made with 
+.I descending 
+theta values.
+
+
+.SH [layer_n]
+Only the layer_0 section is a must. The rest is only needed if you
+have more than one physical soil layer.
+
+.TP
+.B thickness
+thickness of the layer (in cm)
+.TP
+.B soilsection
+Name of the section that contains the soiltype info for this layer (node).
+
+
+.SH SUMMARY OUTPUT FILE
+
+.SH [header]
+.TP
+.B run_start_time
+Time at which the run started.
+.TP
+.B command
+The command that made  this file. This  can be something like:
+.br
+ vamps -v -o myfile infile
+.TP
+.B defaultsfile
+The name of the file from which the program defaults for this run have
+been read.
+.TP
+.B infilename
+The name of the vamps input file used in this run
+
+.SH [initial]
+.TP
+.B steps
+Number of time-steps in this run.
+.TP
+.B layers
+Number of soil layers in this run.
+.TP
+.B volini
+Initial water content of the profile.
+.TP
+.B volsat
+Water content of the the profile at saturation.
+.TP
+.B z
+Array with actual depth (in cm) of each layer
+.TP
+.B theta
+Initial water content of the profile for each layer
+.TP
+.B h
+Initial head of the profile for each layer.
+.TP
+.B k
+initial unsaturated conductivity for each layer
+.TP
+.B as_above
+Variable which shows if a layer inherited setting from the above layer
+or not.
+
+.SH [t_n]
+.TP
+.B t
+Actual date at timestep n.
+.TP
+.B ra
+Aerodynamic resistance
+.TP
+.B rs
+Canopy resistance
+.TP
+.B rho
+Density of air
+.TP
+.B ea
+Actual vapour pressure
+.TP
+.B es
+Vapour pressure at saturation
+.TP
+.B gamma
+The factor gamma in Penman-Montheith
+.TP
+.B slope
+Slope of the vapour pressure deficit vs ?? line (Penman-Montheith)
+.TP
+.B L
+L in Penman-Montheith
+.TP
+.B Cp
+Cp in Penman-Montheith
+.TP
+.B interception
+Canopy interception in cm
+.TP
+.B transpiration
+Potential transpiration of the canopy
+.TP
+.B stemflow
+Amount of stemflow in cm
+.TP
+.B throughfall
+Amount of throughfall in cm
+.TP
+.B dt
+Last timestep (size) of time t.
+.TP
+.B avgtheta
+average theta of the whole profile
+.TP 
+.B SMD
+Soil moisture deficit in the layer in which rooting 
+takes place or until the depth specified with the
+.B smddepth
+variable in the soil section.
+.TP
+.B pond
+Amount of ponding at time t (or timestep n)
+.TP
+.B surface_runoff
+Cumulative surface runoff.
+.TP
+.B runots 
+The amount of surface runoff for this timestep.
+.TP
+.B cumeva
+Cumulative actual soil evaporation
+.TP
+.B cumtra
+Cumulative actual transpiration 
+.TP
+.B cumprec
+Cumulative precipitation
+.TP
+.B cumintc
+Cumulative interception
+.TP
+.B cqbot
+Cumulative flow through bottom of the profile, calculated from change in
+pore volume. This does 
+.I not
+work if the profile is saturated!
+.TP
+.B cumtop
+Cumulative flow through the top of the profile
+.TP
+.B qtop
+Flow through the top of the profile (this timestep)
+.TP
+.B qbot
+Flow through the bottom of the profile
+.TP
+.B cumbot
+Cumulative flow through bottom of the profile
+.TP
+.B rootextract
+Water extracted by roots (cumulative)
+.TP
+.B soilevaporation
+Actual soilevaporation [cm]
+.TP
+.B precipitation
+Precipitation [cm]
+.TP
+.B intc
+Interception [cm]
+.TP
+.B masbal
+Error in cumulative mass balance [cm]
+.TP
+.B volact
+Amount of water in the soil profile [cm]
+.TP
+.B ptra
+Potential transpiration [cm]
+.TP
+.B theta
+Water content for each layer in the profile
+.TP
+.B k
+Unsaturated conductivity for each layer in the profile [cm/d]
+.TP
+.B h
+(suction)head for each layer in the profile [cm]
+.TP
+.B q
+flux of water through each layer in the profile for the last dt of
+this timestep
+.TP
+.B inq
+Total flux of water through each layer of the profile for this timestep
+.TP
+.B qrot
+Water extracted by root in this timestep for each layer of the profile
+.TP
+.B converror
+If set to 1 no convergence was reached during this timestep
+.TP
+.B itter
+Number of iterations used in the last dt of this timestep
+.TP
+.B CPU
+CPU seconds used thisfar.
+
+
+.SH [trailer]
+.TP
+.B run_end_time
+Date and time at which the present run ended 
+
+.SH SUMMARY OF DEFAULTS FILE
+.SH [vamps]
+.TP 
+.B verbose
+FALSE = silent
+.br
+TRUE = display progress information
+.TP
+.B header 
+(See also the \*(--Header option in
+.BR vamps (1))
+.br
+FALSE = no header in output
+.br
+TRUE = header in output
+.TP
+.B max_sec_in_ts
+Maximum number of seconds allowed in a single timestep during calculations. A value
+of zero (default) disables this check. Usefull for debugging purposes only. A SIGALARM
+is raised if the value is exceeded and 
+.B vamps
+will switch to interactive mode.
+.TP
+.B logging
+FALSE = no logging is done
+.br
+TRUE = logging is on
+.TP
+.B logfilename
+name of the file to which logging is performed
+.TP
+.B iniinmem
+TRUE = the input file is read into memory (some speedup)
+.br
+FALSE = the input file is not read into memory
+.TP
+.B progstr
+String which is used to display progress information (use 0, 1 or 2
+for build in strings).  0 will show calculation time and estimated
+time to go. 1 will show a percentage finished bar and 2 will show
+'calculating'.
+
+You can define your own such as:
+.br
+Vamps is running, please wait......................
+.TP
+.B graphcommand
+full path to 
+.B gnuplot
+with optional command line options. In OS/2 only gnuplot.exe should be
+specified here. This seems to be a 'bug' in the emx library.
+.TP
+.B commentchars
+Character(s) that denotes the start of a comment. This defaults to #% and
+the first character should
+.I not
+be changed unless you have a very good reason to do so.
+.TP
+.B noslang
+If this variable is set to true no S-Lang functions will be
+used.
+.TP
+.B xtrasl
+comma seperated  list of S-Lang files to be loaded a startup
+.TP
+.B sl_in_input
+If set to  1 the input file is also processed through the S-Lang
+interpreter. You will need ifdef structures to make sure only
+S-Lang code is used by the interpreter.
+Example:
+.br
+#ifdef VAMPS
+.br
+put S-Lang code here..
+.br
+#else
+.br
+Put 'normal' input instuctions here..
+.br
+#endif
+.br
+
+
+.SH COPYRIGHT
+.PP
+.RS
+.nf
+.ft CW
+/*
+Copyright (C) 1995 Jaap Schellekens.
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2, or (at your option)
+any later version.
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; see the file COPYING.  If not, write to the
+Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+
+-----------------------------------------------------------------------
+(C) Jaap Schellekens                   |
+Faculty of Earth Sciences	       |	International Institute 
+Vrije Universiteit 		       |	for Tropical Forestry
+De Boelelaan 1085		       |	Rio Piedras
+1081 HV Amsterdam		       |	Puerto Rico, USA
+The Netherlands                        |
+E-mail: schj@geo.vu.nl 		       |
+	schj@xs4all.nl                 |
+-----------------------------------------------------------------------
+Parts of this program derived from swap.  The following is taken from
+the swap Fortran code:
+
+   Author : Jan G. Wesseling
+
+                     Correspondence
+
+This program uses the ideas and experiences of various researchers at the
+Winand Staring Centre and the Wageningen Agricultural University. Currently
+the program is maintained and documented in cooperation by :
+
+     Dept. of Agrohydrology             Dept. of Water Resources
+     Winand Staring Centre              Wageningen Agricultural University
+     Marijkeweg 11/22                   Nieuwe Kanaal 11
+     6700 AC  Wageningen                6709 PA  Wageningen
+      The Netherlands                    The Netherlands
+     Fax: +31 8370 24812                Fax: +31 8370 84885
+*/
+.ft R
+.fi
+.RE
+
+.SH AUTHOR
+J. Schellekens
+.br
+schj@geo.vu.nl
+\"  LocalWords:  ksat

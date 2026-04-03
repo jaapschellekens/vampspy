@@ -1,0 +1,374 @@
+head	1.11;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.11
+date	99.01.06.12.13.01;	author schj;	state Alpha;
+branches;
+next	1.10;
+
+1.10
+date	99.01.06.12.07.49;	author schj;	state Alpha;
+branches;
+next	1.9;
+
+1.9
+date	97.09.09.08.39.10;	author schj;	state Exp;
+branches;
+next	1.8;
+
+1.8
+date	97.01.16.15.07.31;	author schj;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	96.11.10.14.49.28;	author schj;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	96.11.05.14.59.13;	author schj;	state Alpha;
+branches;
+next	1.5;
+
+1.5
+date	96.10.22.17.40.55;	author schj;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	96.03.25.07.55.11;	author schj;	state alpha;
+branches;
+next	1.3;
+
+1.3
+date	96.02.27.11.39.40;	author schj;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	95.12.17.21.54.44;	author schj;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	95.10.23.07.52.03;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@print error message
+@
+
+
+1.11
+log
+@Version: 0.99g
+@
+text
+@/* $Header: /home/schj/src/vamps_0.99g/src/util/RCS/perror.c,v 1.10 1999/01/06 12:07:49 schj Alpha $ */
+/*
+ *  $RCSfile: perror.c,v $
+ *  $Author: schj $
+ *  $Date: 1999/01/06 12:07:49 $
+ */
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include "vamps.h"
+#include "deffile.h"
+
+/*C:Perror
+ *@@ void Perror(char *Eprogname,int exitval,int prr, char *from,
+ *		const char *descr,const char *xtr)
+ *
+ * If @@prr@@ > 0 then @@perror@@ is also called.
+ * Prints an error message on stderr and exits with level
+ * exitval if this value is > 0	
+ * Normally called with something like:
+ * @@Perror(progname,1,RCSid,"A fatal error","divide by zero");@@
+ */
+void
+Perror (char *Eprogname,int exitval,int prr,char *from,const char *descr,const char *xtr)
+{
+	if (!exitval) {
+		(void) fprintf (stderr, "%s:\terror message:\n", Eprogname);
+		(void) fprintf (stderr, "\tfrom: %s\n", from);
+		(void) fprintf (stderr, "\tdescription: %s %s\n", descr, xtr);
+		if (prr)
+			perror ("syserr");
+	} else {
+		(void) fprintf (stderr, "%s:\terror message:\n", Eprogname);
+		(void) fprintf (stderr, "\tfrom: %s\n", from);
+		(void) fprintf (stderr, "\tdescription: %s %s\n", descr, xtr);
+		/* delete all datasets and free memory  */
+		/* deletes the ini memory list (if present)  */
+#ifdef HAVE_LIBSLANG
+		if (exit_is_inter){
+			if (prr)
+				perror ("syserr");
+			interpreter(0);
+			switchtoint = 0;
+		}else
+#endif
+		{
+		if (prr)
+			perror ("syserr");
+		exit (exitval);
+		}
+	}
+}
+@
+
+
+1.10
+log
+@Version: 0.99g
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99e/src/util/RCS/perror.c,v 1.9 1997/09/09 08:39:10 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1997/09/09 08:39:10 $
+@
+
+
+1.9
+log
+@0.99e version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99c/src/util/RCS/perror.c,v 1.8 1997/01/16 15:07:31 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1997/01/16 15:07:31 $
+d14 1
+a14 1
+ *@@ void Perror(char *Eprogname,int exitval, char *from,
+d17 1
+d24 1
+a24 1
+Perror (char *Eprogname,int exitval,char *from,const char *descr,const char *xtr)
+d30 2
+a31 2
+		perror (Eprogname);
+		errno = 0;
+a35 6
+		if (genoutfile){
+		outfiletrailer();
+		closeout();
+		if (genoutfile != stdout)/* Close the stream if needed  */
+			(void)fclose (genoutfile);
+		}
+a36 1
+		del_all_sets ();
+a37 2
+		delmemlist ();
+		endshow();
+d40 2
+d46 3
+a48 2
+		perror (Eprogname);
+		errno = 0;
+d50 1
+@
+
+
+1.8
+log
+@layout + stuff
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/util/RCS/perror.c,v 1.7 1996/11/10 14:49:28 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1996/11/10 14:49:28 $
+d9 1
+d11 1
+d13 8
+a20 6
+/*-
+ * void Perror(char *Eprogname,int exitval, char *from,const char *descr,const char *xtr)
+ *	Prints an error message on stderr and exits with level
+ *	exitval if this value is > 0	
+ *	Normally called with something like:
+ *	Perror(progname,1,RCSid,"A fatal error","divide by zero");
+d25 31
+a55 18
+  if (!exitval)
+    {
+      (void) fprintf (stderr, "%s:\terror message:\n", Eprogname);
+      (void) fprintf (stderr, "\tfrom: %s\n", from);
+      (void) fprintf (stderr, "\tdescription: %s %s\n", descr, xtr);
+    }
+  else
+    {
+      (void) fprintf (stderr, "%s:\terror message:\n", Eprogname);
+      (void) fprintf (stderr, "\tfrom: %s\n", from);
+      (void) fprintf (stderr, "\tdescription: %s %s\n", descr, xtr);
+      if (exit_is_inter){
+	      
+	   interpreter(0);
+	   switchtoint = 0;
+      }else
+	      exit (exitval);
+    }
+a56 1
+
+@
+
+
+1.7
+log
+@fixed typo
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/util/RCS/perror.c,v 1.6 1996/11/05 14:59:13 schj Alpha $ */
+d5 1
+a5 1
+ *  $Date: 1996/11/05 14:59:13 $
+d32 6
+a37 2
+
+      exit (exitval);
+@
+
+
+1.6
+log
+@Updated to Alpha version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/util/RCS/perror.c,v 1.5 1996/10/22 17:40:55 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1996/10/22 17:40:55 $
+d16 1
+a16 1
+ *	Perror(progname,1,RCSid,"A fatal error","devision by zero");
+@
+
+
+1.5
+log
+@changed var names
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.98/src/util/RCS/perror.c,v 1.4 1996/03/25 07:55:11 schj alpha $ */
+d5 1
+a5 1
+ *  $Date: 1996/03/25 07:55:11 $
+@
+
+
+1.4
+log
+@0.98
+@
+text
+@d1 2
+a2 3
+
+/* $Header: /home/schj/src/vamps_0.975/src/util/RCS/perror.c,v 1.3 1996/02/27 11:39:40 schj Exp $ */
+/*-
+d5 1
+a5 10
+ *  $Date: 1996/02/27 11:39:40 $
+ *  $Log: perror.c,v $
+ *  Revision 1.3  1996/02/27 11:39:40  schj
+ *  changed to ansi
+ *
+ * Revision 1.2  1995/12/17  21:54:44  schj
+ * no real change
+ *
+ *  Revision 1.1  1995/10/23 07:52:03  schj
+ *  Initial revision
+d9 1
+d12 1
+a12 1
+ * void Perror(char *progname,int exitval, char *from,char *descr,char *xtr)
+d19 1
+a19 1
+Perror (char *progname,int exitval,char *from,char *descr,char *xtr)
+d23 1
+a23 1
+      (void) fprintf (stderr, "%s:\terror message:\n", progname);
+d29 1
+a29 1
+      (void) fprintf (stderr, "%s:\terror message:\n", progname);
+d36 1
+@
+
+
+1.3
+log
+@changed to ansi
+@
+text
+@d2 1
+a2 1
+/* $Header: /homes/schj/src/vamps_0.96/src/util/RCS/perror.c,v 1.2 1995/12/17 21:54:44 schj Exp $ */
+d6 1
+a6 1
+ *  $Date: 1995/12/17 21:54:44 $
+d8 3
+@
+
+
+1.2
+log
+@no real change
+@
+text
+@d2 1
+a2 1
+/* $Header: /home/schj/src/vamps_0.95/src/util/RCS/perror.c,v 1.1 1995/10/23 07:52:03 schj Exp $ */
+d6 1
+a6 1
+ *  $Date: 1995/10/23 07:52:03 $
+d8 3
+d25 1
+a25 6
+Perror (progname,exitval, from, descr, xtr)
+     char *progname;
+     int exitval;
+     char *from;
+     char *descr;
+     char *xtr;
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d2 1
+a2 1
+/* $Header: /home/schj/src/prosper/vamps_0.9/util/RCS/perror.c,v 1.1 1995/10/07 14:01:34 schj Exp $ */
+d6 1
+a6 1
+ *  $Date: 1995/10/07 14:01:34 $
+d8 2
+a9 3
+ * Revision 1.1  1995/10/07  14:01:34  schj
+ * Initial revision
+ *
+@

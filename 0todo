@@ -1,0 +1,50 @@
+Whislist/todolist      V A M P S
+--------------------------------
+
+Very soon (Before 0.99Beta):
+ 
+ - change sat example so that is actually works without S-Lang. The
+   filename,1,2 notation is ignored, giving bogus results
+
+ - rename command line options so that _all_ first chars of long and short
+   options match.
+
+ - streamline logging stuff. S-Lang functions should
+   also use this system
+
+ - check malloc bugs in maq.lib
+
+ - add priestly Taylor to libmet
+ 
+ - change Makefile for each lib dir. they should _not_ copy
+   the lib, this should be done in the root makefile
+
+ - check en correct bottom boundaries
+ 	Only 1, 6, 4 and 5 tested.
+
+ - Finish topsys
+
+ - decouple water balance calculations from soil module!
+
+ - Update utilities and finish manual pages
+
+ - calcgwl seems to be shit!? Is it used at all? solved??
+
+ - check setup pot evap when canopy is not used! fractions etc
+
+
+Longer term (1.0Beta)
+
+ - working macro-pore setup
+
+ - add litter interception (see waterloo programs)
+
+ - Finish canopy stuff, multilayer
+ 
+ - refine soil functions to generate _SMOOTH_ and _SOUND_ curves.
+   i.e. no zero's in row that break ts_slopes etc.
+
+
+Very long term (1.0)
+
+ - Graphical shell using Java, wxwin, V or tcl/tk

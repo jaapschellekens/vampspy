@@ -1,0 +1,430 @@
+head	1.11;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.11
+date	99.01.06.12.13.01;	author schj;	state Alpha;
+branches;
+next	1.10;
+
+1.10
+date	99.01.06.12.07.49;	author schj;	state Alpha;
+branches;
+next	1.9;
+
+1.9
+date	97.09.09.08.43.02;	author schj;	state Exp;
+branches;
+next	1.8;
+
+1.8
+date	97.05.09.09.26.35;	author schj;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	97.05.07.11.05.44;	author schj;	state Sta;
+branches;
+next	1.6;
+
+1.6
+date	97.05.07.11.00.29;	author schj;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	97.04.10.09.32.11;	author schj;	state Sta;
+branches;
+next	1.4;
+
+1.4
+date	96.11.05.15.06.48;	author schj;	state Alpha;
+branches;
+next	1.3;
+
+1.3
+date	96.10.22.17.58.51;	author schj;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	96.09.06.12.24.57;	author schj;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	96.03.24.11.43.29;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@My fgets, reads past newlines
+@
+
+
+1.11
+log
+@Version: 0.99g
+@
+text
+@/* $Header: /home/schj/src/vamps_0.99g/src/deffile.lib/RCS/fgets.c,v 1.10 1999/01/06 12:07:49 schj Alpha $ */
+/*
+ *  $RCSfile: fgets.c,v $
+ *  $Author: schj $
+ *  $Date: 1999/01/06 12:07:49 $
+ *
+ */
+
+#include <stdio.h>
+#include <string.h>
+#include "deffile.h"
+
+static char RCSid[] =
+"$Id: fgets.c,v 1.10 1999/01/06 12:07:49 schj Alpha $";
+
+/* NOTE: Fgets not used anymore, see fgetl! */
+/*C:Fgets
+ *@@char *Fgets(char *s,int size,FILE *inf)
+ *
+ * Description: Replacement fgets, reads past newlines if escaped with
+ * \. It should also dump cr '\r' characters
+ *
+ * Returns: pointer to *s
+ *
+ * Remarks: It's behaviour is different from fgets. If the buffer is
+ * to small a  warning is printed and the truncated buffer is returned
+ */
+
+char *
+Fgets (char *s,int size,FILE *inf)
+{
+	int c, i;
+
+	i = c = 0;
+
+newl:
+	while (--size > 0 && (c = fgetc (inf)) != EOF && c != '\n'){
+		if (c!='\r')
+			s[i++] = c;
+	}
+
+	if (size <= 1){
+		deferror (defprog,0, RCSid, "Warning Input string to large", "Fgets()");
+		return s;
+	}
+
+	if (c == '\n' && (s[i - 1] == '\\')){
+		s [i-1]=' ';
+		goto newl;
+	}
+
+	if (c == '\n')
+		s[i++] = c;
+
+	s[i] = '\0';
+
+	if (i < 1)
+		return (char *) NULL;
+	else
+		return s;
+}
+
+
+
+/*C:fgetl
+ *@@ char *fgetl(FILE *fp)
+ *
+ *	Get the next line from open file fp up to the newline which
+ *	is replaced with NUL. Returns char * to the NUL terminated
+ *	string or NULL on EOF or error; return ptr points to static
+ *	memory overwritten at each invocation.
+ *	The function reads across newline chars if escaped with '\'
+ *	(not yet!!!!!)
+ *
+ *	Function written by R. Venneker, Adapted by J. Schellekens
+ */
+char *
+fgetl(FILE *fp)
+{
+	int	c ='\0',cc = '\0', n;
+	static int	nb = 0;
+	static char	*buf;
+
+	if(!nb)
+		buf = (char *)malloc((nb = 64) * sizeof(char));
+	n = 0;
+	while((c = getc(fp)) != EOF) {
+		if (c == '\r'){ /* 'handle' returns ..*/
+			n--;
+			continue;
+		}
+
+		if (c == '\n' && cc != '\\')
+			break;
+
+		if (c == '\n'){ /* escaped newline */
+			n--;
+			continue;
+		}
+
+		if(n >= nb) {
+			buf = (char *)realloc(buf, (nb += 64) * sizeof(char));
+		}
+		buf[n++] = (char)c;
+		cc = c;
+	}
+	if(!n && c != '\n')
+		return((char *)NULL);
+
+	buf[n] = '\0';
+	return(buf);
+}
+@
+
+
+1.10
+log
+@Version: 0.99g
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99e/src/deffile.lib/RCS/fgets.c,v 1.9 1997/09/09 08:43:02 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1997/09/09 08:43:02 $
+d14 1
+a14 1
+"$Id: fgets.c,v 1.9 1997/09/09 08:43:02 schj Exp $";
+@
+
+
+1.9
+log
+@0.99e version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99c/src/deffile.lib/RCS/fgets.c,v 1.8 1997/05/09 09:26:35 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1997/05/09 09:26:35 $
+d14 1
+a14 1
+"$Id: fgets.c,v 1.8 1997/05/09 09:26:35 schj Exp $";
+@
+
+
+1.8
+log
+@Added fgetl that allocated the memory for a line. Fgets is not
+neeeded anymore.
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99c/src/deffile.lib/RCS/fgets.c,v 1.7 1997/05/07 11:05:44 schj Sta $ */
+d5 1
+a5 1
+ *  $Date: 1997/05/07 11:05:44 $
+d14 1
+a14 1
+"$Id: fgets.c,v 1.7 1997/05/07 11:05:44 schj Sta $";
+d16 1
+d21 1
+a21 1
+ * \. It also dumps cr '\r' characters
+d67 1
+a67 1
+
+d87 6
+a92 1
+	while((c = getc(fp)) != EOF/* && c != '\n'*/) {
+@
+
+
+1.7
+log
+@Stable version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99c/src/deffile.lib/RCS/fgets.c,v 1.6 1997/05/07 11:00:29 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1997/05/07 11:00:29 $
+d14 1
+a14 1
+"$Id: fgets.c,v 1.6 1997/05/07 11:00:29 schj Exp $";
+d60 46
+@
+
+
+1.6
+log
+@Updated to reflect changes in memlist.c
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99c/src/deffile/RCS/fgets.c,v 1.5 1997/04/10 09:32:11 schj Sta $ */
+d5 1
+a5 1
+ *  $Date: 1997/04/10 09:32:11 $
+d14 1
+a14 1
+"$Id: fgets.c,v 1.5 1997/04/10 09:32:11 schj Sta $";
+@
+
+
+1.5
+log
+@changed layout + doc
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/deffile/RCS/fgets.c,v 1.4 1996/11/05 15:06:48 schj Alpha $ */
+d5 1
+a5 1
+ *  $Date: 1996/11/05 15:06:48 $
+d14 1
+a14 1
+"$Id: fgets.c,v 1.4 1996/11/05 15:06:48 schj Alpha $";
+@
+
+
+1.4
+log
+@Updated to Alpha version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/deffile/RCS/fgets.c,v 1.3 1996/10/22 17:58:51 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1996/10/22 17:58:51 $
+d14 1
+a14 1
+"$Id: fgets.c,v 1.3 1996/10/22 17:58:51 schj Exp $";
+d16 2
+a17 2
+/*-
+ * char *Fgets(char *s,int size,FILE *inf)
+d19 7
+a25 2
+ *	My fgets, reads past newlines if escaped with \
+ *	It also dumps cr '\r' characters.
+d31 1
+a31 1
+  int c, i;
+d33 1
+a33 1
+  i = c = 0;
+d36 24
+a59 26
+  while (--size > 0 && (c = fgetc (inf)) != EOF && c != '\n')
+    {
+      if (c!='\r')
+      	s[i++] = c;
+    }
+
+  if (size <= 1){
+    deferror (defprog,0, RCSid, "Warning Input string to large", "Fgets()");
+    return s;
+  }
+
+  if (c == '\n' && (s[i - 1] == '\\'))
+    {
+      s [i-1]=' ';
+      goto newl;
+    }
+
+  if (c == '\n')
+    s[i++] = c;
+
+  s[i] = '\0';
+
+  if (i < 1)
+    return (char *) NULL;
+  else
+    return s;
+@
+
+
+1.3
+log
+@changed Fgets header to ansi
+@
+text
+@d1 1
+a1 1
+/* $Header: /homes/schj/src/vamps_0.99/src/deffile/RCS/fgets.c,v 1.2 1996/09/06 12:24:57 schj Exp $ */
+d5 1
+a5 7
+ *  $Date: 1996/09/06 12:24:57 $
+ *  $Log: fgets.c,v $
+ *  Revision 1.2  1996/09/06 12:24:57  schj
+ *  cosmetic
+ *
+ *  Revision 1.1  1996/03/24 11:43:29  schj
+ *  Initial revision
+d14 1
+a14 1
+"$Id: fgets.c,v 1.2 1996/09/06 12:24:57 schj Exp $";
+@
+
+
+1.2
+log
+@cosmetic
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.98/src/deffile/RCS/fgets.c,v 1.1 1996/03/24 11:43:29 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1996/03/24 11:43:29 $
+d7 3
+d20 1
+a20 1
+"$Id: fgets.c,v 1.1 1996/03/24 11:43:29 schj Exp $";
+d30 1
+a30 4
+Fgets (s, size, inf)
+     char *s;
+     int size;
+     FILE *inf;
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 3
+a3 4
+/* deffile.c */
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.97/src/deffile/RCS/deffile.c,v 1.22 1996/02/08 08:21:03 schj Exp $ */
+/*-
+ *  $RCSfile: deffile.c,v $
+d5 5
+a9 2
+ *  $Date: 1996/02/08 08:21:03 $
+ *  $Log: deffile.c,v $
+d17 1
+a17 1
+"$Id: deffile.c,v 1.22 1996/02/08 08:21:03 schj Exp $";
+d20 2
+a21 1
+ *	char *Fgets(char *s,int size,FILE *inf)
+@

@@ -1,0 +1,1319 @@
+head	1.16;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.16
+date	99.01.06.12.13.01;	author schj;	state Alpha;
+branches;
+next	1.15;
+
+1.15
+date	99.01.06.12.07.49;	author schj;	state Alpha;
+branches;
+next	1.14;
+
+1.14
+date	97.09.09.08.39.10;	author schj;	state Exp;
+branches;
+next	1.13;
+
+1.13
+date	97.01.16.15.07.09;	author schj;	state Exp;
+branches;
+next	1.12;
+
+1.12
+date	96.11.05.14.59.13;	author schj;	state Alpha;
+branches;
+next	1.11;
+
+1.11
+date	96.10.22.17.40.22;	author schj;	state Exp;
+branches;
+next	1.10;
+
+1.10
+date	96.03.25.07.54.57;	author schj;	state alpha;
+branches;
+next	1.9;
+
+1.9
+date	96.02.27.11.39.01;	author schj;	state Exp;
+branches;
+next	1.8;
+
+1.8
+date	96.01.25.15.03.00;	author schj;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	95.12.09.08.12.14;	author schj;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	95.12.09.08.11.41;	author schj;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	95.12.05.03.07.11;	author schj;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	95.10.23.07.52.03;	author schj;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	95.09.23.20.45.12;	author schj;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	95.09.22.15.43.24;	author schj;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	95.09.20.08.23.59;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@create look up tables
+@
+
+
+1.16
+log
+@Version: 0.99g
+@
+text
+@/* $Header: /home/schj/src/vamps_0.99g/src/util/RCS/mktable.c,v 1.15 1999/01/06 12:07:49 schj Alpha $ */
+/*
+ *  $RCSfile: mktable.c,v $
+ *  $Author: schj $
+ *  $Date: 1999/01/06 12:07:49 $
+ */
+#include "vamps.h"
+#include "swatsoil.h"
+#include <string.h>
+#include <float.h>
+
+static char RCSid[] =
+"$Id: mktable.c,v 1.15 1999/01/06 12:07:49 schj Alpha $";
+
+
+TBL
+* mktable (int items,char *des,int verb)
+{
+	TBL *tt;
+
+	if (verb)
+		fprintf (stderr, 
+		"mktable.c: creating table %s with %d points\n", des, items);
+	
+	tt = (TBL *) ts_memory (NULL, sizeof (TBL), progname);
+	tt->x = (double *) ts_memory (NULL, items * sizeof (double), progname);
+	tt->y = (double *) ts_memory (NULL, items * sizeof (double), progname);
+	tt->points = items;
+	tt->lasthit = 0.5 * items;
+	strcpy (tt->des, des);
+
+	return tt;
+}
+
+
+/*C:getval
+ *@@double getval(TBL *tab, double x)
+ *
+ * Gets the y value corresponding to @@x@@ from @@tab@@. This version uses
+ * the lasthit hint in the table as a starting point for a
+ * hunt phase. This is followed by bisection and interpolation.
+ * In speed.inp this method is about 18% faster than the one without the
+ * hunt fase.
+ */ 
+double getval(TBL *tab, double x)
+{
+	register unsigned int jhi,jm,inc,index,n;
+	register int ascnd;
+	double top,bott,rico;
+
+	n = tab->points; /* number of points in the table */
+	ascnd = (tab->x[n -1] >= tab->x[0]); /* are we ascending? */
+
+	if (tab->lasthit < 0 || tab->lasthit >= n){ /* hint seems _not_valid */
+		tab->lasthit = -1;
+		jhi = n;
+	}else{					/* we have a valid hint... */
+		inc = 1;
+		if (x >= tab->x[tab->lasthit] == ascnd){
+			if (tab->lasthit == n - 1) 
+				return tab->y[n-1]; /* last point */
+			jhi = tab->lasthit + 1;
+			while ( x >= tab->x[jhi] == ascnd) {
+				tab->lasthit = jhi;
+				inc += inc;
+				/*jhi = tab->lasthit + inc;
+				 * because lasthit == jhi rewtite to:
+				 */ 
+				jhi += inc;
+				if (jhi >= n){
+					jhi = n;
+					break;
+				}
+			}
+		} else {
+			if (tab->lasthit == 0){
+				tab->lasthit = -1;
+				return tab->y[0];
+			}
+			jhi = tab->lasthit--;
+			while(x < tab->x[tab->lasthit] == ascnd) {
+				jhi = tab->lasthit;
+				inc <<= 1;
+				if (inc >= jhi){
+					tab->lasthit = -1;
+					break;
+				}else 
+					/* tab->lasthit = jhi - inc; 
+					 * becuase jhi == lastit rewrite 
+					 * (this might save use sime time)
+					 * to: */
+					tab->lasthit -= inc;
+			}
+		}
+	} /* hunting stopped, do bin search...*/
+	while ((jhi - tab->lasthit) != 1){
+		jm = (jhi + tab->lasthit) >> 1;
+		if (x >= tab->x[jm] == ascnd)
+			tab->lasthit = jm;
+		else
+			jhi = jm;
+	}
+	if ( x == tab->x[0]) /* at first point and match */
+		tab->lasthit = 0;
+	else if (x == tab->x[n - 1]) /* at last point and match */
+		tab->lasthit = n - 2;
+
+	/* linear interpolation */
+	top = (tab->y[tab->lasthit + 1] - tab->y[tab->lasthit]);
+	bott = (tab->x[tab->lasthit + 1] - tab->x[tab->lasthit]);
+	rico =  top/bott;
+	return (rico * (x - tab->x[tab->lasthit]))
+		+ tab->y[tab->lasthit];
+}
+
+
+
+/*C:__getval
+ *
+ *@@ double __getval(TBL *tab, double xval)
+ * 
+ * get the y value from xval from table tab. Linear interpolation
+ * is used after the search. This is the old method.
+ */
+
+double __getval(TBL *tab, double xval)
+{
+	unsigned long index,mid,lo,up,n;
+	int ascnd;
+	double top,bott,rico;
+
+  	/* first check high and low points */	
+	if (xval <= tab->x[0])
+		return tab->y[0];
+	else if (xval >= tab->x[(tab->points) - 1])
+		return tab->y[(tab->points) - 1];
+
+	/* Find position in array: x[index] < xval < x[index +1]*/
+	n = tab->points;
+	lo = -1; up = n;
+
+	ascnd = (tab->x[n - 1] >= tab->x[0]);
+	while (up - lo > 1){
+		mid = (up + lo) >> 1;
+		if (xval >= tab->x[mid] == ascnd)
+			lo = mid;
+		else
+			up = mid;
+	}
+	if ( xval == tab->x[0])  index = 0;
+	else if (xval == tab->x[n-1]) index =  n - 2;
+	else index = lo;
+
+	/* linear interpolation */
+	top = (tab->y[index + 1] - tab->y[index]);
+	bott = (tab->x[index + 1] - tab->x[index]);
+	rico =  top/bott;
+	return (rico * (xval - tab->x[index])) + tab->y[index];
+}
+
+/*C_getval
+ *
+ *@@ double _getval(dataset *ds, double xval)
+ * 
+ * gets the y value from xval from set DS. Linear interpolation
+ * is used after the search
+ */
+double _getval(dataset *ds, double xval)
+{
+	unsigned long index,mid,lo,up,n;
+	int ascnd;
+	double rico;
+
+  	/* first check high and low points */
+	
+	if (xval <= ds->xy[0].x)
+		return ds->xy[0].y;
+	else if (xval >= ds->xy[(ds->points) - 1].x)
+		return ds->xy[(ds->points) - 1].y;
+
+	/* Find position in array: x[index] < xval < x[index +1]*/
+	n = ds->points;
+	lo = -1; up = n;
+	ascnd = (ds->xy[n - 1].x >= ds->xy[0].x);
+	while (up - lo > 1){
+		mid = (up + lo) >> 1;
+		if (xval >= ds->xy[mid].x == ascnd)
+			lo = mid;
+		else
+			up = mid;
+	}
+	if ( xval == ds->xy[0].x)  index = 0;
+	else if (xval == ds->xy[n-1].x) index =  n - 2;
+	else index = lo;
+
+	if (xval == ds->xy[index].x)
+		return ds->xy[index].y; /* exact match */
+
+	/* linear interpolation */
+	rico = (ds->xy[index + 1].y - ds->xy[index].y) / (ds->xy[index + 1].x - ds->xy[index].x);
+	return (rico * (xval - ds->xy[index].x)) + ds->xy[index].y;
+}
+
+
+#ifndef LBUFF
+#define LBUFF 2048
+#endif
+/*-
+ * void readtablefile (FILE *stream,int nr, int type)
+ * reads the soil tables from an external (TOPOG _SOIL) file
+ * This should be an already opened stream.
+ * There are some cludges when reading these files. The entries
+ * var is incorrect (substract 17!!) and at present only the following
+ * columns are used:
+ * 1) psi [m] (converted to cm)
+ * 2) skipped
+ * 3) theta
+ * 4) k (converted to cm)
+ * 5) differention moisture cap. (d_theta/d_phi) (converted to cm)
+ * The rest is skipped
+ * Types are:
+ *       1     TOPOG _soil file
+ *       2     white space separated columns (psi theta k) diff_moist is estimated
+ *       3     white space separated columns (psi theta k diff_moist)
+ */
+void
+readtablefile(FILE *stream,int nr,int type)
+{
+	/* theta = y phi = x */
+	char *cp;
+	double *dmc;
+	XY *tmpxy;
+	int lread=0;
+	int datalines=0;
+	int entries,i;
+	char buf[LBUFF];
+	char ens[512];
+	double tt_k,tt_theta,tt_psi,tt_dtdp,tt_dkdp,tt_u,dummy;
+
+	/* First count the number of lines in the file */
+	while ((cp = fgets (buf,LBUFF,stream)) != (char *) NULL){
+		if (*cp && *cp != '#' && *cp != '&') 
+			/* main body, when not in header */
+			datalines++;
+	}
+	rewind(stream); /* rewind the file to top */
+
+	if (verbose)
+		fprintf(stderr,"Making tables with entries: %d\n",datalines);
+	/* Making the tables now we know the number of lines */
+	sp[nr].tab = (TBL *) ts_memory (NULL, MAXTBL * sizeof (TBL), progname);
+	sp[nr].tab[T2KTAB]= *mktable(datalines,"theta2k",verbose);
+	sp[nr].tab[T2HTAB]= *mktable(datalines,"theta2head",verbose);
+	sp[nr].tab[H2DMCTAB]= *mktable(datalines,"head2dmc",verbose);
+	sp[nr].tab[H2TTAB]= *mktable(datalines,"head2theta",verbose);
+	/* new ones for the TOPOG style solution */
+	sp[nr].tab[H2KTAB]= *mktable(datalines,"head2k",verbose);
+	sp[nr].tab[H2UTAB]= *mktable(datalines,"head2u",verbose);
+	sp[nr].tab[H2DKDPTAB]= *mktable(datalines,"head2dkdp",verbose);
+
+	/* No actually read the contents of the file */
+	while ((cp = fgets (buf,LBUFF,stream)) != (char *) NULL){
+		if (*cp && *cp != '#' && *cp != '&'){ 
+			/* main body, when not in header */ 
+			switch (type){
+				case 2:
+					if (sscanf(cp,"%lf %lf %lf",&tt_psi,&tt_theta,&tt_k)!=3){
+						fclose(stream);
+						Perror(progname,1,1,RCSid,"Error when reading soil table.","format 2 (psi theta k)");
+					}
+					break;
+				case 1:
+					if (sscanf(cp,"%lf %lf %lf %lf %lf %lf",&tt_psi,&tt_u,&tt_theta,&tt_k,&tt_dtdp,&tt_dkdp)!=6){
+						fclose(stream);
+						Perror(progname,1,1,RCSid,"Error when reading soil table.","TOPOG _soil format");
+					}
+					tt_k *=100;
+					tt_psi *= 100;
+					tt_dtdp*=0.01;
+					break;
+				case 3:
+					if (sscanf(cp,"%lf %lf %lf %lf",&tt_psi,&tt_theta,&tt_k,&tt_dtdp)!=4){
+						fclose(stream);
+						Perror(progname,1,1,RCSid,"Error when reading soil table.","format 3 (psi theta k diff_moist)");
+					}
+				default:
+					break;
+			}
+			lread++;
+			sp[nr].tab[T2KTAB].x[datalines-lread]=tt_theta;
+			sp[nr].tab[T2KTAB].y[datalines-lread]=tt_k;
+			sp[nr].tab[T2HTAB].x[datalines-lread]=tt_theta;
+			sp[nr].tab[T2HTAB].y[datalines-lread]=tt_psi;
+			sp[nr].tab[H2DMCTAB].x[datalines-lread]=tt_psi;
+			sp[nr].tab[H2DMCTAB].y[datalines-lread]=tt_dtdp;
+			sp[nr].tab[H2TTAB].x[datalines-lread]=tt_psi;
+			sp[nr].tab[H2TTAB].y[datalines-lread]=tt_theta;
+			sp[nr].tab[H2KTAB].x[datalines-lread]=tt_psi;
+			sp[nr].tab[H2KTAB].y[datalines-lread]=tt_k;
+			sp[nr].tab[H2UTAB].x[datalines-lread]=tt_psi;
+			sp[nr].tab[H2UTAB].y[datalines-lread]=tt_u;
+			sp[nr].tab[H2DKDPTAB].x[datalines-lread]=tt_psi;
+			sp[nr].tab[H2DKDPTAB].y[datalines-lread]=tt_dkdp;
+		}else
+		if (type ==1){ /* Get information from the file header and comments of TOPOG file*/
+			if (strstr (cp,"K(sat)=") != NULL) /* get k_sat*/
+				sscanf(cp,"%10c %lf",ens,&sp[nr].ksat);
+			if (strstr(cp,"Theta(sat)=") != NULL) /* get porosity */
+				sscanf(cp,"%14c %lf",ens,&sp[nr].thetas);
+			if (strstr(cp,"Theta(dry)=") != NULL) /* get residual water */
+				sscanf(cp,"%14c %lf",ens,&sp[nr].residual_water);
+			if (strstr(cp,"entries")!=NULL){ /* get entries for a check */
+				sscanf(cp,"%14c %d",ens,&entries);
+				entries -= 17;
+				if (entries != datalines)
+					Perror(progname,0,0,RCSid,"Problem in TOPOG soil table:","datalines != entries this datafile might be corrupt!");
+			}
+		}
+	}
+
+	if (type == 2){
+		tmpxy = (XY *) ts_memory(NULL,sp[nr].tab[T2HTAB].points * sizeof(XY),progname);
+		dmc = (double *) ts_memory(NULL,sp[nr].tab[T2HTAB].points * sizeof(double),progname);
+		for (i = 0; i< sp[nr].tab[T2HTAB].points; i++){
+			tmpxy[i].x = sp[nr].tab[T2HTAB].y[i];	
+			tmpxy[i].y = sp[nr].tab[T2HTAB].x[i];	
+		}
+		dmc = ts_slopes(tmpxy,sp[nr].tab[T2HTAB].points);
+		for (i = 0; i< sp[nr].tab[T2HTAB].points; i++)
+			sp[nr].tab[H2DMCTAB].y[i]=dmc[i] > DBL_MAX ? 0.0 : dmc[i];
+		free(tmpxy);
+		free(dmc);
+	}
+
+	if (dumptables)
+		for (i=0;i<4;i++){
+			printcom(RCSid);
+			printcom("Dumped look-up tables follow");
+			sprintf(buf,"%s_%d_x",sp[nr].tab[i].des,nr);
+			printar(buf,sp[nr].tab[i].x,sp[nr].tab[i].points);
+			sprintf(buf,"%s_%d_y",sp[nr].tab[i].des,nr);
+			printar(buf,sp[nr].tab[i].y,sp[nr].tab[i].points);
+		}
+}
+@
+
+
+1.15
+log
+@Version: 0.99g
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99e/src/util/RCS/mktable.c,v 1.14 1997/09/09 08:39:10 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1997/09/09 08:39:10 $
+d13 1
+a13 1
+"$Id: mktable.c,v 1.14 1997/09/09 08:39:10 schj Exp $";
+@
+
+
+1.14
+log
+@0.99e version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99c/src/util/RCS/mktable.c,v 1.13 1997/01/16 15:07:09 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1997/01/16 15:07:09 $
+a11 1
+
+d13 1
+a13 1
+"$Id: mktable.c,v 1.13 1997/01/16 15:07:09 schj Exp $";
+a14 1
+#define MAXTBL 4
+d29 1
+d34 12
+a45 2
+/*
+int loc(TBL *tab, double x)
+d47 6
+a52 2
+	unsigned long up, mid, lo,n;
+	int ascnd;
+d54 46
+a99 7
+	n = tab->points;
+	lo = -1; up = n;
+	ascnd = (tab->x[n - 1] >= tab->x[0]);
+	while (up - lo > 1){
+		mid = (up + lo) >> 1;
+		if (x >= tab->x[mid] == ascnd)
+			lo = mid;
+d101 1
+a101 1
+			up = mid;
+d103 11
+a113 3
+	if ( x == tab->x[0])  return 0;
+	else if (x == tab->x[n-1]) return  n - 2;
+	else return lo;
+a114 1
+*/
+d116 5
+a120 3
+ 
+/*-
+ * double getval(TBL *tab, double xval)
+d122 2
+a123 2
+ * gets the y value from xval from table tab. Linear interpolation
+ * is used for increased accuracy.
+d125 2
+a126 1
+double getval(TBL *tab, double xval)
+d141 1
+a153 3
+	if (xval == tab->x[index])
+		return tab->y[index]; /* exact match */
+
+a157 1
+
+d161 3
+a163 2
+/*-
+ * double _getval(dataset *ds, double xval)
+d166 1
+a166 1
+ * is used for increased accuracy.
+d238 1
+a238 1
+	double tt_k,tt_theta,tt_psi,tt_dtdp,dummy;
+d251 1
+a251 1
+	sp[nr].tab = (TBL *) ts_memory (NULL, 4 * sizeof (TBL), progname);
+d256 4
+d269 1
+a269 1
+						Perror(progname,1,RCSid,"Error when reading soil table.","format 2 (psi theta k)");
+d273 1
+a273 1
+					if (sscanf(cp,"%lf %lf %lf %lf %lf",&tt_psi,&dummy,&tt_theta,&tt_k,&tt_dtdp)!=5){
+d275 1
+a275 1
+						Perror(progname,1,RCSid,"Error when reading soil table.","TOPOG _soil format");
+d284 1
+a284 1
+						Perror(progname,1,RCSid,"Error when reading soil table.","format 3 (psi theta k diff_moist)");
+d298 6
+d316 1
+a316 1
+					Perror(progname,0,RCSid,"Problem in TOPOG soil table:","datalines != entries this datafile might be corrupt!");
+@
+
+
+1.13
+log
+@new faster bin-search (5%)
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/util/RCS/mktable.c,v 1.12 1996/11/05 14:59:13 schj Alpha $ */
+d5 1
+a5 1
+ *  $Date: 1996/11/05 14:59:13 $
+d10 1
+d14 1
+a14 1
+"$Id: mktable.c,v 1.12 1996/11/05 14:59:13 schj Alpha $";
+d23 4
+a26 4
+	if (verb){
+		fprintf (stderr, "mktable.c: creating table %s with %d points\n", 
+				des, items);
+	}
+d33 1
+a33 1
+  return tt;
+d57 1
+a57 1
+
+d68 1
+a68 1
+	double rico;
+d70 1
+a70 2
+  	/* first check high and low points */
+	
+d95 4
+a98 1
+	rico = (tab->y[index + 1] - tab->y[index]) / (tab->x[index + 1] - tab->x[index]);
+d102 42
+d169 105
+a273 105
+  /* theta = y phi = x */
+  char *cp;
+  double *dmc;
+  XY *tmpxy;
+  int lread=0;
+  int datalines=0;
+  int entries,i;
+  char buf[LBUFF];
+  char ens[512];
+  double tt_k,tt_theta,tt_psi,tt_dtdp,dummy;
+
+  /* First count the number of lines in the file */
+  while ((cp = fgets (buf,LBUFF,stream)) != (char *) NULL)
+    {
+      if (*cp && *cp != '#' && *cp != '&') /* main body, when not in header */
+	datalines++;
+    }
+  rewind(stream); /* rewind the file to top */
+
+  if (verbose)
+    fprintf(stderr,"Making tables with entries: %d\n",datalines);
+  /* Making the tables now we know the number of lines */
+  sp[nr].tab = (TBL *) ts_memory (NULL, 4 * sizeof (TBL), progname);
+  sp[nr].tab[T2KTAB]= *mktable(datalines,"theta2k",verbose);
+  sp[nr].tab[T2HTAB]= *mktable(datalines,"theta2head",verbose);
+  sp[nr].tab[H2DMCTAB]= *mktable(datalines,"head2dmc",verbose);
+  sp[nr].tab[H2TTAB]= *mktable(datalines,"head2theta",verbose);
+
+  /* No actually read the contents of the file */
+  while ((cp = fgets (buf,LBUFF,stream)) != (char *) NULL)
+    {
+	    if (*cp && *cp != '#' && *cp != '&'){ /* main body, when not in header */ 
+		    switch (type){
+			    case 2:
+				    if (sscanf(cp,"%lf %lf %lf",&tt_psi,&tt_theta,&tt_k)!=3){
+					    fclose(stream);
+					    Perror(progname,1,RCSid,"Error when reading soil table.","format 2 (psi theta k)");
+				    }
+				    break;
+			    case 1:
+				    if (sscanf(cp,"%lf %lf %lf %lf %lf",&tt_psi,&dummy,&tt_theta,&tt_k,&tt_dtdp)!=5){
+					    fclose(stream);
+					    Perror(progname,1,RCSid,"Error when reading soil table.","TOPOG _soil format");
+				    }
+				    tt_k *=100;
+				    tt_psi *= 100;
+				    tt_dtdp*=0.01;
+				    break;
+			    case 3:
+				    if (sscanf(cp,"%lf %lf %lf %lf",&tt_psi,&tt_theta,&tt_k,&tt_dtdp)!=4){
+					    fclose(stream);
+					    Perror(progname,1,RCSid,"Error when reading soil table.","format 3 (psi theta k diff_moist)");
+				    }
+			    default:
+				    break;
+		    }
+		    lread++;
+		    sp[nr].tab[T2KTAB].x[datalines-lread]=tt_theta;
+		    sp[nr].tab[T2KTAB].y[datalines-lread]=tt_k;
+		    sp[nr].tab[T2HTAB].x[datalines-lread]=tt_theta;
+		    sp[nr].tab[T2HTAB].y[datalines-lread]=tt_psi;
+		    sp[nr].tab[H2DMCTAB].x[datalines-lread]=tt_psi;
+		    sp[nr].tab[H2DMCTAB].y[datalines-lread]=tt_dtdp;
+		    sp[nr].tab[H2TTAB].x[datalines-lread]=tt_psi;
+		    sp[nr].tab[H2TTAB].y[datalines-lread]=tt_theta;
+	    }else
+		    if (type ==1){ /* Get information from the file header and comments of TOPOG file*/
+			    if (strstr (cp,"K(sat)=") != NULL) /* get k_sat*/
+				    sscanf(cp,"%10c %lf",ens,&sp[nr].ksat);
+			    if (strstr(cp,"Theta(sat)=") != NULL) /* get porosity */
+				    sscanf(cp,"%14c %lf",ens,&sp[nr].thetas);
+			    if (strstr(cp,"Theta(dry)=") != NULL) /* get residual water */
+				    sscanf(cp,"%14c %lf",ens,&sp[nr].residual_water);
+			    if (strstr(cp,"entries")!=NULL){ /* get entries for a check */
+				    sscanf(cp,"%14c %d",ens,&entries);
+				    entries -= 17;
+				    if (entries != datalines)
+					    Perror(progname,0,RCSid,"Problem in TOPOG soil table:","datalines != entries this datafile might be corrupt!");
+			    }
+		    }
+    }
+
+  if (type == 2){
+	  tmpxy = (XY *) ts_memory(NULL,sp[nr].tab[T2HTAB].points * sizeof(XY),progname);
+	  dmc = (double *) ts_memory(NULL,sp[nr].tab[T2HTAB].points * sizeof(double),progname);
+	  for (i = 0; i< sp[nr].tab[T2HTAB].points; i++){
+		  tmpxy[i].x = sp[nr].tab[T2HTAB].x[i];	
+		  tmpxy[i].y = sp[nr].tab[T2HTAB].y[i];	
+	  }
+	  dmc = ts_slopes(tmpxy,sp[nr].tab[T2HTAB].points);
+	  for (i = 0; i< sp[nr].tab[T2HTAB].points; i++)
+		  sp[nr].tab[H2DMCTAB].y[i]=dmc[i];
+	  free(tmpxy);
+	  free(dmc);
+  }
+
+  if (dumptables)
+    for (i=0;i<4;i++){
+	    printcom(RCSid);
+	    printcom("Dumped look-up tables follow");
+	    sprintf(buf,"%s_%d_x",sp[nr].tab[i].des,nr);
+	    printar(buf,sp[nr].tab[i].x,sp[nr].tab[i].points);
+	    sprintf(buf,"%s_%d_y",sp[nr].tab[i].des,nr);
+	    printar(buf,sp[nr].tab[i].y,sp[nr].tab[i].points);
+    }
+@
+
+
+1.12
+log
+@Updated to Alpha version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/util/RCS/mktable.c,v 1.11 1996/10/22 17:40:22 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1996/10/22 17:40:22 $
+a10 6
+/* If you use the NOINTERPOL define, this routine
+ * might be slightly faste by the overall accuracy
+ * can deminish so much that vamps has to use more
+ * iteration, thus slowing the calculations. Not recommend!
+ */
+/* #define NOINTERPOL */
+d13 1
+a13 1
+"$Id: mktable.c,v 1.11 1996/10/22 17:40:22 schj Exp $";
+d20 1
+a20 1
+  TBL *tt;
+d22 9
+a30 9
+  if (verb)
+    {
+      fprintf (stderr, "mktable.c: creating table %s with %d points\n", des, items);
+    }
+  tt = (TBL *) ts_memory (NULL, sizeof (TBL), progname);
+  tt->x = (double *) ts_memory (NULL, items * sizeof (double), progname);
+  tt->y = (double *) ts_memory (NULL, items * sizeof (double), progname);
+  tt->points = items;
+  strcpy (tt->des, des);
+d34 21
+d60 1
+a60 1
+ * gets the y value belogin to xval from table tab. Linear interpolation
+d63 1
+a63 2
+double
+getval (TBL *tab,double xval)
+d65 21
+a85 24
+  int index;
+  double rico,ans;
+  int high, low, mid;
+
+  /* first check high and low points */
+  if (xval <= tab->x[0])
+    return tab->y[0];
+  else if (xval >= tab->x[(tab->points) - 1])
+    return tab->y[(tab->points) - 1];
+
+  /* here the binary search starts */
+  mid = low = 0;
+  high = tab->points;
+
+  while (high >= low)
+    {
+      mid = (high + low) / 2;
+      if (xval > tab->x[mid] && xval > tab->x[mid + 1])
+	{
+	  low = mid + 1;
+	}
+      else if (tab->x[mid] > xval)
+	{
+	  high = mid - 1;
+d87 10
+a96 21
+      else
+	high = -1;
+    }
+
+  if (xval == tab->x[mid])
+    return tab->y[mid]; /* exact match */
+  else{
+     if (xval < tab->x[mid])
+     index = mid-1;
+     else
+	    index = mid;
+  }
+
+#ifdef NOINTERPOL
+	return tab->x[mid];
+#endif
+   /* linear interpolation */
+      rico = (tab->y[index + 1] - tab->y[index]) / (tab->x[index + 1] - tab->x[index]);
+      ans = (rico * (xval - tab->x[index])) + tab->y[index];
+
+      return ans;
+d104 1
+a104 1
+ * void readtablefile (FILE *stream,int layer, int type)
+d122 1
+a122 1
+readtablefile(FILE *stream,int layer,int type)
+d126 2
+d146 5
+a150 5
+  soilparm[layer].tab = (TBL *) ts_memory (NULL, 4 * sizeof (TBL), progname);
+  soilparm[layer].tab[THETA2KTAB]= *mktable(datalines,"theta2k",verbose);
+  soilparm[layer].tab[PRHNODETAB]= *mktable(datalines,"theta2head",verbose);
+  soilparm[layer].tab[DMCNODETAB]= *mktable(datalines,"head2dmc",verbose);
+  soilparm[layer].tab[THENODETAB]= *mktable(datalines,"head2theta",verbose);
+d155 57
+a211 26
+      if (*cp && *cp != '#' && *cp != '&') /* main body, when not in header */
+	{ 
+	  switch (type){
+	  case 2:
+	    if (sscanf(cp,"%lf %lf %lf",&tt_psi,&tt_theta,&tt_k)!=3){
+	      fclose(stream);
+	      Perror(progname,1,RCSid,"Error when reading soil table.","format 2 (psi theta k)");
+	    }
+	    Perror(progname,1,RCSid,"File type not yet implemneted","still have to insert ts_spline!");
+	    break;
+	  case 1:
+	    if (sscanf(cp,"%lf %lf %lf %lf %lf",&tt_psi,&dummy,&tt_theta,&tt_k,&tt_dtdp)!=5){
+	      fclose(stream);
+	      Perror(progname,1,RCSid,"Error when reading soil table.","TOPOG _soil format");
+	    }
+	    tt_k *=100;
+	    tt_psi *= 100;
+	    tt_dtdp*=0.01;
+	    break;
+	  case 3:
+	    if (sscanf(cp,"%lf %lf %lf %lf",&tt_psi,&tt_theta,&tt_k,&tt_dtdp)!=4){
+	      fclose(stream);
+	      Perror(progname,1,RCSid,"Error when reading soil table.","format 3 (psi theta k diff_moist)");
+	    }
+	  default:
+	    break;
+d213 6
+a218 27
+
+	  lread++;
+	  soilparm[layer].tab[THETA2KTAB].x[datalines-lread]=tt_theta;
+	  soilparm[layer].tab[THETA2KTAB].y[datalines-lread]=tt_k;
+	  soilparm[layer].tab[PRHNODETAB].x[datalines-lread]=tt_theta;
+	  soilparm[layer].tab[PRHNODETAB].y[datalines-lread]=tt_psi;
+	  soilparm[layer].tab[DMCNODETAB].x[datalines-lread]=tt_psi;
+	  soilparm[layer].tab[DMCNODETAB].y[datalines-lread]=tt_dtdp;
+	  soilparm[layer].tab[THENODETAB].x[datalines-lread]=tt_psi;
+	  soilparm[layer].tab[THENODETAB].y[datalines-lread]=tt_theta;
+	}
+	  else
+	    if (type ==1){ /* Get information from the file header and comments of TOPOG file*/
+	       if (strstr (cp,"K(sat)=") != NULL) /* get k_sat*/
+		  sscanf(cp,"%10c %lf",ens,&soilparm[layer].ksat);
+	       if (strstr(cp,"Theta(sat)=") != NULL) /* get porosity */
+		 sscanf(cp,"%14c %lf",ens,&soilparm[layer].thetas);
+	       if (strstr(cp,"Theta(dry)=") != NULL) /* get residual water */
+		 sscanf(cp,"%14c %lf",ens,&soilparm[layer].residual_water);
+		if (strstr(cp,"entries")!=NULL){ /* get entries for a check */
+		sscanf(cp,"%14c %d",ens,&entries);
+		entries -= 17;
+		if (entries != datalines)
+		  Perror(progname,0,RCSid,"Problem in TOPOG soil table:","datalines != entries this datafile might be corrupt!");
+	      }
+	     }
+    }
+d224 4
+a227 4
+	    sprintf(buf,"%s_%d_x",soilparm[layer].tab[i].des,layer);
+	    printar(buf,soilparm[layer].tab[i].x,soilparm[layer].tab[i].points);
+	    sprintf(buf,"%s_%d_y",soilparm[layer].tab[i].des,layer);
+	    printar(buf,soilparm[layer].tab[i].y,soilparm[layer].tab[i].points);
+@
+
+
+1.11
+log
+@no changes
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.98/src/util/RCS/mktable.c,v 1.10 1996/03/25 07:54:57 schj alpha $ */
+d5 1
+a5 24
+ *  $Date: 1996/03/25 07:54:57 $
+ *  $Log: mktable.c,v $
+ *  Revision 1.10  1996/03/25 07:54:57  schj
+ *  0.98
+ *
+ *  Revision 1.9  1996/02/27 11:39:01  schj
+ *  added readtable stuff
+ *  changed to ansi
+ *
+ * Revision 1.8  1996/01/25  15:03:00  schj
+ * added readtablefile to read TOPOG _soil tables
+ *
+ *  Revision 1.7  1995/12/09 08:12:14  schj
+ *  optimized versio, negative number bug? removed
+ *
+ *  Revision 1.5  1995/12/05 03:07:11  schj
+ *  first working version, includes getval()
+ *
+ * Revision 1.3  1995/09/23  20:45:12  schj
+ * added ifdef DDEBUG
+ *
+ * Revision 1.1  1995/09/20  08:23:59  schj
+ * Initial revision
+ *
+d19 1
+a19 1
+"$Id: mktable.c,v 1.10 1996/03/25 07:54:57 schj alpha $";
+@
+
+
+1.10
+log
+@0.98
+@
+text
+@d1 2
+a2 2
+/* $Header: /home/schj/src/vamps_0.975/src/util/RCS/mktable.c,v 1.9 1996/02/27 11:39:01 schj Exp $ */
+/*-
+d5 1
+a5 1
+ *  $Date: 1996/02/27 11:39:01 $
+d7 3
+d42 1
+a42 1
+"$Id: mktable.c,v 1.9 1996/02/27 11:39:01 schj Exp $";
+@
+
+
+1.9
+log
+@added readtable stuff
+changed to ansi
+@
+text
+@d1 1
+a1 1
+/* $Header: /homes/schj/src/vamps_0.96/src/util/RCS/mktable.c,v 1.8 1996/01/25 15:03:00 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1996/01/25 15:03:00 $
+d7 4
+d39 1
+a39 1
+"$Id: mktable.c,v 1.8 1996/01/25 15:03:00 schj Exp $";
+@
+
+
+1.8
+log
+@added readtablefile to read TOPOG _soil tables
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.96/src/util/RCS/mktable.c,v 1.7 1995/12/09 08:12:14 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1995/12/09 08:12:14 $
+d7 3
+a15 3
+ * Revision 1.4  1995/10/23  07:52:03  schj
+ * *** empty log message ***
+ *
+a18 3
+ * Revision 1.2  1995/09/22  15:43:24  schj
+ * *** empty log message ***
+ *
+d25 8
+a32 1
+#include <strings.h>
+d35 1
+a35 1
+"$Id: mktable.c,v 1.7 1995/12/09 08:12:14 schj Exp $";
+d40 1
+a40 4
+* mktable (items, des, verb)
+     int items;
+     char *des;
+     int verb;
+d65 1
+a65 3
+getval (tab, xval)
+     TBL *tab;
+     double xval;
+a70 1
+
+a76 1
+
+a95 5
+   if (high != -1){
+	   fprintf(stderr,"Not found: %g\n",xval);
+	   Perror(progname,1,RCSid,"Value not found","getval");
+   }
+
+d105 3
+d111 1
+a111 4
+  /*fprintf(stderr,"xval    tab[mid-1] tab[mid] tab[mid+1]\n");
+  fprintf(stderr,"%g %g %g %g %g\n",xval,tab->x[mid-1], tab->x[mid], tab->x[mid+1],ans);
+  fprintf(stderr,"%g %g %g %g %g\n",xval,tab->y[mid-1], tab->y[mid], tab->y[mid+1],ans);
+  */
+a112 1
+  /* Notreached */
+d120 1
+a120 1
+ * int readtablefile (FILE *stream,int layer)
+d132 4
+d137 2
+a138 4
+int
+readtablefile(stream, layer)
+FILE *stream;
+int layer;
+a139 1
+  XY *p_t; /* phi vs theta, needed to determine C (diff_moist dtheta/dphi)*/
+d143 1
+d149 18
+d171 21
+a191 3
+	  if (sscanf(cp,"%lf %lf %lf %lf %lf",&tt_psi,&dummy,&tt_theta,&tt_k,&tt_dtdp)!=5){
+	    fclose(stream);
+	    Perror(progname,1,RCSid,"Error when reading soil table.","TOPOG _soil format");
+d193 4
+d198 8
+a205 8
+	  soilparm[layer].tab[THETA2KTAB].x[entries-lread]=tt_theta;
+	  soilparm[layer].tab[THETA2KTAB].y[entries-lread]=tt_k*100;
+	  soilparm[layer].tab[PRHNODETAB].x[entries-lread]=tt_theta;
+	  soilparm[layer].tab[PRHNODETAB].y[entries-lread]=tt_psi*100;
+	  soilparm[layer].tab[DMCNODETAB].x[entries-lread]=tt_psi*100;
+	  soilparm[layer].tab[DMCNODETAB].y[entries-lread]=tt_dtdp*0.01;
+	  soilparm[layer].tab[THENODETAB].x[entries-lread]=tt_psi*100;
+	  soilparm[layer].tab[THENODETAB].y[entries-lread]=tt_theta;
+d208 8
+a215 3
+	    {
+	      if (strstr(cp,"entries")!=NULL){/* Assingtables to soil */
+		soilparm[layer].tab = (TBL *) ts_memory (NULL, 4 * sizeof (TBL), progname);
+d218 2
+a219 5
+		fprintf(stderr,"Making tables with entries: %d\n",entries);
+		soilparm[layer].tab[THETA2KTAB]= *mktable(entries,"theta2k",verbose);
+		soilparm[layer].tab[PRHNODETAB]= *mktable(entries,"theta2head",verbose);
+		soilparm[layer].tab[DMCNODETAB]= *mktable(entries,"head2dmc",verbose);
+		soilparm[layer].tab[THENODETAB]= *mktable(entries,"head2theta",verbose);
+d221 1
+a221 1
+	    }
+a232 1
+ return 0;
+a233 4
+
+
+
+
+@
+
+
+1.7
+log
+@optimized versio, negative number bug? removed
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.95/src/util/RCS/mktable.c,v 1.5 1995/12/05 03:07:11 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1995/12/05 03:07:11 $
+d7 3
+d27 1
+d31 1
+a31 1
+"$Id: mktable.c,v 1.5 1995/12/05 03:07:11 schj Exp $";
+d123 81
+@
+
+
+1.6
+log
+@somewhat working version, used as base
+@
+text
+@a22 1
+
+d65 1
+a65 1
+  double rico;
+d70 1
+a70 1
+  if (xval < tab->x[0])
+d72 1
+a72 1
+  else if (xval > tab->x[(tab->points) - 1])
+d95 15
+a109 10
+  if (xval > tab->x[mid] || xval == tab->x[mid])
+    index = mid;
+  else
+    index = mid - 1;
+
+   /* return exact match or use linear interpolation */
+  if (tab->x[index] == xval)
+    return tab->y[index];
+  else
+    {
+d111 6
+a116 2
+      return (rico * (xval - tab->x[index])) + tab->y[index];
+    }
+@
+
+
+1.5
+log
+@first working version, includes getval()
+@
+text
+@d1 1
+a1 1
+/* $Header: /homes/schj/src/vamps_0.91/RCS/mktable.c,v 1.4 1995/10/23 07:52:03 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1995/10/23 07:52:03 $
+d7 3
+d28 1
+a28 1
+"$Id: mktable.c,v 1.4 1995/10/23 07:52:03 schj Exp $";
+a30 1
+int lin = 1; /* Use linear interpolation in look up tables */
+d33 1
+a33 1
+* mktable (items, des,verb)
+d41 3
+a43 3
+	{
+		fprintf(stderr,"mktable.c: creating tab;e %s with %d points\n",des,items);
+	}
+d55 1
+a55 1
+ * double getval(TBL *tab, double xval,int lin)
+d58 1
+a58 1
+ * is used for increase accuracy if lin is set to a nonzero value.
+d61 1
+a61 1
+getval (tab, xval,lin)
+a63 1
+     int lin;
+d95 3
+a97 7
+  if (high == -1)
+    {
+      if (xval > tab->x[mid] || xval == tab->x[mid])
+	index = mid;
+      else
+	index = mid - 1;
+    }
+d99 1
+a99 4
+    {
+      fprintf (stderr, "asked: %f from tab %s\n", xval, tab->des);
+      Perror (progname, 1, RCSid, "Find error in table", "tab->des");
+    }
+d101 1
+d106 2
+a107 12
+      if (lin)
+	{
+	  rico = (tab->y[index + 1] - tab->y[index]) / (tab->x[index + 1] - tab->x[index]);
+	  return (rico * (xval - tab->x[index])) + tab->y[index];
+	}
+      else
+	{
+	  if (xval - tab->x[index] > tab->x[index + 1] - xval)
+	    return tab->y[index + 1];
+	  else
+	    return tab->y[index];
+	}
+a110 19
+
+#ifdef TST
+char *progname = NULL;
+main ()
+{
+  TBL *tt;
+  int i;
+
+  tt = mktable (100, 0.5, "kk");
+
+  for (i = 0; i < 100; i++)
+    {
+      tt->x[i] = i;
+      tt->y[i] = i * 2;
+    }
+  for (i = -1; i < 101; i++)
+    printf ("%f %f %f\n", tt->y[Bsearch (tt->x, tt->y, i, tt->points], getval (tt, (double) i), (double) i);
+	    }
+#endif
+@
+
+
+1.4
+log
+@*** empty log message ***
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/util/RCS/mktable.c,v 1.3 1995/09/23 20:45:12 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1995/09/23 20:45:12 $
+d7 3
+d21 1
+a21 1
+#include "../include/vamps.h"
+d24 2
+a25 4
+#ifdef DDEBUG
+static  char RCSid[] =
+"$Id: mktable.c,v 1.3 1995/09/23 20:45:12 schj Exp $";
+#endif
+d28 1
+a28 2
+
+TBL	alltab[MAXTBL];
+d31 4
+a34 3
+mktable(items,des)
+int items;
+char  *des;
+d36 1
+a36 1
+TBL tt;
+d38 9
+a46 3
+ tt.xy=(XY *)ts_memory(NULL,items*sizeof(XY),progname);
+ tt.points=items;
+ strcpy(tt.des,des);
+d48 1
+a48 1
+return tt;
+d50 95
+@
+
+
+1.3
+log
+@added ifdef DDEBUG
+@
+text
+@d1 3
+a3 2
+/* $Header: /home/schj/src/prosper/vamps_0.9/util/RCS/mktable.c,v 1.2 1995/09/22 15:43:24 schj Exp $ */
+/*- $RCSfile: mktable.c,v $
+d5 1
+a5 1
+ *  $Date: 1995/09/22 15:43:24 $
+d7 3
+d23 1
+a23 1
+"$Id: mktable.c,v 1.2 1995/09/22 15:43:24 schj Exp $";
+@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/util/RCS/mktable.c,v 1.1 1995/09/20 08:23:59 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/09/20 08:23:59 $
+d6 3
+d17 1
+d19 2
+a20 1
+"$Id: mktable.c,v 1.1 1995/09/20 08:23:59 schj Exp $";
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 2
+a2 2
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/util/RCS/bsearch.c,v 1.3 1995/09/20 08:08:59 schj Exp $ */
+/*- $RCSfile: bsearch.c,v $
+d4 5
+a8 2
+ *  $Date: 1995/09/20 08:08:59 $
+ *  $Log$
+d12 1
+d15 5
+a19 1
+"$Id$";
+d22 1
+a22 1
+mktable(items)
+d24 1
+d30 1
+@

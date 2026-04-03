@@ -1,0 +1,225 @@
+head	1.5;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.5
+date	99.01.06.12.13.01;	author schj;	state Alpha;
+branches;
+next	1.4;
+
+1.4
+date	99.01.06.12.07.49;	author schj;	state Alpha;
+branches;
+next	1.3;
+
+1.3
+date	97.09.09.08.42.42;	author schj;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	96.11.05.15.07.59;	author schj;	state Alpha;
+branches;
+next	1.1;
+
+1.1
+date	95.11.14.20.30.14;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@allocate arrays and matrixes
+@
+
+
+1.5
+log
+@Version: 0.99g
+@
+text
+@/*- 
+ * void *memory(void *ptr, size_t size, char *progname)
+ *		Allocates size bytes of memory if ptr == NULL, else
+ *		reallocates size bytes from ptr (ANSI realloc()). On
+ *		memory error, print diagnostic with progname and exit
+ *		with status 1.
+ *	Ret:	pointer to allocated memory, deallocate with free(3).
+ *
+ */
+#include <sys/types.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include "marquard.h"
+
+void *
+m_memory(void *ptr,size_t size,const char *progname)
+{
+	void	*rp;
+
+	if(ptr)
+		rp = (void *)realloc(ptr, size);
+	else
+		rp = (void *)malloc(size);
+	if(rp)
+		return(rp);
+
+	(void)fprintf(stderr, "%s: Memory allocation failed\n", progname);
+	exit (1);
+	/* NOTREACHED */
+}
+
+
+double **m_matr (int rows,int  cols)
+{
+    /* allocates a double matrix */
+
+    register int i;
+    register double **m;
+
+    if ( rows < 1  ||  cols < 1 )
+        return NULL;
+    /* allocate pointers to rows */
+    if ( (m = (double **) malloc ((rows)* sizeof(double *) )) == NULL ){
+	fprintf (stderr,"Memory running low during fit: rows = %d\n", rows);
+	exit (1);
+    }
+    /* allocate rows and set pointers to them */
+    for ( i=0 ; i<rows ; i++ )
+	if ( (m[i] = (double *) malloc ((cols)* sizeof(double))) == NULL ){
+	    fprintf (stderr,"Memory running low during fit: cols = %d\n",cols);
+	    exit (1);
+	}
+    return m;
+}
+
+void m_free_matr (double **m,int  rows)
+{
+    register int i;
+  
+    for ( i=0 ; i<rows ; i++ ){
+      free ( m[i] );
+    }
+    free (m);
+}
+@
+
+
+1.4
+log
+@Version: 0.99g
+@
+text
+@@
+
+
+1.3
+log
+@0.99e version
+@
+text
+@@
+
+
+1.2
+log
+@Updated to Alpha version
+@
+text
+@d12 1
+a12 1
+#include <malloc.h>
+d16 1
+a16 1
+memory(void *ptr,size_t size,const char *progname)
+d28 1
+a28 1
+	exit(1);
+d33 1
+a33 1
+double **matr (int rows,int  cols)
+d43 4
+a46 2
+    if ( (m = (double **) malloc ((rows+1)* sizeof(double *) )) == NULL )
+	fprintf (stderr,"Memory running low during fit");
+d48 5
+a52 3
+    for ( i=0 ; i<=rows ; i++ )
+	if ( (m[i] = (double *) malloc ((cols +1)* sizeof(double))) == NULL )
+	    fprintf (stderr,"Memory running low during fit");
+d56 1
+a56 1
+void free_matr (double **m,int  rows)
+d60 1
+a60 3
+      fprintf(stderr,"Free row %d\n",0);
+    for ( i=0 ; i<=rows ; i++ ){
+      fprintf(stderr,"Free row %d\n",i);
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 2
+a2 3
+/* memory.c */
+/*-
+ *	void *memory(void *ptr, size_t size, char *progname)
+d8 1
+d13 1
+d16 1
+a16 4
+memory(ptr, size, progname)
+void	*ptr;
+size_t	size;
+char	*progname;
+a31 28
+double *vec (n)
+int	n;
+{
+    /* allocates a double vector with n elements */
+    double *dp;
+    if( n < 1 )
+	return (double *) NULL;
+    if ( (dp = (double *) malloc ( n * sizeof(double) )) == NULL ){
+	fprintf (stderr,"Memory running low during fit");
+	exit(1);
+     }
+    else
+	return dp;
+}
+
+int *ivec (n)
+int	n;
+{
+    /* allocates a int vector with n elements */
+    int *ip;
+    if( n < 1 )
+	return (int *) NULL;
+    if ( (ip = (int *) malloc ( n * sizeof(int) )) == NULL ){
+	fprintf (stderr,"Memory running low during fit");
+	exit(1);
+   }else
+	return ip;
+}
+d33 1
+a33 3
+double **matr ( rows,  cols)
+int	rows;
+int	cols;
+d52 1
+a52 3
+void free_matr ( m,  rows)
+double	**m;
+int	rows;
+d55 6
+a60 2
+    for ( i=0 ; i<=rows ; i++ )
+	free ( m[i] );
+@

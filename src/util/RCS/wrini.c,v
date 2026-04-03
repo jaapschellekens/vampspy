@@ -1,0 +1,623 @@
+head	1.16;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.16
+date	97.01.16.15.08.25;	author schj;	state Exp;
+branches;
+next	1.15;
+
+1.15
+date	96.11.05.14.59.13;	author schj;	state Alpha;
+branches;
+next	1.14;
+
+1.14
+date	96.10.22.17.44.00;	author schj;	state Exp;
+branches;
+next	1.13;
+
+1.13
+date	96.03.25.07.56.32;	author schj;	state alpha;
+branches;
+next	1.12;
+
+1.12
+date	96.02.27.11.41.16;	author schj;	state Exp;
+branches;
+next	1.11;
+
+1.11
+date	95.12.05.03.07.11;	author schj;	state Exp;
+branches;
+next	1.10;
+
+1.10
+date	95.10.30.13.54.33;	author schj;	state Exp;
+branches;
+next	1.9;
+
+1.9
+date	95.10.23.07.52.03;	author schj;	state Exp;
+branches;
+next	1.8;
+
+1.8
+date	95.10.03.14.06.18;	author schj;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	95.09.01.11.43.50;	author schj;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	95.09.01.06.09.11;	author schj;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	95.08.29.13.56.44;	author schj;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	95.08.24.14.14.24;	author schj;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	95.08.24.12.47.38;	author schj;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	95.08.24.12.25.38;	author schj;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	95.08.23.13.22.08;	author schj;	state Beta;
+branches;
+next	;
+
+
+desc
+@ini file stream editor
+@
+
+
+1.16
+log
+@*** empty log message ***
+@
+text
+@/* $Header: /home/schj/src/vamps_0.99/src/util/RCS/wrini.c,v 1.15 1996/11/05 14:59:13 schj Alpha $ */
+/*
+ *  $RCSfile: wrini.c,v $
+ *  $Author: schj $
+ *  $Date: 1996/11/05 14:59:13 $
+ */
+/*
+  simple program to add stuff to .ini files
+  it uses the vamps common functions from pro_def.c
+  USAGE:
+  wrini fname [[section name value] section name value]...
+*/
+
+
+static char RCSid[] =
+"$Id: wrini.c,v 1.15 1996/11/05 14:59:13 schj Alpha $";
+
+#include <stdio.h>
+#include <string.h>
+#include "vamps.h"
+#include "deffile.h"
+#include "getopt.h"
+
+#define WRINIDES "simple program to add stuff to vamps input/output files"
+
+struct option options[] =
+{
+  {"help", no_argument, 0, 'h'},
+  {"copyright", no_argument, 0, 'c'},
+  {"verbose", no_argument, 0, 'v'},
+  {"license", no_argument, 0, 'l'},
+  {"Header", no_argument, 0, 'H'},
+  {"Comment", required_argument, 0, 'C'},
+  {"outfile", required_argument, 0, 'o'},
+  {0, 0, 0, 0},
+};
+
+#define USE "\t[options] [[section name value] section name value]... infile"
+
+#define EXPL "\
+\t--verbose\t\tbe verbose about performed actions\n\
+\t--help\t\t\tshow this information\n\
+\t--copyright\t\tshow part of the GPL\n\
+\t--licence\t\tshow part of the GPL\n\
+\t--outfile outfilename\tdump output in outfile, in stead of overwriting infile\n\
+\t--Header\t\tomit header in output\n\
+\t--Comment commentchar\tset the commentchar\n\
+"
+
+char *progname;
+char command[1024];
+FILE *outfile = NULL;
+
+#define OPTSTR "o:vhclHC:F:"
+#define INI 0
+#define TCL 1
+char   *progname;
+FILE *genoutfile=NULL;
+
+int
+main (int argc,char *argv[])
+{
+  int     i;
+  int     j = 0;
+  int     what;
+  int	  header=0;
+  int     format = INI;
+  char    section[1024];
+  char    name[1024];
+  int 	verbose=0;
+  char	*outname=NULL;
+  char    value[1024];
+  void disclaim ();
+  void showinfo (int verb);
+
+  progname = argv[0];
+  if (argv[1] == NULL)
+    {
+    	showinfo(0);
+    }
+
+  while ((what = getopt_long (argc, argv, OPTSTR, options, NULL)) != EOF)
+    {
+      switch (what)
+	{
+	case 'v':
+	  {
+	    verbose = TRUE;
+	    break;
+	  }
+	case 'o':
+	  {
+	    outname = optarg;
+	    break;
+	  }
+	case 'l':
+	  {
+	    disclaim ();
+	    break;
+	  }
+	case 'c':
+	  {
+	    disclaim ();
+	    break;
+	  }
+	case 'H':
+	  {
+	    header = FALSE;
+	    break;
+	  }
+	case 'C':
+	  {
+	    commchar = *optarg;
+	    break;
+	  }
+	case 'h':
+		{
+		showinfo(1);
+		break;
+		}
+	case 'F':
+	  {
+	    if (*optarg == 't')
+	      format = TCL;
+	    break;
+	  }
+	default:break;
+	}
+    }
+
+  rinmem (argv[argc-1]);
+  if (!outname)
+     outname=argv[argc-1];
+
+  for (i = optind; i < argc; i++)
+    {
+      j++;
+      switch (j)
+	{
+	case 1:
+	  strcpy (section, argv[i]);
+	  break;
+	case 2:
+	  strcpy (name, argv[i]);
+	  break;
+	case 3:
+	  strcpy (value, argv[i]);
+	  break;
+	default:
+	  break;
+	}
+      if (j == 3)
+	j = 0;
+      else
+	j = j;
+
+      if (j == 0)
+	{
+	  setvalue (section, name, value,1);
+	}
+    }
+
+
+  writememini (outname, &format, NULL);
+
+  return 0;
+}
+
+void
+showinfo (verb)
+     int verb;
+{
+  (void) fprintf (stderr, "\n%s - %s\n\t(c) %s - %s\n", progname, WRINIDES, AUTHOR, DATE);
+  (void) fprintf (stderr, "\tfor vamps %s\n",PROVERSION);
+  (void) fprintf (stderr, "\tBuild on %s at %s by %s (%s)\n", WHERE, BUILDDATE, WHO,OS);
+  (void) fprintf (stderr, "\t(%s)\n", RCSid);
+  (void) fprintf (stderr, "\n\tusage: %s\n%s\n", progname, USE);
+  if (verb)
+    (void) fprintf (stderr, "%s", EXPL);
+  (void) fprintf (stderr, "\n");
+  exit (1);
+}
+
+void
+disclaim ()
+{
+  (void) fprintf (stderr, "%s\n", GNUL);
+  exit (0);
+}
+
+@
+
+
+1.15
+log
+@Updated to Alpha version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/util/RCS/wrini.c,v 1.14 1996/10/22 17:44:00 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1996/10/22 17:44:00 $
+d16 1
+a16 1
+"$Id: wrini.c,v 1.14 1996/10/22 17:44:00 schj Exp $";
+@
+
+
+1.14
+log
+@changed header
+Actually wrini can go!
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.98/src/util/RCS/wrini.c,v 1.13 1996/03/25 07:56:32 schj alpha $ */
+d5 1
+a5 1
+ *  $Date: 1996/03/25 07:56:32 $
+d16 1
+a16 1
+"$Id: wrini.c,v 1.13 1996/03/25 07:56:32 schj alpha $";
+d34 1
+d38 1
+a38 1
+#define USE "\t[[section name value] section name value]... filename"
+d45 1
+d47 1
+a47 1
+\t--Comment\t\tset commentchar\n\
+d54 1
+a54 1
+#define OPTSTR "vhclHC:F:f:"
+d86 1
+a86 1
+	case 'f':
+d88 1
+a88 1
+	    outname = optarg;
+d91 1
+a91 1
+	case 'v':
+d93 1
+a93 1
+	    verbose = TRUE;
+d131 1
+a131 1
+  rinmem (argv[optind]);
+d133 1
+a133 1
+     outname=argv[optind];
+d135 1
+a135 1
+  for (i = optind + 1; i < argc; i++)
+d164 1
+a164 1
+  writememini (outname, format, NULL);
+@
+
+
+1.13
+log
+@updated help message (link to vamps version)
+@
+text
+@d1 2
+a2 2
+/* $Header: /home/schj/src/vamps_0.975/src/util/RCS/wrini.c,v 1.12 1996/02/27 11:41:16 schj Exp $ */
+/*-
+d5 1
+a5 14
+ *  $Date: 1996/02/27 11:41:16 $
+ *  $Log: wrini.c,v $
+ *  Revision 1.12  1996/02/27 11:41:16  schj
+ *  changed to ansi
+ *
+ * Revision 1.10  1995/10/30  13:54:33  schj
+ * added deffile.h
+ *
+ * Revision 1.8  1995/10/03  14:06:18  schj
+ * removed some vars
+ *
+ * Revision 1.7  1995/09/01  11:43:50  schj
+ * updated header
+ *
+d16 1
+a16 1
+"$Id: wrini.c,v 1.12 1996/02/27 11:41:16 schj Exp $";
+@
+
+
+1.12
+log
+@changed to ansi
+@
+text
+@d1 1
+a1 1
+/* $Header: /homes/schj/src/vamps_0.96/src/util/RCS/wrini.c,v 1.11 1995/12/05 03:07:11 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1995/12/05 03:07:11 $
+d7 3
+d29 1
+a29 1
+"$Id: wrini.c,v 1.11 1995/12/05 03:07:11 schj Exp $";
+d185 1
+@
+
+
+1.11
+log
+@*** empty log message ***
+@
+text
+@d1 1
+a1 1
+/* $Header: /homes/schj/src/vamps_0.91/RCS/wrini.c,v 1.10 1995/10/30 13:54:33 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1995/10/30 13:54:33 $
+a8 4
+ * ,
+ *
+ * Revision 1.9  1995/10/23  07:52:03  schj
+ * *** empty log message ***
+d26 1
+a26 1
+"$Id: wrini.c,v 1.10 1995/10/30 13:54:33 schj Exp $";
+d69 1
+a69 3
+main (argc, argv)
+int     argc;
+char   *argv[];
+d81 2
+a82 2
+  void disclaim __P (());
+  void showinfo __P ((int verb));
+@
+
+
+1.10
+log
+@added deffile.h
+,
+@
+text
+@d1 1
+a1 2
+
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.9/util/RCS/wrini.c,v 1.9 1995/10/23 07:52:03 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1995/10/23 07:52:03 $
+d7 4
+d30 1
+a30 1
+"$Id: wrini.c,v 1.9 1995/10/23 07:52:03 schj Exp $";
+d34 3
+a36 3
+#include "../include/vamps.h"
+#include "../include/deffile.h"
+#include "../include/getopt.h"
+a64 1
+static int verbose;
+d84 1
+d145 1
+a145 1
+  rinmem (argv[optind], 4);
+@
+
+
+1.9
+log
+@*** empty log message ***
+@
+text
+@d2 1
+a2 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/util/RCS/wrini.c,v 1.8 1995/10/03 14:06:18 schj Exp $ */
+d6 1
+a6 1
+ *  $Date: 1995/10/03 14:06:18 $
+d8 3
+d27 1
+a27 1
+"$Id: wrini.c,v 1.8 1995/10/03 14:06:18 schj Exp $";
+d32 1
+d62 1
+@
+
+
+1.8
+log
+@removed some vars
+@
+text
+@d2 3
+a4 2
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/util/RCS/wrini.c,v 1.7 1995/09/01 11:43:50 schj Exp $ */
+/*- $RCSfile: wrini.c,v $
+d6 1
+a6 1
+ *  $Date: 1995/09/01 11:43:50 $
+d8 3
+a22 1
+#ifdef DDEBUG
+d24 1
+a24 2
+"$Id: wrini.c,v 1.7 1995/09/01 11:43:50 schj Exp $";
+#endif
+d31 29
+a59 1
+#define OPTSTR "F:f:"
+d64 1
+d73 1
+d79 2
+d85 1
+a85 4
+      (void) fprintf (stderr, "usage:\n%s [options] filename [[section name value] section name value]...\n", progname);
+      (void) fprintf(stderr, "\t -f filename_for_output (- is stdout)\n");
+      (void) fprintf(stderr, "\t -F format (t= TCL)\n");
+      exit (1);
+d88 1
+a88 1
+  while ((what = getopt (argc, argv, OPTSTR)) != EOF)
+d97 30
+d174 22
+@
+
+
+1.7
+log
+@updated header
+@
+text
+@d2 2
+a3 2
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/prosper/vamps_0.9/soil/RCS/swatsoil.c,v 1.10 1995/09/01 06:14:26 schj Exp $ */
+/*- $RCSfile: swatsoil.c,v $
+d5 5
+a9 2
+ *  $Date: 1995/09/01 06:14:26 $
+ *  $Log$
+d19 1
+d21 2
+a22 1
+"$Id: wrini.c,v 1.6 1995/09/01 06:09:11 schj Exp $";
+@
+
+
+1.6
+log
+@updated getvalue call
+@
+text
+@d1 7
+d17 1
+a17 1
+"$Id: wrini.c,v 1.5 1995/08/29 13:56:44 schj Exp $";
+@
+
+
+1.5
+log
+@*** empty log message ***
+@
+text
+@d10 1
+a10 1
+"$Id: wrini.c,v 1.4 1995/08/24 14:14:24 schj Exp $";
+d92 1
+a92 1
+	  setvalue (section, name, value);
+@
+
+
+1.4
+log
+@RCS
+@
+text
+@d9 2
+a10 2
+static const char RCSid[] =
+"$Id: wrini.c,v 1.3 1995/08/24 12:47:38 schj Exp $";
+@
+
+
+1.3
+log
+@include use of perror
+@
+text
+@d10 1
+a10 1
+"$Id: wrini.c,v 1.2 1995/08/24 12:25:38 schj Exp $";
+d21 1
+a21 1
+
+@
+
+
+1.2
+log
+@added RCSid
+@
+text
+@d9 2
+a10 2
+static char RCSid[] =
+"$Id$";
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d8 4
+@

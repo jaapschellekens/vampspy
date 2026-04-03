@@ -1,0 +1,2223 @@
+vamps(1)                                                              vamps(1)
+
+
+
+NAME
+       vamps - A model of Vegetation-AtMosPhere-Soil water flow
+
+SYNOPSIS
+       vamps   [--helpg]   [--Header]   [--copyright]  [--license]  [--verbose]
+       [--showdef]  [--fitg]  [--noinputdump]   [--Interpret]   [--Comment com-
+       mentchar] [--Output setname] [--Determine gvariable] [--output filename]
+       [--Logfile filename]  [--Setvar gsection name value]  [--Interpret file-
+       name] [--spEed speed] [--interFaceg] filename
+
+
+DESCRIPTION
+       vamps  is  a  one-dimensional  model  for  describing the flow of water
+       through a forested ecosystem.  vamps has been designed to  be  flexible
+       and  fast.  Flexibility  allows  users  to  adapt the program either by
+       changing parameters in the input file, or  change  S-Lang  based  func-
+       tions.  Alternatively  you can change the source code and recompile the
+       program. It is designed to be as fast as I could make it without sacri-
+       ficing  reliability  because scientist tend to solve tomorrows problems
+       with yesterdays hardware. Because I used vamps at the same time as  the
+       TOPOG  model  (a physically based distributed catchment model) vamps gis
+       able to share some of it's input files with TOPOG, notable soil  tables
+       (see vamps(5) for a description).
+
+       As  vamps  is  a  complicated  model, it needs rather complicated input
+       files.  The layout of these files is described in vamps(5) and  in  the
+       full  manual. Also vamps contains a S-Lang interpreter and an interface
+       to vamps specific variables which allows to user  to  redefine  certain
+       functions  and generally change vamps behaviour. The S-Lang library and
+       documentation can be found at: ftp://space.mit.edu/pub/davis/slan
+
+       This manual page describes  the  vamps  command  line  options  and  --
+       shortly  --  the vamps interactive interface. A full manual including a
+       description of the principles behind the vamps model  is  available  in
+       LaTeX and postscript format.
+
+       Input  is  read from either filename, or standard input. If filename is
+       specified as a single dash ``-'', it is taken from standard input. Out-
+       put  is  written to the standard output or filename if the -o option is
+       used.
+
+       vamps intercepts some signals (like keyboard  interrupts)  and  ignores
+       them  MAXSIG times. This means that if you want to stop vamps using  ^C
+       you must use this MAXSIG  (usually  5)  times.  MAXSIG  is  defined  in
+       vamps.c.
+
+
+
+USAGE
+       vamps  basically  runs  in two modes. In one mode vamps gis started with
+       command line options, runs and exits when it is finished.   vamps  also
+       has an interactive mode in which vamps accepts S-Lang commands and exe-
+       cutes each as the user enters them via  the  keyboard.  In  both  modes
+       vamps needs an input file to perform most actions.
+
+
+
+OPTIONS
+       Options  may  be  given  as  either standard one-letter options, or GNU
+       style long options. Long options start with two dashes ``--''  and  may
+       be  truncated  to  any  unambiguous abbreviation.  Short options can be
+       found by taking the first letter of the  long  option  or  (if  one  is
+       present)  the  first  capitalized letter of the long option. This means
+       that you can specify -h in stead of --help and -F instead  of  --inter-
+       Face.
+
+
+       --Header
+              Omit the headers in output.
+
+
+       --copyright
+              Show copyright information and exit
+
+
+       --license
+              Print license information and exit.
+
+
+       --help Print help text and exit.
+
+
+       --verbose
+              Enter  verbose  mode,  program  progress is displayed on stderr.
+              Default is silent.
+
+
+       --noinputdump
+              By default the contents of the input-file is  also  included  in
+              the output. Use this option to alter this behaviour.
+
+
+       --spEed speed
+              Set  calculation speed to speed. See vamps(5) for information on
+              settings.  Speed ranges from 1 (slow) to 6 (fastest).
+
+
+       --fit  Fit data to settings in  fit  section.  See  vampsg(5)  for  more
+              information.
+
+
+       --Interpret
+              Interpret  the  last  argument  on  the command line as a S-Lan
+              file.  vamps reads and interprets the file and than exits.
+
+
+       --Output setname
+              Dump the specified setname to a separate file in  ts(5)  format.
+              See vamps(5) for a list of allowed setnames.
+
+
+       --Determine variable
+              Determine  variable (can be a single variable or a time series).
+              See vamps(5) for a list of allowed variables. This  is  normally
+              set in the input file.  Multiple options are allowed.
+
+
+       --Logfile filename
+              Log this session to the file filename.
+
+
+       --Setvar section name value
+              Set  the  value  of  variable  name  in section section to value
+              value.  This overrides the setting in the input file.
+
+
+       --Comment commentchar
+              Set the commentchar to  char  commentchar.   Don't  change  this
+              unless you have a very good reason to do so.
+
+
+       --showdef
+              Send  program  defaults  to stdout. This can be used to create a
+              defaults file from scratch.
+
+
+
+       --output filename
+              Send output to filename in stead of stdout.
+
+
+       --Interpret filename
+              Interpret (execute) filename as an S-Lang file. If the  file  is
+              not found in the current dir the VAMPSLIB dir is tried.
+
+
+       --interFace
+              Start  the  vamps interactive interface. This option must be the
+              last option on the command line (before filename if any)
+
+
+       filename
+              Read input from filename.
+
+
+USAGE
+       If the verbose option is set via the command line  or  the  input  file
+       vamps  show the progress of the calculations on stderr. On UNIX systems
+       that support the  popen(3)  call  with  X11  and  gnuplotg(1)  installed
+       progress  information  can  also be displayed graphically.  This can be
+       done by setting the showgraph variable to 1 and the graphcommand  vari-
+       able  to  the  name  of  the gnuplot executable.  Both should be in the
+       [vamps] section of your default or input file. See  vampsg(5)  for  more
+       information. This option slows down calculations!
+
+
+
+INTRINSICS
+       These are the documented S-Lang intrinsics added by vamps.  They can be
+       used in the vamps interactive mode and in any of the scripts that vamps
+       processes.
+
+       A  lot  of  general utilities come from the slash package written by R.
+       Venneker.
+
+
+
+
+       #
+
+       # [plotcommand]
+
+       Operator to send a single command to the plotting system (gnuplot) when
+       followed  by  an  argument  or to enter plotting mode if no argument is
+       given.  In plotting mode all commands should be  gnuplot  commands.  To
+       switch  back  to  normal mode give a single '#'. The : and \@ operators
+       also work within plotting mode.
+
+       Some special characters can be used to  addres  S-Lang  variables  from
+       within plotting mode. Words withing $'s are replaced by a string repre-
+       sentation of the S-Lang variable with that name. Example
+
+       variable h = "sin(x)";
+       # plot $h$
+
+       To plot S-Lang matrix variables the \@ char must be used. Example
+
+       variable m = mread("mydata.file",-1);
+       # plot @m@ using 1:
+
+       Although S-Lang matrix variables are zero based gnuplot starts countin
+       at 1.
+
+       Variables  from  vamps  output  files can also be plotted. In this case
+       both the name of the of  the  variable  and  the  output  filename  are
+       needed.  They should be seperated by a colon and enclosed in \@ charac-
+       ters:
+
+       # plot @precipitation:example1.out@ using boxes
+
+       See also plt.
+
+       from: ../src/main/init_s.c
+
+       from file: vampsdoc.tmp
+
+
+       :
+
+       : command [options ...]
+
+       Execute a system command in a subshell. Note that the syntax  does  not
+       use  S-Lang  conventions;  everything  after  the  `:' is passed to the
+       shell. Returns nothing, a message is printed on standard error if  com-
+       mand returned a non-zero exit status.
+
+       from: ../src/main/intrins.c
+
+       from file: vampsdoc.tmp
+
+
+       ?
+
+       ? [name ...]
+
+       Invoke the vamps online help system. This command can only be used when
+       running interactive.
+
+       If a single `?' is entered at the prompt, a list  of  names,  typically
+       vamps  command  or  variable  names,  for which online documentation is
+       present will be printed on the screen.
+
+       If one or more name(s) are given after the `?', the available  documen-
+       tation text for those name(s) is printed on the screen.
+
+       If  there is more than one screenfull of text, the cursor and PgDn/PgUp
+       keys will cause the text to scroll; pressing `q' will stop text display
+       and go back to the command prompt.
+
+       from: ../src/main/intrins.c
+
+       from file: vampsdoc.tmp
+
+
+       @
+
+       @scriptname
+
+       This  operator  passes  it's  argument to evalfile. It can only be used
+       when running interactively. It can be used to run scripts in  stead  of
+       an expression like:
+
+       () = evalfile("scriptname");
+
+       Note the lack of a space between the operator and it's argument!
+
+       from: ../src/main/init_s.c
+
+       from file: vampsdoc.tmp
+
+
+       SLang_init_tty
+
+       Int SLang_init_tty()
+
+       Initialize the S-Lang tty.
+
+       from: ../src/main/init_s.c
+
+       from file: vampsdoc.tmp
+
+
+       SLang_reset_tty
+
+       Int SLang_reset_tty()
+
+       Resets  the S-Lang tty. Needed is you want to use stdin and stdout from
+       interactive mode.
+
+       from: ../src/main/init_s.c
+
+       from file: vampsdoc.tmp
+
+
+       Slai_to_s
+
+       Float Slai_to_s(Float lai)
+
+       Function called in the canopy module to convert lai to canopy  storage.
+       If  this  S-Lang  function is not defined the lai value from the canopy
+       section in the input file is used.
+
+       from: ../src/main/init_s.c
+
+       from file: vampsdoc.tmp
+
+
+       _sets_
+
+       Int _sets_
+
+       Number of data sets in memory
+
+       from: ../src/main/init_s.c
+
+       from file: vampsdoc.tmp
+
+
+       _version_
+
+       Int _version_
+
+       Devide by 10 to get version number of Vamps
+
+       from: ../src/main/init_s.c
+
+       from file: vampsdoc.tmp
+
+
+       addset
+
+       Void addset(name, points)
+
+       Adds an empty set name with points points to the list
+
+       from: ../src/main/init_s.c
+
+       from file: vampsdoc.tmp
+
+
+       addtohist
+
+       Int addtohist(string)
+
+       Adds string to the history list.
+
+       from: ../src/main/init_s.c
+
+       from file: vampsdoc.tmp
+
+
+       adev
+
+       Array adev(Array mtx)
+
+       Returns a row vector with the absolute mean deviations for each  column
+       in mtx.
+
+       from file: vampsdoc.tmp
+
+
+       adim
+
+       Integer adim(Array arr)
+       Integer, ... asize(Array arr)
+       Integer atype(Array arr)
+
+       Give  information about array arr. adim returns the array dimension (1,
+       2 or 3), asize returns the size for each dimension  and  atype  returns
+       the data type of the array.
+
+       from file: vampsdoc.tmp
+
+
+       apropos
+
+       apropos(String substring)
+
+       apropos prints all functions and variables containing substring to std-
+       out. It assumes the print() intrinsic
+
+       from file: vampsdoc.tmp
+
+
+       arg0
+
+       String arg0
+
+       Readonly variable holding the name of  the  application  (``slash''  if
+       running  interactive) or the name of the current script file being pro-
+       cessed.
+
+       from: ../src/main/intrins.c
+
+       from file: vampsdoc.tmp
+
+
+       asize
+
+       Integer adim(Array arr)
+       Integer, ... asize(Array arr)
+       Integer atype(Array arr)
+
+       Give information about array arr. adim returns the array dimension  (1,
+       2  or  3),  asize returns the size for each dimension and atype returns
+       the data type of the array.
+
+       from file: vampsdoc.tmp
+
+
+       at_end
+
+       Void at_end()
+
+       The vamps s-lang end function. Place extra stuff you want to have  done
+       at the end of simulation in this function.
+
+       from file: vampsdoc.tmp
+
+
+       at_start
+
+       Void at_start()
+
+       This  is  the vamps s-lang startup function. It can be completely empty
+       if you want. The default shows all the  data  sets  in  memory.   Place
+       extra stuff you want to have done at startup in this function.
+
+       from file: vampsdoc.tmp
+
+
+       atype
+
+       Integer adim(Array arr)
+       Integer, ... asize(Array arr)
+       Integer atype(Array arr)
+
+       Give  information about array arr. adim returns the array dimension (1,
+       2 or 3), asize returns the size for each dimension  and  atype  returns
+       the data type of the array.
+
+       from file: vampsdoc.tmp
+
+
+       cat
+
+       Void cat(inf, outf)
+
+       Copies  the  file  inf to outf appending it if outf already exists. cat
+       only works with ascii files.
+
+       from file: vampsdoc.tmp
+
+
+       closedef
+
+       int closedef ()
+
+       Description: closes a file  previously  opened  with  opendef  Returns:
+       fclose's result
+
+       from: ../src/deffile.lib/sl_inter.c
+
+       from file: vampsdoc.tmp
+
+
+       cont
+
+       cont()
+
+       Continiue the current Vamps run
+
+       from: ../src/main/init_s.c
+
+       from file: vampsdoc.tmp
+
+
+       copyright
+
+       Void disclaim
+       Void copyright
+
+       Shows a short version of the GPL
+
+       from: ../src/main/init_s.c
+
+       from file: vampsdoc.tmp
+
+
+       corr
+
+       Array corr(Array mtx)
+
+       Calculate linear correlation coefficient (r) between x-data in column 0
+       and y-data in subsequent columns.
+
+       Returns a row vector with correlation coefficients for each  column  in
+       mtx w.r.t. column 0. Hence, Array[0,0] = 1.
+
+       from file: vampsdoc.tmp
+
+
+       covar
+
+       Array covar(Array mtx)
+
+       Calculates  the covariance between x-data in mtx column 0 and y-data in
+       subsequent columns.
+
+       Returns a row vector with covariances for each  column  in  mtx  w.r.t.
+       column  0.  Hence,  Array[0,0] contains the variance of the data in the
+       first column.
+
+       from file: vampsdoc.tmp
+
+
+       cpu
+
+       Float cpu()
+
+       Return the number of CPU seconds used since the start of  the  program.
+       On  msdos  systems  this will be equal to the total run-time. On multi-
+       tasking systems the actually used cpu time will be returned.
+
+       from: ../src/main/init_s.c
+
+       from file: vampsdoc.tmp
+
+
+       debug
+
+       Void debug()
+
+       Alias for print_stack, prints the present contents of the S-Lang  stack
+       to stdout
+
+       from file: vampsdoc.tmp
+
+
+       defverb
+
+       Int defverb
+
+       The  verbose  level in the input file routines. 0 is quit. A higher the
+       number makes this part of Vamps more verbose
+
+       from: ../src/deffile.lib/sl_inter.c
+
+       from file: vampsdoc.tmp
+
+
+       disclaim
+
+       Void disclaim
+       Void copyright
+
+       Shows a short version of the GPL
+
+       from: ../src/main/init_s.c
+
+       from file: vampsdoc.tmp
+
+
+       e0a
+
+       Float e0a(Td,Rs,sunratio,u,Ea,Es,Slope,Gamma,L)
+
+       Returns: e0 in mm/day (i think) The determination of $E_a$ is described
+       in  \cite{calder1990284}: \begin{equation} E_a = 2.6  (e_s - e_a)  (1 +
+       0.537 u) \end{equation} \begin{where} \Index{$e_a$}  &    actual vapour
+       pressure  [mbar]\\  \Index{$e_s$}  &    vapour  pressure  at saturation
+       [mbar]\\ \Index{$u$}    &    mean daily wind-speed at g\\ \end{where}
+
+       from file: vampsdoc.tmp
+
+
+       e0b
+
+       Float e0b(Td,Rs,Rsout,Rnet,u,Ea,Es,Slope,Gamma,L)
+
+       Calculates penman open water evaporation using net radiation.  Use  the
+       delgam function to get Gamma, Slope, and L
+
+       Returns: e0 in mm/day (i think)
+
+       from file: vampsdoc.tmp
+
+
+       each_step
+
+       Void each_step()
+
+       The  vamps S-Lang function that is executed after each timestep.  Place
+       extra stuff you want to have done after each timestep in this function.
+       Normally  this  function is defined in vamps.sl but it can be redefined
+       in any S-Lang file that is loaded by Vamps.  It's default definition is
+       as follows:
+
+            define each_step ()
+            {
+               % Check for conditional switches to interactive mode, see stop.sl
+               stop();
+               v_printstr("CPU",string(cpu)); % Store CPU time used in output file
+            }
+
+       from file: @vampsdoc.tmp@
+
+
+
+       eaes
+
+       Float,Float eaes(td,rh)
+
+       Determines  saturation vapour pressure (ea) and actual vapour presssure
+       (ea) from relative humidity and dry bulb temperature. es is  calculated
+       according  to  Bringfeld 1986. Relative humidity should be in % and dry
+       bulb temp in degrees Celcius.  Example:
+
+       variable ea,es;
+
+       (ea, es) = eaes(20.0,76);
+       printf("ea = %f es = %f\n",ea,es,2);
+
+       Returns: ea, es
+
+       from file: vampsdoc.tmp
+
+
+       echo
+
+       Void echo(obj)
+
+       Prints an ascii representation of obj, followed by a newline  on  stan-
+       dard  output.  Supported are: Character, Float, Integer, String, and 1D
+       and 2D Arrays for these types.
+
+       from file: vampsdoc.tmp
+
+
+       endsubplot
+
+       Void endsubplot()
+
+       Resets the plotting system to single plot mode. Also needed to actually
+       draw the plot on some terminals. See also subplot.
+
+       from file: vampsdoc.tmp
+
+
+       error
+
+       Void error(String str)
+
+       Prints  the  text  held  in str followed by a newline on standard error
+       output and raises internal error status.
+
+       from: ../src/main/intrins.c
+
+       from file: vampsdoc.tmp
+
+
+       exit
+
+       exit()
+       quit()
+
+       Quits the S-Lang interpreter and returns to the operating system
+
+       from: ../src/main/init_s.c
+
+       from file: vampsdoc.tmp
+
+
+       exit
+
+       exit()
+       quit()
+
+       Quits the S-Lang interpreter and returns to the operating system
+
+       from: ../src/main/init_s.c
+
+       from file: vampsdoc.tmp
+
+
+       f_plot
+
+       Void f_plot(String var,String  thef,Int xcol, Int ycol)
+
+       Plots var var from vamps output file thef.  It does so by calling  vsel
+       to construct a matrix. This matrix is than passed to m_plot to make the
+       actual plot.  Column 0 is time.  See also plot and plot.sl.
+
+       from file: vampsdoc.tmp
+
+
+       f_save
+
+       Void f_save(String var, String filename, String outfilename)
+
+       Writes the variable var from the vamps outputfile filename to an  ascii
+       file  outfilename. Depending on the nature of the variable two ore more
+       columns are created. The time data resides in the first column.
+
+       from file: vampsdoc.tmp
+
+
+       format
+
+       Void format(String fmt)
+
+       Sets the floating point output format to fmt. If  given  as  the  null-
+       string (""), the default format is restored.  The default can be set by
+       calling format from .vampssl, else it is set to ``%6g''. (Using the  S-
+       Lang intrinsic set_float_format is deprecated.)
+
+       from: ../src/main/intrins.c
+
+       from file: vampsdoc.tmp
+
+
+       fprintf
+
+       Void printf(String fmt, ..., Integer N)
+       Void fprintf(Integer fp, String fmt, ..., Integer N)
+       String sprintf(String fmt, ..., Integer N)
+
+       Formatted  printing  cf. the C printf family, except that the number of
+       parameters N must be given. printf and fprintf return nothing,  sprintf
+       returns the formatted string.
+
+       from file: vampsdoc.tmp
+
+
+       fscanf
+
+
+       Formatted variable assignment like their C counterparts (see scanf(3)),
+       except that the assigned values, followed by the number of  assignments
+       are placed on the stack. For example:
+
+            variable month, day;
+            if(sscanf("December, 5\n", "%[A-Z a-z], %d\n") == 2)
+            {
+                 (month, day) = ();
+                 ...
+            }
+
+       pushes a string followed by an integer on the stack.
+
+       from: ../src/main/intrins.c
+
+       from file: vampsdoc.tmp
+
+
+       gamma
+
+       Float gamma(td)
+
+       Calculates  the  psychometric  constant ([$mbar/{}^o K$]) It assumes an
+       air pressure of 998mb. Cp is estimated at 1005.0 J/kgK
+
+       Returns: psychrometric constant
+
+       from file: vampsdoc.tmp
+
+
+       getarg
+
+       String getarg()
+
+       Returns a string holding the next command line argument  or  ``--''  if
+       there  are no options left. Increases the internal index to the command
+       line arguments each time it is called.  For example:
+
+            variable arg;
+            while(arg = getarg(), strcmp("--", arg))
+            {
+                 ...
+            }
+
+       from: ../src/main/intrins.c
+
+       from file: vampsdoc.tmp
+
+
+       getdefar
+
+       String getdefstr(section, name, def, fname, exitonerror)
+       Int getdefint(section, name, def, fname, exitonerror)
+       Float getdefdoub(section, name, def, fname, exitonerror)
+       Int, Array getdefar(section, name, fname, exitonerror)
+
+       A series of functions te get information from Vamps input/output files.
+
+       They  get  the  value  for variable name in section section of the file
+       fname. If exitonerror != 0 then the program is terminated  if  name  is
+       not found in section.  If exitonerror == 0 and name is not found def is
+       returned instead.  getdefar is somewhat different. Is does not allow  a
+       def variable and return either one or two values. It always returns the
+       number of points read. If zero points are read no array is returned.
+
+       Say we use the following file (named ex.inp):
+
+       [example]
+       examplename = nonsense
+
+       And then call the getdefstr function like this:
+
+       variable exn = getdefstr("example","examplename","Not found","ex.inp",0);
+
+       the variable exn will now hold the string "nonsense".
+
+       from: ../src/deffile.lib/sl_inter.c
+
+       from file: vampsdoc.tmp
+
+
+       getdefdoub
+
+       String getdefstr(section, name, def, fname, exitonerror)
+       Int getdefint(section, name, def, fname, exitonerror)
+       Float getdefdoub(section, name, def, fname, exitonerror)
+       Int, Array getdefar(section, name, fname, exitonerror)
+
+       A series of functions te get information from Vamps input/output files.
+
+       They  get  the  value  for variable name in section section of the file
+       fname. If exitonerror != 0 then the program is terminated  if  name  is
+       not found in section.  If exitonerror == 0 and name is not found def is
+       returned instead.  getdefar is somewhat different. Is does not allow  a
+       def variable and return either one or two values. It always returns the
+       number of points read. If zero points are read no array is returned.
+
+       Say we use the following file (named ex.inp):
+
+       [example]
+       examplename = nonsense
+
+       And then call the getdefstr function like this:
+
+       variable exn = getdefstr("example","examplename","Not found","ex.inp",0);
+
+       the variable exn will now hold the string "nonsense".
+
+       from: ../src/deffile.lib/sl_inter.c
+
+       from file: vampsdoc.tmp
+
+
+       getdefint
+
+       String getdefstr(section, name, def, fname, exitonerror)
+       Int getdefint(section, name, def, fname, exitonerror)
+       Float getdefdoub(section, name, def, fname, exitonerror)
+       Int, Array getdefar(section, name, fname, exitonerror)
+
+       A series of functions te get information from Vamps input/output files.
+
+       They  get  the  value  for variable name in section section of the file
+       fname. If exitonerror != 0 then the program is terminated  if  name  is
+       not found in section.  If exitonerror == 0 and name is not found def is
+       returned instead.  getdefar is somewhat different. Is does not allow  a
+       def variable and return either one or two values. It always returns the
+       number of points read. If zero points are read no array is returned.
+
+       Say we use the following file (named ex.inp):
+
+       [example]
+       examplename = nonsense
+
+       And then call the getdefstr function like this:
+
+       variable exn = getdefstr("example","examplename","Not found","ex.inp",0);
+
+       the variable exn will now hold the string "nonsense".
+
+       from: ../src/deffile.lib/sl_inter.c
+
+       from file: vampsdoc.tmp
+
+
+       getdefstr
+
+       String getdefstr(section, name, def, fname, exitonerror)
+       Int getdefint(section, name, def, fname, exitonerror)
+       Float getdefdoub(section, name, def, fname, exitonerror)
+       Int, Array getdefar(section, name, fname, exitonerror)
+
+       A series of functions te get information from Vamps input/output files.
+
+       They  get  the  value  for variable name in section section of the file
+       fname. If exitonerror != 0 then the program is terminated  if  name  is
+       not found in section.  If exitonerror == 0 and name is not found def is
+       returned instead.  getdefar is somewhat different. Is does not allow  a
+       def variable and return either one or two values. It always returns the
+       number of points read. If zero points are read no array is returned.
+
+       Say we use the following file (named ex.inp):
+
+       [example]
+       examplename = nonsense
+
+       And then call the getdefstr function like this:
+
+       variable exn = getdefstr("example","examplename","Not found","ex.inp",0);
+
+       the variable exn will now hold the string "nonsense".
+
+       from: ../src/deffile.lib/sl_inter.c
+
+       from file: vampsdoc.tmp
+
+
+       help
+
+       Void help()
+
+       Prints short info on the Vamps interactive mode. See also '?'
+
+       from file: vampsdoc.tmp
+
+
+       hist
+
+       Void hist()
+
+       Prints the history of command entered at the interactive prompt to  the
+       screen.
+
+       Note that the  help operator `?' is never added to the list.  The exce-
+       cute operator \ is replaced by () = evalfile("arg");@.
+
+       from: ../src/main/init_s.c
+
+       from file: vampsdoc.tmp
+
+
+       linreg
+
+       Array linreg(Array mtx)
+
+       Calculates linear regression coefficients for  straight  line  fitting,
+       i.e:  y = Ax + B. A is slope and B is y-intercept.  Argument is minimum
+       2*2 matrix, regression is performed for all mtx columns  j>=1  (y-data)
+       against column 0 (x-data).
+
+       Returns  a 2*n matrix in which for each column j in mtx, Array[0,j] = A
+       and Array[1,j] = B. Hence, Array[0,0] = 1 and Array[1,0] = 0.
+
+       from file: vampsdoc.tmp
+
+
+       linspace
+
+       Array linspace(Float x0, Float x1, Integer n)
+
+       Returns a vector of n elements with linearly spaced  intervals  between
+       x0 and x1.
+
+       from file: vampsdoc.tmp
+
+
+       logspace
+
+       Array logspace(Float x0, Float x1, Integer n)
+
+       Returns  a  vector  of n elements with logarithmically spaced intervals
+       between 1Ex0 and 1Ex1.
+
+       from file: vampsdoc.tmp
+
+
+       m_plot
+
+       Void m_plot(Matrix m, Int xcol, Int ycol, String title, String xlab,
+                 String ylab)
+
+       Plots an XY diagram of matrix m  using  the  current  graphics  method.
+       Column  numbering  for  xcol  and ycol starts at zero. Depending on the
+       graphics method used the top, x and y-axis  labels  strings  cannot  be
+       empty.  example:
+
+       outputdev = 1; % screen graphics
+       m_plot(m,0,1,"Matrix m","Time","Q");
+       outputdev = 0; % Plot is OK, make hardcopy
+       m_plot(m,0,1,"Matrix m","Time","Q");
+
+       See also plot and plot.sl.
+
+       from file: vampsdoc.tmp
+
+
+       makeindex
+
+       Int makeindex(filename)
+
+       Makes  an index (in memory) of file filename. It is usefull to speed up
+       random access to large vamps output files. Use saveindex  to  save  the
+       index to a file.
+
+       from: ../src/deffile.lib/sl_inter.c
+
+       from file: vampsdoc.tmp
+
+
+       makkink
+
+       Float makkink(rad,Slope,Gamma)
+
+       calculates  reference  evaporation according to Makkink The C1 constant
+       is taken as 0.65 and C2 0.0
+
+       Returns: makkink reference evaporation in mm/day
+
+       from file: vampsdoc.tmp
+
+
+       maqend
+
+       Void maqend(int maq_m)
+
+       Cleans up after maqinit
+
+       from: ../src/maq.lib/marquard.c
+
+       from file: vampsdoc.tmp
+
+
+       maqhead
+
+       Void maqhead()
+
+       prints startup options of the maqrun procedure to stderr
+
+       from: ../src/maq.lib/marquard.c
+
+       from file: vampsdoc.tmp
+
+
+       maqinit
+
+       Int maqinit(int m, int n)
+
+       Initializes the fitting system. n is the number of parameters to use, m
+       the number of points used in the fitting process.
+
+       Returns 0 on success, -1 on error
+
+       from: ../src/maq.lib/marquard.c
+
+       from file: vampsdoc.tmp
+
+
+       maqrun
+
+       Int maqrun()
+
+       Runs  the  fitting procedure with the current settings The S-Lang func-
+       tion Int fitf(Array par[], Int m, Int n)  which  sets  the  rv[]  array
+       should  be defined and working. It should return 0 if successfull and 1
+       if the function could not be resolved  with  the  supplied  values  for
+       par[].
+
+       Returns 0 on success
+
+       from: ../src/maq.lib/marquard.c
+
+       from file: vampsdoc.tmp
+
+
+       maqtail
+
+       Void maqtail()
+
+       prints exit info of the maqrun procedure to stderr
+
+       from: ../src/maq.lib/marquard.c
+
+       from file: vampsdoc.tmp
+
+
+       matrix
+
+       Array matrix(Integer m, Integer n)
+
+       Returns a matrix (two-dimensional floating point array) with m rows and
+       n columns. All elements are set to zero.  A row vector is created  with
+       m=1,  a  column  vector  is created with n=1. Elements are addressed by
+       [i,j], where 0<=i<m and 0<=j<n.
+
+       from file: vampsdoc.tmp
+
+
+       mean
+
+       Array mean(Array mtx)
+
+       Returns a row vector with the mean values for each column in mtx.
+
+       from file: vampsdoc.tmp
+
+
+       median
+
+       Array median(Array mtx)
+
+       Returns a row vector with the median values for each column in mtx.
+
+       from file: vampsdoc.tmp
+
+
+       mmax
+
+       Array mmax(Array mtx)
+
+       Returns a row vector with the maximum values for each column in mtx.
+
+       from file: vampsdoc.tmp
+
+
+       mmin
+
+       Array mmin(Array mtx)
+
+       Returns a row vector with the minimum values for each column in mtx.
+
+       from file: vampsdoc.tmp
+
+
+       mread
+
+       Array mread(String file, Integer nc)
+
+       Reads a matrix (2D floating point array) from  the  named  ascii  file,
+       which  is  supposed to consist of lines with numerical fields separated
+       by whitespace (spaces, TABS and/or newlines). Lines starting  with  `#'
+       or  `%'  are considered comments; blank lines are skipped. If nc>0, the
+       number of matrix columns are set to nc. If nc is zero or less, the num-
+       ber  of  columns  are  set  equal  to the number of fields in the input
+       lines. The number of matrix rows are calculated from dividing the  num-
+       ber of values by the number of lines in the input file.
+
+       from: ../src/main/intrins.c
+
+       from file: vampsdoc.tmp
+
+
+       mwrite
+
+       Void mwrite(Array m, String fname)
+
+       Writes the double matrix m to an ascii file Returns nothing;
+
+       from: ../src/main/intrins.c
+
+       from file: vampsdoc.tmp
+
+
+       opendef
+
+       Int opendef (String fname)
+
+       open a file for processing, close with closedef()
+
+       Returns: 0 on error, otherwise 1
+
+       Remarks:  Opendef is used to speed up processing of files that are used
+       in a _sequential_ way. If files must be accessed randomely  rinimem  or
+       readindex should be used
+
+       from: ../src/deffile.lib/sl_inter.c
+
+       from file: vampsdoc.tmp
+
+
+       pause
+
+       Void pause(Integer n)
+
+       Suspends  processing for n seconds, if n is positive. If n is less than
+       or equals zero, processing waits until a key is pressed on the keyboard
+       for which the user is prompted on standard error.
+
+       from: ../src/main/intrins.c
+
+       from file: vampsdoc.tmp
+
+
+       plot
+
+       plot.sl - high level plotting functions
+
+       Plot  functions  to allow quick visualization of Vamps output files and
+       matrix variables. The syntax of the high level  functions  (f_plot  and
+       m_plot)  is  the  same,  no  matter which underlying graphics method is
+       used. Low level functions depend on the graphics method used. The  fol-
+       lowing graphics methods can be used:
+
+            plot      - gnu plotutils lib 1.1
+            agl       - AGL graphics lib 3.?
+            ext_plot  - using external gnu plotutils programs (UNIX only)
+            gnu_plot  - using gnuplot interface (UNIX only)
+                        see also @#@ and @plt@.
+
+       Which  of these methods can be used in this version of vamps is printed
+       to the screen when using the plot command to initialize the  plot  sys-
+       tem.  The show_plotsys() function can be used for this purpose as well.
+
+       The outputdev variable can be used to specify  screen  preview  (1)  or
+       hardcopy output (0).
+
+       If  more  than  one graphics method is available you can switch between
+       methods be setting the m_plot function to the method specific function.
+       Use the set_plotsys function to do so.
+
+       from file: vampsdoc.tmp
+
+
+       plot.sl
+
+       plot.sl - high level plotting functions
+
+       Plot  functions  to allow quick visualization of Vamps output files and
+       matrix variables. The syntax of the high level  functions  (f_plot  and
+       m_plot)  is  the  same,  no  matter which underlying graphics method is
+       used. Low level functions depend on the graphics method used. The  fol-
+       lowing graphics methods can be used:
+
+            plot      - gnu plotutils lib 1.1
+            agl       - AGL graphics lib 3.?
+            ext_plot  - using external gnu plotutils programs (UNIX only)
+            gnu_plot  - using gnuplot interface (UNIX only)
+                        see also @#@ and @plt@.
+
+       Which  of these methods can be used in this version of vamps is printed
+       to the screen when using the plot command to initialize the  plot  sys-
+       tem.  The show_plotsys() function can be used for this purpose as well.
+
+       The outputdev variable can be used to specify  screen  preview  (1)  or
+       hardcopy output (0).
+
+       If  more  than  one graphics method is available you can switch between
+       methods be setting the m_plot function to the method specific function.
+       Use the set_plotsys function to do so.
+
+       from file: vampsdoc.tmp
+
+
+       plotpar
+
+       Void plotpar("parname")
+
+       calls vsel and graph to plot parameter parname from outfilename.
+
+       from file: vampsdoc.tmp
+
+
+       plotstyle
+
+       Int plotstyle;
+
+       Set the plotting style:
+
+       0 = lines, 1 is markers, 2 = markers & lines
+
+       from file: @vampsdoc.tmp@
+
+
+
+       plotts
+
+       Int plotts("tsname");
+
+       plots  a time serie from the start of the run to current time 't' usin
+       the current plot settings
+
+       Returns: nothin
+
+       from file: vampsdoc.tmp
+
+
+       plt
+
+       Void plt_close()
+
+       Closes the pipe to the plotting program
+
+       from: ../src/main/init_s.c
+
+       from file: vampsdoc.tmp
+
+
+       plt_close
+
+       Void plt_close()
+
+       Closes the pipe to the plotting program
+
+       from: ../src/main/init_s.c
+
+       from file: vampsdoc.tmp
+
+
+       pprint
+
+       Void pprint()
+
+       Print the current plot on a postscript printer
+
+       from file: vampsdoc.tmp
+
+
+       printf
+
+       Void printf(String fmt, ..., Integer N)
+       Void fprintf(Integer fp, String fmt, ..., Integer N)
+       String sprintf(String fmt, ..., Integer N)
+
+       Formatted printing cf. the C printf family, except that the  number  of
+       parameters  N must be given. printf and fprintf return nothing, sprintf
+       returns the formatted string.
+
+       from file: vampsdoc.tmp
+
+
+       prompt
+
+       String prompt(String str1, String str2)
+
+       Sets the prompts used in interactive mode. Default prompts are ``Slash>
+       ''  and  ``_Slash>  ''. If either argument is the nullstring (""), that
+       prompt is not changed. The sequences %# and %$ are  translated  to  the
+       current input line number and stack depth respectively.
+
+       from: ../src/main/intrins.c
+
+       from file: vampsdoc.tmp
+
+
+       quit
+
+       exit()
+       quit()
+
+       Quits the S-Lang interpreter and returns to the operating system
+
+       from: ../src/main/init_s.c
+
+       from file: vampsdoc.tmp
+
+
+       ra
+
+       Float ra (z, z0, d, u)
+
+       Calculates ra (aerodynamic resistance) according to:
+
+            ra = [ln((z-d)/z0)]^2 /(k^2u)
+            Where:
+                 d  = displacement height
+                 z  = height of the wind speed measurements
+                 u  = windspeed
+                 z0 = roughness length
+                 k  = von Karman constant
+
+       Returns: ra
+
+       from file: vampsdoc.tmp
+
+
+       readindex
+
+       Int readindex(filename)
+
+       Reads an index previously save with saveindex.
+
+       from: ../src/deffile.lib/sl_inter.c
+
+       from file: vampsdoc.tmp
+
+
+       readset
+
+       Int readset(String filename, String setname)
+
+       Reads  set  setname from file fname. Returns the id of the set or -1 on
+       error.
+
+       from: ../src/main/init_s.c
+
+       from file: vampsdoc.tmp
+
+
+       rmsq
+
+       Array rmsq(Array mtx)
+
+       Returns a row vector with the root mean square or quadratic mean values
+       for each column in mtx.
+
+       from file: vampsdoc.tmp
+
+
+       save_history
+
+       Int save_history(fname)
+
+       Save  the  command entered at the interactive prompt to the file fname.
+       Returns -1 on error (this file could not be opened in write mode) and 0
+       on success.
+
+       from: ../src/main/init_s.c
+
+       from file: vampsdoc.tmp
+
+
+       saveindex
+
+       Int saveindex(filename)
+
+       Save the index to the file filename.
+
+       from: ../src/deffile.lib/sl_inter.c
+
+       from file: vampsdoc.tmp
+
+
+       savets
+
+       Int savets ("tsname", "fname", points)
+
+       saves  the  time  series tsname to the file fname from point 0 to point
+       points
+
+       Returns: -1 on failure, 0 on sucess
+
+       from file: vampsdoc.tmp
+
+
+       scanf
+
+
+       Formatted variable assignment like their C counterparts (see scanf(3)),
+       except  that the assigned values, followed by the number of assignments
+       are placed on the stack. For example:
+
+            variable month, day;
+            if(sscanf("December, 5\n", "%[A-Z a-z], %d\n") == 2)
+            {
+                 (month, day) = ();
+                 ...
+            }
+
+       pushes a string followed by an integer on the stack.
+
+       from: ../src/main/intrins.c
+
+       from file: vampsdoc.tmp
+
+
+       scrcols
+
+       Integer scrcols
+       Integer scrrows
+
+       Readonly variables set to the number of (text) columns and rows of  the
+       screen. These values change when the window size changes.
+
+       from: ../src/main/intrins.c
+
+       from file: vampsdoc.tmp
+
+
+       scrrows
+
+       Integer scrcols
+       Integer scrrows
+
+       Readonly  variables set to the number of (text) columns and rows of the
+       screen. These values change when the window size changes.
+
+       from: ../src/main/intrins.c
+
+       from file: vampsdoc.tmp
+
+
+       sdev
+
+       Array sdev(Array mtx)
+
+       Returns a row vector with the standard deviations for  each  column  in
+       mtx.
+
+       from file: vampsdoc.tmp
+
+
+       set_plotsys
+
+       Void set_plotsys(Int nr)
+
+       Sets the uses plotting system to the system nr. It uses show_plotsys to
+       display the updated list of available plot-systems. If the plverb vari-
+       able is > 1
+
+       from file: vampsdoc.tmp
+
+
+       set_plotsys_byname
+
+       Void set_plotsys_byname(String name)
+
+       Sets  the uses plotting system to the system name. It uses show_plotsys
+       to display the updated list of available plot-systems.
+
+       from file: vampsdoc.tmp
+
+
+       setidx
+
+       void sl_setidx(char *idxname);
+
+       from: ../src/main/intrins.c
+
+       from file: vampsdoc.tmp
+
+
+       show_plotsys
+
+       Void show_plotsys
+
+       Prints short descriptions of all the installed plotting systems to  the
+       screen. The system indicated with a '*' is the active system.
+
+       from file: vampsdoc.tmp
+
+
+       sl_met_init
+
+       Void sl_met_init
+
+       Initializes the meteo functions: eaes, vslope, e0b
+
+       from: ../src/main/init_s.c
+
+       from file: vampsdoc.tmp
+
+
+       slpath
+
+       String slpath(String str)
+
+       Sets  a  colon  (`:')  separated pathlist of directories to search when
+       loading S-Lang command files (using autoload and evalfile).  If str  is
+       the  nullstring  (""), the pathlist is not changed. The returned strin
+       holds the previous pathlist.
+
+       Within a pathlist specification, a single dot (`.') denotes the current
+       working  directory. If the first character of a path in the list is the
+       tilde (`~'), it is expanded to the home  directory  obtained  from  the
+       HOME environment variable. For example, if the user maintains a library
+       of S-Lang command files in a directory $HOME/lib/vamps, the command:
+
+            () = slpath(strcat("~/lib/vamps:", slpath("")));
+
+       can be placed in the .vampssl file in the user's home directory. Script
+       files,  however,  should restore the previous pathlist before terminat-
+       ing.
+
+       from: ../src/main/intrins.c
+
+       from file: vampsdoc.tmp
+
+
+       sprintf
+
+       Void printf(String fmt, ..., Integer N)
+       Void fprintf(Integer fp, String fmt, ..., Integer N)
+       String sprintf(String fmt, ..., Integer N)
+
+       Formatted printing cf. the C printf family, except that the  number  of
+       parameters  N must be given. printf and fprintf return nothing, sprintf
+       returns the formatted string.
+
+       from file: vampsdoc.tmp
+
+
+       sreadline
+
+       Int sreadline
+
+       If this variable is 1 vamps runs in interactive mode (readline initial-
+       ized.).  If  this  is  set  to  0 pressing ^C causes Vamps to switch to
+       interactive mode on unix systems.
+
+       from: ../src/main/init_s.c
+
+       from file: vampsdoc.tmp
+
+
+       sscanf
+
+
+       Formatted variable assignment like their C counterparts (see scanf(3)),
+       except  that the assigned values, followed by the number of assignments
+       are placed on the stack. For example:
+
+            variable month, day;
+            if(sscanf("December, 5\n", "%[A-Z a-z], %d\n") == 2)
+            {
+                 (month, day) = ();
+                 ...
+            }
+
+       pushes a string followed by an integer on the stack.
+
+       from: ../src/main/intrins.c
+
+       from file: vampsdoc.tmp
+
+
+       stats
+
+       Void stats
+
+       Initialize statistical data analysis library. None of the functions  in
+       stats.sl can be used before this command is issued.
+
+       All  statistical  data  analysis  is performed on matrices (2D floatin
+       point arrays) in which the data are column-wise organized.
+
+       from file: vampsdoc.tmp
+
+
+       strv
+
+       Array strv(String str, String sep)
+
+       Splits the string str into fields separated by one or  more  characters
+       from the string sep. A terminating newline is always considered a field
+       separator. Returns a vector (1D array) of strings set to the individual
+       fields.  For example:
+
+            variable fid, i, s, v;
+            fid = fopen("my_file.dat", "r");
+            while(fgets(fid) > 0)
+            {
+                 s = ();
+                 v = strv(s, " \t");
+                 for(i = 0; i < asize(v); i++)
+                      printf("%16s\n", v[i], 1);
+            }
+
+       reads  an  entire  data  file of fields separated by runs of whitespace
+       characters and prints the fields on standard output.
+
+       from: ../src/main/intrins.c
+
+       from file: vampsdoc.tmp
+
+
+       subplot
+
+       Void subplot(x, y, index)
+
+       Set the plotting system for multiple plots on one page. x and y are the
+       number  of  plots  in the x and y direction respectively. index denotes
+       the number of the subplot in which the next plot  is  drawn.  Numberin
+       starts  at  one.  The first plot is drawn in the upper left corner, the
+       last in the lower right. Currently subplot only works with gnuplot. See
+       also endsubplot.
+
+       from file: vampsdoc.tmp
+
+
+       transpose
+
+       Array transpose(Array mtx)
+
+       Returns  a  transposed matrix of mtx. The returned matrix is a new one,
+       the elements of mtx are left unchanged.
+
+       from file: vampsdoc.tmp
+
+
+       ts_echo
+
+       Void ts_echo(obj)
+
+       Prints an ascii representation of obj, followed by a newline  on  stan-
+       dard  output.  Supported are: Character, Float, Integer, String, and 1D
+       and 2D Arrays for these types.  In  this  case  all  floats  and  first
+       columns of matrixes are regarded in ts(5) format
+
+       from file: vampsdoc.tmp
+
+
+       tstep_top
+
+       tstep_top(tstepje)
+
+       Calculates  soilevaporation,  potential transpiration, interception and
+       precipitation for each step at tstepje.
+
+       Return order should be: return(soilevap, pot-trans, intercep,  precipi-
+       tation);
+
+       from file: vampsdoc.tmp
+
+
+       tty
+
+       Integer tty
+
+       Readonly  variable  set to 1 if standard output is a tty, 2 if standard
+       input is a tty, 3 if both standard input and output are connected to  a
+       tty, else set to 0.
+
+       from: ../src/main/intrins.c
+
+       from file: vampsdoc.tmp
+
+
+       usergetstr
+
+       char *usergetstr(char *prompt);
+
+       Gets  a  string  from user, resets tty for use in interactive mode, the
+       global variable userstr_l gives the length of the user string. see also
+       Slang_reset_tty and SLang_init_tty
+
+       If the first character of the string is a ':' the remaining part of the
+       string is passed to system();
+
+       If the first character of the string is a '?' the remaining part of the
+       string is passed to vamps_help();
+
+       If the first character of the string is a '@' the remaining
+
+       part of the string is passed to eval();
+
+       Returns: strin
+
+       from file: vampsdoc.tmp
+
+
+       v_cumbot
+
+       Float v_cumbot
+
+       Cumulative flow trough bottom of profile calculated from start of simu-
+       lation (Read only)
+
+       from: ../src/main/init_s.c
+
+       from file: vampsdoc.tmp
+
+
+       v_cumeva
+
+       Float v_cumeva
+
+       Cumulative evaporation (from wet canopy) (Read only)
+
+       from: ../src/main/init_s.c
+
+       from file: vampsdoc.tmp
+
+
+       v_cumintc
+
+       Float v_cumint
+
+       Cumulative interception [cm] (Read only)
+
+       from: ../src/main/init_s.c
+
+       from file: vampsdoc.tmp
+
+
+       v_cumprec
+
+       Float v_cumprec
+
+       Cumulative precipitation [cm] (Read only)
+
+       from: ../src/main/init_s.c
+
+       from file: vampsdoc.tmp
+
+
+       v_cumtop
+
+       Float v_cumtop
+
+       Cumulative flow trough top of profile calculated from start of  simula-
+       tion (Read only)
+
+       from: ../src/main/init_s.c
+
+       from file: vampsdoc.tmp
+
+
+       v_cumtra
+
+       Float v_cumtra
+
+       Cumulative  transpiration. This is equal to v_rootextract if transpira-
+       tion reduction is not calculated (Read only)
+
+       from: ../src/main/init_s.c
+
+       from file: vampsdoc.tmp
+
+
+       v_dt
+
+       Float v_dt
+
+       Current timestep in interation process. The 'real' timeste can be found
+       in the v_thiststep variable (in days)
+
+       from: ../src/main/init_s.c
+
+       from file: vampsdoc.tmp
+
+
+       v_getspar
+
+       Float v_getspar(int nr, char *des)
+
+       Gets parameter from soil description structure
+
+       from: ../src/main/init_s.c
+
+       from file: vampsdoc.tmp
+
+
+       v_masbal
+
+       Float v_masbal
+
+       mass balance error in %. Read only.
+
+       from: ../src/main/init_s.c
+
+       from file: vampsdoc.tmp
+
+
+       v_postsoil
+
+       Void v_postsoil
+
+       Cleans up after the soil module
+
+       from: ../src/main/init_s.c
+
+       from file: vampsdoc.tmp
+
+
+       v_presoil
+
+       Void v_presoil()
+
+       Initialize the soil moisture module
+
+       from: ../src/main/init_s.c
+
+       from file: vampsdoc.tmp
+
+
+       v_printstr
+
+       Void v_printstr(name, str)
+
+       Stores  variable  str with name name in the output-file.  This function
+       can be used in the each_step function only.  It's purpose is  to  store
+       extra information in the output-file.
+
+       from: ../src/main/init_s.c
+
+       from file: vampsdoc.tmp
+
+
+       v_printsum
+
+       Void v_printsum()
+
+       Prints actual water balance summary at stderr
+
+       from: ../src/main/init_s.c
+
+       from file: vampsdoc.tmp
+
+
+       v_qbot
+
+       Float v_qbot
+
+       Flow trough bottom of profile for current timestep (Read only)
+
+       from: ../src/main/init_s.c
+
+       from file: vampsdoc.tmp
+
+
+       v_qtop
+
+       Float v_qtop
+
+       Flow trough top of profile for current timestep (Read only)
+
+       from: ../src/main/init_s.c
+
+       from file: vampsdoc.tmp
+
+
+       v_rootextract
+
+       Float v_rootextract
+
+       Cumulative  amount  of  water extracted by the roots (actual transpira-
+       tion) (Read only)
+
+       from: ../src/main/init_s.c
+
+       from file: vampsdoc.tmp
+
+
+       v_run
+
+       Void v_run(String inf)
+
+       Starts a Vamps run with input file inf.
+
+       from file: vampsdoc.tmp
+
+
+       v_save_all_sets
+
+       Void v_save_all_sets ()
+
+       save all currently loaded datasets to a file. The filenames are created
+       by prepending 'set_' to the name of the dataset
+
+       from file: vampsdoc.tmp
+
+
+       v_setspar
+
+       Void v_setspar(int nr, char *des, val double)
+
+       set parameter in soil description structure
+
+       from: ../src/main/init_s.c
+
+       from file: vampsdoc.tmp
+
+
+       v_show_data_sets
+
+       Void v_show_data_sets ();
+
+       shows all data set currently loaded
+
+       Returns: nothin
+
+       from file: vampsdoc.tmp
+
+
+       v_smd
+
+       Float v_smd
+
+       Soil moisture deficit for current timestep in cm
+
+       from: ../src/main/init_s.c
+
+       from file: vampsdoc.tmp
+
+
+       v_steps
+
+       Int v_steps
+
+       Number of steps in the current simulation (Read,only)
+
+       from: ../src/main/init_s.c
+
+       from file: vampsdoc.tmp
+
+
+       v_t
+
+       Float v_t
+
+       Current time in simulation (in days)
+
+       from: ../src/main/init_s.c
+
+       from file: vampsdoc.tmp
+
+
+       v_volact
+
+       Float v_volact
+
+       Actual water content of the total soil profile [cm] (Read only)
+
+       from: ../src/main/init_s.c
+
+       from file: vampsdoc.tmp
+
+
+       v_volsat
+
+       Float v_volsat
+
+       Water content of the soil profile at saturation (read only)
+
+       from: ../src/main/init_s.c
+
+       from file: vampsdoc.tmp
+
+
+       v_vpd
+
+       Float v_vpd
+
+       Actual vapour pressure deficit in mbar (Read only)
+
+       from: ../src/main/init_s.c
+
+       from file: vampsdoc.tmp
+
+
+       vamps_help Void vamps_help(String key)
+
+       gets help on key. See '?' for further info.
+
+       from: ../src/main/init_s.c
+
+       from file: vampsdoc.tmp
+
+
+       verbose
+
+       Int verbose
+
+       The  general  verbose  level  in  the current simulation. 0 is quiet. A
+       higher the number makes Vamps more verbose. Verbose levels above 1  are
+       usefull for debugging only
+
+       from: ../src/main/init_s.c
+
+       from file: vampsdoc.tmp
+
+
+       version
+
+       Integer version
+
+       Readonly  variable  holding the current slash version number multiplied
+       by 100.
+
+       from: ../src/main/intrins.c
+
+       from file: vampsdoc.tmp
+
+
+       vprof
+
+       [Array], Int  vprof(String var, Float time, String filename)
+
+       Returns -1 on failure or the number of rows in the array and the  array
+       on success.
+
+       vprof  reads a profile variable from the Vamps output file filename for
+       a single timstep (time) in the simulation.  Depth is placed in column 1
+       and the value in column 0.  See also vsel
+
+       from file: vampsdoc.tmp
+
+
+       vsel
+
+       [array], Int vsel (parname, layer, filename)
+
+       Returns  -1 on failure or the number of rows in the array and the array
+       on success.  If layer == -1 then all layers are  put  into  the  array.
+       Example:
+
+       variable ar;
+       if (vsel("volact",-1,"sat.out") != -1){
+            ar = ();
+       }
+
+       See also the stand-alone vsel program and vprof.
+
+       from file: vampsdoc.tmp
+
+
+       vslope
+
+       Float vslope(Td,es);
+
+       Calculates  the  slope  of the saturation vapour pressure curve from es
+       and dry bulb temp for use in Penman Eo and Penman-Montheith.   Required
+       input: Td (dry bulb temp [oC]), es
+
+       Returns: slope of the vapour pressure curve
+
+       from file: vampsdoc.tmp
+
+
+       writememini
+
+       Int writememini(fname, inifname)
+
+       Writes the file read into memory with the rinmem function to a file. If
+       fname is "-" output is send to stdout.  inifname if  the  name  of  the
+       file in memory.
+
+       from: ../src/deffile.lib/sl_inter.c
+
+       from file: vampsdoc.tmp
+
+EXAMPLES
+       Run  vamps  with  the file veluwe.inp in verbose mode and output to the
+       file veluwe.out:
+       vamps -o veluwe.out -v veluwe.inp
+
+
+FILES
+       Defaults are read from .vampsrc on UNIX systems and vamps.rc on  MS-DOS
+       and OS/2 FAT systems. This file is first searched in the current direc-
+       tory. If it is not present in the current directory, the  directory  to
+       which  the HOME environment variable points is searched. If this search
+       also fails the compiled in  VAMPSLIB  directory  is  searched  (usually
+       /usr/local/lib/vamps).  Otherwise compiled in defaults are used.
+
+       The layout of this files is the same as that of the input/output files.
+       Only one section  ([vamps])  is  searched.  The  vamps(5)  manual  page
+       describes  the allowed variables in the vamps section.  A simple way to
+       produce a defaults file is to redirect the output of vamps -s to .vamp-
+       src (or vamps.rc).
+
+
+
+
+COPYRIGHT
+              Copyright (C) 1995 Jaap Schellekens.
+
+              This program is free software; you can redistribute it and/or modify
+              it under the terms of the GNU General Public License as published by
+              the Free Software Foundation; either version 2, or (at your option)
+              any later version.
+
+              This program is distributed in the hope that it will be useful, but
+              WITHOUT ANY WARRANTY; without even the implied warranty of
+              MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+              General Public License for more details.
+
+              You should have received a copy of the GNU General Public License
+              along with this program; see the file COPYING.  If not, write to the
+              Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+
+              (C) Jaap Schellekens
+              Faculty of Earth Sciences
+              Vrije Universiteit
+              De Boelelaan 1085
+              1081 HV Amsterdam
+              The Netherlands
+              E-mail: schj@geo.vu.nl
+                   schj@xs4all.nl
+
+              International Institute of Tropical Forestry
+              Rio Piedras, Puerto Rico
+
+              Parts of this program derived from swap.  The following is taken from
+              the swap Fortran code:
+
+                 Author : Jan G. Wesselin
+
+                                   Correspondence
+
+              This program uses the ideas and experiences of various researchers at
+              the Winand Staring Centre and the Wageningen Agricultural
+              University. Currently the program is maintained and documented in
+              cooperation by :
+
+                   Dept. of Agrohydrology             Dept. of Water Resources
+                   Winand Staring Centre              Wageningen Agricultural University
+                   Marijkeweg 11/22                   Nieuwe Kanaal 11
+                   6700 AC  Wageningen                6709 PA  Wageningen
+                    The Netherlands                    The Netherlands
+                   Fax: +31 8370 24812                Fax: +31 8370 84885
+
+
+
+SEE ALSO
+       vamps(5), vselg(1), issec(1), getstr(1).
+
+
+AUTHOR
+       J. Schellekens
+       schj@geo.vu.nl
+       schj@xs4all.nl
+
+
+
+BUGS
+       There  are  quite  a  lot  I  suspect.  Please report them to me if you
+       encounter one. Some bugs might be 'features' as vamps will  not  always
+       behave very logical ;-).
+
+
+
+                                Version VERSION                       vamps(1)

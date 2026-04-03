@@ -1,0 +1,663 @@
+head	1.8;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.8
+date	99.01.06.12.13.01;	author schj;	state Alpha;
+branches;
+next	1.7;
+
+1.7
+date	99.01.06.12.07.49;	author schj;	state Alpha;
+branches;
+next	1.6;
+
+1.6
+date	97.09.09.10.29.21;	author schj;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	97.09.09.08.36.57;	author schj;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	97.01.16.14.59.27;	author schj;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	96.11.01.11.00.17;	author schj;	state Alpha;
+branches;
+next	1.2;
+
+1.2
+date	96.10.22.17.47.34;	author schj;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	96.08.02.15.58.26;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.8
+log
+@Version: 0.99g
+@
+text
+@/* $Header: /home/schj/src/vamps_0.99g/src/main/RCS/sigs.c,v 1.7 1999/01/06 12:07:49 schj Alpha $ 
+ */
+/*  $RCSfile: sigs.c,v $
+ *  $Author: schj $
+ *  $Date: 1999/01/06 12:07:49 $ */
+
+#ifdef HAVE_CONFG_H
+#include "vconfig.h"
+#endif
+
+static char RCSid[] =
+"$Id: sigs.c,v 1.7 1999/01/06 12:07:49 schj Alpha $";
+
+#include <stdio.h>
+#include <signal.h>
+#include "vamps.h"
+#ifdef HAVE_LIBSLANG
+#include "slang.h"
+#endif
+#include "deffile.h"
+
+int    setsig (void);
+int    unsetsig (void);
+int    switchtoint=0;
+
+/* Number of signals to be ignored */
+#define MAXIG 1
+#ifdef unix
+#define CATCHSIGS SIGINT, SIGABRT, SIGTERM, SIGFPE, SIGHUP, SIGWINCH, SIGPIPE, SIGSEGV, SIGALRM
+#else
+#define CATCHSIGS SIGINT, SIGABRT, SIGTERM, SIGFPE, SIGHUP
+#endif
+
+/* Signals to be caught or ignored */
+const int catch[] =
+{CATCHSIGS, 0};
+
+/* Needed in djgpp */
+#ifndef SIG_ERR
+#define SIG_ERR 1
+#endif
+
+void
+exitfunc()
+{
+	/* delete all datasets and free memory  */
+	del_all_sets ();
+	/* deletes the ini memory list (if present)  */
+	delmemlist ();
+#ifdef HAVE_LIBSLANG	
+	gp_close();
+	SLang_reset_tty();
+#endif
+}
+
+/*C:onsig
+ *@@void onsig (int sig)
+ *
+ * New signal handler. Setup is run again after handling the signal as
+ * Linux resets them to default behaviour. I suppose this is no
+ * problem on other systems ;-).
+ * Under MSDOS (djgpp) the stuff does not seem to work (what's new). */
+#define EMG 2
+extern FILE *gp_cmd_file;
+void 
+onsig (int sig)
+{
+	char s[512];
+	static int emg=0;
+	static int ign = 0; /* How many sigs may be ignored */
+	static int steps1=0;
+
+	switch (sig){
+#ifdef HAVE_LIBSLANG	
+	case SIGINT:
+		if (!sreadline && steps){
+			(void) fprintf(stderr,"                                                                                \n\n");
+			(void) fprintf(stderr,"                                                                                \n\n");
+			(void) showit ("sig",MESG,"Switching to interactive mode at end of timestep, please wait....",0,0);
+			(void) fprintf (stderr,"\n\n\nType 'cont;' and a blank line to continue run while in interactive mode...      ");
+			setsig ();
+			switchtoint=1;
+			if (steps1 == thisstep)
+				emg++;
+			steps1 = thisstep;
+			if (emg >= EMG){
+					emg =0;
+					(void) showit ("sig",WARN,"Emergency!! Switching to interactive mode now! Timestep not ended.",0,0);
+					interpreter(0);
+					steps1 =0;
+					switchtoint = 0;
+			}
+		}else{
+			ign++;
+			(void) sprintf (s, "Ignoring signal %d (%d/%d)", sig, ign, MAXIG);
+			(void) showit("sig",WARN,s,0,0);
+			if (ign < MAXIG)
+				setsig ();
+			else
+				unsetsig (); 
+		}
+		break;
+#ifdef unix       
+	case SIGWINCH:
+		SLtt_get_screen_size();
+			setsig ();
+			break;
+	case SIGSEGV:
+			fprintf(stderr,"Oops... Vamps tried to use memory that does not belong to vamps\n");
+			fprintf(stderr,"Congratulations, you have found a bug in Vamps!\n");
+			fprintf(stderr,"Switching to interactive mode....\n");
+			setsig ();
+			interpreter(0);
+			break;
+#endif       
+	case SIGHUP:
+			fprintf(stderr,"Vamps recieved a SIGHUP signal.\n");
+			fprintf(stderr,"Switching to interactive mode....\n");
+			setsig ();
+			interpreter(0);
+			break;
+	case SIGALRM:
+			fprintf(stderr,"Vamps recieved a SIGALRM signal.\n");
+			fprintf(stderr,"Switching to interactive mode....\n");
+			fprintf(stderr,"Type 'cont;' to continue run\n");
+			setsig ();
+			interpreter(0);
+			break;
+	case SIGPIPE:
+			fprintf(stderr,"Trying to restart plotting program (%s)...\n",graphcommand);
+			gp_cmd_file = NULL;
+			gp_command(graphcommand);
+			setsig ();
+			break;
+#endif /* HAVE_LIBSLANG */
+	default:
+		(void)sprintf(s,"\nExiting on signal %d", sig);
+		(void) showit ("sig",WARN,s,0,0);
+		/* perror("vamps ");*/
+		exit (sig);
+		break;
+	}
+}
+
+/*C:setsig
+ *@@void setsig()
+ *
+ * set up custom signal handling. Works on UNIX systems, rather broken
+ * on other systems */
+int 
+setsig (void)
+{
+	int     err = 0;
+	int     i;
+
+#ifdef HAVE_LIBSLANG
+	/* set up signal handler */
+	for (i = 0; catch[i] && !err; i++)
+		if (signal (catch[i], onsig) == SIG_ERR){
+			showit("sig",WARN,"Can't set up signal handler",0,0);
+			Perror (progname, 0,1, RCSid, "Can't set up signal handler", "");
+			err++;
+		}
+#endif
+	return err;
+}
+
+/*C:unsetsig
+ *@@int unsetsig()
+ *
+ * resets signal handling
+ */
+int
+unsetsig ()
+{
+	int     err = 0;
+	int     i;
+
+#ifdef HAVE_LIBSLANG
+	/* resets signal handler */
+	for (i = 0; catch[i] && !err; i++)
+		if (signal (catch[i], SIG_DFL) == SIG_ERR) {
+			showit("sig",WARN,"Can't reset signal handler",0,0);
+			Perror (progname, 0,1, RCSid, "Can't reset signal handler", "");
+			err++;
+		}
+#endif
+	return err;
+}
+@
+
+
+1.7
+log
+@Version: 0.99g
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99e/src/main/RCS/sigs.c,v 1.6 1997/09/09 10:29:21 schj Exp $ 
+d5 1
+a5 1
+ *  $Date: 1997/09/09 10:29:21 $ */
+d12 1
+a12 1
+"$Id: sigs.c,v 1.6 1997/09/09 10:29:21 schj Exp $";
+@
+
+
+1.6
+log
+@added exitfunc
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99e/src/main/RCS/sigs.c,v 1.5 1997/09/09 08:36:57 schj Exp $ 
+d5 1
+a5 1
+ *  $Date: 1997/09/09 08:36:57 $ */
+d12 1
+a12 1
+"$Id: sigs.c,v 1.5 1997/09/09 08:36:57 schj Exp $";
+d29 1
+a29 1
+#define CATCHSIGS SIGINT, SIGABRT, SIGTERM, SIGFPE, SIGHUP, SIGWINCH, SIGPIPE, SIGSEGV
+a45 2
+	endshow();
+	outfiletrailer();
+d50 1
+d52 2
+d73 1
+a74 1
+	switch (sig){
+d110 1
+d116 13
+d135 1
+d137 1
+a137 1
+		(void)sprintf(s,"Exiting on signal %d", sig);
+d139 1
+a139 1
+		perror("vamps ");
+a142 1
+#endif
+d148 2
+a149 2
+ * set up custom signal handling
+ */
+d157 1
+a157 3
+	/*
+	 * set up signal handler 
+	 */
+d161 1
+a161 1
+			Perror (progname, 0, RCSid, "Can't set up signal handler", "");
+d180 1
+a180 3
+	/*
+	 * resets signal handler 
+	 */
+d184 1
+a184 1
+			Perror (progname, 0, RCSid, "Can't reset signal handler", "");
+@
+
+
+1.5
+log
+@0.99e version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99c/src/main/RCS/sigs.c,v 1.4 1997/01/16 14:59:27 schj Exp $ 
+d5 1
+a5 1
+ *  $Date: 1997/01/16 14:59:27 $ */
+d12 1
+a12 1
+"$Id: sigs.c,v 1.4 1997/01/16 14:59:27 schj Exp $";
+d43 11
+d63 1
+d99 1
+a99 1
+					unsetsig (); 
+d116 1
+a123 9
+		closeout();
+		outfiletrailer();
+		if (genoutfile != stdout)	/* Close the stream if needed  */
+			(void)fclose (genoutfile);
+		/* delete all datasets and free memory  */
+		del_all_sets ();
+		/* deletes the ini memory list (if present)  */
+		delmemlist ();
+		endshow();
+@
+
+
+1.4
+log
+@add SIGWINCH, remove NOSLANG defs
+@
+text
+@d1 1
+a1 2
+/*
+ * $Header: /homes/schj/src/vamps_0.99/src/main/RCS/sigs.c,v 1.3 1996/11/01 11:00:17 schj Alpha $ 
+d3 1
+a3 2
+/*  
+ *  $RCSfile: sigs.c,v $
+d5 5
+a9 2
+ *  $Date: 1996/11/01 11:00:17 $
+ */
+d12 1
+a12 1
+"$Id: sigs.c,v 1.3 1996/11/01 11:00:17 schj Alpha $";
+d17 1
+d19 1
+d29 1
+a29 1
+#define CATCHSIGS SIGINT, SIGABRT, SIGTERM, SIGFPE, SIGHUP, SIGWINCH
+d34 1
+a34 3
+/*
+ * Signals to be caught or ignored 
+ */
+d44 2
+a45 2
+/*-
+ * void onsig (int sig)
+d47 4
+a50 4
+ *	New signal handler, setup is run after handling the signal
+ *	as Linux reset them to default behaviour. I suppose
+ *	this is no proble on other systems ;-)
+ */
+d55 35
+a89 35
+  char s[512];
+  static int emg=0;
+  static int ign = 0; /* How many sigs may be ignored */
+  static int steps1=0;
+
+  switch (sig)
+    {
+    case SIGINT:
+      if (!sreadline && steps){
+	(void) fprintf(stderr,"                                                                                \n\n");
+	(void) fprintf(stderr,"                                                                                \n\n");
+	(void) showit ("sig",MESG,"Switching to interactive mode at end of timestep, please wait....",0,0);
+	(void) fprintf (stderr,"\n\n\nType 'cont;' and a blank line to continue run while in interactive mode...      ");
+	setsig ();
+	switchtoint=1;
+	if (steps1 == thisstep)
+	   emg++;
+	 steps1 = thisstep;
+        if (emg >= EMG){
+	   emg =0;
+	   (void) showit ("sig",WARN,"Emergency!! Switching to interactive mode now! Timestep not ended.",0,0);
+	   interpreter(0);
+	   steps1 =0;
+	   switchtoint = 0;
+	}
+      }else{
+	ign++;
+	(void) sprintf (s, "Ignoring signal %d (%d/%d)", sig, ign, MAXIG);
+	(void) showit("sig",WARN,s,0,0);
+	if (ign < MAXIG)
+	  setsig ();
+	else
+	  unsetsig (); 
+      }
+      break;
+d91 10
+a100 4
+    case SIGWINCH:
+	SLtt_get_screen_size();
+	setsig ();
+	break;
+d102 22
+a123 15
+    default:
+      (void)sprintf(s,"Exiting on signal %d", sig);
+      (void) showit ("sig",WARN,s,0,0);
+      closeout();
+      outfiletrailer();
+      if (genoutfile != stdout)	/* Close the stream if needed  */
+	(void)fclose (genoutfile);
+      /* delete all datasets and free memory  */
+      del_all_sets ();
+      /* deletes the ini memory list (if present)  */
+      delmemlist ();
+      endshow();
+      exit (sig);
+      break;
+    }
+d126 3
+a128 2
+/*-
+ * void setsig()
+d134 2
+a135 2
+  int     err = 0;
+  int     i;
+d137 12
+a148 11
+  /*
+   * set up signal handler 
+   */
+  for (i = 0; catch[i] && !err; i++)
+    if (signal (catch[i], onsig) == SIG_ERR)
+      {
+	showit("sig",WARN,"Can't set up signal handler",0,0);
+	Perror (progname, 0, RCSid, "Can't set up signal handler", "");
+	err++;
+      }
+  return err;
+d151 3
+a153 2
+/*-
+ * int unsetsig()
+d159 2
+a160 2
+  int     err = 0;
+  int     i;
+d162 12
+a173 11
+  /*
+   * resets signal handler 
+   */
+  for (i = 0; catch[i] && !err; i++)
+    if (signal (catch[i], SIG_DFL) == SIG_ERR)
+      {
+	showit("sig",WARN,"Can't reset signal handler",0,0);
+	Perror (progname, 0, RCSid, "Can't reset signal handler", "");
+	err++;
+      }
+  return err;
+a174 1
+
+@
+
+
+1.3
+log
+@Set to Alpha version
+@
+text
+@d2 1
+a2 1
+ * $Header: /home/schj/src/vamps_0.99/src/main/RCS/sigs.c,v 1.2 1996/10/22 17:47:34 schj Exp $ 
+d7 1
+a7 1
+ *  $Date: 1996/10/22 17:47:34 $
+d11 1
+a11 1
+"$Id: sigs.c,v 1.2 1996/10/22 17:47:34 schj Exp $";
+d16 1
+d25 3
+d29 2
+d50 1
+a50 1
+static int ign = 0; /* How many sigs may be ignored */
+d55 3
+a61 1
+#ifndef NOSLANG
+d65 2
+a66 2
+	(void) showit ("sig",MESG,"Switching to interactive mode.",0,0);
+	(void) fprintf (stderr,"\n\n\nType 'cont;' and a blank line to continue run...                                ");
+d69 10
+d88 4
+a91 5
+#else
+      ign++;
+      (void) sprintf (s, "Ignoring signal %d (%d/%d)", sig, ign, MAXIG);
+      (void) showit("sig",WARN,s,0,0);
+      if (ign < MAXIG)
+d93 2
+a94 4
+      else
+	unsetsig (); 
+#endif
+      break;
+@
+
+
+1.2
+log
+@added change to interactive adn 'nice' abort with
+some signals
+@
+text
+@d2 1
+a2 1
+ * $Header: /home/schj/src/vamps_0.98/src/main/RCS/sigs.c,v 1.1 1996/08/02 15:58:26 schj Exp $ 
+d7 1
+a7 1
+ *  $Date: 1996/08/02 15:58:26 $
+d11 1
+a11 1
+"$Id: sigs.c,v 1.1 1996/08/02 15:58:26 schj Exp $";
+d20 1
+a20 1
+int	switchtoint=0;
+d54 16
+a69 5
+      ign++;
+      (void) showit ("sig",MESG,"Switching to interactive mode.... Please wait while timestep ends, this might take a while...",0,0);
+      (void) showit ("sig",MESG,"Type 'cont;' and a blank line to continue run...",0,0);
+      unsetsig ();
+      switchtoint=1;
+d113 2
+a114 2
+	showit("sig",WARN,"Cant set up signal handler",0,0);
+	Perror (progname, 0, RCSid, "Cant set up signal handler", "");
+d136 2
+a137 2
+	showit("sig",WARN,"Cant set up signal handler",0,0);
+	Perror (progname, 0, RCSid, "Cant set up signal handler", "");
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d2 1
+a2 1
+ * $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.98/src/main/RCS/vamps.c,v 0.28 1996/03/25 07:49:08 schj alpha $ 
+d4 2
+a5 1
+/*- $RCSfile: vamps.c,v $
+d7 1
+a7 2
+ *  $Date: 1996/03/25 07:49:08 $
+ *  $Log: vamps.c,v $
+d11 1
+a11 2
+"$Id: vamps.c,v 0.28 1996/03/25 07:49:08 schj alpha $";
+
+d13 1
+d15 2
+d18 3
+a20 1
+
+d23 1
+a23 1
+#define MAXIG 5
+d42 1
+a42 1
+ *	this is no proble on other systems.
+d44 1
+d48 2
+a49 3
+  static int ign = 0;		/*
+				 * How may sigs may be ignored 
+				 */
+d53 1
+d55 5
+a59 7
+      (void) fprintf (stderr, "Ignoring keyboard interrupt (%d/%d)\n", ign, MAXIG);
+      if (ign < MAXIG)
+	setsig ();
+      else
+	unsetsig ();
+      break;
+    case SIGABRT:
+d61 2
+a62 1
+      (void) fprintf (stderr, "Ignoring abort signal (%d/%d)\n", ign, MAXIG);
+d66 2
+a67 6
+	unsetsig ();
+      break;
+    case SIGFPE:
+      (void) fprintf (stderr, "Floating point error(%d)\n", sig);
+      (void) fprintf (stderr, "Please check input parameters.\n");
+      Perror (progname, 1, RCSid, "Exiting on floating point error.", "");
+d70 12
+a81 2
+      (void) fprintf (stderr, "\n\nExiting on signal %d\n", sig);
+      exit (5);
+d90 2
+a91 2
+void 
+setsig ()
+d102 1
+d106 1
+d108 1
+d110 1
+a110 1
+ * unvoid setsig()
+d113 1
+a113 1
+void 
+d125 1
+d129 1
+d131 1
+@

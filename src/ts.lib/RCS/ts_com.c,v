@@ -1,0 +1,284 @@
+head	1.7;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.7
+date	99.01.06.12.13.01;	author schj;	state Alpha;
+branches;
+next	1.6;
+
+1.6
+date	99.01.06.12.07.49;	author schj;	state Alpha;
+branches;
+next	1.5;
+
+1.5
+date	97.09.09.08.42.25;	author schj;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	97.04.10.08.51.24;	author schj;	state Sta;
+branches;
+next	1.3;
+
+1.3
+date	97.04.09.20.37.32;	author schj;	state Sta;
+branches;
+next	1.2;
+
+1.2
+date	96.11.05.15.05.04;	author schj;	state Beta;
+branches;
+next	1.1;
+
+1.1
+date	95.12.17.22.00.49;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@Get the full command as a string
+@
+
+
+1.7
+log
+@Version: 0.99g
+@
+text
+@/* $Header: /home/schj/src/vamps_0.99g/src/ts.lib/RCS/ts_com.c,v 1.6 1999/01/06 12:07:49 schj Alpha $ */
+
+/*  $RCSfile: ts_com.c,v $
+ *  $Author: schj $
+ *  $Date: 1999/01/06 12:07:49 $
+ */
+
+#include <stdio.h>
+#include <string.h>
+#include "ts.h"
+
+#define META	"# Command:"
+
+static char RCSid[] =
+"$Id: ts_com.c,v 1.6 1999/01/06 12:07:49 schj Alpha $";
+
+/*C:ts_command
+ *@@char *ts_command(int argc, char *argv[])
+ *
+ * Builds a NULL terminated string of maximum BUFSIZ bytes
+ * long holding "@@# Command: argv[0] ... argv[argc-1]@@".
+ * Ret:	Pointer to the metadata string.
+ * Note: Retval points to static memory overwritten at each call.
+ */
+char *
+ts_command(int argc,char *argv[])
+{
+	int	len;
+	char	*src, *dst, *sp;
+	static char	buf[BUFSIZ];
+
+	len = BUFSIZ - 5;
+	dst = buf;
+
+	for(src = META; *src; len--)
+		*dst++ = *src++;
+
+	while(len > 0 && argc--) {
+		*dst++ = ' ';
+		src = *argv++;
+		if((sp = strpbrk(src, " \t")))
+			len -= strlen(src) - 3;
+		else
+			len -= strlen(src) - 1;
+		if(len <= 0)
+			src = "...";
+		else if(sp)
+			*dst++ = '"';
+		while(*src)
+			*dst++ = *src++;
+		if(sp)
+			*dst++ = '"';
+	}
+	*dst = '\0';
+
+	return(buf);
+}
+@
+
+
+1.6
+log
+@Version: 0.99g
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99e/src/ts.lib/RCS/ts_com.c,v 1.5 1997/09/09 08:42:25 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1997/09/09 08:42:25 $
+d15 1
+a15 1
+"$Id: ts_com.c,v 1.5 1997/09/09 08:42:25 schj Exp $";
+@
+
+
+1.5
+log
+@0.99e version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99c/src/ts/RCS/ts_com.c,v 1.4 1997/04/10 08:51:24 schj Sta $ */
+d5 1
+a5 1
+ *  $Date: 1997/04/10 08:51:24 $
+d15 1
+a15 1
+"$Id: ts_com.c,v 1.4 1997/04/10 08:51:24 schj Sta $";
+d35 1
+a35 1
+	for( (const char *)src = META; *src; len--)
+d46 1
+a46 1
+			(const char *)src = "...";
+@
+
+
+1.4
+log
+@added RCSid
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99c/src/ts/RCS/ts_com.c,v 1.3 1997/04/09 20:37:32 schj Sta $ */
+d5 1
+a5 1
+ *  $Date: 1997/04/09 20:37:32 $
+d15 1
+a15 1
+"$Id: ts_time.c,v 1.2 1997/04/09 20:38:06 schj Sta $";
+@
+
+
+1.3
+log
+@updated comment
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/ts/RCS/ts_time.c,v 1.1 1996/11/05 15:04:34 schj Alpha $ */
+d3 1
+a3 1
+/*  $RCSfile: ts_time.c,v $
+d5 1
+a5 1
+ *  $Date: 1996/11/05 15:04:34 $
+d13 3
+@
+
+
+1.2
+log
+@Updated to Alpha version
+@
+text
+@d1 5
+a5 7
+/* ts_command.c */
+/*-
+ * char *ts_command(int argc, char *argv[])
+ *		Builds a NUL terminated string of maximum BUFSIZ bytes
+ *		long holding "# Command: argv[0] ... argv[argc-1]".
+ *	Ret:	Pointer to the metadata string.
+ *	Note:	Retval points to static memory overwritten at each call.
+d7 1
+d14 8
+d25 29
+a53 29
+  int	len;
+  char	*src, *dst, *sp;
+  static char	buf[BUFSIZ];
+  
+  len = BUFSIZ - 5;
+  dst = buf;
+  
+  for( (const char *)src = META; *src; len--)
+    *dst++ = *src++;
+  
+  while(len > 0 && argc--) {
+    *dst++ = ' ';
+    src = *argv++;
+    if((sp = strpbrk(src, " \t")))
+      len -= strlen(src) - 3;
+    else
+      len -= strlen(src) - 1;
+    if(len <= 0)
+      (const char *)src = "...";
+    else if(sp)
+      *dst++ = '"';
+    while(*src)
+      *dst++ = *src++;
+    if(sp)
+      *dst++ = '"';
+  }
+  *dst = '\0';
+  
+  return(buf);
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d3 1
+a3 1
+ *	char *ts_command(int argc, char *argv[])
+d11 1
+d16 1
+a16 3
+ts_command(argc, argv)
+int	argc;
+char	*argv[];
+d18 29
+a46 29
+	int	len;
+	char	*src, *dst, *sp;
+	static char	buf[BUFSIZ];
+
+	len = BUFSIZ - 5;
+	dst = buf;
+
+	for(src = META; *src; len--)
+		*dst++ = *src++;
+
+	while(len > 0 && argc--) {
+		*dst++ = ' ';
+		src = *argv++;
+		if((sp = strpbrk(src, " \t")))
+			len -= strlen(src) - 3;
+		else
+			len -= strlen(src) - 1;
+		if(len <= 0)
+			src = "...";
+		else if(sp)
+			*dst++ = '"';
+		while(*src)
+			*dst++ = *src++;
+		if(sp)
+			*dst++ = '"';
+	}
+	*dst = '\0';
+
+	return(buf);
+@

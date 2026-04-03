@@ -1,0 +1,23 @@
+[vamps]
+iniinmem=1
+showgraph = 0
+
+[run]
+outputfile = makkink.out
+
+
+[top]
+system = 1
+soilevaporation = 4
+
+[time]
+steps = 61
+
+[ts]
+pre	= e0_a_inp.prn,0,1
+ira	= e0_a_inp.prn,0,1
+tem	= e0_a_inp.prn,0,2
+rlh	= e0_a_inp.prn,0,3
+win	= e0_a_inp.prn,0,4
+sur	= e0_a_inp.prn,0,5
+

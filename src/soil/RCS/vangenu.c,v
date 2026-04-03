@@ -1,0 +1,983 @@
+head	1.12;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.12
+date	97.01.16.15.05.50;	author schj;	state Exp;
+branches;
+next	1.11;
+
+1.11
+date	96.11.05.15.00.48;	author schj;	state Alpha;
+branches;
+next	1.10;
+
+1.10
+date	96.10.22.17.57.21;	author schj;	state Exp;
+branches;
+next	1.9;
+
+1.9
+date	96.10.06.16.20.53;	author schj;	state Exp;
+branches;
+next	1.8;
+
+1.8
+date	96.04.09.12.08.16;	author schj;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	96.03.25.07.51.14;	author schj;	state alpha;
+branches;
+next	1.6;
+
+1.6
+date	96.03.24.11.42.00;	author schj;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	95.12.17.21.45.55;	author schj;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	95.12.05.03.05.29;	author schj;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	95.11.14.20.26.08;	author schj;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	95.11.06.15.38.39;	author schj;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	95.11.04.20.46.04;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@determine van genuchter parameters
+@
+
+
+1.12
+log
+@layout + stuff
+@
+text
+@/* $Header: /homes/schj/src/vamps_0.99/src/soil/RCS/vangenu.c,v 1.11 1996/11/05 15:00:48 schj Alpha $ */
+/*
+ *  $RCSfile: vangenu.c,v $
+ *  $Author: schj $
+ *  $Date: 1996/11/05 15:00:48 $
+ */
+
+#ifdef STANDALONE
+int verbose = 0;
+#include "deffile.h"
+#include "getopt.h"
+char *progname;
+#endif
+
+static char RCSid[] =
+"$Id: vangenu.c,v 1.11 1996/11/05 15:00:48 schj Alpha $";
+
+#include "vamps.h"
+#include "swatsoil.h"
+#include "marquard.h"
+#include <math.h>
+double **tmpdat;
+static double ThetaS, ThetaR;
+
+/* The function used for fitting 
+   alpha = par[1]
+   n = par[2]
+*/
+double
+vangenu_f_1 (int i,double *par)
+{
+  if (par[1] <= 0.0 || par[2] <= 0.0) /* Invalid parameters */
+    {
+      if (i == 1)
+	fprintf (stderr, "par[1]= %g par[2] = %g\n", par[1], par[2]);
+      func_error = 1;
+      return 0.0;
+    }
+  else
+    {
+      func_error = 0;
+      return ThetaR + (ThetaS - ThetaR) / exp ((1 - 1 / par[2]) * log (1 + exp (par[2] * log (par[1] * exp (tmpdat[i][2] * 2.3025851))))) - tmpdat[i][1];
+    }
+}
+
+/* The function used for fitting 
+   alpha = par[1]
+   n = par[2]
+   thetas = par[3]
+*/
+double
+vangenu_f_2 (i, par)
+     int i;
+     double *par;
+{
+  if (par[1] <= 0.0 || par[2] <= 0.0 || par[3] <0.001) /* Invalid parameters */
+    {
+      if (i == 1)
+	fprintf (stderr, "par[1]= %g par[2] = %g par[3] = %g\n", par[1], par[2], par[3]);
+      func_error = 1;
+      return 0.0;
+    }
+  else
+    {
+      func_error = 0;
+      return ThetaR + (par[3] - ThetaR) / exp ((1 - 1 / par[2]) * log (1 + exp (par[2] * log (par[1] * exp (tmpdat[i][2] * 2.3025851))))) - tmpdat[i][1];
+    }
+}
+
+
+/* The function used for fitting 
+   alpha = par[1]
+   n = par[2]
+   thetar = par[3]
+*/
+double
+vangenu_f_3 (i, par)
+     int i;
+     double *par;
+{
+  if (par[1] <= 0.0 || par[2] <= 0.0 || par[3] < 0.0 || par[3] > ThetaS) /* Invalid parameters */
+    {
+      if (i == 1)
+	fprintf (stderr, "par[1]= %g par[2] = %g\n", par[1], par[2]);
+      func_error = 1;
+      return 0.0;
+    }
+  else
+    {
+      func_error = 0;
+      return par[3] + (ThetaS - par[3]) / exp ((1 - 1 / par[2]) * log (1 + exp (par[2] * log (par[1] * exp (tmpdat[i][2] * 2.3025851))))) - tmpdat[i][1];
+    }
+}
+
+/* The function used for fitting 
+   alpha = par[1]
+   n = par[2]
+   thetas = par[3]
+   thetar = par[4]
+*/
+double
+vangenu_f_4 (i, par)
+     int i;
+     double *par;
+{
+  if (par[1] <= 0.0 || par[2] <= 0.0) /* Invalid parameters */
+    {
+      if (i == 1)
+	fprintf (stderr, "par[1]= %g par[2] = %g\n", par[1], par[2]);
+      func_error = 1;
+      return 0.0;
+    }
+  else
+    {
+      func_error = 0;
+      return par[4] + (par[3] - par[4]) / exp ((1 - 1 / par[2]) * log (1 + exp (par[2] * log (par[1] * exp (tmpdat[i][2] * 2.3025851))))) - tmpdat[i][1];
+    }
+}
+
+
+/*-
+ * int detvangenu(double *theta, double *head,int pts,double thetas,
+ *		double thetar, double *alpha, double *n,double *l);
+ -*/
+int
+detvangenu (theta, head, pts, thetas, thetar, alpha, n, l)
+     double *theta;
+     double *head;
+     int pts;
+     double thetas;
+     double thetar;
+     double *alpha;
+     double *n;
+     double *l;
+{
+  int nnn = 2;			/* alpha,n,l */
+  int mmm;
+  int i;
+
+  ThetaS = thetas;
+  ThetaR = thetar;
+  maqverb = verbose;
+
+  mmm = pts;
+  maqinit (mmm, nnn);
+  inp[0] = 1e-9;
+  inp[3] = 1e-3;
+  inp[4] = 1e-3;
+  inp[5] = 375.0;
+  inp[6] = 0.0001;
+  par[1] = *alpha;		/* Initial alpha */
+  par[2] = *n;			/* Initial n */
+  par[3] = 0.5;			/* Initial l */
+  tmpdat = matr (mmm, 2);
+  maqdata = tmpdat;
+  func = vangenu_f_1;		/* let maq function point to the user defined */
+
+/* fill the data matrix */
+  for (i = 1; i <= pts; i++)
+    {
+      tmpdat[i][1] = theta[i - 1];
+      tmpdat[i][2] = head[i - 1];
+    }
+
+  if (maqverb)
+    {
+      fprintf (stderr, "(%s)\n", RCSid);
+      fprintf (stderr, "vangenu.c: fitting van Genuchten parameters...\n");
+    }
+
+  /* Run the actual marquardt procedure */
+  Marquardt (mmm, nnn, par, rv, jjinv, inp, out);
+
+  /* return the fitted parameters */
+  *alpha = par[1];
+  *n = par[2];
+  *l = par[3];
+  maqend (mmm);
+  free_matr (tmpdat, mmm);
+  return (int) out[1];
+}
+
+#ifdef STANDALONE
+
+#define VANGENUDES "determine van Genuchten parameters"
+#define OPTSTR "hcvla:s:r:"
+
+struct option options[] =
+{
+  {"help", no_argument, 0, 'h'},
+  {"copyright", no_argument, 0, 'c'},
+  {"license", no_argument, 0, 'l'},
+  {"verbose", no_argument, 0, 'v'},
+  {"alpha", required_argument, 0, 'a'},
+  {"n", required_argument, 0, 'n'},
+  {"thetas", required_argument, 0, 's'},
+  {"thetar", required_argument, 0, 'r'},
+  {0, 0, 0, 0},
+};
+
+#define USE "\t[-h][-c][-l][-a alpha][-r thetar][-s thetas][-n n] filename"
+#define EXPL "\
+\t--help\t\t\tshow this information\n\
+\t--copyright\t\tshow part of the GPL\n\
+\t--licence\t\tshow part of the GPL\n\
+\t--verbose\t\tincrease verbose level\n\
+\t--alpha alpha\t\t\tinitial alpha estimate\n\
+\t--n n\t\t\tinitial n estimate\n\
+\t--thetar residual_theta\t\tresidual water\n\
+\t--thetas theta_at_saturation\ttheta at saturation (porosity)\n\
+"
+
+
+int
+main (argc, argv)
+     int argc;
+     char *argv[];
+{
+  double *head;
+  double *theta;
+  double thetar = MISSVAL;
+  double thetas = MISSVAL;
+  double alpha = 0.044;
+  double n = 4.5;
+  double l;
+  int what,i;
+  int pts;
+  XY *tmpxy;
+  FILE *datfile;
+  char *fname;
+  void disclaim ();
+  void showinfo (int verb);
+
+  progname = argv[0];
+  fname = argv[argc-1];
+  if (argc <2)
+	  showinfo(1);
+
+  while ((what = getopt_long (argc, argv, OPTSTR, options, NULL)) != EOF)
+    {
+      switch (what)
+	{
+	case 'l':
+	  {
+	    disclaim ();
+	    break;
+	  }
+	case 'v':
+	  {
+		  verbose++;
+	    break;
+	  }
+	case 'c':
+	  {
+	    disclaim ();
+	    break;
+	  }
+	case 's':
+	  {
+            thetas = atof (optarg);
+	    break;
+	  }
+	case 'r':
+	  {
+            thetar = atof (optarg);
+	    break;
+	  }
+	case 'a':
+	  {
+		  alpha = atof (optarg);
+	    break;
+	  }
+	case 'n':
+	  {
+		  n = atof (optarg);
+	    break;
+	  }
+	case 'h':
+	  {
+	    showinfo (1);
+	    break;
+	  }
+	}
+    }
+
+
+  if ((datfile = fopen (fname, "r")) == NULL)
+    {
+      Perror (progname, 1, RCSid, "Error opening:", fname);
+    }
+  tmpxy = ts_readf (&pts, datfile, progname, verbose);
+  fclose (datfile);
+
+  theta = (double *) ts_memory (NULL, pts * sizeof (double), progname);
+  head = (double *) ts_memory (NULL, pts * sizeof (double), progname);
+  for (i = 0; i < pts; i++)
+    {
+      theta[i] = tmpxy[i].y;
+      head[i] = tmpxy[i].x;
+    }
+  free (tmpxy);			/* clear this stuff */
+
+  if (thetas == MISSVAL)
+	  thetas = theta[0];
+
+  if (thetar == MISSVAL)
+	  thetar = 0.0;
+
+  detvangenu (theta, head, pts, &thetas, &thetar, &alpha, &n, &l);
+  printf ("alpha = %f\nn = %f\n", alpha, n);
+  return 0;
+}
+
+
+/*-
+ * void Perror(char *progname,int exitval, char *from,char *descr,char *xtr)
+ *	Prints an error message on stderr and exits with level
+ *	exitval if this value is > 0	
+ *	Normally called with something like:
+ *	Perror(progname,1,RCSid,"A fatal error","devision by zero");
+ -*/
+void
+Perror (progname, exitval, from, descr, xtr)
+     char *progname;
+     int exitval;
+     char *from;
+     const char *descr;
+     const char *xtr;
+{
+  if (!exitval)
+    {
+      (void) fprintf (stderr, "%s:\terror message:\n", progname);
+      (void) fprintf (stderr, "\tfrom: %s\n", from);
+      (void) fprintf (stderr, "\tdescription: %s %s\n", descr, xtr);
+    }
+  else
+    {
+      (void) fprintf (stderr, "%s:\terror message:\n", progname);
+      (void) fprintf (stderr, "\tfrom: %s\n", from);
+      (void) fprintf (stderr, "\tdescription: %s %s\n", descr, xtr);
+
+      exit (exitval);
+    }
+}
+
+void
+disclaim (void)
+{
+  (void) fprintf (stderr, "%s\n", GNUL);
+  exit (0);
+}
+
+void
+showinfo (int verb)
+
+{
+  (void) fprintf (stderr, "%s - %s\n\t(c) %s - %s\n\t(%s)", progname, VANGENUDES, AUTHOR, DATE, RCSid);
+  (void) fprintf (stderr, "\n\tfor vamps %s",PROVERSION);
+  (void) fprintf (stderr, "\n\tBuild on %s at %s by %s (%s)", WHERE, BUILDDATE, WHO, OS);
+  (void) fprintf (stderr, "\n\n\tusage:\n\t%s\n\t%s\n\n", progname, USE);
+  if (verb)
+    (void) fprintf (stderr, "%s", EXPL);
+  exit (1);
+}
+#endif
+
+
+#include <math.h>
+
+/*-
+ * double s_theta2k(double wcon,thetar,thetas,m,l, int method)
+ * Calculation of hydraulic conductivity from water content.
+ * Via van Genuchten, Clapp Hornberger, or a look up table. 
+ -*/
+double
+s_theta2k (wcon,thetar,thetas,n,l,ksat,method)
+double  wcon;
+double  thetar;
+double  thetas;
+double  n;
+double  l;
+double  ksat;
+int     method;
+{
+double	relsat,term1,expon1;
+double m;
+
+m = 1-1/n;
+
+  if (method)
+    {
+      relsat = (wcon - thetar) / (thetas - thetar);
+	  if (relsat < 0.001)
+	    {
+	      return 1.0E-10;
+	     }
+	  else
+	    {
+	      expon1 = l / m - 2.0;
+	      term1 = pow(1.0 - pow(relsat, 1.0 / m),m);
+		return ksat * pow (relsat, expon1) * (1.0 - term1) * (1.0 - term1);
+	    }
+    }
+  else
+    {
+      (void) fprintf (stderr, "Option not yet implemented (Calculation via tables");
+      exit (1);
+    }
+}
+
+
+
+
+
+/*-
+ * double prhnode (int j, double wcon, int method)
+ *	Calculates the pressure heads water content
+ *	It uses van Genuchten or a look-up table
+ -*/
+
+double
+s_prhnode (wcon,thetar,thetas,n,alpha, method)
+double  wcon;
+double  thetar;
+double  thetas;
+double  n;
+double  alpha;
+int	method;
+{
+  double  help,m;
+  
+  m= 1-1/n;
+
+  if ((thetas - wcon) < 1.0E-6)
+    {				/* Saturated */
+	return 0.0;
+    }
+  else
+    {
+      if (method)
+	{			/* Calculate according to van Genuchten */
+	  if ((wcon - thetar) < 1.0E-6)
+	    {
+	      return -1.0E12;
+	    }
+	  else
+	    {
+	      /* First the inverse of the sorptivity is calculated */
+	      help = (thetas - thetar) / (wcon - thetar);
+	      /* Raise to the power of 1/m */
+	      help = pow (help, 1.0 / m);
+	      /* Substract one and raise to the power of 1/n */
+	      help = pow ((help - 1.0), 1.0 / n);
+	      /* Devide by alpha */
+	      return -1.0 * fabs (help / alpha);
+	    }
+	}
+      else
+	{			/* Calculate using look-up table */
+	  (void) fprintf (stderr, "Option not yet implemented (Calculation via tables");
+	  exit (1);
+	}
+    }
+}
+@
+
+
+1.11
+log
+@Updated to Alpha version
+@
+text
+@d1 1
+a1 1
+/* $Header: /homes/schj/src/vamps_0.99/src/soil/RCS/vangenu.c,v 1.10 1996/10/22 17:57:21 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1996/10/22 17:57:21 $
+d16 1
+a16 1
+"$Id: vangenu.c,v 1.10 1996/10/22 17:57:21 schj Exp $";
+d124 1
+a124 1
+ */
+d221 2
+a222 2
+  double thetar = -999.0;
+  double thetas = -999.0;
+d303 1
+a303 1
+  if (thetas == -999.0)
+d306 1
+a306 1
+  if (thetar == -999.0)
+d321 1
+a321 1
+ */
+d374 1
+a374 1
+ */
+d419 1
+a419 1
+ */
+@
+
+
+1.10
+log
+@removed log in file
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/soil/RCS/vangenu.c,v 1.9 1996/10/06 16:20:53 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1996/10/06 16:20:53 $
+d16 1
+a16 1
+"$Id: vangenu.c,v 1.9 1996/10/06 16:20:53 schj Exp $";
+@
+
+
+1.9
+log
+@cosmetic changes
+@
+text
+@d1 2
+a2 2
+/* $Header: /homes/schj/src/vamps_0.98/src/soil/RCS/vangenu.c,v 1.8 1996/04/09 12:08:16 schj Exp $ */
+/*-
+d5 1
+a5 25
+ *  $Date: 1996/04/09 12:08:16 $
+ *  $Log: vangenu.c,v $
+ *  Revision 1.8  1996/04/09 12:08:16  schj
+ *  minor
+ *
+ *  Revision 1.7  1996/03/25 07:51:14  schj
+ *  remove TRY_SUBDAY
+ *
+ *  Revision 1.6  1996/03/24 11:42:00  schj
+ *  consmetic changes
+ *
+ * Revision 1.5  1995/12/17  21:45:55  schj
+ * cosmectic changes
+ *
+ *  Revision 1.4  1995/12/05 03:05:29  schj
+ *  added standalone version
+ *
+ *  Revision 1.3  1995/11/14 20:26:08  schj
+ *  changed inp array defaults for vangenuchten
+ *
+ * Revision 1.2  1995/11/06  15:38:39  schj
+ * simple working version, the l variable still not added !!
+ *
+ *  Revision 1.1  1995/11/04 20:46:04  schj
+ *  Initial revision
+d16 1
+a16 1
+"$Id: vangenu.c,v 1.8 1996/04/09 12:08:16 schj Exp $";
+d416 1
+a416 1
+ *  double prhnode (int j, double wcon, int method)
+@
+
+
+1.8
+log
+@minor
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.98/src/soil/RCS/vangenu.c,v 1.7 1996/03/25 07:51:14 schj alpha $ */
+d5 1
+a5 1
+ *  $Date: 1996/03/25 07:51:14 $
+d7 3
+d40 1
+a40 1
+"$Id: vangenu.c,v 1.7 1996/03/25 07:51:14 schj alpha $";
+d351 2
+a352 2
+     char *descr;
+     char *xtr;
+d371 1
+a371 1
+disclaim ()
+d378 2
+a379 2
+showinfo (verb)
+     int verb;
+@
+
+
+1.7
+log
+@remove TRY_SUBDAY
+@
+text
+@d1 3
+a3 2
+/* $Header: /home/schj/src/vamps_0.98/src/soil/RCS/vangenu.c,v 1.6 1996/03/24 11:42:00 schj Exp $ */
+/*- $RCSfile: vangenu.c,v $
+d5 1
+a5 1
+ *  $Date: 1996/03/24 11:42:00 $
+d7 3
+d37 1
+a37 1
+"$Id: vangenu.c,v 1.6 1996/03/24 11:42:00 schj Exp $";
+d235 1
+d252 2
+a253 2
+  void disclaim __P (());
+  void showinfo __P ((int verb));
+d332 1
+@
+
+
+1.6
+log
+@consmetic changes
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.97/src/soil/RCS/vangenu.c,v 1.5 1995/12/17 21:45:55 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/12/17 21:45:55 $
+d6 3
+d33 1
+a33 1
+"$Id: vangenu.c,v 1.5 1995/12/17 21:45:55 schj Exp $";
+d373 1
+@
+
+
+1.5
+log
+@cosmectic changes
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.95/src/soil/RCS/vangenu.c,v 1.4 1995/12/05 03:05:29 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/12/05 03:05:29 $
+d6 3
+d30 1
+a30 1
+"$Id: vangenu.c,v 1.4 1995/12/05 03:05:29 schj Exp $";
+d44 1
+a44 3
+vangenu_f_1 (i, par)
+     int i;
+     double *par;
+d435 4
+@
+
+
+1.4
+log
+@added standalone version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.91/soil/RCS/vangenu.c,v 1.3 1995/11/14 20:26:08 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/11/14 20:26:08 $
+d6 3
+d27 1
+a27 1
+"$Id: vangenu.c,v 1.3 1995/11/14 20:26:08 schj Exp $";
+d220 2
+a221 2
+\t--alpha alpha\tinitial alpha estimate\n\
+\t--n n\tinitial n estimate\n\
+@
+
+
+1.3
+log
+@changed inp array defaults for vangenuchten
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.91/soil/RCS/vangenu.c,v 1.2 1995/11/06 15:38:39 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/11/06 15:38:39 $
+d6 3
+d17 1
+a17 1
+int verbose = 1;
+d19 2
+d24 1
+a24 1
+"$Id: vangenu.c,v 1.2 1995/11/06 15:38:39 schj Exp $";
+d31 1
+a31 1
+static double ThetaS,ThetaR;
+d33 4
+a36 1
+/* The function used for fitting */
+d38 1
+a38 1
+vangenu_f (i, par)
+d42 85
+a126 13
+    if (par[1] <=0.0 || par[2] <= 0.0){
+    if (i==1)
+    	fprintf(stderr,"par[1]= %g par[2] = %g\n",par[1],par[2]);
+    func_error = 1;
+    return 0.0;
+    }else{
+#ifdef DEBUG
+    if (i==1)
+    	fprintf(stderr,"par[1]= %g par[2] = %g\n",par[1],par[2]);
+#endif
+    func_error = 0;
+    return ThetaR+(ThetaS-ThetaR)/exp((1-1/par[2])*
+           log(1+exp(par[2]*log(par[1]*exp(tmpdat[i][2]*2.3025851)))))-tmpdat[i][1];
+d130 1
+d153 1
+d165 3
+a167 3
+  maqdata= tmpdat;
+  func = vangenu_f; /* let maq function point to the user defined */
+  
+d174 1
+a174 1
+  
+d177 2
+a178 2
+      fprintf (stderr,"(%s)\n",RCSid);
+      fprintf (stderr,"vangenu.c: fitting van Genuchten parameters...\n");
+d183 1
+a183 1
+  
+d190 1
+a190 1
+  return (int)out[1];
+d194 33
+a226 1
+main()
+d228 6
+a233 6
+  double head[7];
+  double theta[7];
+  double thetar=0.04;
+  double thetas=0.370;
+  double alpha=0.044;
+  double n=4.5;
+d235 199
+d435 32
+a466 9
+  theta[0]=0.370;head[0]=0.40;
+  theta[1]=0.360;head[1]=1.0;
+  theta[2]=0.340;head[2]=1.4;
+  theta[3]=0.300;head[3]=1.7;
+  theta[4]=0.280;head[4]=2.0;
+  theta[5]=0.240;head[5]=2.4;
+  theta[6]=0.230;head[6]=2.7;
+  detvangenu (&theta, &head, 7, thetas, thetar, &alpha, &n, &l);
+  printf ("alpha = %f n = %f l = %f\n",alpha,n,l);  
+a467 1
+#endif
+@
+
+
+1.2
+log
+@simple working version, the l variable still not added !!
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.91/soil/RCS/vangenu.c,v 1.1 1995/11/04 20:46:04 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/11/04 20:46:04 $
+d6 3
+d19 1
+a19 1
+"$Id: vangenu.c,v 1.1 1995/11/04 20:46:04 schj Exp $";
+d34 11
+d47 1
+d51 2
+a52 3
+ * int detvangenu(couble *theta, double *head,int pts, double *alpha,
+ *			double *n,double *l);
+ *
+d68 1
+d74 8
+a81 8
+  inp[0]=1E-10;
+  inp[3]=1e-8;
+  inp[4]=1e-7;
+  inp[5]=200;
+  inp[6]=1e-10;
+  par[1] = 0.01;		/* Initial alpha */
+  par[2] = 9.0;			/* Initial n */
+  par[3] = 0.1;			/* Initial l */
+d84 1
+a84 1
+  func = vangenu_f;
+d108 1
+d116 1
+a116 1
+  double thetar=0.040;
+d118 3
+a120 1
+  double alpha,n,l;
+d129 2
+a130 1
+  detvangenu (&theta, &head, 7, thetas, thetar, &alpha, &n, &l);  
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 2
+a2 2
+/* $Header: /homes/schj/src/vamps_0.91/RCS/setzero.c,v 1.6 1995/10/03 14:06:53 schj Exp $ */
+/*- $RCSfile: setzero.c,v $
+d4 4
+a7 8
+ *  $Date: 1995/10/03 14:06:53 $
+ *  $Log: setzero.c,v $
+ * Revision 1.6  1995/10/03  14:06:53  schj
+ * added ifdef DDEBUG
+ *
+ * Revision 1.5  1995/09/04  11:40:29  schj
+ * added log in RCS header
+ *
+d10 3
+a12 3
+#ifdef DDEBUG
+static  char RCSid[] =
+"$Id: setzero.c,v 1.6 1995/10/03 14:06:53 schj Exp $";
+d15 3
+d21 1
+d23 1
+d25 1
+a25 1
+
+d27 3
+a29 3
+vangenu_f(i,par)
+int	i;
+double	*par;
+d31 2
+a32 1
+return 0.0;
+d35 5
+d41 9
+a49 7
+detvangenu(theta,head,pts,alpha,n,l)
+double	*theta;
+double	*head;
+int	pts;
+double	*alpha;
+double	*n;
+double	*l;
+d51 20
+a70 12
+int	nnn=3; /* alpha,n,l */
+int	mmm;
+int	i;
+
+maqverb=1;
+mmm=pts;
+maqinit(mmm,nnn);
+par[1]=0.1; /* Initial alpha */
+par[2]=2.0; /* Initial n */
+par[3]=0.0; /* Initial l */
+tmpdat = matr(mmm,2);
+func=vangenu_f;
+d72 21
+a92 3
+for (i=1;i<=pts;i++){
+	tmpdat[i][1]=theta[i-1];
+	tmpdat[i][1]=head[i-1];
+d94 18
+a111 7
+/* Run the actual marquardt procedure */
+Marquardt(mmm,nnn,par,rv,jjinv,inp,out);
+&alpha=par[1];
+&n=par[2];
+&l=par[3];
+maqend(mmm);
+free_matr(tmpdat,mmm);
+d113 1
+@

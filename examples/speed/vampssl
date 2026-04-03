@@ -1,0 +1,5 @@
+% Default Vamps user S-Lang setup
+% Copy to ~/.vampssl or vampssl (msdos) and edit to your liking
+
+% Set the prompt to include stack-depth and line-number
+prompt("%$[%#] Vamps> ","%$[%#] Vamps?> ");

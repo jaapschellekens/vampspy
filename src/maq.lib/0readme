@@ -1,0 +1,14 @@
+No manual yet :-(
+
+Some idea of how to use this Marquardt non-linear fitting routine can be
+obtained by looking at the file mex.c, which is an example of how to
+integrate the routine in your own programs. The two S-Lang files
+fit.sl (initialization) and fitf.sl (actual fitting) show how to use
+the S-Lang interface.
+
+
++------------------------------------------------------------------------
+| Author:		J. Schellekens 
+| E-mail:		schj@geo.vu.nl or schj@anna.xs4all.nl
+| Copying:		GPL
+------------------------------------------------------------------------

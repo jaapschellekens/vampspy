@@ -1,0 +1,2450 @@
+head	1.10;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.10
+date	99.01.06.12.13.01;	author schj;	state Alpha;
+branches;
+next	1.9;
+
+1.9
+date	99.01.06.12.07.49;	author schj;	state Alpha;
+branches;
+next	1.8;
+
+1.8
+date	97.09.09.08.36.57;	author schj;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	97.01.16.14.58.41;	author schj;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	96.11.19.13.48.11;	author schj;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	96.11.01.11.00.17;	author schj;	state Alpha;
+branches;
+next	1.4;
+
+1.4
+date	96.10.22.17.47.18;	author schj;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	96.10.14.18.17.19;	author schj;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	96.10.14.18.07.54;	author schj;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	96.08.05.14.26.03;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.10
+log
+@Version: 0.99g
+@
+text
+@/* $Header: /home/schj/src/vamps_0.99g/src/main/RCS/init_s.c,v 1.9 1999/01/06 12:07:49 schj Alpha $ 
+ */
+
+/*  $RCSfile: init_s.c,v $
+ *  $Author: schj $
+ *  $Date: 1999/01/06 12:07:49 $
+ */
+
+static char RCSid[] =
+"$Id: init_s.c,v 1.9 1999/01/06 12:07:49 schj Alpha $";
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#include "vamps.h"
+#include "deffile.h"
+#include "swatsoil.h"
+#include "marquard.h"
+#include "met.h"
+#include "ts.h"
+
+#ifdef HAVE_LIBSLANG
+#include "slang.h"
+
+extern double VPD;
+extern int Getout;
+extern void gp_close();
+extern void sl_init();
+void setoutfilename(char *n);
+void setinfilename(char *n);
+char *at_start = "at_start";
+char *at_end = "at_end";
+char *each_step = "each_step";
+int  noslang = FALSE; /*don't use any slang functions*/
+int sreadline = 0;
+extern char *statfile(char *file, char *sp);
+extern int slash_evalfile(char *file);
+extern void slash_autoload(char *func, char *file);
+extern void slash_help(char *cmd);
+extern void v_plot(char *pltcmd);
+extern char *sl_getarg(void);
+extern char sl_arg0[];
+extern char *sl_prompt[2];
+void getspar();
+void setspar(int *nr, char *des,double *val);
+void V_tstep_soil();
+void Sinterpreter(void);
+double V_ts_time(char *tmstr);
+char *V_ts_fmt(double *inp);
+int sl_add_set (char *name, int *points);
+extern void prtopsys();
+
+/* Here are two intrinsics that the S-lang code can call. */
+/* An intrinsic function to set error */
+static void c_error (char *s)
+{
+	SLang_Error = INTRINSIC_ERROR;
+	fprintf (stderr, "Error: %s\n", s);
+}
+
+/* Function to quit */
+static void c_quit (void)
+{
+	(void)fprintf(stderr,"Press enter to Leave interactive mode...\n");
+	Getout = 1;
+}
+
+#define FLOAT_TYPE 3
+
+/* This table provides some 'general' utilities */
+SLang_Name_Type Vamps_Utils[] =
+{
+#ifdef unix
+	MAKE_VARIABLE("._vampspid_",&VampsPid,INT_TYPE,0), 
+#endif
+	MAKE_VARIABLE("._tmp_prefix", tmp_prefix, STRING_TYPE,1), 
+	MAKE_INTRINSIC(".vamps_help", slash_help, VOID_TYPE, 1),
+	/*I:vamps_help
+	 *Void vamps_help(String key)
+	 * 
+	 * gets help on @@key@@. See @@'?'@@ for further info.
+	 */ 
+	MAKE_INTRINSIC(".SLang_reset_tty", SLang_reset_tty, VOID_TYPE, 0),
+	/*I:SLang_reset_tty
+	 *@@ Int SLang_reset_tty()
+	 *
+	 *  Resets the S-Lang tty. Needed is you want to use stdin and
+	 *  stdout from interactive mode.  */
+	MAKE_INTRINSIC(".SLang_init_tty", SSLang_init_tty, INT_TYPE, 0),
+	/*I:SLang_init_tty
+	 *@@ Int SLang_init_tty()
+	 *
+	 *  Initialize the S-Lang tty. */
+	MAKE_INTRINSIC(".cpu", cpusec, FLOAT_TYPE, 0),
+	/*I:cpu
+	 *@@ Float cpu()
+	 *
+	 * Return the number of CPU seconds used since the start of
+	 * the program. On msdos systems this will be equal to the
+	 * total run-time. On multitasking systems the actually used cpu time
+	 * will be returned.
+	 */ 
+	SLANG_END_TABLE
+};
+
+/*I:@@
+ *@@ @@scriptname
+ * This operator passes it's argument to @@evalfile@@. It
+ * can only be used when running interactively. It
+ * can be used to run scripts in stead of an expression
+ * like:
+ * 
+ *@@ () = evalfile("scriptname");
+ *  
+ * Note the lack of a space between the operator and it's
+ * argument!
+ */
+
+/*I:#
+ *@@ # [plotcommand]
+ *
+ * Operator to send a single command to the plotting system (gnuplot) when
+ * followed by an argument or to enter plotting mode if no argument is given.
+ * In plotting mode all commands should be gnuplot commands. To switch back to
+ * normal mode give a single '#'. The @@:@@ and \@@ operators also work within
+ * plotting mode.
+ *
+ * Some special characters can be used to addres S-Lang variables from within
+ * plotting mode. Words withing $'s are replaced by a string representation of
+ * the S-Lang variable with that name. Example
+ *@@ variable h = "sin(x)";
+ *@@ # plot $h$
+ *
+ * To plot S-Lang matrix variables the \@@ char must be used. Example
+ *@@ variable m = mread("mydata.file",-1);
+ *@@ # plot @@m@@ using 1:2
+ *
+ * Although S-Lang matrix variables are zero based gnuplot starts counting at
+ * 1.
+ *
+ * Variables from vamps output files can also be plotted. In this case both
+ * the name of the of the variable and the output filename are needed. 
+ * They should be seperated by a colon and enclosed in \@@ characters:
+ * 
+ *@@ # plot @@precipitation:example1.out@@ using boxes
+ *
+ * See also @@plt@@.
+ */ 
+
+/*---------------------------------------------------------------------------*/
+/* Create the Table that S-Lang requires, here all the vamps
+   specific functions usable from s-lang are defined */
+SLang_Name_Type Vamps_Intrinsics[] =
+{
+	MAKE_VARIABLE(".v_steps",&steps,INT_TYPE,0), 
+	/*I:v_steps
+	 *@@ Int v_steps
+	 *
+	 * Number of steps in the current simulation (Read,only) */
+	MAKE_VARIABLE(".verbose", &verbose, INT_TYPE, 0),  
+	/*I:verbose
+	 *@@ Int verbose
+	 *
+	 * The general verbose level in the current simulation. 0 is quiet. A
+	 * higher the number makes Vamps more verbose. Verbose levels above 1
+	 * are usefull for debugging only */
+	MAKE_VARIABLE("._version_", &version, INT_TYPE, 1),  
+	/*I:_version_
+	 *@@ Int _version_
+	 *
+	 * Devide by 10 to get version number of Vamps */
+	MAKE_VARIABLE("._BUILDDATE_", BUILDDATE, STRING_TYPE, 1),  
+	MAKE_VARIABLE("._VERSTRING_", PROVERSION, STRING_TYPE, 1),  
+	MAKE_VARIABLE("._OS_", OS, STRING_TYPE, 1),  
+	MAKE_VARIABLE(".sreadline", &sreadline, INT_TYPE, 0),  
+	/*I:sreadline
+	 *@@ Int sreadline
+	 *
+	 * If this variable is 1 vamps runs in interactive mode (readline
+	 * initialized.). If this is set to 0 pressing ^C causes Vamps to
+	 * switch to interactive mode on unix systems. */
+	MAKE_VARIABLE("._sets_", &sets, INT_TYPE, 1),
+	/*I:_sets_
+	 *@@ Int _sets_
+	 *
+	 * Number of data sets in memory */
+	MAKE_VARIABLE(".v_t", &t, FLOAT_TYPE, 0),
+	/*I:v_t
+	 *@@ Float v_t
+	 *
+	 * Current time in simulation (in days) */
+	MAKE_VARIABLE(".v_dt", &dt, FLOAT_TYPE, 0),
+	/*I:v_dt
+	 *@@ Float v_dt
+	 *
+	 * Current timestep in interation process. The 'real' timeste can 
+	 * be found in the @@v_thiststep@@ variable (in days) */
+	MAKE_VARIABLE(".v_qtop", &qtop, FLOAT_TYPE, 1),
+	/*I:v_qtop
+	 *@@ Float v_qtop
+	 *
+	 * Flow trough top of profile for current timestep (Read only) */
+	MAKE_VARIABLE(".v_qbot", &qbot, FLOAT_TYPE, 1),
+	/*I:v_qbot
+	 *@@ Float v_qbot
+	 *
+	 * Flow trough bottom of profile for current timestep (Read only)*/
+	MAKE_VARIABLE(".v_masbal", &masbal, FLOAT_TYPE, 1),
+	/*I:v_masbal
+	 *@@ Float v_masbal
+	 *
+	 * mass balance error in %. Read only.*/
+	MAKE_VARIABLE(".v_cumbot", &cumbot, FLOAT_TYPE, 1),
+	/*I:v_cumbot
+	 *@@ Float v_cumbot
+	 *
+	 * Cumulative flow trough bottom of profile calculated from start of
+	 * simulation (Read only)*/
+	MAKE_VARIABLE(".v_cumtop", &cumtop, FLOAT_TYPE, 1),
+	/*I:v_cumtop
+	 *@@ Float v_cumtop
+	 *
+	 * Cumulative flow trough top of profile calculated from start of
+	 * simulation (Read only)*/
+	MAKE_VARIABLE(".v_rootextract", &rootextract, FLOAT_TYPE, 1),
+	/*I:v_rootextract
+	 *@@ Float v_rootextract
+	 * 
+	 * Cumulative amount of water extracted by the roots (actual 
+	 * transpiration) (Read only) */
+	MAKE_VARIABLE(".v_cumeva", &cumeva, FLOAT_TYPE, 1),
+	/*I:v_cumeva
+	 *@@ Float v_cumeva
+	 * 
+	 * Cumulative evaporation (from wet canopy) (Read only) */ 
+	MAKE_VARIABLE(".v_cumdra", &cumdra, FLOAT_TYPE, 1),
+	MAKE_VARIABLE(".v_cumtra", &cumtra, FLOAT_TYPE, 1),
+	/*I:v_cumtra
+	 *@@ Float v_cumtra
+	 * 
+	 * Cumulative transpiration. This is equal to @@v_rootextract@@ if
+	 * transpiration reduction is not calculated (Read only) */
+	MAKE_VARIABLE(".v_cumprec", &cumprec, FLOAT_TYPE, 1),
+	/*I:v_cumprec
+	 *@@ Float v_cumprec
+	 * 
+	 * Cumulative precipitation [cm] (Read only) */
+	MAKE_VARIABLE(".v_cumintc", &cumintc, FLOAT_TYPE, 1),
+	/*I:v_cumintc
+	 *@@ Float v_cumint
+	 * 
+	 * Cumulative interception [cm] (Read only) */
+	MAKE_VARIABLE(".v_volact", &volact, FLOAT_TYPE, 1),
+	/*I:v_volact
+	 *@@ Float v_volact
+	 * 
+	 * Actual water content of the total soil profile [cm] (Read only)
+	 * */
+	MAKE_VARIABLE(".v_layers", &layers, INT_TYPE, 1),
+	MAKE_VARIABLE(".switchtoint", &switchtoint, INT_TYPE, 0),     
+	MAKE_VARIABLE(".v_infilename", infilename, STRING_TYPE, 0),
+	MAKE_VARIABLE(".v_outfilename", outfilename, STRING_TYPE, 0),
+	MAKE_VARIABLE(".vampslib", vampslib, STRING_TYPE, 0),
+	MAKE_VARIABLE(".v_volsat", &volsat, FLOAT_TYPE, 1),
+	/*I:v_volsat
+	 *@@ Float v_volsat
+	 * 
+	 * Water content of the soil profile at saturation (read only)
+	 * */
+	MAKE_VARIABLE(".v_thiststep", &thiststep, FLOAT_TYPE, 0),
+	MAKE_VARIABLE(".v_thisstep", &thisstep, INT_TYPE, 0),     
+	MAKE_VARIABLE(".commentchars", commchar, STRING_TYPE, 0),     
+	MAKE_VARIABLE(".v_surface_runoff", &surface_runoff, FLOAT_TYPE, 1),
+	MAKE_VARIABLE(".v_ptra", &ptra, FLOAT_TYPE, 1),
+	MAKE_VARIABLE(".v_rootts", &rootts, FLOAT_TYPE, 1),     
+	MAKE_VARIABLE(".v_qdrtot", &qdrtot, FLOAT_TYPE, 0),
+	MAKE_VARIABLE(".dumpini", &dumpini, INT_TYPE, 0),
+	MAKE_VARIABLE(".soilverb", &soilverb, INT_TYPE, 0),
+	MAKE_VARIABLE(".id.pre", &id.pre, INT_TYPE, 0),
+	MAKE_VARIABLE(".id.ptr", &id.ptr, INT_TYPE, 0),
+	MAKE_VARIABLE(".id.spe", &id.spe, INT_TYPE, 0),
+	MAKE_VARIABLE(".id.spe", &id.spe, INT_TYPE, 0),
+	MAKE_VARIABLE(".id.inr", &id.inr, INT_TYPE, 0),
+	MAKE_VARIABLE(".id.win", &id.win, INT_TYPE, 0),
+	MAKE_VARIABLE(".id.nra", &id.nra, INT_TYPE, 0),
+	MAKE_VARIABLE(".id.tem", &id.tem, INT_TYPE, 0),
+	MAKE_VARIABLE(".v_avgtheta", &avgtheta, FLOAT_TYPE, 1),
+	MAKE_VARIABLE(".v_smd", &SMD, FLOAT_TYPE, 1),
+	/*I:v_smd
+	 *@@ Float v_smd
+	 *
+	 * Soil moisture deficit for current timestep in cm */
+	MAKE_VARIABLE(".v_vpd", &VPD, FLOAT_TYPE, 1),
+	/*I:v_vpd
+	 *@@ Float v_vpd
+	 * 
+	 * Actual vapour pressure deficit in mbar (Read only)
+	 * */
+	MAKE_VARIABLE(".check", &check, INT_TYPE, 0),     
+	MAKE_VARIABLE(".v_thetol", &thetol, FLOAT_TYPE, 0),     
+	MAKE_VARIABLE(".v_maxitr", &maxitr, INT_TYPE, 0),     
+	MAKE_INTRINSIC(".getdefname", getdefname, STRING_TYPE, 1),
+	MAKE_INTRINSIC(".editmemitem", editmemitem, VOID_TYPE, 3),
+	MAKE_INTRINSIC(".print", print, VOID_TYPE, 1),
+	MAKE_INTRINSIC(".error", c_error, VOID_TYPE, 1),
+	MAKE_INTRINSIC(".quit", quit_vamps, VOID_TYPE, 0),
+	/*I:exit
+	 *I:quit
+	 *@@exit()
+	 *@@quit()
+	 * Quits the S-Lang interpreter and returns to the
+	 * operating system */
+	MAKE_INTRINSIC(".exit", quit_vamps, VOID_TYPE, 0),
+	MAKE_INTRINSIC(".interpreter", Sinterpreter, VOID_TYPE, 0),
+	/*I:interpreter
+	 *@@Void interpreter(int verb)
+	 *
+	 * Start the Vamps interactive mode. If @@verb@@ != 0
+	 * the opening banner will be shown.
+	 */ 
+	MAKE_INTRINSIC(".cont", c_quit, VOID_TYPE, 0),
+	/*I:cont
+	 *@@ cont()
+	 * Continiue the current Vamps run */
+	MAKE_INTRINSIC(".v_precanop", precanop, VOID_TYPE, 0),
+	MAKE_INTRINSIC(".plt_close", gp_close, VOID_TYPE, 0),
+	/*I:plt_close
+	 *@@ Void plt_close()
+	 *
+	 * Closes the pipe to the plotting program
+	 */ 
+	MAKE_INTRINSIC(".plt", v_plot, VOID_TYPE, 1),
+	/*I:plt
+	 *@@ Void plt(String cmd)
+	 * Sends the string @@cmd@@ to the plotting system. This has
+	 * the same effect as using the @@#@@ operator in interactive mode.
+	 * @@plt@@ can be used in scripts.
+	 *
+	 * See also @@#@@.
+	 */ 
+	MAKE_INTRINSIC(".v_inidump", inidump, VOID_TYPE, 0),
+	MAKE_INTRINSIC(".v_presoil", presoil, VOID_TYPE, 0),
+	/*I:v_presoil
+	 *@@ Void v_presoil()
+	 * 
+	 * Initialize the soil moisture module
+	 * */
+	MAKE_INTRINSIC(".v_postsoil", postsoil, VOID_TYPE, 0),
+	/*I:v_postsoil
+	 *@@ Void v_postsoil
+	 * 
+	 * Cleans up after the soil module
+	 * */
+	MAKE_INTRINSIC(".v_postcanop", postcanop, VOID_TYPE, 0),
+	MAKE_INTRINSIC(".v_prtopsys", prtopsys, VOID_TYPE, 0),
+	MAKE_INTRINSIC(".v_closeout", closeout, VOID_TYPE, 0),
+	MAKE_INTRINSIC(".v_xcloseout", xcloseout, VOID_TYPE, 0),
+	MAKE_INTRINSIC(".disclaim", disclaim, VOID_TYPE, 0),
+	/*I:disclaim
+	 *I:copyright
+	 *@@Void disclaim
+	 *@@Void copyright
+	 * Shows a short version of the GPL */
+	MAKE_INTRINSIC(".copyright", disclaim, VOID_TYPE, 0),
+	MAKE_INTRINSIC(".readset", readset, INT_TYPE, 2),
+	/*I:readset
+	 *@@Int readset(String filename, String setname)
+	 *
+	 * Reads set @@setname@@ from file @@fname@@. Returns the
+	 * id of the set or -1 on error. 
+	 */
+	MAKE_INTRINSIC(".addset", sl_add_set, INT_TYPE, 2),
+	/*I:addset
+	 *@@Void addset(name, points)
+	 *
+	 * Adds an empty set @@name@@ with @@points@@ points
+	 * to the list
+	 * */
+	MAKE_INTRINSIC(".at_start_f", at_start_f, VOID_TYPE, 0),
+	MAKE_INTRINSIC(".v_tstep_soil", V_tstep_soil, VOID_TYPE, 0),
+	MAKE_INTRINSIC(".v_setinfilename", setinfilename, VOID_TYPE, 1),
+	MAKE_INTRINSIC(".v_setoutfilename", setoutfilename, VOID_TYPE, 1),
+	MAKE_INTRINSIC(".v_utout", utout, VOID_TYPE, 1),
+	MAKE_INTRINSIC(".v_xtraout", xtraout, VOID_TYPE, 1),
+	MAKE_INTRINSIC(".getsetbyname", getsetbyname, INT_TYPE, 1),
+	MAKE_INTRINSIC(".v_printcom", printcom, VOID_TYPE, 1),
+	MAKE_INTRINSIC(".v_printstr", printstr, VOID_TYPE, 2),
+	/*I:v_printstr
+	 *@@ Void v_printstr(name, str)
+	 *
+	 * Stores variable @@str@@ with name @@name@@ in the output-file.
+	 * This function can be used in the @@each_step@@ function only.
+	 * It's purpose is to store extra information in the output-file.
+	 * */
+	MAKE_INTRINSIC(".getset_x", getset_x, FLOAT_TYPE, 2),
+	MAKE_INTRINSIC(".getset_y", getset_y, FLOAT_TYPE, 2),
+	MAKE_INTRINSIC(".getset_points", getset_points, INT_TYPE, 1),
+	MAKE_INTRINSIC(".getset_y_from_x", getset_y_from_x, FLOAT_TYPE, 2),
+	MAKE_INTRINSIC(".getset_name", getset_name, STRING_TYPE, 1),
+	MAKE_INTRINSIC(".getset_fname", getset_fname, STRING_TYPE, 1),
+	MAKE_INTRINSIC(".getset_xmax", getset_xmax, FLOAT_TYPE, 1),
+	MAKE_INTRINSIC(".getset_ymax", getset_ymax, FLOAT_TYPE, 1),
+	MAKE_INTRINSIC(".getset_ymin", getset_ymin, FLOAT_TYPE, 1),
+	MAKE_INTRINSIC(".getset_xmin", getset_xmin, FLOAT_TYPE, 1),
+	MAKE_INTRINSIC(".getset_xsum", getset_xsum, FLOAT_TYPE, 1),
+	MAKE_INTRINSIC(".getset_ysum", getset_ysum, FLOAT_TYPE, 1),
+	MAKE_INTRINSIC(".v_del_all_sets",del_all_sets, VOID_TYPE, 0),
+	MAKE_INTRINSIC(".v_prelim",prelim, VOID_TYPE, 0),
+	MAKE_INTRINSIC(".v_dorun",dorun, VOID_TYPE, 0),
+	MAKE_INTRINSIC(".v_dotail",dotail, VOID_TYPE, 0),
+	MAKE_INTRINSIC(".history",show_history, VOID_TYPE, 0),
+	MAKE_INTRINSIC(".addtohist",addtohist, INT_TYPE, 1),
+	/*I:addtohist
+	 *@@ Int addtohist(string)
+	 *
+	 * Adds @@string@@ to the history list.
+	 */ 
+	MAKE_INTRINSIC(".hist",show_history, VOID_TYPE, 0),
+	/*I:hist
+	 *@@ Void hist()
+	 *
+	 * Prints the history of command entered at the interactive
+	 * prompt to the screen. 
+	 *
+	 * Note that the  help operator `?' is never added to the list.
+	 * The excecute operator \@@ is replaced by @@() = evalfile("arg");@@.
+	 * */
+	MAKE_INTRINSIC(".del_history",del_history, VOID_TYPE, 0),
+	MAKE_INTRINSIC(".save_history",save_history, INT_TYPE, 1),
+	/*I:save_history
+	 *@@Int save_history(fname)
+	 *
+	 * Save the command entered at the interactive prompt to the
+	 * file @@fname@@. Returns -1 on error (this file could not be
+	 * opened in write mode) and 0 on success.
+	 * */
+	MAKE_INTRINSIC(".v_printsum",s_printsum, VOID_TYPE, 0),
+	/*I:v_printsum
+	 *@@Void v_printsum()
+	 *
+	 * Prints actual water balance summary at @@stderr@@ */
+	MAKE_INTRINSIC(".v_outfiletrailer",outfiletrailer, VOID_TYPE, 0),
+	MAKE_INTRINSIC(".v_endshow",endshow, VOID_TYPE, 0),
+	MAKE_INTRINSIC(".v_dumpset",s_dumpset, VOID_TYPE, 2),
+	MAKE_INTRINSIC(".v_getspar",getspar, VOID_TYPE,0),
+	/*I:v_getspar
+	 * 
+	 *@@ Float v_getspar(int nr, char *des)
+	 * 
+	 * Gets parameter from soil description structure
+	 * */
+	MAKE_INTRINSIC(".v_setspar",setspar, VOID_TYPE, 3),
+	/*I:v_setspar
+	 * 
+	 *@@ Void v_setspar(int nr, char *des, val double)
+	 * 
+	 * set parameter in soil description structure
+	 * */
+	MAKE_INTRINSIC(".ts_time",V_ts_time, STRING_TYPE, 1),
+	MAKE_INTRINSIC(".ts_fmt",V_ts_fmt, FLOAT_TYPE, 1),
+	MAKE_INTRINSIC(".sl_met_init",sl_met_init, VOID_TYPE, 0),
+	/*I:sl_met_init
+	 *@@ Void sl_met_init
+	 *
+	 * Initializes the meteo functions:
+	 * @@eaes, vslope, e0b@@
+	 * */
+	SLANG_END_TABLE
+};
+
+/*C:init_s
+ * @@void init_s (char *vamps_sl)
+ *
+ * Initializes the S-Lang system and loads the startup file
+ * @@vamps_sl@@.
+ */
+void
+init_s (char *vamps_sl)
+{
+	double lai_to_s(double lai);
+
+	/* Initialize the library.  This is always needed. */
+
+	if (!init_SLang()		       /* basic interpreter functions */
+			|| !init_SLmath() 	       /* sin, cos, etc... */
+#ifdef unix
+			|| !init_SLunix()	       /* unix system calls */
+#endif
+			|| !init_SLfiles()	       /* file i/o */
+
+			/* Now add intrinsics for this application */
+			|| !SLang_add_table(Vamps_Utils, "Vamps")  
+			|| !SLang_add_table(Maq, "Marquardt")
+			|| !SLang_add_table(Vamps_Intrinsics, "Vamps"))  {
+		fprintf(stderr, "Unable to initialize S-Lang.\n");
+		exit(-1);
+	}
+	if (sl_def_init() == -1)
+		fprintf(stderr, "Unable to initialize S-Lang deffile functions.\n");
+#ifdef HAVE_LIBAGL
+	sl_AGL_init();
+#endif
+#ifdef HAVE_LIBPLOT
+	sl_plot_init();
+#endif
+	
+
+	sl_init();
+
+	/* Turn on debugging */
+	SLang_Traceback = 1;
+
+	/* Add VAMPS as a define from S-Lang preprocessor */
+	SLdefine_for_ifdef("VAMPS");
+	/* Now load an initialization file and exit */
+	if (vamps_sl)
+		SLang_load_file (vamps_sl);
+	else
+		Perror(progname,1,1,RCSid,"Slang init file not found",vamps_sl);
+}
+
+
+/* Here all the function definitions in s-lang follow. They can be used */
+/* by all modules in vamps. Prototypes can be found in s_lang.h */
+/* Three functions can exist one that is executed after the command
+ * line options are parsed and the input file is read and before the 
+ * modelling takes place. One is executed after each step in the precipitation
+ * input array. One is excecuted after the program is finished, but before
+ * the output files are closed.
+ * they are stored in:
+ *    at_start
+ *    each_step
+ *    at_end
+ * by default the names of the S-Lang functions are the same, but they
+ * can be changed by the user. Functions shoud return 0 on success and
+ * something else on failure. Setting these vars to NULL disables checking
+ * of these options.
+ */
+
+/*C:lai_to_s
+ *@@double lai_to_s (double lai)
+ *
+ * Converts lai to canopy storage by a user defined function in s_lang
+ * called Slai_to_s (lai).
+ */
+/*I:Slai_to_s
+ *@@Float Slai_to_s(Float lai)
+ *
+ * Function called in the canopy module to convert lai to
+ * canopy storage. If this S-Lang function is not defined the
+ * lai value from the @@canopy@@ section in the input file is used.
+ */
+double
+lai_to_s (double lai)
+{
+	double x;
+	int ix,tt;
+
+	SLang_push_float (lai);
+	if (SLang_execute_function("Slai_to_s")) {
+		SLang_pop_float(&x,&ix,&tt);
+		return x;
+	}else{
+		fprintf(stderr,"Error: Slai_to_s not defined\n");
+		exit(88);
+	}
+}
+
+
+int
+at_start_f()
+{
+	int ret;
+
+	if (at_start)
+		if((ret = SLang_execute_function(at_start)))
+			return 0;
+		else
+			return ret;
+
+	return 1;
+}
+
+int
+at_end_f()
+{
+	int ret;
+
+	if (at_end)
+		if((ret = SLang_execute_function(at_end)))
+			return 0;
+		else
+			return ret;
+
+	return 1;
+}
+
+int
+each_step_f()
+{
+	int ret;
+
+	if (each_step)
+		if((ret = SLang_execute_function(each_step)))
+			return 0;
+		else
+			return ret;
+
+	return 1;
+}
+
+
+double 
+getset_x (int *set,int *pos)
+{
+	return data[*set].xy[*pos].x;
+}
+
+double 
+getset_y (int *set,int *pos)
+{
+	return data[*set].xy[*pos].y;
+}
+
+double
+getset_xmax(int *set)
+{
+	return data[*set].xmax;
+}
+double
+getset_ymax(int *set)
+{
+	return data[*set].ymax;
+}
+double
+getset_ymin(int *set)
+{
+	return data[*set].ymin;
+}
+double
+getset_xmin(int *set)
+{
+	return data[*set].xmin;
+}
+double
+getset_ysum(int *set)
+{
+	return data[*set].ysum;
+}
+double
+getset_xsum(int *set)
+{
+	return data[*set].xsum;
+}
+
+double
+getset_y_from_x (int *set, double *x)
+{
+	int low=0,mid=0,high=0;
+
+	high = data[*set].points;
+
+	while (high > low) {
+		mid = (high + low) / 2;
+		if (*x > data[*set].xy[mid].x) {
+			low = mid;
+		} else if (data[*set].xy[mid].x > *x) {
+			high = mid;
+		} else
+		high = -1;
+	}
+
+	return data[*set].xy[mid].y;
+}
+
+int 
+getset_points (int *set)
+{
+	return data[*set].points;
+}
+
+char 
+*getset_name (int *set)
+{
+	return data[*set].name;
+}
+
+char 
+*getset_fname (int *set)
+{
+	return data[*set].fname;
+}
+
+
+void
+setoutfilename(char *n)
+{
+	strcpy(outfilename,n);
+}
+
+void
+setinfilename(char *n)
+{
+	strcpy(infilename,n);
+}
+
+#endif /* HAVE_LIBSLANG*/
+
+double
+estrs(void)
+{
+#ifdef HAVE_LIBSLANG
+	double x;
+	int ix,tt;
+
+	if (SLang_execute_function("estrs")) {
+		SLang_pop_float(&x,&ix,&tt);
+		return x;
+	}else{
+		fprintf(stderr,"Error: estrs not defined\n");
+		exit(88);
+	}
+#endif
+	Perror(progname,1,0,RCSid,"Need S-Lang for estrs","");
+	/* NOTREACHED */
+}
+
+
+double
+Rs_to_Rn(double Rs)
+{
+#ifdef HAVE_LIBSLANG
+	double x;
+	int ix,tt;
+
+	SLang_push_float (Rs);
+	if (SLang_execute_function("Rs_to_Rn")) {
+		SLang_pop_float(&x,&ix,&tt);
+		return x;
+	}else{
+		fprintf(stderr,"Error: Rs_to_Rn not defined\n");
+		exit(88);
+	}
+#else
+	return (Rs *0.858) - 35.0;
+#endif
+}
+
+
+
+#ifdef HAVE_LIBSLANG
+
+void
+s_printsum(void)
+{
+	printsum(stderr);
+}
+
+
+void
+s_dumpset(int *setn,char *fname)
+{
+	FILE *tt;
+
+	if((tt = fopen(fname,"w"))){
+		dumpset(*setn,tt);
+		fclose(tt);
+	}else{
+		(void)fprintf(stderr,"File open failed: %s\n",fname);
+	}
+}
+#endif
+
+
+/* Below follows all needed for the interactive vamps mode. Most
+   is taken from the S-Lang calc.c example */
+   
+ 
+#ifdef HAVE_LIBSLANG
+int Getout =0;
+/* This is calc.c S-Lang example stuff */
+void quit_vamps (void)
+{
+	/*   SLsmg_reset_smg(); */
+	SLang_reset_tty ();
+#ifdef MALLOC_DEBUG
+	SLmalloc_dump_statistics ();
+#endif
+	exit (SLang_Error);
+}
+
+void print (char *s)
+{
+	(void)fputs(s, stdout); 
+	(void)fflush (stdout);
+}
+
+/* forward declarations */
+static int take_input (void);
+static int vamps_open_readline (SLang_Load_Type *);
+static int vamps_close_readline (SLang_Load_Type *);
+
+void Sinterpreter(void)
+{
+	int verb;
+	if (SLang_pop_integer(&verb)) verb = 1;
+
+	(void)interpreter(verb);
+}
+
+int interpreter (int verb)
+{
+	sreadline = 1; 
+	SLang_set_abort_signal (onsig);
+	SLang_Ignore_User_Abort = 0;
+	SLang_Traceback = 1;
+	alarm(0);
+	if (verb){
+		(void) fprintf (stderr, "\n%s - %s\n\t%s (%s) %s\n\t%s (c) - %s\n", progname, DESCRIPTION, IDENTIFY, STATUS, PROVERSION, AUTHOR, DATE);
+		(void) fprintf (stderr, "\tBuild on %s at %s by %s (%s)\n", WHERE, BUILDDATE, WHO, OS);
+		(void) fprintf (stderr, "\t(%s)\n", RCSid);
+		(void)fputs(" \n\n This is  V A M P S  in interactive mode.\n", stderr);
+		(void)fputs(" V A M P S  comes with ABSOLUTELY NO WARRANTY; for details type `disclaim;'.\n",stderr);
+		(void)fputs(" This is free software, and you are welcome to redistribute it\n",stderr);
+		(void)fputs(" under certain conditions; type `copyright;' for details.\n\n",stderr);
+		(void)fputs(" Type `?' for a list of available functions. `??' explains how\n", stderr);
+		(void)fputs(" to use help.\n", stderr);
+		(void)fputs(" Note also that statements end in a `;'\n", stderr);
+		(void)fputs("\n It is also important to note that most binary operators +, -, *, /,\n", stderr);
+		(void) fputs(" as well as the `=' sign must be surrounded by spaces!\n", stderr);
+		(void)fputs("\n Type `quit;' or `exit;' to exit this program.\n", stderr);
+		(void)fputs("\n Type `cont;' to continue a run.\n", stderr);
+	}
+
+	SLang_User_Open_Slang_Object = vamps_open_readline;
+	SLang_User_Close_Slang_Object = vamps_close_readline;
+
+	while(1){
+		if (SLang_Error) SLang_restart(1);
+		SLKeyBoard_Quit = SLang_Error = 0;
+		take_input();
+		if (Getout == 1)
+			break;
+	}
+
+	Getout = 0;
+	sreadline =0;
+	setsig();
+	return (SLang_Error);
+}
+
+/* For a detailed explanation of all of this, see slang/demo/useropen.c */
+
+static char *read_using_readline (SLang_Load_Type *x)
+{
+	int n;
+	static int pmode =0;
+	static int lineno = 0;
+	char *cp,*rp,buf[256],s[256];
+	SLang_RLine_Info_Type *rli;
+	char *pmode_prompt = "plotting> ";
+
+	rli = (SLang_RLine_Info_Type *) x->ptr;
+	*rli->buf = 0;
+
+	/* set prompt. Taken from slash */
+	if (x->top_level){
+		lineno++;
+		cp = sl_prompt[0];
+	}else cp = sl_prompt[1];
+
+	rp = buf;
+
+	while(*rp = *cp++) {		/* scan prompt for %[#$] */
+		rp[1] = '\0';
+		if(*rp == '%') {
+			if(*cp == '#') {
+				cp++;
+				sprintf(rp, "%d", lineno);
+			}
+			else if(*cp == '$') {
+				cp++;
+				sprintf(rp, "%d", SLstack_depth());
+			}
+		}
+		while(*rp)
+			rp++;
+	}
+
+	/* do the readline */
+	if (pmode)
+		rli->prompt = pmode_prompt;
+	else
+		rli->prompt = buf;
+	n = SLang_read_line (rli);
+
+	putc ('\n', stdout);  fflush (stdout);
+	if (n <= 0) return NULL;
+	if ((n == 1) && ((int)*rli->buf == (int)SLang_RL_EOF_Char)) return "quit;";
+
+	(void)SLang_rline_save_line (rli);
+	for(cp = rli->buf; *cp == ' ' || *cp == '\t'; cp++) ;
+	if(*cp == '?') {
+		slash_help(++cp);
+		return(NULL);
+	}
+	if(*cp == '@@') {
+		++cp;
+		sprintf(s,"() = evalfile(\"%s\");",cp); 
+		(void)addtohist(s); 
+		slash_evalfile(cp);
+		return(NULL);
+	}
+	if(*cp == ':'){
+		++cp;
+		while(*cp == ' ' || *cp == '\t' || *cp == ';')
+			cp++;
+
+		/* using >> 8 is dangerous, should test with macros in sys/wait.h */
+		if(*cp != '\0' && (n = system(cp) >> 8)){
+			(void)fprintf(stderr, "%s: exited with status %d\n", cp, n);
+		}else{
+			sprintf(s,"() = system(\"%s\");",cp); 
+			(void)addtohist(s); 
+		}
+		return (NULL);
+	}
+	if(*cp == '#' || pmode) {
+		if (pmode){
+			if (*cp == '#'){
+				pmode = 0;
+				fprintf(stderr,"Leaving plotting mode...\nGive # as first char to switch back\n");
+				return NULL;
+			}
+			v_plot(cp);
+			return NULL;
+		}
+		++cp;
+		v_plot(cp);
+		if (strlen(cp) == 0){
+			fprintf(stderr,"Entering plotting mode...\nGive # as first char to switch back\n");
+			pmode = 1;
+		}
+		return(NULL);
+	}
+	(void)addtohist((char *)rli->buf); /* make a history */
+	return((char *)rli->buf);
+
+
+	return(NULL);
+}
+
+static SLang_RLine_Info_Type Vamps_RLI;
+static unsigned char Vamps_RLI_Buf[256];
+
+static int 
+vamps_open_readline (SLang_Load_Type *x)
+{
+	switch (x->type) {
+		case 'r':
+			x->ptr = (char *) &Vamps_RLI;
+			x->read = read_using_readline;
+
+			if (Vamps_RLI.buf != NULL){
+				/* everything else already initialized.
+				 * Just return. */
+				return 0;
+			}
+			Vamps_RLI.buf = Vamps_RLI_Buf;
+			Vamps_RLI.buf_len = 255;
+			Vamps_RLI.tab = 8;
+			Vamps_RLI.edit_width = 79;
+			Vamps_RLI.dhscroll = 20;
+			Vamps_RLI.prompt = "Vamps> ";
+			Vamps_RLI.getkey = SLang_getkey;
+#ifdef USE_ANSI_COLOR
+			Vamps_RLI.flags = SL_RLINE_USE_ANSI;
+#endif
+			SLang_init_readline (&Vamps_RLI);
+			return 0;
+		default:
+			/* unrecognized-- let S-lang handle it */
+			return SL_OBJ_UNKNOWN;
+	}
+}
+
+
+
+static int 
+vamps_close_readline (SLang_Load_Type *x)
+{
+	switch (x->type){
+		case 'r':
+			/* Nothing to do */
+			return 0;
+
+		default:
+			/* unrecognized-- let S-lang handle it */
+			return SL_OBJ_UNKNOWN;
+	}
+}
+
+static int take_input ()
+{
+	SLang_Load_Type x;
+
+	x.type = 'r';		       /* readline type */
+	x.read = read_using_readline;       /* function to call to perform the read */
+
+	return SLang_load_object (&x);
+}
+
+int
+SSLang_init_tty()
+{
+#ifdef __MSDOS__
+	return SLang_init_tty (34, 0, 1);
+#else	
+	return SLang_init_tty (7, 0, 1);
+#endif
+}
+
+void
+getspar()
+{
+	int nr,d = 0;
+	char *des;
+
+	if (SLang_pop_string(&des, &d)) return;
+	if (SLang_pop_integer(&nr)) return;
+
+	if (strcmp(des,"thetas") == 0)
+		SLang_push_float(sp[nr].thetas);
+	else if (strcmp(des,"ksat") == 0)
+		SLang_push_float(sp[nr].ksat);
+	else if (strcmp(des,"residual_water") == 0)
+		SLang_push_float(sp[nr].residual_water);
+	else if (strcmp(des,"n") == 0)
+		SLang_push_float(sp[nr].n);
+	else if (strcmp(des,"alpha") == 0)
+		SLang_push_float(sp[nr].alpha);
+	else if (strcmp(des,"l") == 0)
+		SLang_push_float(sp[nr].l);
+	else if (strcmp(des,"psisat") == 0)
+		SLang_push_float(sp[nr].psisat);
+	else if (strcmp(des,"b") == 0)
+		SLang_push_float(sp[nr].b);
+	else SLang_push_float(MISSVAL);
+}
+
+void
+setspar(int *nr, char *des,double *val)
+{
+	if (strcmp(des,"thetas") == 0)
+		sp[*nr].thetas = *val;
+	else if (strcmp(des,"ksat") == 0)
+		sp[*nr].ksat = *val;
+	else if (strcmp(des,"residual_water") == 0)
+		sp[*nr].residual_water = *val;
+	else if (strcmp(des,"n") == 0)
+		sp[*nr].n = *val;
+	else if (strcmp(des,"alpha") == 0)
+		sp[*nr].alpha = *val;
+	else if (strcmp(des,"l") == 0)
+		sp[*nr].l = *val;
+	else if (strcmp(des,"psisat") == 0)
+		sp[*nr].psisat = *val;
+	else if (strcmp(des,"b") == 0)
+		sp[*nr].b = *val;
+	else fprintf(stderr,"Don't know: %s\n",des);
+}
+
+int
+sl_add_set (char *name, int *points)
+{
+	return add_set(NULL,name,name,*points,0,0);
+}
+
+int readset(char *fname,char *name)
+{
+	(void) get_data(fname,name,-1);
+	return getsetbyname(name);
+}
+
+
+void
+V_tstep_soil()
+{
+	fprintf(stderr,"under construction\n");
+	exit(1);
+}
+
+double
+V_ts_time(char *tmstr)
+{
+	TM tm;
+	double dumm;
+
+	ts_time  (tmstr, NULL, &tm);
+	ts_jday  (&tm, &dumm);
+	return dumm;
+}
+
+char *
+V_ts_fmt(double *inp)
+{
+	static char buf[512];
+	TM tm;
+	
+	ts_jdate(&tm, *inp);
+	(void)strftime(buf, 512, TIME_OFMT, &tm);
+	return buf;
+}
+
+#endif /* HAVE_LIBSLANG */
+
+static int ft = 0;
+static int bclk = 0;
+double cpusec()
+{
+	if (ft == 0){
+		bclk = (int)clock();
+		ft = 1;
+	}
+#ifdef CLOCKS_PER_SEC
+#undef CLK_TCK	
+#define CLK_TCK CLOCKS_PER_SEC
+#endif
+#ifdef  CLK_TCK
+	return (double)((int)clock() - bclk)/(double)CLK_TCK;
+#else
+	return -1.0;
+#endif
+}
+@
+
+
+1.9
+log
+@Version: 0.99g
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99e/src/main/RCS/init_s.c,v 1.8 1997/09/09 08:36:57 schj Exp $ 
+d6 1
+a6 1
+ *  $Date: 1997/09/09 08:36:57 $
+d10 1
+a10 1
+"$Id: init_s.c,v 1.8 1997/09/09 08:36:57 schj Exp $";
+@
+
+
+1.8
+log
+@0.99e version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99c/src/main/RCS/init_s.c,v 1.7 1997/01/16 14:58:41 schj Exp $ 
+d6 1
+a6 1
+ *  $Date: 1997/01/16 14:58:41 $
+d10 1
+a10 1
+"$Id: init_s.c,v 1.7 1997/01/16 14:58:41 schj Exp $";
+d15 3
+d50 1
+d144 6
+d317 7
+d522 1
+a522 1
+		Perror(progname,1,RCSid,"Slang init file not found",vamps_sl);
+d727 1
+a727 1
+	Perror(progname,1,RCSid,"Need S-Lang for estrs","");
+d806 8
+d820 1
+@
+
+
+1.7
+log
+@Removed history to hist.c
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.99/src/main/RCS/init_s.c,v 1.6 1996/11/19 13:48:11 schj Exp $ 
+d3 2
+a4 2
+/* 
+ *  $RCSfile: init_s.c,v $
+d6 1
+a6 1
+ *  $Date: 1996/11/19 13:48:11 $
+d10 5
+a14 1
+"$Id: init_s.c,v 1.6 1996/11/19 13:48:11 schj Exp $";
+a16 1
+#include "canopy.h"
+d19 5
+a23 3
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+d25 1
+a25 1
+#ifndef NOSLANG
+d27 1
+d40 1
+d44 1
+a44 1
+void getspar(int *nr, char *des);
+d46 5
+d56 2
+a57 2
+   SLang_Error = INTRINSIC_ERROR;
+   fprintf (stderr, "Error: %s\n", s);
+d63 1
+d72 31
+a102 21
+  MAKE_INTRINSIC(".SLang_reset_tty", SLang_reset_tty, VOID_TYPE, 0),
+  /*I:SLang_reset_tty
+   *@@ Int SLang_reset_tty()
+   *
+   *  Resets the S-Lang tty. Needed is you want to use stdin and
+   *  stdout from interactive mode.  */
+  MAKE_INTRINSIC(".SLang_init_tty", SSLang_init_tty, INT_TYPE, 0),
+  /*I:SLang_init_tty
+   *@@ Int SLang_init_tty()
+   *
+   *  Initialize the S-Lang tty. */
+  MAKE_INTRINSIC(".CPU", cpusec, FLOAT_TYPE, 0),
+  /*I:CPU
+   *@@ Float CPU()
+   *
+   * Return the number of CPU seconds used since the start of
+   * the program. On msdos systems this will be equal to the
+   * total run-time. On multitasking systems the actually used cpu time
+   * will be returend.
+   */ 
+  SLANG_END_TABLE
+d118 25
+d148 307
+a454 303
+  MAKE_VARIABLE(".steps",&steps,INT_TYPE,0), 
+  /*I:steps
+   *@@ Int steps
+   *
+   * Number of steps in the current simulation (Read,only) */
+  MAKE_VARIABLE(".verbose", &verbose, INT_TYPE, 0),  
+  /*I:verbose
+   *@@ Int verbose
+   *
+   * The general verbose level in the current simulation. 0 is quiet. A
+   * higher the number makes Vamps more verbose. Verbose levels above 1
+   * are usefull for debugging only */
+  MAKE_VARIABLE(".version", &verbose, INT_TYPE, 1),  
+  /*I:version
+   *@@ Int version
+   *
+   * Devide by 10 to get version number of Vamps */
+  MAKE_VARIABLE(".sreadline", &sreadline, INT_TYPE, 0),  
+  /*I:sreadline
+   *@@ Int sreadline
+   *
+   * If this variable is 1 vamps runs in interactive mode (readline
+   * initialized.). If this is set to 0 pressing ^C causes Vamps to
+   * switch to interactive mode on unix systems. */
+  MAKE_VARIABLE(".defverb", &defverb, INT_TYPE, 0),
+  /*I:defverb
+   *@@ Int defverb
+   *
+   * The verbose level in the input file routines. 0 is quit. A higher
+   * the number makes this part of Vamps more verbose */
+  MAKE_VARIABLE(".sets", &sets, INT_TYPE, 1),
+  /*I:sets
+   *@@ Int sets
+   *
+   * Number of data sets in memory */
+  MAKE_VARIABLE(".t", &t, FLOAT_TYPE, 0),
+  /*I:t
+   *@@ Float t
+   *
+   * Current time in simulation (in days) */
+  MAKE_VARIABLE(".dt", &dt, FLOAT_TYPE, 0),
+  /*I:dt
+   *@@ Float dt
+   *
+   * Current timestep in interation process. The 'real' timeste can 
+   * be found in the @@thiststep@@ variable (in days) */
+  MAKE_VARIABLE(".qtop", &qtop, FLOAT_TYPE, 1),
+  /*I:qtop
+   *@@ Float qtop
+   *
+   * Flow trough top of profile for current timestep (Read only) */
+  MAKE_VARIABLE(".qbot", &qbot, FLOAT_TYPE, 1),
+  /*I:qbot
+   *@@ Float qbot
+   *
+   * Flow trough bottom of profile for current timestep (Read only)*/
+  MAKE_VARIABLE(".masbal", &masbal, FLOAT_TYPE, 1),
+  /*I:masbal
+   *@@ Float masbal
+   *
+   * mass balance error in %. Read only.*/
+  MAKE_VARIABLE(".cumbot", &cumbot, FLOAT_TYPE, 1),
+  /*I:cumbot
+   *@@ Float cumbot
+   *
+   * Cumulative flow trough bottom of profile calculated from start of
+   * simulation (Read only)*/
+  MAKE_VARIABLE(".cumtop", &cumtop, FLOAT_TYPE, 1),
+  /*I:cumtop
+   *@@ Float cumtop
+   *
+   * Cumulative flow trough top of profile calculated from start of
+   * simulation (Read only)*/
+  MAKE_VARIABLE(".rootextract", &rootextract, FLOAT_TYPE, 1),
+   /*I:rootextract
+    *@@ Float rootextract
+    * 
+    * Cumulative amount of water extracted by the roots (actual 
+    * transpiration) (Read only) */
+  MAKE_VARIABLE(".cumeva", &cumeva, FLOAT_TYPE, 1),
+   /*I:cumeva
+    *@@ Float cumeva
+    * 
+    * Cumulative evaporation (from wet canopy) (Read only) */ 
+  MAKE_VARIABLE(".cumdra", &cumdra, FLOAT_TYPE, 1),
+  MAKE_VARIABLE(".cumtra", &cumtra, FLOAT_TYPE, 1),
+   /*I:cumtra
+    *@@ Float cumtra
+    * 
+    * Cumulative transpiration. This is equal to @@rootextract@@ if
+    * transpiration reduction is not calculated (Read only) */
+  MAKE_VARIABLE(".cumprec", &cumprec, FLOAT_TYPE, 1),
+   /*I:cumprec
+    *@@ Float cumprec
+    * 
+    * Cumulative precipitation [cm] (Read only) */
+  MAKE_VARIABLE(".cumintc", &cumintc, FLOAT_TYPE, 1),
+   /*I:cumintc
+    *@@ Float cumint
+    * 
+    * Cumulative interception [cm] (Read only) */
+  MAKE_VARIABLE(".volact", &volact, FLOAT_TYPE, 1),
+   /*I:volact
+    *@@ Float volact
+    * 
+    * Actual water content of the total soil profile [cm] (Read only)
+    * */
+  MAKE_VARIABLE(".layers", &layers, INT_TYPE, 1),
+  MAKE_VARIABLE(".switchtoint", &switchtoint, INT_TYPE, 0),     
+  MAKE_VARIABLE(".infilename", infilename, STRING_TYPE, 0),
+  MAKE_VARIABLE(".outfilename", outfilename, STRING_TYPE, 0),
+  MAKE_VARIABLE(".vampslib", vampslib, STRING_TYPE, 0),
+  MAKE_VARIABLE(".volsat", &volsat, FLOAT_TYPE, 0),
+   /*Ivolsat
+    *@@ Float volsat
+    * 
+    * Water content of the soil profile at saturation
+    * */
+  MAKE_VARIABLE(".thiststep", &thiststep, FLOAT_TYPE, 0),
+  MAKE_VARIABLE(".thisstep", &thisstep, INT_TYPE, 0),     
+  MAKE_VARIABLE(".commentchar", &commchar, INT_TYPE, 0),     
+  MAKE_VARIABLE(".surface_runoff", &surface_runoff, FLOAT_TYPE, 0),
+  MAKE_VARIABLE(".ptra", &ptra, FLOAT_TYPE, 1),
+  MAKE_VARIABLE(".rootts", &rootts, FLOAT_TYPE, 1),     
+  MAKE_VARIABLE(".qdrtot", &qdrtot, FLOAT_TYPE, 0),
+  MAKE_VARIABLE(".showgraph", &showgraph, INT_TYPE, 0),
+  MAKE_VARIABLE(".dumpini", &dumpini, INT_TYPE, 0),
+  MAKE_VARIABLE(".soilverb", &soilverb, INT_TYPE, 0),
+  MAKE_VARIABLE(".preset", &preset, INT_TYPE, 0),
+  MAKE_VARIABLE(".windset", &windset, INT_TYPE, 0),
+  MAKE_VARIABLE(".netradset", &netradset, INT_TYPE, 0),
+  MAKE_VARIABLE(".tset", &tset, INT_TYPE, 0),
+  MAKE_VARIABLE(".avgtheta", &avgtheta, FLOAT_TYPE, 1),
+  MAKE_VARIABLE(".SMD", &SMD, FLOAT_TYPE, 1),
+  /*I:SMD
+   *@@ Float SMD
+   *
+   * Soil moisture deficit for current timestep in cm */
+  MAKE_VARIABLE(".VPD", &VPD, FLOAT_TYPE, 1),
+   /*I:VPD
+    *@@ Float VPD
+    * 
+    * Actual vapour pressure deficit in mbar
+    * */
+  MAKE_VARIABLE(".usesecptr", &usesecptr, INT_TYPE, 0),
+  MAKE_VARIABLE(".nrsectionlist", &nrsectionlist, INT_TYPE, 0),     
+  MAKE_VARIABLE(".check", &check, INT_TYPE, 0),     
+  MAKE_VARIABLE(".thetol", &thetol, FLOAT_TYPE, 0),     
+  MAKE_VARIABLE(".maxitr", &maxitr, INT_TYPE, 0),     
+  MAKE_INTRINSIC(".getdefname", getdefname, STRING_TYPE, 1),
+  MAKE_INTRINSIC(".editmemitem", editmemitem, VOID_TYPE, 3),
+  MAKE_INTRINSIC(".setvalue", Ssetvalue, VOID_TYPE, 4),
+  MAKE_INTRINSIC(".print", print, VOID_TYPE, 1),
+  MAKE_INTRINSIC(".error", c_error, VOID_TYPE, 1),
+  MAKE_INTRINSIC(".quit", quit_vamps, VOID_TYPE, 0),
+  MAKE_INTRINSIC(".exit", quit_vamps, VOID_TYPE, 0),
+  MAKE_INTRINSIC(".cont", c_quit, VOID_TYPE, 0),
+  MAKE_INTRINSIC(".precanop", precanop, VOID_TYPE, 0),
+  MAKE_INTRINSIC(".inidump", inidump, VOID_TYPE, 0),
+  MAKE_INTRINSIC(".presoil", presoil, VOID_TYPE, 0),
+   /*I:presoil
+    *@@ Float presoil()
+    * 
+    * Initialize the soil moisture module
+    * */
+  MAKE_INTRINSIC(".postsoil", postsoil, VOID_TYPE, 0),
+   /*I:postsoil
+    *@@ Float postsoil
+    * 
+    * Cleans up after the soil module
+    * */
+  MAKE_INTRINSIC(".postcanop", postcanop, VOID_TYPE, 0),
+  MAKE_INTRINSIC(".closeout", closeout, VOID_TYPE, 0),
+  MAKE_INTRINSIC(".xcloseout", xcloseout, VOID_TYPE, 0),
+  MAKE_INTRINSIC(".disclaim", disclaim, VOID_TYPE, 0),
+  MAKE_INTRINSIC(".copyright", disclaim, VOID_TYPE, 0),
+  MAKE_INTRINSIC(".at_start_f", at_start_f, VOID_TYPE, 0),
+  MAKE_INTRINSIC(".tstep_canop", tstep_canop, VOID_TYPE, 1),
+  MAKE_INTRINSIC(".tstep_soil", tstep_soil, VOID_TYPE, 1),
+  MAKE_INTRINSIC(".setinfilename", setinfilename, VOID_TYPE, 1),
+  MAKE_INTRINSIC(".setoutfilename", setoutfilename, VOID_TYPE, 1),
+  MAKE_INTRINSIC(".utout", utout, VOID_TYPE, 1),
+  MAKE_INTRINSIC(".xtraout", xtraout, VOID_TYPE, 1),
+  MAKE_INTRINSIC(".getsetbyname", getsetbyname, INT_TYPE, 1),
+  MAKE_INTRINSIC(".printcom", printcom, VOID_TYPE, 1),
+  MAKE_INTRINSIC(".printstr", printstr, VOID_TYPE, 2),
+  /*I:printstr
+   *@@ Void printstr(name, str)
+   *
+   * Stores variable @@str@@ with name @@name@@ in the output-file.
+   * This function can be used in the @@each_step@@ function only.
+   * It's purpose is to store extra information in the output-file.
+   * */
+  MAKE_INTRINSIC(".getset_x", getset_x, FLOAT_TYPE, 2),
+  MAKE_INTRINSIC(".getset_y", getset_y, FLOAT_TYPE, 2),
+  MAKE_INTRINSIC(".getset_points", getset_points, INT_TYPE, 1),
+  MAKE_INTRINSIC(".getset_y_from_x", getset_y_from_x, FLOAT_TYPE, 2),
+  MAKE_INTRINSIC(".getset_name", getset_name, STRING_TYPE, 1),
+  MAKE_INTRINSIC(".getset_fname", getset_fname, STRING_TYPE, 1),
+  MAKE_INTRINSIC(".issection", issection, INT_TYPE, 2),
+  MAKE_INTRINSIC(".makeindex", makeindex, INT_TYPE, 1),
+  MAKE_INTRINSIC(".saveindex", saveindex, INT_TYPE, 1),
+  MAKE_INTRINSIC(".readindex", readindex, INT_TYPE, 1),
+  MAKE_INTRINSIC(".rinmem",rinmem, INT_TYPE, 1),
+  MAKE_INTRINSIC(".delmemlist",delmemlist, VOID_TYPE, 0),
+  MAKE_INTRINSIC(".delindex",delseclist, VOID_TYPE, 0),
+  MAKE_INTRINSIC(".del_all_sets",del_all_sets, VOID_TYPE, 0),
+  MAKE_INTRINSIC(".opendef",opendef, INT_TYPE, 1),
+  MAKE_INTRINSIC(".closedef",closedef, INT_TYPE, 0),
+  MAKE_INTRINSIC(".writememini",s_writememini, INT_TYPE, 2),
+  /*I:writememini
+   *@@Int writememini(fname, fmt)
+   *
+   * Writes the file read into memory with the @@rinmem@@ function
+   * to a file. If @@fname@@ is "-" output is send to stdout. 
+   * @@fmt@@ should be 0 for an ini file.
+   * Possible values for @@fmt@@:
+   *@@ 0   = input file
+   *@@ 1   = tcl set commands
+   *@@ 2   = as input file comments
+   *@@ 3   = as LaTeX file
+   */
+  MAKE_INTRINSIC(".getdefstr",Sgetdefstr, STRING_TYPE, 5),
+  MAKE_INTRINSIC(".getdefar",Sgetdefar, VOID_TYPE, 4),
+  MAKE_INTRINSIC(".getdefint",Sgetdefint, INT_TYPE, 5),
+  MAKE_INTRINSIC(".getdefdoub",Sgetdefdoub, FLOAT_TYPE, 5),
+  /*I:getdefstr
+   *I:getdefint
+   *I:getdefdoub
+   *I:getdefar
+   *@@String getdefstr(section, name, def, fname, exitonerror)
+   *@@Int getdefint(section, name, def, fname, exitonerror)
+   *@@Float getdefdoub(section, name, def, fname, exitonerror)
+   *@@Int, Array getdefar(section, name, fname, exitonerror)
+   *
+   * A series of functions te get information from Vamps input/output files.
+   *
+   * They get the value for variable @@name@@ in section @@section@@ 
+   * of the file @@fname@@. If @@exitonerror@@ != 0 then the
+   * program is terminated if @@name@@ is not found in @@section@@.
+   * If @@exitonerror@@ == 0 and @@name@@ is not found @@def@@ is
+   * returned instead. 
+   * @@getdefar@@ is somewhat different. Is does not allow a @@def@@
+   * variable and return either one or two values. It always returns
+   * the number of points read. If zero
+   * points are read no array is returned.
+   * 
+   * Say we use the following file (named ex.inp):
+   *@@[example]
+   *@@ examplename = nonsense
+   * And then call the @@getdefstr@@ function like this:
+   *@@variable exn = getdefstr("example","examplename","Not found","ex.inp",0);
+   * the variable exn will now hold the string "nonsense".
+   * */
+  MAKE_INTRINSIC(".prelim",prelim, VOID_TYPE, 0),
+  MAKE_INTRINSIC(".dorun",dorun, VOID_TYPE, 0),
+  MAKE_INTRINSIC(".dotail",dotail, VOID_TYPE, 0),
+  MAKE_INTRINSIC(".history",show_history, VOID_TYPE, 0),
+  MAKE_INTRINSIC(".addtohist",addtohist, INT_TYPE, 1),
+  /*I:addtohist
+   *@@ Int addtohist(string)
+   *
+   * Adds @@string@@ to the history list.
+   */ 
+  MAKE_INTRINSIC(".hist",show_history, VOID_TYPE, 0),
+  /*I:hist
+   *@@ Void hist()
+   *
+   * Prints the history of command entered at the interactive
+   * prompt to the screen. 
+   *
+   * Note that the  help operator `?' is never added to the list.
+   * The excecute operator \@@ is replaced by @@() = evalfile("arg");@@.
+   * */
+  MAKE_INTRINSIC(".del_history",del_history, VOID_TYPE, 0),
+  MAKE_INTRINSIC(".save_history",save_history, INT_TYPE, 1),
+  /*I:save_history
+   *@@Int save_history(fname)
+   *
+   * Save the command entered at the interactive prompt to the
+   * file @@fname@@. Returns -1 on error (this file could not be
+   * opened in write mode) and 0 on success.
+   * */
+  MAKE_INTRINSIC(".printsum",s_printsum, VOID_TYPE, 0),
+  MAKE_INTRINSIC(".outfiletrailer",outfiletrailer, VOID_TYPE, 0),
+  MAKE_INTRINSIC(".endshow",endshow, VOID_TYPE, 0),
+  MAKE_INTRINSIC(".dumpset",s_dumpset, VOID_TYPE, 2),
+  MAKE_INTRINSIC(".getspar",getspar, VOID_TYPE, 2),
+  /*I:getspar
+   * 
+   *@@ Float getspar(int nr, char *des)
+   * 
+   * Gets parameter from soil description structure
+   * */
+  MAKE_INTRINSIC(".setspar",setspar, VOID_TYPE, 3),
+  /*I:setspar
+   * 
+   *@@ Void setspar(int nr, char *des, val double)
+   * 
+   * set parameter in soil description structure
+   * */
+
+  SLANG_END_TABLE
+d461 1
+a461 1
+ * vamps_sl.
+d466 1
+a466 1
+  double lai_to_s(double lai);
+d468 4
+a471 4
+  /* Initialize the library.  This is always needed. */
+  
+  if (!init_SLang()		       /* basic interpreter functions */
+      || !init_SLmath() 	       /* sin, cos, etc... */
+d473 18
+a490 1
+      || !init_SLunix()	       /* unix system calls */
+d492 14
+a505 22
+      || !init_SLfiles()	       /* file i/o */
+      
+      /* Now add intrinsics for this application */
+      || !SLang_add_table(Vamps_Utils, "Vamps")  
+      || !SLang_add_table(Maq, "Marquardt")
+      || !SLang_add_table(Vamps_Intrinsics, "Vamps"))   
+    {
+      fprintf(stderr, "Unable to initialize S-Lang.\n");
+      exit(-1);
+    }
+    sl_init();
+  
+  /* Turn on debugging */
+  SLang_Traceback = 1;
+  
+  /* Add VAMPS as a define from S-Lang preprocessor */
+  SLdefine_for_ifdef("VAMPS");
+  /* Now load an initialization file and exit */
+  if (vamps_sl)
+    SLang_load_file (vamps_sl);
+  else
+    Perror(progname,1,RCSid,"Slang init file not found",vamps_sl);
+d526 2
+a527 2
+/*-
+ * double lai_to_s (double lai)
+d542 2
+a543 2
+  double x;
+  int ix,tt;
+d545 8
+a552 9
+  SLang_push_float (lai);
+  if (SLang_execute_function("Slai_to_s"))
+    {
+      SLang_pop_float(&x,&ix,&tt);
+      return x;
+    }else{
+      fprintf(stderr,"Error: Slai_to_s not defined\n");
+      exit(88);
+    }
+d559 1
+a559 1
+  int ret;
+d561 5
+a565 5
+  if (at_start)
+    if((ret = SLang_execute_function(at_start)))
+      return 0;
+    else
+      return ret;
+d567 1
+a567 1
+  return 1;
+d573 1
+a573 1
+  int ret;
+d575 5
+a579 5
+  if (at_end)
+    if((ret = SLang_execute_function(at_end)))
+      return 0;
+    else
+      return ret;
+d581 1
+a581 1
+  return 1;
+d587 1
+a587 1
+  int ret;
+d589 5
+a593 5
+  if (each_step)
+    if((ret = SLang_execute_function(each_step)))
+      return 0;
+    else
+      return ret;
+d595 1
+a595 1
+  return 1;
+d602 1
+a602 1
+  return data[*set].xy[*pos].x;
+d608 32
+a639 1
+  return data[*set].xy[*pos].y;
+d645 1
+a645 1
+ int low=0,mid=0,high=0;
+d647 1
+a647 1
+ high = data[*set].points;
+d649 9
+a657 14
+ while (high > low)
+    {
+      mid = (high + low) / 2;
+      if (*x > data[*set].xy[mid].x)
+        {
+          low = mid;
+        }
+      else if (data[*set].xy[mid].x > *x)
+        {
+          high = mid;
+        }
+      else
+        high = -1;
+    }
+d659 1
+a659 1
+ return data[*set].xy[mid].y;
+d665 1
+a665 1
+  return data[*set].points;
+d671 1
+a671 1
+   return data[*set].name;
+d677 1
+a677 9
+   return data[*set].fname;
+}
+
+
+char 
+*Sgetdefstr (const char *section,const char *name,
+	     char *def,char *fname, int *exitonerror)
+{
+  return getdefstr (section,name,def,fname,*exitonerror);
+a679 31
+int 
+Sgetdefint (const char *section,const char *name,
+	     int *def,char *fname, int *exitonerror)
+{
+  return getdefint (section,name,*def,fname,*exitonerror);
+}
+
+double 
+Sgetdefdoub (const char *section,const char *name,
+	     double *def,char *fname, int *exitonerror)
+{
+  return getdefdoub (section,name,*def,fname,*exitonerror);
+}
+
+void 
+Sgetdefar (const char *section,const char *name,
+	     char *fname, int *exitonerror)
+{
+	double *ttar = NULL;
+	int pts = 0;
+
+	ttar = getdefar (section,name,ttar,fname,&pts,*exitonerror);
+
+	if (pts != 0){
+		SLang_push_user_object(SLcreate_array((char *)ttar, 
+				1, pts, 0, 0, 'f', 0));
+		free(ttar);
+	}
+
+	SLang_push_integer(pts);
+}
+d684 1
+a684 1
+   strcpy(outfilename,n);
+d690 1
+a690 1
+   strcpy(infilename,n);
+d693 1
+a693 1
+#endif /* NOSLANG*/
+d698 11
+a708 12
+#ifndef NOSLANG
+  double x;
+  int ix,tt;
+
+  if (SLang_execute_function("estrs"))
+    {
+      SLang_pop_float(&x,&ix,&tt);
+      return x;
+    }else{
+      fprintf(stderr,"Error: estrs not defined\n");
+      exit(88);
+    }
+d710 2
+a711 2
+  Perror(progname,1,RCSid,"Need S-Lang for estrs","");
+  /* NOTREACHED */
+d718 12
+a729 13
+#ifndef NOSLANG
+  double x;
+  int ix,tt;
+
+  SLang_push_float (Rs);
+  if (SLang_execute_function("Rs_to_Rn"))
+    {
+      SLang_pop_float(&x,&ix,&tt);
+      return x;
+    }else{
+      fprintf(stderr,"Error: Rs_to_Rn not defined\n");
+      exit(88);
+    }
+d731 1
+a731 1
+  return (Rs *0.858) - 35.0;
+d737 1
+a737 1
+#ifndef NOSLANG
+d742 1
+a742 1
+  printsum(stderr);
+a744 5
+int
+s_writememini(char *fname,int *fmt)
+{
+	return	writememini(fname,fmt,NULL);
+}
+d749 8
+a756 8
+  FILE *tt;
+  
+  if((tt = fopen(fname,"w"))){
+    dumpset(*setn,tt);
+    fclose(tt);
+  }else{
+    (void)fprintf(stderr,"File open failed: %s\n",fname);
+  }
+d765 1
+a765 1
+#ifndef NOSLANG
+d770 2
+a771 2
+/*   SLsmg_reset_smg(); */
+   SLang_reset_tty ();
+d773 1
+a773 1
+   SLmalloc_dump_statistics ();
+d775 1
+a775 1
+   exit (SLang_Error);
+d780 2
+a781 2
+   (void)fputs(s, stdout); 
+   (void)fflush (stdout);
+d791 36
+a826 43
+   if (SLang_init_tty (-1, 0, 1))
+     {
+	fprintf(stderr, "Unable to initialize tty.");
+	exit (-1);
+     }
+   sreadline = 1; 
+   SLang_set_abort_signal (onsig);
+   SLang_Ignore_User_Abort = 1;
+   SLang_Traceback = 1;
+   if (verb){
+  (void) fprintf (stderr, "\n%s - %s\n\t%s (%s) %s\n\t%s (c) - %s\n", progname, DESCRIPTION, IDENTIFY, STATUS, PROVERSION, AUTHOR, DATE);
+  (void) fprintf (stderr, "\tBuild on %s at %s by %s (%s)\n", WHERE, BUILDDATE, WHO, OS);
+  (void) fprintf (stderr, "\t(%s)\n", RCSid);
+   (void)fputs(" \n\n This is  V A M P S  in interactive mode.\n", stderr);
+   (void)fputs(" V A M P S  comes with ABSOLUTELY NO WARRANTY; for details type `disclaim;'.\n",stderr);
+   (void)fputs(" This is free software, and you are welcome to redistribute it\n",stderr);
+   (void)fputs(" under certain conditions; type `copyright;' for details.\n\n",stderr);
+   (void)fputs(" Type `?' for a list of available functions. `??' explains how\n", stderr);
+   (void)fputs(" to use help.\n", stderr);
+   (void)fputs(" Note also that statements end in a `;'\n", stderr);
+   (void)fputs("\n It is also important to note that most binary operators +, -, *, /,\n", stderr);
+  (void) fputs(" as well as the `=' sign must be surrounded by spaces!\n", stderr);
+   (void)fputs("\n Type `quit;' or `q;' to exit this program.\n", stderr);
+   (void)fputs("\n Type `cont;' to continue this run.\n", stderr);
+   }
+   
+   SLang_User_Open_Slang_Object = vamps_open_readline;
+   SLang_User_Close_Slang_Object = vamps_close_readline;
+   
+   while(1)
+     {
+	if (SLang_Error) SLang_restart(1);
+	SLKeyBoard_Quit = SLang_Error = 0;
+	take_input();
+	if (Getout == 1)
+	    break;
+     }
+   
+   Getout = 0;
+   SLang_reset_tty ();
+   sreadline =0;
+   setsig();
+   return (SLang_Error);
+a828 1
+
+d833 15
+a847 13
+   int n;
+   static int lineno = 0;
+   char *cp,*rp,buf[256],s[256];
+   SLang_RLine_Info_Type *rli;
+   
+   rli = (SLang_RLine_Info_Type *) x->ptr;
+   *rli->buf = 0;
+  
+   /* set prompt. Taken from slash */
+   if (x->top_level){
+	lineno++;
+	cp = sl_prompt[0];
+   }else cp = sl_prompt[1];
+d849 1
+a849 1
+   rp = buf;
+d868 4
+a871 1
+	rli->prompt = buf;
+d891 13
+a903 3
+	if(*cp++ != ':'){
+		(void)addtohist((char *)rli->buf); /* make a history */
+		return((char *)rli->buf);
+d905 20
+a925 10
+	while(*cp == ' ' || *cp == '\t' || *cp == ';')
+		cp++;
+
+/* using >> 8 is dangerous, should test with macros in sys/wait.h */
+	if(*cp != '\0' && (n = system(cp) >> 8)){
+		(void)fprintf(stderr, "%s: exited with status %d\n", cp, n);
+	}else{
+		sprintf(s,"() = system(\"%s\");",cp); 
+		(void)addtohist(s); 
+	}
+d936 17
+a952 20
+   switch (x->type)
+     {
+      case 'r':
+	
+	x->ptr = (char *) &Vamps_RLI;
+	x->read = read_using_readline;
+	
+	if (Vamps_RLI.buf != NULL)
+	  {
+	     /* everything else already initialized. Just return. */
+	     return 0;
+	  }
+	
+	Vamps_RLI.buf = Vamps_RLI_Buf;
+	Vamps_RLI.buf_len = 255;
+	Vamps_RLI.tab = 8;
+	Vamps_RLI.edit_width = 79;
+	Vamps_RLI.dhscroll = 20;
+	Vamps_RLI.prompt = "Vamps> ";
+	Vamps_RLI.getkey = SLang_getkey;
+d954 1
+a954 1
+	Vamps_RLI.flags = SL_RLINE_USE_ANSI;
+d956 6
+a961 7
+	SLang_init_readline (&Vamps_RLI);
+	return 0;
+	
+      default:
+	/* unrecognized-- let S-lang handle it */
+	return SL_OBJ_UNKNOWN;
+     }
+d969 9
+a977 10
+   switch (x->type)
+     {
+      case 'r':
+	/* Nothing to do */
+	return 0;
+	
+      default:
+	/* unrecognized-- let S-lang handle it */
+	return SL_OBJ_UNKNOWN;
+     }
+d982 4
+a985 4
+   SLang_Load_Type x;
+   
+   x.type = 'r';		       /* readline type */
+   x.read = read_using_readline;       /* function to call to perform the read */
+d987 1
+a987 1
+   return SLang_load_object (&x);
+d993 5
+a997 1
+    return SLang_init_tty (-1, 0, 1);
+d1001 1
+a1001 1
+Ssetvalue(char *section, char *var, char *name, int *check)
+d1003 23
+a1025 1
+	setvalue(section, var, name, *check);
+d1029 28
+a1056 1
+getspar(int *nr, char *des)
+d1058 2
+a1059 17
+ if (strcmp(des,"thetas") == 0)
+    SLang_push_float(sp[*nr].thetas);
+  else if (strcmp(des,"ksat") == 0)
+    SLang_push_float(sp[*nr].ksat);
+  else if (strcmp(des,"residual_water") == 0)
+    SLang_push_float(sp[*nr].residual_water);
+  else if (strcmp(des,"n") == 0)
+    SLang_push_float(sp[*nr].n);
+  else if (strcmp(des,"alpha") == 0)
+    SLang_push_float(sp[*nr].alpha);
+  else if (strcmp(des,"l") == 0)
+    SLang_push_float(sp[*nr].l);
+  else if (strcmp(des,"psisat") == 0)
+    SLang_push_float(sp[*nr].psisat);
+  else if (strcmp(des,"b") == 0)
+    SLang_push_float(sp[*nr].b);
+  else SLang_push_float(MISSVAL);
+d1062 1
+d1064 19
+a1082 1
+setspar(int *nr, char *des,double *val)
+d1084 6
+a1089 17
+ if (strcmp(des,"thetas") == 0)
+    sp[*nr].thetas = *val;
+  else if (strcmp(des,"ksat") == 0)
+    sp[*nr].ksat = *val;
+  else if (strcmp(des,"residual_water") == 0)
+    sp[*nr].residual_water = *val;
+  else if (strcmp(des,"n") == 0)
+    sp[*nr].n = *val;
+  else if (strcmp(des,"alpha") == 0)
+    sp[*nr].alpha = *val;
+  else if (strcmp(des,"l") == 0)
+    sp[*nr].l = *val;
+  else if (strcmp(des,"psisat") == 0)
+    sp[*nr].psisat = *val;
+  else if (strcmp(des,"b") == 0)
+    sp[*nr].b = *val;
+  else fprintf(stderr,"Don't know: %s\n",des);
+d1092 4
+d1098 10
+a1107 2
+#ifdef CLK_TCK
+	return (double)clock()/(double)CLK_TCK;
+d1109 1
+a1109 1
+	return -1;
+a1111 2
+#endif /* NOSLANG */
+
+@
+
+
+1.6
+log
+@added INTRINSIC delindex -> delseclist
+@
+text
+@d1 1
+a1 1
+/* $Header: /homes/schj/src/vamps_0.99/src/main/RCS/init_s.c,v 1.5 1996/11/01 11:00:17 schj Alpha $ 
+d6 1
+a6 1
+ *  $Date: 1996/11/01 11:00:17 $
+d10 1
+a10 1
+"$Id: init_s.c,v 1.5 1996/11/01 11:00:17 schj Alpha $";
+d15 1
+d18 1
+d22 1
+d30 9
+a38 1
+char **history; /*S-Lang interactive mode history */
+d56 41
+a96 1
+/* Create the Table that S-Lang requires, here allthe vamps
+d100 5
+a104 1
+  MAKE_VARIABLE(".steps",&steps,INT_TYPE,0), /* Number of steps (Read,only) */
+d106 11
+d118 12
+a129 1
+  MAKE_VARIABLE(".defverb", &defverb, INT_TYPE, 0),  
+d131 4
+d136 4
+d141 5
+d147 4
+d152 4
+d157 4
+d162 5
+d168 5
+d174 5
+d180 5
+d186 5
+d192 4
+d197 4
+d202 5
+d213 5
+d234 4
+d239 5
+a250 4
+  MAKE_INTRINSIC(".SLang_reset_tty", SLang_reset_tty, VOID_TYPE, 0),
+/*  MAKE_INTRINSIC(".SLsmg_init_smg", SLsmg_init_smg, INT_TYPE, 0),
+  MAKE_INTRINSIC(".SLsmg_reset_smg", SLsmg_reset_smg, VOID_TYPE, 0),*/
+  MAKE_INTRINSIC(".SLang_init_tty", SSLang_init_tty, INT_TYPE, 0),
+d255 1
+d260 5
+d266 5
+d277 2
+a278 2
+  MAKE_INTRINSIC(".daycanop", daycanop, VOID_TYPE, 1),
+  MAKE_INTRINSIC(".daysoil", daysoil, VOID_TYPE, 1),
+d285 8
+d310 12
+d323 1
+d326 28
+d355 2
+d359 5
+d365 9
+d376 7
+d387 15
+d405 2
+a406 2
+/*-
+ * void init_s (char *vamps_sl)
+d408 1
+a408 1
+ * Initializes tha s-lang system and loads the startup file
+d426 2
+d433 1
+d438 2
+d471 7
+a477 1
+
+d616 18
+a692 64
+/* How to manage history list */
+static int histl=0;
+int
+addtohist(char *item)
+{
+  if (histl == 0){
+    history = (char **) ts_memory (NULL, sizeof (char *), progname);	
+    /*history[histl] = (char *) ts_memory (NULL, (strlen(item)+1) * sizeof (char), progname);	
+      strcpy(history[histl],item);*/
+    history[histl]=strdup(item);
+    histl++;
+    return histl-1;
+  }else {
+    history = (char **) ts_memory ((void *)history, (histl+1)*sizeof (char *), progname);	
+    /* history[histl] = (char *) ts_memory (NULL, strlen(item)* sizeof (char), progname);
+       strcpy(history[histl],item); */
+    history[histl]=strdup(item);
+    histl++;
+    return histl-1;
+  }
+/* NOTREACHED */
+}
+
+void
+show_history(void)
+{
+  int i;
+  
+  for (i=0;i<histl-1;i++){
+    (void)fprintf(stderr,"%d: %s\n",i,history[i]);
+  }
+}
+
+int
+save_history(char *histfname)
+{
+  int i;
+  FILE *hf;
+  
+  if ((hf = fopen(histfname,"w")) == NULL){
+    (void)fprintf(stderr,"Error opening %s\n",histfname);
+    return 0;
+  }else{
+    for (i=0;i<histl-1;i++){
+	(void)fprintf(hf,"%s\n",history[i]);
+    }
+    fclose(hf);
+    return 1;
+  }
+/* NOTREACHED */
+}
+
+void
+del_history(void)
+{
+  int i;
+  
+  for (i = histl-2; i >=0; i--){
+    free((void *)history[i]);
+  }
+
+  free((void *)history);
+  histl =0;
+}
+d768 2
+a769 1
+   (void)fputs(" Type `help();' for help and a list of available functions.\n", stderr);
+a774 3
+   }else{
+   	(void)fprintf(stderr,"                                                                                ");
+   	(void)fprintf(stderr,"\n\n\n\n");
+d802 2
+d808 63
+a870 12
+   
+   if (x->top_level) rli->prompt = "Vamps> ";
+   else rli->prompt = "Vamps?> ";
+   n = SLang_read_line (rli);
+   
+   putc ('\n', stdout);  fflush (stdout);
+   if (n <= 0) return NULL;
+   if ((n == 1) && ((int)*rli->buf == (int)SLang_RL_EOF_Char)) return "quit;";
+
+   (void)SLang_rline_save_line (rli);
+   (void)addtohist((char *)rli->buf); /* make a history */
+   return (char *) rli->buf;
+d911 2
+d948 53
+@
+
+
+1.5
+log
+@Set to Alpha version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/main/RCS/init_s.c,v 1.4 1996/10/22 17:47:18 schj Exp $ 
+d6 1
+a6 1
+ *  $Date: 1996/10/22 17:47:18 $
+d10 1
+a10 1
+"$Id: init_s.c,v 1.4 1996/10/22 17:47:18 schj Exp $";
+d93 2
+d98 2
+d114 1
+d136 1
+d517 1
+d552 5
+a556 2
+   (void)fputs(" Type 'help();' for help and a list of available functions.\n", stderr);
+   (void)fputs(" Note also that statements end in a ';'\n", stderr);
+d558 3
+a560 2
+  (void) fputs(" as well as the '=' sign must be surrounded by spaces!\n", stderr);
+   (void)fputs("\n Type `quit;' to exit this program.\n", stderr);
+d636 1
+a636 1
+	Vamps_RLI.flags = SLRL_USE_ANSI;
+@
+
+
+1.4
+log
+@added writememini
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/main/RCS/init_s.c,v 1.3 1996/10/14 18:17:19 schj Exp $ 
+d6 1
+a6 1
+ *  $Date: 1996/10/14 18:17:19 $
+a8 2
+#ifndef NOSLANG
+
+d10 1
+a10 1
+"$Id: init_s.c,v 1.3 1996/10/14 18:17:19 schj Exp $";
+d16 1
+d18 1
+d26 1
+d51 1
+d75 1
+d93 5
+d134 1
+a134 1
+  MAKE_INTRINSIC(".writememini",s_writememini, INT_TYPE, 1),
+d136 1
+d337 7
+d409 1
+a409 1
+
+d482 1
+a482 1
+s_writememini(char *fname)
+d484 1
+a484 2
+int fmt = 0;
+	return	writememini(fname,&fmt,NULL);
+d499 2
+d536 1
+a536 1
+   
+d569 2
+d661 11
+@
+
+
+1.3
+log
+@minor mods
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/main/RCS/init_s.c,v 1.2 1996/10/14 18:07:54 schj Exp $ 
+d6 1
+a6 1
+ *  $Date: 1996/10/14 18:07:54 $
+d12 1
+a12 1
+"$Id: init_s.c,v 1.2 1996/10/14 18:07:54 schj Exp $";
+d89 1
+d126 1
+a126 1
+  MAKE_INTRINSIC(".writememini",writememini, INT_TYPE, 3),
+d465 6
+@
+
+
+1.2
+log
+@Added interactive vamps stuff
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.98/src/main/RCS/init_s.c,v 1.1 1996/08/05 14:26:03 schj Exp $ 
+d6 1
+a6 5
+ *  $Date: 1996/08/05 14:26:03 $
+ *  $Log: init_s.c,v $
+ *  Revision 1.1  1996/08/05 14:26:03  schj
+ *  Initial revision
+ *
+d12 1
+a12 1
+"$Id: init_s.c,v 1.1 1996/08/05 14:26:03 schj Exp $";
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 1
+a1 2
+/*
+ * $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.98/src/main/RCS/vamps.c,v 0.28 1996/03/25 07:49:08 schj alpha $ 
+d3 2
+a4 1
+/*- $RCSfile: vamps.c,v $
+d6 5
+a10 2
+ *  $Date: 1996/03/25 07:49:08 $
+ *  $Log: vamps.c,v $
+d12 3
+a14 1
+ 
+d16 1
+a16 1
+"$Id: vamps.c,v 0.28 1996/03/25 07:49:08 schj alpha $";
+d18 2
+d23 9
+d36 1
+a36 1
+   if (SLang_Error == 0) SLang_Error = INTRINSIC_ERROR;
+d43 1
+a43 1
+   exit (0);
+d53 3
+a55 1
+  MAKE_VARIABLE(".verbose", &verbose, INT_TYPE, 0),
+d58 16
+a73 11
+  MAKE_VARIABLE(".qtop", &qtop, FLOAT_TYPE, 0),
+  MAKE_VARIABLE(".qbot", &qbot, FLOAT_TYPE, 0),
+  MAKE_VARIABLE(".masbal", &masbal, FLOAT_TYPE, 0),
+  MAKE_VARIABLE(".cumbot", &cumbot, FLOAT_TYPE, 0),
+  MAKE_VARIABLE(".cumtop", &cumtop, FLOAT_TYPE, 0),
+  MAKE_VARIABLE(".rootextract", &rootextract, FLOAT_TYPE, 0),
+  MAKE_VARIABLE(".cumeva", &cumeva, FLOAT_TYPE, 0),
+  MAKE_VARIABLE(".cumtra", &cumtra, FLOAT_TYPE, 0),
+  MAKE_VARIABLE(".cumprec", &cumprec, FLOAT_TYPE, 0),
+  MAKE_VARIABLE(".cumintc", &cumintc, FLOAT_TYPE, 0),
+  MAKE_VARIABLE(".volact", &volact, FLOAT_TYPE, 0),
+d75 2
+d78 2
+d81 13
+d95 47
+a141 1
+  MAKE_INTRINSIC(".quit", c_quit, VOID_TYPE, 0),
+a153 2
+  double x;
+  int i;
+d176 4
+a179 1
+  SLang_load_file (vamps_sl);
+d185 14
+d225 147
+d373 265
+d639 1
+@

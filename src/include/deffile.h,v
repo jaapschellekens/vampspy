@@ -1,0 +1,194 @@
+head	1.2;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.2
+date	99.01.06.12.13.01;	author schj;	state Alpha;
+branches;
+next	1.1;
+
+1.1
+date	99.01.06.12.07.49;	author schj;	state Alpha;
+branches;
+next	;
+
+
+desc
+@deffile header file
+@
+
+
+1.2
+log
+@Version: 0.99g
+@
+text
+@/* $Header: /home/schj/src/vamps_0.99g/src/include/deffile.h,v 1.1 1999/01/06 12:07:49 schj Alpha $ */
+
+/*  $RCSfile: deffile.h,v $
+ *  $Author: schj $
+ *  $Date: 1999/01/06 12:07:49 $ */
+
+#ifndef _DEFFILE_H_
+#define _DEFFILE_H_
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+/*F:deffile.h
+ *
+ * The deffile.h header file provides an interface to libdef.a. It is
+ * a simple library to read and write parameter files for programs
+ * in a format used by samba and Windows programs. Files are subdivided
+ * in sections which each contain variables (parameters) with values:
+ *@@# example def file
+ *@@[vamps]
+ *@@version = 0.1
+ *@@id = Vamps 0.1 test version
+ *@@multiple lines = variables can span\
+ *@@	multiple lines
+ *
+ * In principle all variables are treated as strings but the library 
+ * provides functions to extract intergers, doubles, chars and double
+ * arrays.
+ *
+ * Files can be read into memory for fast processing and for very
+ * large files an index with section pointers can be generated.
+ *
+ * (c) J. Schellekens 1997 
+ *@@ $Id: deffile.h,v 1.1 1999/01/06 12:07:49 schj Alpha $
+ */ 
+
+
+#define DEFFILE_VERSION 110 /* devide by 100 for version number */
+#ifndef TRUE
+#define TRUE 1
+#endif
+#ifndef FALSE
+#define FALSE 0
+#endif
+
+#ifndef SEEK_SET /* This was defined on linux and gcc but not in SunOS */
+#define SEEK_SET 0
+#endif
+
+/* Some buffer sizes... */
+#define NAMEL 128
+#define SECL 128
+#define VALL 9128
+#define LBUFF VALL
+#define NBUFF 1024
+#define prit(A) fprintf(stderr,"deffile: %s\n",A);
+
+/* override mem lists, order: default, filename, override */
+#define DEF_DEF "_default_"
+#define DEF_OVR "_override_"
+
+typedef struct {
+	char *var;
+	char *val;
+	unsigned short int hits; /* set to >0 if the var hase been used */
+}vtype;
+
+typedef struct {
+	int vpt; /* number of values (points) in this section */
+	char *secname;
+	vtype *nlist; /* pointer to array of vars and values */
+}stype;
+
+typedef struct {
+	int secpt; /* number of sections in this file */
+	char *fname; /* name of this file */
+	stype *slist; /* pointer to array of sections */
+}ftype;
+
+
+/* Index structure, used as hashtable for _LARGE_ files */
+typedef struct{
+	long int secptr;
+	char section[SECL];
+} sectionlistt;
+
+typedef struct {/* used for storing ini override values  */
+	char   *section;
+	char   *name;
+	char   *value;
+}varst;
+
+extern int nrsectionlist;
+extern int firstpass;  
+extern int usesecptr;
+extern int Strcasecmp(const char *s,const char *ss);
+extern char *Fgets (char *s,int size,FILE *inf);
+extern char *fgetl(FILE *fp);
+
+extern void delmemlist (void);
+extern void deferror (char *defprog,int exitval, char *from,
+		const char *descr,const char *xtr);
+extern int opendef (char *fname);
+extern int closedef (void);
+extern void setvar (char *s);
+extern char *getvar (char *s);
+extern int getdefint (const char *section,const char *name,
+		int def,char *fname,int exitonerror);
+extern double *getdefar (const char *section, const char *name,
+		double *def, char *fname, int *pts,int exitonerror);
+extern int getdefchar (const char *section,const char *name,
+		int def,char *fname,int exitonerror);
+extern double  getdefdoub (const char *section,const char *name,
+		double def, char *fname,int exitonerror);
+extern char *getdefstr (const char *section,const char *name,
+		char *def,char *fname, int exitonerror);
+extern int isdefitem (const char *section,const char *name,const char *fname);
+extern int rinmem (char *fname);
+extern int check;
+extern int issection (char *section,char *fname);
+extern int writememini (char *fname, char *inifile,FILE *stream);
+extern void savesecpos(const char *section,long int nowpos);
+extern long int getsecpos(const char *section);
+extern int saveindex(char *fname);
+extern int readindex(char *fname);
+extern int makeindex(char *fname);
+extern void delseclist(void);
+extern int defverb;
+extern char defprog[];
+/*extern int nrvars,nrlist;*/
+extern int nrlist;
+/*extern varst  *vars;*/
+extern int chk_only_mem;
+extern char commchar[];
+extern int addvar(const char *fname,const  char *secname,const  char *var,
+		const  char *val,int nck);
+extern char  *getvarval(const char *fname,const char *secname,const char *var);
+extern void delsection(const char *fname, const char *secname);
+extern void editmemitem(char *section,char *name,char *def);
+extern char *(*editfunc)(char *editstr);
+extern int sl_def_init (void);
+extern int getnspos(const char *secname,int filenr, int n);
+extern int getnfpos(const char *fname, int n);
+extern int delfile(const char *fname);
+extern int getnextvar(char *fname, char *section, char *name,
+		char *val, int reset);
+#endif
+@
+
+
+1.1
+log
+@Version: 0.99g
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99c/src/deffile.lib/RCS/deffile.h,v 1.4 1997/05/09 09:28:31 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1997/05/09 09:28:31 $ */
+d35 1
+a35 1
+ *@@ $Id: deffile.h,v 1.4 1997/05/09 09:28:31 schj Exp $
+@

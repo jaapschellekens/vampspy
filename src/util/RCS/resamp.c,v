@@ -1,0 +1,220 @@
+head	1.6;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.6
+date	99.01.06.12.13.01;	author schj;	state Alpha;
+branches;
+next	1.5;
+
+1.5
+date	99.01.06.12.07.49;	author schj;	state Alpha;
+branches;
+next	1.4;
+
+1.4
+date	97.09.09.08.39.10;	author schj;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	97.01.16.15.08.06;	author schj;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	96.11.05.14.59.13;	author schj;	state Alpha;
+branches;
+next	1.1;
+
+1.1
+date	96.10.22.17.42.18;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@resample datasets
+@
+
+
+1.6
+log
+@Version: 0.99g
+@
+text
+@/* $Header: /home/schj/src/vamps_0.99g/src/util/RCS/resamp.c,v 1.5 1999/01/06 12:07:49 schj Alpha $ */
+/* $RCSfile: resamp.c,v $
+ *  $Author: schj $
+ *  $Date: 1999/01/06 12:07:49 $
+ */
+
+static  char RCSid[] =
+"$Id: resamp.c,v 1.5 1999/01/06 12:07:49 schj Alpha $";
+
+#include "vamps.h"
+#include <stdlib.h>
+
+/*-
+ * void resamp_a_to_a(XY *a, XY *b, int apoints, int bpoints)
+ *
+ * resamples a to b using the spline stuff from ts (see ts_spl.c)
+ *
+ */
+
+XY
+*resamp_a_to_b(XY *a, XY *b,int apoints,int bpoints)
+{
+	double *Slopes;
+	XY *tmpxy;
+	int i;
+
+	if (a[0].x > b[0].x || a[apoints -1].x < b[bpoints -1].x){
+      		Perror (progname,1,0, RCSid, "Resampling failed due to extrapolation", "Check input sets");
+	}
+	/* First calculate slopes */
+	Slopes = ts_slopes (a,apoints);
+
+	/* We need a temp structure here*/
+	tmpxy = (XY *)ts_memory(NULL,bpoints * sizeof(XY),progname);
+
+	for (i=0;i<bpoints; i++)
+		tmpxy[i].x=b[i].x;
+
+	ts_meval (tmpxy,a,Slopes,apoints,bpoints);
+	free(a); /* don't need this anymore */
+
+	/*
+	for (i=0;i<bpoints; i++){
+		fprintf(stderr,"%f %f %f\n",tmpxy[i].x,tmpxy[i].y,b[i].y);
+	}
+	*/
+
+	free(Slopes);
+	return tmpxy;
+}
+@
+
+
+1.5
+log
+@Version: 0.99g
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99e/src/util/RCS/resamp.c,v 1.4 1997/09/09 08:39:10 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1997/09/09 08:39:10 $
+d8 1
+a8 1
+"$Id: resamp.c,v 1.4 1997/09/09 08:39:10 schj Exp $";
+@
+
+
+1.4
+log
+@0.99e version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99c/src/util/RCS/resamp.c,v 1.3 1997/01/16 15:08:06 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1997/01/16 15:08:06 $
+d8 1
+a8 1
+"$Id: resamp.c,v 1.3 1997/01/16 15:08:06 schj Exp $";
+d28 1
+a28 1
+      		Perror (progname,1, RCSid, "Resampling failed due to extrapolation", "Check input sets");
+@
+
+
+1.3
+log
+@*** empty log message ***
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/util/RCS/resamp.c,v 1.2 1996/11/05 14:59:13 schj Alpha $ */
+d4 1
+a4 1
+ *  $Date: 1996/11/05 14:59:13 $
+a6 1
+#ifdef DDEBUG
+d8 1
+a8 2
+"$Id: resamp.c,v 1.2 1996/11/05 14:59:13 schj Alpha $";
+#endif
+a10 1
+#include <malloc.h>
+d17 1
+d23 24
+a46 19
+double *Slopes;
+XY *tmpxy;
+int i;
+
+/* First calculate slopes */
+Slopes = ts_slopes (a,apoints);
+
+/* We need a temp structure here*/
+tmpxy = (XY *)ts_memory(NULL,bpoints * sizeof(XY),progname);
+
+for (i=0;i<bpoints; i++)
+	tmpxy[i].x=b[i].x;
+
+ts_meval (tmpxy,a,Slopes,apoints,bpoints);
+free(a); /* don't need this anymore */
+
+for (i=0;i<bpoints; i++){
+fprintf(stderr,"%f %f %f\n",tmpxy[i].x,tmpxy[i].y,b[i].y);
+}
+d48 2
+a49 2
+free(Slopes);
+return tmpxy;
+@
+
+
+1.2
+log
+@Updated to Alpha version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/util/RCS/resamp.c,v 1.1 1996/10/22 17:42:18 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1996/10/22 17:42:18 $
+d9 1
+a9 1
+"$Id: resamp.c,v 1.1 1996/10/22 17:42:18 schj Exp $";
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 2
+a2 2
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.98/src/util/RCS/smoothar.c,v 1.1 1996/03/25 07:55:32 schj alpha $ */
+/* $RCSfile: smoothar.c,v $
+d4 1
+a4 2
+ *  $Date: 1996/03/25 07:55:32 $
+ *  $Log: smoothar.c,v $
+d9 1
+a9 1
+"$Id: smoothar.c,v 1.1 1996/03/25 07:55:32 schj alpha $";
+@

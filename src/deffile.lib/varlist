@@ -1,0 +1,17 @@
+# Sample of an allowed var list (not implemented yet)
+# In this list the values of the variables are set to 
+# the allowed type:
+#	s[max_length] = string variable
+#	b = boolean variable (1 or 0, yes of no)
+#	c[list_of_chars] = char variable, one character
+#	i[,min,max] = integer variable (signed)
+#	f[,min,max] = floating point variable
+#	a[min_items,max_items]] = floating point array variable
+[*] # Everything in this section is allowed in _ALL_other sections
+
+[vamps]
+iniinmem = b #Ini in mem or not
+
+
+[soil]
+dtmax = f,1.0E-4,0.1 #Maximum dt

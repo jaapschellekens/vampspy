@@ -1,0 +1,81 @@
+QUICK installation instructions for VAMPS
+
+NOTE!---------------------------------------------------------------------
+If you have the plot, slang or agl lib nstalled in a non standard dir set the
+environment variable LDFLAGS to the dir so configure can find them. (ex:
+setenv LDFLAGS -L/home/user/bob/lib.sun) By default vamps is installed in
+/usr/local if your uid < 10 and in ~/ if not.  If an old version of vamps is
+found the directory just below that will be used as basedir. If you want
+something else use the --prefix=/some/prefix option when running configure.
+
+If you trust the optimizations your compiler makes set the
+environment variable CFLAGS to include them as it can speed up
+Vamps quite a lot.
+
+(ex: setenv CFLAGS "-O3 -m486 -funroll-loops") <- works fine on my
+						  linux box
+--------------------------------------------------------------------------
+
+
+
+Source distribution
+-------------------------------------------------------------------------
+Requirements:
+	GNU make
+	ANSI C compiler
+
+1)Run the configure script. It is experimental at present but will replace
+make.in eventually to comply with GNU standards You may want to edit
+vconfig.h and sllib/site.sl
+
+2)If you don't have S-Lang installed on your system, you should build
+this first. It is located in the slang.99 dir. Just run configure and
+build it.  Optionally install the AGL the gnu plotutils library and
+programs and/or gnuplot. This way Vamps can display graphics. It will
+work fine without.
+
+3)Do a 'make lib' followed by a 'make all'
+
+4)If this works a 'make install' should be enough to have vamps installed on
+your system.
+
+5)The manual pages can be installed by doing a make 'man-install' in the
+doc/ directory. The complete manual is in this directory in LaTeX and
+PostScript format. 6)Test vamps by running one of the examples. running
+'vamps example1.inp' in the examples/1/ directory should do the trick.
+
+
+
+Bin distribution
+--------------------------------------------------------------------------
+UNIX
+
+1)Copy the files in the 'your_unix_system' directory to a directory in your
+path (or leave them where they are and adjust the path).
+
+2)if you copy the files in share to the dir used when building the
+binaries, vamps can run without the VAMPSLIB environment variable,
+otherwise you will have to set VAMPSLIB to the directory in which the
+files are installed (e.g.  /usr/local/lib/vamps/)
+
+3)The manual pages can be installed by doing a 'make man-install' in
+the doc/ directory. The complete manual can be found in this directory
+in LaTeX and PostScript format.
+
+4)Take vamps for a quick testrun by running vamps on the example1.inp file
+in the examples/1 directory
+
+MS-DOS (poorly supported at present)
+
+1)Copy the files from the msdos directory to a directory in your path (or
+leave them were they are and adjust the path).
+
+2)If you copy the files in sllib to c:\vamps vamps can run without the
+VAMPSLIB environment variable, otherwise you will have to set VAMPSLIB to
+the directory in which the files are installed (e.g. d:\vamps\lib)
+
+3)Preformatted manual pages are present in the doc directory as well as
+complete documentation in LaTeX and PostScript format.
+
+4)Take vamps for a quick testrun by running vamps on the example1.inp file
+in the examples\1 directory 

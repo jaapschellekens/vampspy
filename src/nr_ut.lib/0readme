@@ -1,0 +1,54 @@
+libnru.a -- Small matrix library based on the nrutils public code 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+J. Schellekens Feb, 1997
+
+Adapted in several ways:
+ - Removed the K&R stuff, use gcc (or other ANSI compiler) for compilation
+
+ - Added documentation, see 0nr_ut.txt, 0nr_ut.tex or 0nr_ut.trf for
+   ascii, LaTeX or troff documentation.
+
+ - If you need one of the MIN/MAX macros first define NR_{MACRONAME}
+   _BEFORE_ including nrutil.h. This is to get gcc silent with -Wall.
+   
+ - nr_[dfi]mread and nr_[dfi]mwrite functions (to read and write ascii
+   matrixes) have been added. Note that NR_END should be _ZERO_ to use
+   these functions. nr_[dfilc]write functions for writing vectors
+   also added.
+
+ - some basic statistics by R. Venneker added
+
+ - If compiled with -DNR_LIST a list of all vectors and matrixes
+   added by a call to one of the allocation functions is maintained
+   together with size info. This list can also serve as a garbage
+   collector. The list is an array of structures (type defined in
+   nrutil.h). Freeing matrixes etc. becomes much easyer, just call:
+
+   	nr_free(1,(void *)your matrix or vector);
+
+   This only works if you made you matrix (or vector) with one of the
+   supplied routines. The syntax of the creation functions remains the
+   same as the original ones. You can also use the 'old' free_* functions.
+   A matrix/vector can be written to an (ascii) file with one of the
+   type specific functions or (easyer) with the nr_genw function:
+
+   	nr_genw("This is my file",(void *)your matrix or vector);
+
+
+ - I also added a simple memory leak check (counts the number of
+   calls to make and free vector/matrix calls. Enable with -DNR_MEM_DEBUG
+   Should not be needed is you use the list functions, intended for debugging
+   only.
+
+ - log.c contains functions to facilitate error reporting and logging to
+   multiple streams.
+
+  ----------------------------------------------------------------------
+
+
+TODO
+----
+- matrix to vector routines
+- Add support for the convert_* routines
+- update nr_stat stuff

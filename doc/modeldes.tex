@@ -1,0 +1,680 @@
+% -*- LaTeX -*-
+
+\part{Model description}
+
+\chapter{Introduction}
+This part of the manual will describe the principles on which \vamps\
+was based.  If things are not explained here a reference to existing
+literature is given.  If you think the manual is incorrect it might be
+out of date as \vamps\ is still being developed. The best thing is to
+check the source code if you have any doubts.
+
+The main goals when the development of \vamps\ started were: {\em (1)}
+make a parameterized model which can adequately describe the flow of
+water in a forested environment (on a plot base) and {\em (2)} be
+flexible enough to be able to be applied to the variety of forested
+environments that exist.  However, because \vamps\ is very flexible it
+is also possible to apply \vamps\ to plots covered with agricultural
+crops or bare soils.  Also {\em (3)} it is the authors opinion that
+(modelling) software should be distributed with complete source code
+and documentation to allow the user to adapt the program to any new
+situation and examine the program's internal workings.  
+
+The flexible nature of \vamps\ can be a bit confusing at first because
+of the large amount of choices to be made. However, this manual and
+the example files should be able to guide you to a successful
+application of the \vamps{} model.
+
+The flow of water through a forested ecosystem is described in
+Figure~\ref{fig:fcycle}. In general three pathways can be distinguished
+by which precipitation reaches the forest floor. A small fraction of
+the water reaches the forest floor without touching leaves or stems --
+known as direct throughfall. Another -- also small -- fraction of the
+water flows down the tree trunks as stemflow. The rest of the water
+hits the forest canopy and will leave this canopy as crown drip or
+evaporation from the wet canopy depending on canopy storage and shape,
+kinetic energy of the droplets and the athmosphere's evaporative demand.
+Water that infiltrates in the soil profile can leave this laterally as
+saturated or unsaturated flow, percolate to deep groundwater or it can
+be extracted by the roots of plants or trees. If the troughfall intensity
+exceeds the infiltration capacity of the topsoil Hortonian overland flow
+can occur. The top layer of the profile can become saturated resulting
+in Saturation overland flow. \vamps\ simulates most of these fluxes
+as can be seen in Figure~\ref{fig:vflow} which shows a simplified flow
+diagram of the \vamps\ model. The model is mainly driven by input from the
+atmosphere\footnote{As the bottom boundary conditions can also change in
+time one could probably regard this as a driving force as well}. In the
+following chapters the workings of \vamps\ and how the model simulates
+each of these fluxes will be explained.
+
+It should be noted that most fluxes in the model can either be
+calculated or given by the user. The atmosphere, canopy and soil part
+of the model can be combined or used separately. However, the strength
+of models like \vamps\ is their ability to combine all these to an
+integrated model of the forest hydrological cycle. The canopy part in
+particular is closely interwoven with the atmosphere module and is
+hard to use seperate from the atmosphere part. 
+
+
+%-------------------------------------------------------------------
+% This chapter should summerize the functions of the main modules
+% Finish this first.
+
+\chapter{The modules}
+
+\section{Introduction}
+\vamps\ is set up is such a way that parts of the model can be used
+or disregarded depending on the user's needs and the available data.
+This implies that you don't need {\em all} the following information.
+Although the setup of the following chapters might suggest a strict
+separation between the modules parts overlap and parts cannot be used
+without some parts of other modules.
+
+\section{The atmosphere}
+In the atmosphere module, potential transpiration, potential soil
+evaporation and evaporation from a wet surface are calculated from
+meteorological and vegetation parameters. Several methods can be
+chosen, depending on the data available and the user's
+preferences. The terms potential evaporation, actual evaporation and
+evapotranspiration can lead to some confusion, particularly with the
+use of models like \vamps{}. Also the terms can have slightly
+different meanings when different methods are used. Although this is
+hardly desirable \vamps{} is no exception yet. In the final version of
+the model I hope to simplify all this, in the mean time most names and
+units remain as quoted from the original source.
+
+%If you want to model a canopy in detail (see section~\ref{sec:canopy}) some
+%of the stuff presented in this module is not needed.
+
+
+\subsection{Potential evaporation}
+Potential evaporation can be used in \vamps{} to determine actual
+evaporation (or evapotranspiration, depending on the method chosen) in
+an other part of the model. Three methods can be used:
+
+\begin{enumerate}
+\item Determine Penman \Index{$E_0$} (open water evaporation)
+\cite{penman1956N,makkink1957} using reflected
+radiation, net-radiation, relative humidity (this is used to calculate
+the vapour pressure deficit), wind-speed, temperature and incoming
+radiation.
+\item Determine Penman $E_0$ using sun-ratio, relative humidity, wind-speed,
+temperature and incoming radiation.
+\item Using the Makkink formula \cite{makkink1961,commissie1988N} which needs
+incoming radiation, relative humidity, wind-speed and temperature.
+\end{enumerate}
+
+The input file settings for potential evaporation are described in
+section~\ref{section:pevaporation} on
+page~\pageref{section:pevaporation}.
+
+Penman $E_0$ is determined via:
+\begin{equation}
+E_0 = \frac{\Delta R_{no} + \gamma E_a}{\Delta + \gamma}
+\end{equation}
+\begin{where}
+$R_{no}$& net radiation over open water [cm/day]\\
+\Index{$E_a$}	& aerodynamic evaporation or drying power of air [cm/day]\\
+$E_0$ 	& open water evaporation [cm/day]\\
+\Index{$\Delta$} & slope of the saturation vapour pressure curve\\
+\Index{$\gamma$} & psychrometer 'constant' [$mbar/{}^o K$]\footnote{An
+air-pressure of 998 mbar is assumed in calculating $\gamma$}\\
+\end{where}
+
+The determination of $E_a$
+is described in \cite{calder1990284}:
+
+\begin{equation}
+E_a = 2.6  (e_s - e_a)  (1 + 0.537 u)
+\end{equation}
+\begin{where}
+\Index{$e_a$}	&	actual vapour pressure [mbar]\\
+\Index{$e_s$}	&	vapour pressure at saturation [mbar]\\
+\Index{$u$}	&	mean daily wind-speed at 2m\\
+\end{where}
+\vamps\ calculates $e_s$ and $e_a$ from relative humidity and
+dry bulb temperature using an equation 
+described by~\citeasnoun{bringfelt86}.
+
+Net radiation over open water is given by:
+\begin{equation}
+R_{no} = R_s (1- \alpha) - R_{nl}
+\end{equation}
+\begin{where}
+\Index{$R_s$}		& incoming solar radiation \\
+\Index{$R_{nl}$}	& net long-wave radiation \\
+\Index{$\alpha$}  	&albedo of open water (0.05) \\
+\end{where}
+
+In method 1 $R_{nl}$ is calculated using incoming and
+reflected short-wave radiation to calculation net long-wave
+radiation via:
+\begin{equation}
+ R_{nl} = R_s - R_{net} - Rs_{out}
+\end{equation}
+\begin{where}
+$R_s$ 			& incoming solar radiation \\
+\Index{$Rs_{out}$} 	& reflected short-wave radiation \\
+\Index{$R_{net}$}	& net radiation\\
+\end{where}
+In method 2 sun-ratio $n/N$ is used to calculate $R_{nl}$ via:
+\begin{equation}
+R_{nl} = \frac{86400 \sigma T^4 (0.56 - 0.248 \sqrt e) (0.1 + 0.9 n/N)}{\lambda}
+\end{equation}
+\begin{where}
+\Index{$T$} 	& mean daily air temperature [${}^o K$]\\
+\Index{$e$}	& mean daily water vapour pressure [kPa]\\
+\Index{$n/N$}	& \parbox[t]{7cm}
+{ratio of duration of bright sunshine hours, n, 
+	to the maximum possible duration of sunshine hours, N} \\
+\Index{$\lambda$} & latent heat of vaporization \\
+\end{where}
+
+
+Makkink~\cite{commissie1988N} reference evaporation is calculated by:
+\begin{equation}
+\lambda E = C \frac{\Delta}{\Delta + \gamma} R_s
+\end{equation}
+\begin{where}
+\Index{$C$} 	& Constant (usually 0.65)\\
+$\lambda, E, \Delta, \gamma, R_s$ & are defined as before\\
+\end{where}
+
+
+\subsection{Actual evapotranspiration}
+If you don't want to model an entire canopy (as is described in
+section \ref{sec:canopy}) you can estimate actual evapotranspiration
+with one the following three methods. The use of the canopy section
+is the preferred way.
+
+\begin{enumerate}
+\item Set actual evapotranspiration to be equal to potential evaporation.
+\item Multiply potential evaporation by a crop factor
+\item Calculate actual evaporation using the Penman-Monteith formula
+\end{enumerate}
+
+%\vamps\ of course needs to now how much of this amount is attributed
+%to soil evaporation, transpiration and evaporation from a wet canopy.
+%The variables {\tt int\_frac}, {\tt sevap\_frac} and {\tt trans\_frac}
+%determine this. Note that an approach like this only makes sense of you
+%use daily or larger time-steps.
+
+
+
+\section{Plants and trees}\label{sec:canopy}
+
+Although \vamps\ has been set up to be able to use a multilayer
+canopy, this option is untested and has been disabled in the alpha
+version. At present you are stuck to one canopy layer.
+
+At the base of this module lies the Penman-Montheith equation\cite{monteith1965}.
+
+
+\begin{equation}
+\lambda ET = \frac{\Delta (R_n - G) + \rho C_p \delta e/r_a}
+{\Delta + \gamma ( 1 + r_s/r_a)}
+\end{equation}
+
+\begin{where}
+$\rho$	& density of air \\
+$c_p$	& specific heat of air \\
+$\delta e$	& vapour pressure deficit \\
+$\gamma$	& psychrometic constant \\
+$\Delta$	& the slope of the saturation vapour pressure curve \\
+$r_s$	& canopy resistance \\
+$r_a$	& aerodynamic resistance\\
+\end{where}
+
+The program seperates wet and dry periods.  Evaporation from the wet
+canopy is calculated using the Penman-Monteith equation with $r_s$ set
+to zero.  During these times transpiration (and thus rootextraction)
+is assumed zero.
+
+The amount of net radiation available is determined via a simple
+fraction or via an equation by \citeasnoun{roberts1993197} linking the
+leaf area profile to absorbed radiation.
+
+This module combines most of what has been explained before (in the
+sections concerning evaporation, transpiration and interception) and
+\vamps\ work best if you use this.
+
+
+\subsection{Interception}\label{sec:interception}
+
+\paragraph{Introduction}\footnote{The settings for the input file that control interception are described in section~\ref{section:interception} on
+page~\pageref{section:interception}.}
+\Index{Interception} of precipitation can comprise a large part of the water
+balance in forested catchments.  Interception is defined as
+\cite{leonard1967184}:
+\begin{quote}
+\ldots the amount of rainfall retained by the vegetation and evaporated
+without dripping off or running down the stem. At some point after 
+precipitation ceases, all of the intercepted water will be evaporated\ldots
+\end{quote}
+Note that losses in the litter layer are not included\footnote{\vamps
+, the final version, can estimate litter interception as a seperate
+term}.  The balance between precipitation, evaporation and canopy
+storage\footnote{Although the word canopy implies a forest most of the
+methods described here can also be applied to agricultural crops or
+grassland} \cite{rutter1971174} determines the amount of rainfall
+interception.  As the canopy parameters can change with vegetation
+type, so does the interception.
+
+Interception of a forest canopy is generally determined by either the
+water budget method or by the aerodynamic method
+\cite{tsukamoto1989185}.  An alternative method consists of hanging a
+tree in its place in the forest and weighing it continuously. This has
+the advantage that the evaporation during the storm can adequately
+be determined \cite{tsukamoto1989185}.
+
+In tropical rain forest areas a great diversity of species exist. Highly
+significant differences in interception storage have been found 
+\cite{leonard1967184,herwitz1985181,scatena1990158}. This implies that
+parameters probably need to be determined for each site seperately.
+
+How interception losses can be calculated is mostly determined by the
+available data. The model by \citeasnoun{rutter1971174} needs hourly
+input, while some of it's parameters should be determined using 5 minute
+values. In reality daily values are most commonly available, so
+developing equations for daily values (despite the obvious limitation)
+is justifiable and certainly practical \cite{jackson1975183}. 
+\citeasnoun{gash1979165} developed an analytical
+variant of the Rutter model which can be used with daily input values
+assuming one storm a day.
+
+Several methods for determining interception losses can be used within
+the \vamps\ model. The choice of method is mainly governed by the
+available input data. The following paragraphs present the methods
+that \vamps\ can use to determine interception losses.
+
+\paragraph{\Index{Gash}'s method}\label{par:gash}
+If input data is available on a daily basis, the method described
+by~\citeasnoun{gash1979165} is the preferred method.  Gash's model is
+based on a numerical model developed by \citeasnoun{rutter1971174}. In
+contrast to Rutter's model which is described later, it can be applied
+to daily measurements assuming one storm a day. \citeasnoun{gash1980166}
+have tested both models on the same data set and found comparable
+results.
+
+In the model  \Index{$P$'} -- the  amount  of water  needed to completely
+saturate the canopy \cite{gash1979165} -- is defined as:
+
+\begin{equation}
+P\acute{}=\frac{-\overline{R}S}{\overline{E}}
+ln\left[1-\frac{\overline{E}}{\overline{R}}
+(1-p-p_{Tr})^{-1}\right] 
+\end{equation}
+
+Interception losses  for storms larger and  smaller than  $P\acute{}$ are dealt
+with separately. For small storms the equation becomes:
+
+\begin{equation}
+E_i = (1-p-p_{Tr}) P 
+\end{equation}
+while or large storms it becomes:
+\begin{equation}
+E_i = (1-p-p_{Tr}) P\acute{} + (\overline{E}/\overline{R}) (P - P\acute{})
+\end{equation}
+
+\begin{where}
+\Index{$\overline{R}$}  & average precipitation [mm/d]\\
+\Index{$\overline{E}$}  & average evaporation during storms [mm/d] \\
+\Index{$S$} 	        & storage capacity of the canopy [mm] \\
+\Index{$p$}             & free throughfall coefficient \\
+\Index{$p_{Tr}$}        & stemflow coefficient \\
+\Index{$P$}		& precipitation [mm/d]\\
+\Index{$E_i$}		& interception loss [mm]\\
+\end{where}
+
+The interception losses from the stem are calculated for days that $P
+\geq S_{Tr}/p_{Tr}$. As this is generally small (about 2\% of gross $P$)
+it is often neglected\footnote{This is also true for \vamps}. \vamps\
+can calculate The ratio of $\overline{E}/\overline{R}$ from the
+Penman-Monteith equation or use a fixed value.\footnote{The latter is
+generally preferable as the penman-Monteith equation (in this case
+with $R_s$ set to zero) in not very good at predicting in storm
+evaporation.  This seems to be due to the influence of advective
+energy during a storm. Usually $\overline{E}/\overline{R}$ is
+determined by a regression of interception losses versus gross
+precipitation including only single storm events.} \vamps\ also allows
+the parameters $S$, $p$ and $p_{Tr}$ to be linked to the Leaf Area
+Index (LAI). If lai is defined in the \inisec{interception} section of the
+input file, or in the \inisec{ts} section of the input file a method
+described in~\citeasnoun{dijk1996N} is used to link these parameters to LAI.
+
+A version of the Gash model adapted to small time-steps can also be
+used in \vamps{}. In this version the canopy storage ($S$) is
+diminished with the value of the actual canopy storage at that
+moment. This new value is now used to calculate $P$' and interception
+losses.  To use this method Evaporation during that time-step is
+needed as well as this is subtracted from the amount of water in the
+canopy at the begin of the time-step. Results of applying this adapted
+version to a test case using the normal version with daily time-steps
+and the adapted version with half-hourly data, show that interception
+losses as modeled with both methods did not differ more than 2\%.
+
+\paragraph{\Index{Calder regression model}}
+
+\citeasnoun{calder1986171} presented a simple regression model for interception
+loss. Despite it's simplicity it could adequately describe the interception
+of forests in the UK. It is defined as:
+\begin{equation}
+E_i = \gamma \left[ 1 - exp (-\delta P) \right]
+\end{equation}
+\begin{where}
+$E_i$			& Interception loss [mm/d] \\
+\Index{$P$}		& precipitation [mm/d] \\
+\Index{$\gamma$}	& maximum interception loss per day [mm] \\
+\Index{$\delta$}	& fitting parameter \\
+\end{where}
+
+
+
+\paragraph{\Index{Interception as a fraction of LAI}}
+
+In this method interception is calculated as:
+\begin{equation}
+E_i = min (P,laifrac*LAI) 
+\end{equation}
+\begin{where}
+$E_i$			& Interception loss [mm/d] \\
+$P$			& precipitation [mm/d] \\
+\Index{$laifrac$}	& fraction (usually around canopy storage) \\
+\Index{$LAI$}		& leaf area index \\
+\end{where}
+This method can describe total interception rather well but fails on a
+storm to storm basis (it is used in the TOPOG model
+\cite{vertessy1993140}). The fact that it is based on LAI makes it well
+suited for applications in which the canopy changes in time, although
+an alternative Gash model in which the parameters $S$, $p_{tr}$ and
+$p$ are related to LAI might yield better results (see also
+paragraph~\ref{par:gash} on page~\pageref{par:gash}).
+
+\paragraph{\Index{Rutter's model}}
+\citeasnoun{rutter1971174} (see also \citeasnoun{rutter1975172}) developed
+a model of interception based on the storage of water in the canopy.
+The model needs hourly meteorological data plus canopy parameters as
+input, although five minute data are preferred.
+
+\begin{equation}
+dC/dt = P(1 - p - p_{Tr}) - (C/S) E_c - D_r
+\end{equation}
+\begin{where}
+$t$			& time-step [hour]\\
+\Index{$C$}		& amount of water in the canopy\\
+$P$			& gross precipitation [mm/h] \\
+$p$			& free throughfall coefficient [-] \\
+$p_{Tr}$		& proportion of water discharged via stem flow\\
+$S$			& canopy storage capacity [mm]\\
+\Index{$E_c$}		& evaporation rate from wet canopy [mm/h]\\
+\Index{$D_r$}		& drainage-speed from storage in canopy [mm/h] \\
+\end{where}
+
+The model is rather insensitive to both $S$ and $p$ \cite{gash1978167}.
+
+
+\section{The soil} 
+\subsection{Introduction}
+The soil module can be regarded as the core of \vamps. The model was
+developed using the {\sc swap94} model as a framework. About 80\% of
+\vamps 's soil module consists of hand-translated\footnote{And changed
+to my liking} Fortran code from the original {\sc swap94} program. The
+head based solution of Richard's equation using remains more or less
+the same in the present version, although the solution has been
+extended with a band-diagonal procedure and a (optional) step to regain
+full machine precision (described in
+\citeasnoun{press1992B}) that can be used if a zero pivot
+occurs in the tri-diagonal solution.
+
+
+\subsection{Solving Richard's equation}
+The soil module solves Richards equation using a $\psi$ based form of this
+equation. A differential moisture capacity ($C(h)$) has been introduced to
+have a single independent variable. This differential soil moisture capacity
+is equal to the slope of the soil-moisture retension curve, $d\theta/d\psi$.
+
+\begin{equation}
+\frac{\partial \psi}{\partial t} = \frac{1}{C(\psi)}
+\frac{\partial}{\partial z} \left[ K(\psi) \left(
+\frac{\partial \psi}{\partial z} - 1 \right) \right]
+\end{equation}
+
+A sink term (S) has been added to accommodate water extraction by roots
+and lateral flow.
+
+\begin{equation}
+\frac{\partial \psi}{\partial t} = \frac{1}{C(\psi)}
+\frac{\partial}{\partial z} \left[ K(\psi) \left(
+\frac{\partial \psi}{\partial z} - 1 \right) \right]
+- \frac{S(\psi)}{C(\psi)}
+\end{equation}
+
+\begin{where}
+$\psi$	& Suction head [cm] \\
+t	& time [days] \\
+$C$	& differential moisture capacity ($d\theta/d\psi$)\\
+$S$	& sink term\\ 
+$z$	& heigth [cm]\\
+\end{where}
+
+At present the reader is referred to \citeasnoun{feddes1978273} and
+\citeasnoun{belmans1983272} for a detailed description.
+
+\vamps\ first estimates the largest time-step possible with the code
+presented in example~\ref{ex:timestep}. It uses the previous dt and
+a value for thetol (the maximum change in theta allowed per time-step)
+to do so. This is done for all layers in the soil profile. This way the
+layer in which the largest changes occur determines the maximum dt.
+\begin{Example}
+\begin{verbatim}
+/*-
+ *	void timestep(int step)
+ *	Calculation of timestep (dt) depending on theta  changes
+ *	and new time (t)
+ */
+double
+timestep (int step)
+{
+  int i;
+
+  /* Store previous values */
+  tm1 = t;
+  dtm1 = dt;
+
+  /* start with max dt */
+  dt = dtmax;
+
+  mdtheta = fabs (thetm1[0] - theta[0]);
+  for (i = 0; i < layers; i++)
+    {
+      dtheta = fabs (thetm1[i] - theta[i]);
+      mdtheta = mdtheta < dtheta ? dtheta : mdtheta;
+    }
+
+  if (mdtheta < 1.0E-6)
+    dt = dtmax;
+  else
+      dt = 10.0 * thetol * dtm1 / mdtheta;
+
+  /* restrict to dtmin and dtmax */
+  dt = dt > dtmin ? dt : dtmin;
+  dt = dt < dtmax ? dt : dtmax;
+
+return dt;
+}
+
+\end{verbatim}
+\caption{The C code used by \vamps\ to estimate the maximum dt}
+\label{ex:timestep}
+\end{Example}
+If this produces results that are regarded as not accurate enough (set
+with the \inivar{thetol} variable) \vamps\ will perform iterations to
+get the accuracy asked. If this fails dt is halved and the procedure
+is started again until the accuracy is reached or dt-minimum is
+reached. The maximum number of iterations is set with \inivar{maxitr}
+variable while the minimum allowed dt is set using the \inivar{dtmin}
+variable.
+
+
+\subsection{Relation between Theta, $\psi$  and  $K_{unsat}$} 
+\vamps\ was first developed using the equations by 
+\citeasnoun{genuchten1980179} (see also \citeasnoun{mualem1976261}).
+This is still the default method. For extra speed and flexibility
+\vamps\ can also read tables which describe these relations. This
+means that the user can use any method available\footnote{the use of
+lookup tables can in certain circumstances also cause some speed
+increase}. At present \vamps\ can only generate tables for the van
+Genuchten method. However, it can read tables generated by the {\tt
+topog\_soil} program \cite{beverly1994274} or user made tables, thus
+extending the amount of models for the theta vs $\psi$ that can be
+used to anything the user can imagine.  The following is derived from
+the topog\_soil\footnote{A version of topog\_soil for the
+\vamps\ model will be available in the future} manual:
+
+\begin{quote}
+Six different soil tables can be generated using topog\_soil, the
+options being:
+\begin{enumerate}
+\item Broadbridge and White (1988)
+\item Campbell (Ross and Bristow, 1990)
+\item Campbell (SWIM model version, 1974;1985)
+\item Campbell (Ross, Williams and Bristow, 1991)
+\item van Genuchten (1980)
+\item Simplified Bucket Model soil table (1979)
+\end{enumerate}
+\end{quote}
+
+At present only items 1 and 5 have been tested using \vamps .  A
+description of the file format for these tables can be found in
+Appendix ??.
+
+\paragraph{Van Genuchten}
+
+\vamps\ default and most tested method of describing the
+theta versus suction- head and $k_{unsat}$ is base in the van
+Genuchten equations \cite{mualem1976261,genuchten1980179}.  The
+dimensionless water content is given as:
+
+
+
+\begin{equation}
+\Theta = \frac{\theta - {\theta}_r}{{\theta}_s - {\theta}_r}
+\end{equation}
+\begin{where}
+$\theta_s$	& saturated water content \\
+$\theta_r$	& residual water content\\
+$\theta$	& actual soil water content\\
+$\Theta$	& dimensionless soil water content\\
+\end{where}
+
+Then a class of $\Theta (\psi)$ functions can be given by:
+\begin{equation}
+\Theta = \left[ \frac{1}{1 + (\alpha \psi)^n}\right]^m
+\end{equation}
+
+\begin{where}
+$\psi$ 	& pressure head \\
+$\alpha$, $n$ and $m$	& soil characteristic parameters \\
+\end{where}
+
+if $m = 1 - n/m$ the following closed-for expression of $K(\Theta )$
+can be obtained:
+
+\begin{equation}
+\Theta = \left\{ \begin{array}{ll}
+		\frac{1}{[1+(\alpha \psi)^n]^{1-1/n}} 	& \psi < 0 \\
+		1					& \psi \geq 0
+		\end{array}
+	\right.
+\end{equation}
+
+\begin{equation}
+K = K_s \Theta^{1/2}
+\left[ 1 - \left( 1 - \Theta^{n/(n-1)}\right)^{1-1/n}\right]^2
+\end{equation}
+
+The $ K_s \Theta^{1/2}$ part of the equation can be changed to $ K_s
+\Theta^{L} $ is which $L$ is a fitting parameter describing the
+$\Theta$ to $K_{unsat}$ relation if you have $K_{unsat}$ measurements.
+
+Values for the parameters $\alpha$, $n$ and $L$ for most soil types in
+the Netherlands can be found in \citeasnoun{wosten1987287}. Such
+values for tropical soils seem to be less common. In that case a
+nonlinear regression method can be used to determine the parameters
+$\alpha$ and $n$ from a soil moisture retention curve
+\cite{marquardt1963N}.
+
+\paragraph{Clapp/Hornberger}
+A power curve can conveniently describe the moisture characteristics
+of a soil as has been demonstrated
+by~\citeasnoun{campbell1974}. \citeasnoun{clapp1978263} described
+these functions and presented some representative values for the soil
+hydraulic parameters needed. They are shown in Table~\ref{tab:clapp}.
+
+\begin{equation}
+\psi = \psi{_s} \left(\frac{\theta}{\theta{_s}}\right)^{-b}
+\end{equation}
+
+Soil hydraulic conductivity functions are derived by integrating a
+function of $\psi$ with respect to $\theta$. This results in the
+following equation:
+\begin{equation}
+\frac{K}{K_s} = \left(\frac{\theta}{\theta{_s}}\right)^{2b + 2}
+\end{equation}
+
+\begin{where}
+$\psi$	&	suction head \\
+$\psi{_s}$	& suction head at saturation (air entry value) \\
+$\theta$	& volumetric water content \\
+$\theta{_s}$	& water content at saturation (porosity)\\
+$b$	& soil characteristic parameter\\
+$K$	& hydraulic cnductivity \\
+$K_s$	& saturated hydraulic conductivity \\
+\end{where}
+
+\begin{table}
+\centerline{
+\begin{tabular}{lllll} \hline \hline
+Soil Texture & $\overline{b}$ & $\overline{\psi{_s}}$ &  $\overline{\theta{_s}}$ & $\overline{K_s}$ \\ \hline
+Sand & 4.05 & 12.2 & 0.395 & 1520.64 \\
+Loamy sand & 4.38 & 9.0 & 0.410 & 1350.72 \\
+Sandy loam & 4.90 & 21.8 & 0.435 & 299.52 \\
+Silt loam & 5.3 & 78.6 & 0.485 & 62.21 \\
+Loam & 5.39 & 47.8 & 0.451 & 60.05 \\
+Sandy clay loam & 7.12 & 29.9 & 0.420 & 54.43 \\
+Silty clay loam & 7.75 & 35.6 & 0.477 & 14.69 \\
+Clay loam & 8.52 & 63.0 & 0.476 & 21.17 \\
+Sandy clay & 10.4 & 15.3 & 0.426 & 18.72 \\
+Silty clay & 10.4 & 49.0 & 0.492 & 8.93 \\
+Clay & 11.4 & 40.5 & 0.482 & 11.09 \\ \hline \hline
+\end{tabular}}
+\label{tab:clapp}
+\caption{Representative values for hydraulic parameters. 
+After Clapp (1978).}
+\end{table}
+An input file containing all the soil-types mentioned in table~\ref{tab:clapp}
+can be found in the src/sllib directory. It is called \fname{soillib.inp}.
+
+\subsection{Bottom boundary conditions}
+\vamps\ can  handle several boundary conditions at the bottom of  the
+profile.  Below is a lists of those available in the model. Not all
+conditions have been fully tested in the present version of \vamps{}.
+
+\begin{itemize} 
+\item A no-flow bottom boundary (5)
+\item Free drainage at the bottom of the profile (6)
+\item A fixed head at the bottom of the profile (4)
+\item A fixed flux at the bottom of the profile (1)
+\item Daily groundwater depth (0)
+\item Seepage or infiltration from/to deep groundwater (2)
+\item Flux calculated as a function of head (3)
+\end{itemize}
+
+The choice of bottom boundary condition is of great importance to
+the results of the modelling. Unfortunately
+most of the time the choice of bottom boundary is usually determined 
+by the available data or lack thereof.
+
+See {\bf vamps}(5) for details\footnote{The numbers between brackets
+denote the value of the \inivar{bottom} variable in the \inisec{soil}
+section needed}.

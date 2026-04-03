@@ -1,0 +1,101 @@
+.SH EXAMPLES
+Run 
+.B vamps
+with the file veluwe.inp in verbose mode and output to the file
+veluwe.out:
+.br
+.B vamps \-o veluwe.out \-v veluwe.inp
+
+.SH FILES
+Defaults are read from .vampsrc on UNIX systems and vamps.rc on MS-DOS
+and OS/2 FAT systems. This file is first searched in the current
+directory. If it is not present in the current directory, the directory to
+which the HOME environment variable points is searched. If this search
+also fails the compiled in VAMPSLIB directory is searched (usually
+/usr/local/lib/vamps).  Otherwise compiled in defaults are used.
+
+The layout of this files is the same as that of the input/output
+files. Only one section ([vamps]) is searched. The
+.BR vamps (5)
+manual page describes the allowed variables in the vamps section.  A
+simple way to produce a defaults file is to redirect the output of
+.B vamps \-s
+to .vampsrc (or vamps.rc).
+
+
+
+.SH COPYRIGHT
+.PP
+.RS
+.nf
+.ft CW
+Copyright (C) 1995 Jaap Schellekens.
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2, or (at your option)
+any later version.
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; see the file COPYING.  If not, write to the
+Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+
+(C) Jaap Schellekens
+Faculty of Earth Sciences
+Vrije Universiteit
+De Boelelaan 1085
+1081 HV Amsterdam
+The Netherlands
+E-mail: schj@geo.vu.nl 
+	schj@xs4all.nl
+
+International Institute of Tropical Forestry
+Rio Piedras, Puerto Rico
+
+Parts of this program derived from swap.  The following is taken from
+the swap Fortran code:
+
+   Author : Jan G. Wesseling
+
+                     Correspondence
+
+This program uses the ideas and experiences of various researchers at
+the Winand Staring Centre and the Wageningen Agricultural
+University. Currently the program is maintained and documented in
+cooperation by :
+
+     Dept. of Agrohydrology             Dept. of Water Resources
+     Winand Staring Centre              Wageningen Agricultural University
+     Marijkeweg 11/22                   Nieuwe Kanaal 11
+     6700 AC  Wageningen                6709 PA  Wageningen
+      The Netherlands                    The Netherlands
+     Fax: +31 8370 24812                Fax: +31 8370 84885
+.ft R
+.fi
+.RE
+.PP
+
+.SH SEE ALSO
+.BR vamps (5),
+.BR vsel (1),
+.BR issec (1),
+.BR getstr (1).
+
+.SH AUTHOR
+J. Schellekens
+.br
+schj@geo.vu.nl
+.br
+schj@xs4all.nl
+
+
+.SH BUGS
+There are quite a lot I suspect. Please report them to me if you
+encounter one. Some bugs might be 'features' as
+.B vamps
+will not always behave very logical ;-).

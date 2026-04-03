@@ -1,0 +1,119 @@
+head	1.4;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.4
+date	99.01.06.12.13.01;	author schj;	state Alpha;
+branches;
+next	1.3;
+
+1.3
+date	99.01.06.12.07.49;	author schj;	state Alpha;
+branches;
+next	1.2;
+
+1.2
+date	97.09.09.08.39.39;	author schj;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	97.03.27.10.58.12;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@This used to be evapotra.c but now only determines hatm
+@
+
+
+1.4
+log
+@Version: 0.99g
+@
+text
+@/* $Header: /home/schj/src/vamps_0.99g/src/soil/RCS/det_hatm.c,v 1.3 1999/01/06 12:07:49 schj Alpha $ */
+/*  $RCSfile: det_hatm.c,v $
+ *  $Author: schj $
+ *  $Date: 1999/01/06 12:07:49 $
+ */
+
+#ifdef DDEBUG
+static  char RCSid[] =
+"$Id: det_hatm.c,v 1.3 1999/01/06 12:07:49 schj Alpha $";
+#endif
+#include <math.h>
+#include "swatsoil.h"
+
+
+/*C:det_hatm
+ *@@ double det_hatm(int i)
+ *  Description: gets  hatm for step i
+ *  Returns: nothing
+ *  Remarks: hatm calculation kind of stupid
+ */
+double
+det_hatm(int i)
+{
+	return  4698.0*22.5*log(0.6);
+}
+@
+
+
+1.3
+log
+@Version: 0.99g
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99e/src/soil/RCS/det_hatm.c,v 1.2 1997/09/09 08:39:39 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1997/09/09 08:39:39 $
+d9 1
+a9 1
+"$Id: det_hatm.c,v 1.2 1997/09/09 08:39:39 schj Exp $";
+@
+
+
+1.2
+log
+@0.99e version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/src/vamps_0.99c/src/soil/RCS/det_hatm.c,v 1.1 1997/03/27 10:58:12 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1997/03/27 10:58:12 $
+d9 1
+a9 1
+"$Id: det_hatm.c,v 1.1 1997/03/27 10:58:12 schj Exp $";
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 2
+a2 2
+/* $Header: /home/schj/src/vamps_0.99c/src/soil/RCS/evapotra.c,v 1.13 1997/01/16 15:03:37 schj Exp $ */
+/*  $RCSfile: evapotra.c,v $
+d4 1
+a4 1
+ *  $Date: 1997/01/16 15:03:37 $
+d9 1
+a9 1
+"$Id: evapotra.c,v 1.13 1997/01/16 15:03:37 schj Exp $";
+d24 1
+a24 1
+	return = 4698*22.5*log(0.6);
+@

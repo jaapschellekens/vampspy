@@ -1,0 +1,371 @@
+head	1.4;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.4
+date	99.01.06.12.13.01;	author schj;	state Alpha;
+branches;
+next	1.3;
+
+1.3
+date	99.01.06.12.07.49;	author schj;	state Alpha;
+branches;
+next	1.2;
+
+1.2
+date	97.09.09.08.40.34;	author schj;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	97.04.07.19.43.25;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@Top-system initialization/main modules
+@
+
+
+1.4
+log
+@Version: 0.99g
+@
+text
+@/* $Header: /home/schj/src/vamps_0.99g/src/topsys/RCS/intopsys.c,v 1.3 1999/01/06 12:07:49 schj Alpha $ */
+
+/* $RCSfile: intopsys.c,v $
+ * $Author: schj $
+ * $Date: 1999/01/06 12:07:49 $ */
+
+#include "topsys.h"
+#include "vamps.h"
+
+
+static char RCSid[] =
+ "$Id: intopsys.c,v 1.3 1999/01/06 12:07:49 schj Alpha $";
+
+/* forward declarations of dummy functions */
+void tstep_top_noop (int tstep, double *precipitation,
+		double *interception, double *transpiration,
+		double *soilevaporation);
+void pre_top_noop();
+void post_top_noop();
+
+/* These should be linked to the above*/
+/* no-trees (or plants) setup */
+extern void tstep_top_notree (int tstep, double *precipitation,
+		double *interception, double *transpiration,
+		double *soilevaporation);
+extern void pre_top_notree (void);
+extern void post_top_notree (void);
+
+#ifdef HAVE_LIBSLANG
+/* Procedures in scripting language (S-LANG) */
+extern void tstep_top_script (int tstep, double *precipitation,
+		double *interception, double *transpiration,
+		double *soilevaporation);
+extern void pre_top_script (void);
+extern void post_top_script (void);
+#endif
+
+/* Topsys in which all fluxes ar read from a file */
+extern void tstep_top_pre_canop (int tstep, double *precipitation,
+		double *interception, double *transpiration,
+		double *soilevaporation);
+extern void pre_top_pre_canop (void);
+extern void post_top_pre_canop (void);
+
+/* 'Old 0.99b topsys (canopy.c) */
+extern void precanop (void);
+extern void postcanop (void);
+extern void tstep_ocanop (int tstep, double *precipitation,
+		double *interception, double *transpiration,
+		double *soilevaporation);
+
+
+/* Functions to call */
+void (*tstep_top) (int tstep, double *precipitation,
+		double *interception, double *transpiration,
+		double *soilevaporation) = NULL;
+void (*pre_top) () = NULL;
+void (*post_top) () = NULL;
+
+/* 
+   Usage:
+   ID, "Description", tstep func, pre func, post func
+*/
+ttop	toptype[] = {
+	{TOP_NOOP, "Empty topsystem",
+		tstep_top_noop,pre_top_noop,post_top_noop
+	},
+	{TOP_SOIL, "Bare soil",
+		tstep_top_notree,pre_top_notree,post_top_notree
+	},
+	{TOP_FUL_CANOP, "Full canopy",
+		/*tstep_top_fcanop,pre_top_fcanop,post_top_fcanop*/
+		tstep_top_noop,pre_top_noop,post_top_noop
+	},
+	{TOP_PAR_CANOP, "Partial canopy",
+		/*tstep_top_pcanop,pre_top_pcanop,post_top_pcanop*/
+		tstep_top_noop,pre_top_noop,post_top_noop
+	},
+	{TOP_PRE_CANOP, "All canopy stuff precalculated",
+		tstep_top_pre_canop,pre_top_pre_canop,post_top_pre_canop
+	},
+	{TOP_OCANOP, "Old canopy.c topsystem",
+		tstep_ocanop,precanop,postcanop
+	}
+#ifdef HAVE_LIBSLANG
+	,
+	{TOP_SCRIPT, "Scripting language based top-system",
+		tstep_top_script,pre_top_script,post_top_script
+	}
+#endif
+};
+static int nrtopsys = NRTOPSYS;
+
+void 
+tstep_top_noop (int tstep, double *precipitation,
+		double *interception, double *transpiration,
+		double *soilevaporation)
+{
+	(void)fprintf(stderr,"Topsystem not yet finished\n");
+	exit(1);
+}
+
+void
+pre_top_noop()
+{
+	(void)fprintf(stderr,"Topsystem not yet finished\n");
+	exit(1);
+}
+
+void
+post_top_noop()
+{
+	(void)fprintf(stderr,"Topsystem not yet finished\n");
+	exit(1);
+}
+
+
+/*C:init_top
+ *@@void init_top(int topt)
+ * Initializes the topsystem by pointing @@tstep_top@@, @@pre_top@@
+ * and @@post_top@@ to the functions determined by @@toptype@@.
+ *
+ * Values for topt in topsys.h
+ */ 
+void
+init_top(int topt)
+{
+	char s[128];
+	void prtopsys();
+
+	if (getsetbyname("inr") == -1)
+		(void)add_set (NULL, "inr", "inr", steps, 0, 0);
+	if (getsetbyname("spe") == -1)
+		(void)add_set (NULL, "spe", "spe", steps, 0, 0);
+	if (getsetbyname("ptr") == -1)
+		(void)add_set (NULL, "ptr", "ptr", steps, 0, 0);
+	if (getsetbyname("trf") == -1)
+		(void)add_set (NULL, "trf", "trf", steps, 0, 0);
+	if (getsetbyname("stf") == -1)
+		(void)add_set (NULL, "stf", "stf", steps, 0, 0);
+	id.inr = getsetbyname("inr");
+	id.spe = getsetbyname("spe");
+	id.ptr = getsetbyname("ptr");
+	id.trf = getsetbyname("trf");
+	id.stf = getsetbyname("stf");
+
+	if (topt < 0 || topt >= nrtopsys){
+		prtopsys();
+		Perror(progname,1,0,RCSid,"Invalid topsystem given","See list above");
+	}
+	sprintf(s,"%d topsystems, using %d (%s)\n",nrtopsys,topt,toptype[topt].desc);	
+	showit("topsys",MESG,s,1,verbose);
+	tstep_top = toptype[topt].tstep_top;
+	pre_top =  toptype[topt].pre_top;
+	post_top = toptype[topt].post_top;
+}
+
+/*C:prtopsys
+ *@@ void prtopsys(void)
+ *
+ * Prints all topsystems descriptions on @@stderr@@
+ */
+void
+prtopsys()
+{
+	int	i;
+
+	for (i = 0; i < nrtopsys; i++){
+		(void)fprintf(stderr,"%d: %s\n",i,toptype[i].desc);
+	}
+}
+@
+
+
+1.3
+log
+@Version: 0.99g
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99e/src/topsys/RCS/intopsys.c,v 1.2 1997/09/09 08:40:34 schj Exp $ */
+d5 1
+a5 1
+ * $Date: 1997/09/09 08:40:34 $ */
+d12 1
+a12 1
+ "$Id: intopsys.c,v 1.2 1997/09/09 08:40:34 schj Exp $";
+@
+
+
+1.2
+log
+@initial version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99c/src/topsys/RCS/intopsys.c,v 1.1 1997/04/07 19:43:25 schj Exp $ */
+d5 1
+a5 1
+ * $Date: 1997/04/07 19:43:25 $ */
+d12 1
+a12 1
+ "$Id: topsys.c,v 0.34 1997/01/16 15:00:01 schj Exp $";
+d149 1
+a149 1
+		Perror(progname,1,RCSid,"Invalid topsystem given","See list above");
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 171
+a171 114
+/* $Header: /home/schjpriv/schj/src/vamps_0.99c/src/topsys/script.c,v 1.1 1997/04/02 06:44:49 schj Exp $ */
+
+/* $RCSfile: script.c,v $
+ * $Author: schj $
+ * $Date: 1997/04/02 06:44:49 $ */
+#include "topsys.h"
+#include "vamps.h"
+
+
+/* These should be linked to the above*/
+
+/* no-trees (or plants) setup */
+extern void tstep_top_notree (int tstep, double *precipitation,
+		double *interception, double *transpiration,
+		double *soilevaporation);
+extern void pre_top_notree (void);
+extern void post_top_notree (void);
+
+/* Procedures in scripting language (S-LANG) */
+extern void tstep_top_script (int tstep, double *precipitation,
+		double *interception, double *transpiration,
+		double *soilevaporation);
+extern void pre_top_script (void);
+extern void post_top_script (void);
+
+/* Topsys in which all fluxes ar read from a file */
+extern void tstep_top_pre_canop (int tstep, double *precipitation,
+		double *interception, double *transpiration,
+		double *soilevaporation);
+extern void pre_top_pre_canop (void);
+extern void post_top_pre_canop (void);
+
+/* dummy functions */
+void tstep_top_noop (int tstep, double *precipitation,
+		double *interception, double *transpiration,
+		double *soilevaporation);
+void pre_top_noop();
+void post_top_noop();
+
+/* Functions to call */
+void (*tstep_top) (int tstep, double *precipitation,
+		double *interception, double *transpiration,
+		double *soilevaporation) = tstep_top_noop;
+void (*pre_top) () = pre_top_noop;
+void (*post_top) () = post_top_noop;
+
+void 
+tstep_top_noop (int tstep, double *precipitation,
+		double *interception, double *transpiration,
+		double *soilevaporation)
+{
+	exit(1);
+}
+
+void
+pre_top_noop()
+{
+	exit(1);
+}
+
+void
+post_top_noop()
+{
+	exit(1);
+}
+
+
+/*C:init_top
+ *@@void init_top(int toptype)
+ * Initializes the topsystem by pointing @@tstep_top@@, @@pre_top@@
+ * and @@post_top@@ to the functions determined by @@toptype@@.
+ *
+ * Values for toptype in topsys.h
+ */ 
+void
+init_top(int toptype)
+{
+#ifdef TRY_TOPSYS
+	fprintf(stderr,"Initializing topsystem with %d\n",toptype);
+#endif	
+	switch (toptype){
+		case TOP_SOIL:
+			tstep_top = tstep_top_notree;
+			pre_top = pre_top_notree;
+			post_top = post_top_notree;
+			break;
+/*		case TOP_FUL_CANOP:
+			tstep_top = tstep_top_fcanop;
+			pre_top = pre_top_fcanop;
+			post_top = post_top_fcanop;
+			break;
+		case TOP_PAR_CANOP:
+			tstep_top = tstep_top_pcanop;
+			pre_top = pre_top_pcanop;
+			post_top = post_top_pcanop;
+			break;
+*/
+		case TOP_SCRIPT:
+			tstep_top = tstep_top_script;
+			pre_top = pre_top_script;
+			post_top = post_top_script;
+			break;
+		case TOP_PRE_CANOP:
+			tstep_top = tstep_top_pre_canop;
+			pre_top = pre_top_pre_canop;
+			post_top = post_top_pre_canop;
+			break;
+		default:
+			tstep_top = tstep_top_noop;
+			pre_top = pre_top_noop;
+			post_top = post_top_noop;
+			break;
+	}
+}
+@

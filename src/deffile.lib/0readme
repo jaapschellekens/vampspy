@@ -1,0 +1,17 @@
+libdef -- process parameter files
+-----------------------------------------------------------------------
+
+libdef is a library for processing .ini files (what's in a name). The
+syntax of the files is the same as used by the samba program. These
+files can be used to store program defaults/input and output.
+
+libdef has some special options to make working with large files
+fast. libdef can use and create index files files for faster access and
+also read entire files into memory. Default and override values can be
+used as well.
+
+
+Author: J. Schellekens
+E-Mail: schj@geo.vu.nl
+Copying: GPL
+Date:  Sun Feb  1 11:23:17 MET 1998

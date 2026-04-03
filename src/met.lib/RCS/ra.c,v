@@ -1,0 +1,85 @@
+head	1.2;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.2
+date	99.01.06.12.13.01;	author schj;	state Alpha;
+branches;
+next	1.1;
+
+1.1
+date	97.09.09.08.45.20;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@Determine  Ra
+@
+
+
+1.2
+log
+@Version: 0.99g
+@
+text
+@/* $Header: /home/schjpriv/schj/src/vamps_0.99e/src/met.lib/RCS/ra.c,v 1.1 1997/09/09 08:45:20 schj Exp $ */
+
+/* $RCSfile: ra.c,v $
+ * $Author: schj $
+ * $Date: 1997/09/09 08:45:20 $ */
+
+/* metut.c Assorted meteorological functions to estimate
+ * evapo(trans)piration.  Most have been
+ * translated from Pascal (provided by Arnoud F) to C
+ *
+ * Jaap Schellekens */
+
+#include <math.h>
+#include <float.h>
+#include "met.h"
+
+/*C:ra
+ *@@double ra (double z, double z0, double d, double u)
+ *
+ * Calculates ra (aerodynamic resistance) according to:
+ *@@	ra = [ln((z-d)/z0)]^2 /(k^2u)
+ *@@	Where:
+ *@@		d  = displacement height
+ *@@		z  = height of the wind speed measurements
+ *@@		u  = windspeed 
+ *@@		z0 = roughness length
+ *@@		k  = von Karman constant
+ *
+ * Returns: ra */
+double 
+ra (double z, double z0, double d, double u)
+{
+	double k2 = 0.1681;		/* (von Karman constant)^2 */
+	double tt;
+
+	tt = log ((z - d) / z0);
+
+	return ((tt * tt) / k2)/u;
+}
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99c/src/topsys/RCS/metut.c,v 1.1 1997/04/07 19:43:25 schj Exp $ */
+d3 1
+a3 1
+/* $RCSfile: metut.c,v $
+d5 1
+a5 1
+ * $Date: 1997/04/07 19:43:25 $ */
+@

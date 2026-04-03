@@ -1,0 +1,339 @@
+head	1.7;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.7
+date	99.01.06.12.13.01;	author schj;	state Alpha;
+branches;
+next	1.6;
+
+1.6
+date	99.01.06.12.07.49;	author schj;	state Alpha;
+branches;
+next	1.5;
+
+1.5
+date	97.11.08.18.51.20;	author schj;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	97.09.09.08.42.42;	author schj;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	96.11.05.15.07.59;	author schj;	state Alpha;
+branches;
+next	1.2;
+
+1.2
+date	95.11.14.20.37.35;	author schj;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	95.11.14.20.30.14;	author schj;	state Exp;
+branches;
+next	;
+
+
+desc
+@example program for using the marquardt procedure
+@
+
+
+1.7
+log
+@Version: 0.99g
+@
+text
+@/* $Header: /home/schj/src/vamps_0.99g/src/maq.lib/RCS/mex.c,v 1.6 1999/01/06 12:07:49 schj Alpha $ */
+/*  $RCSfile: mex.c,v $
+ *  $Author: schj $
+ *  $Date: 1999/01/06 12:07:49 $
+ */
+#include <stdlib.h>
+#include <stdio.h>
+#include <values.h>
+#include "marquard.h"
+
+#ifdef HAVE_LIBSLANG
+#include <slang.h>
+#endif
+
+double **mydat;
+int
+ttf(double *npar,int mmm, int nnn)
+{
+ int i;
+
+  for (i = 1; i <= mmm; i++)
+   rv[i] = (mydat[i][2]- ((mydat[i][1]* (npar[1]))+(npar[2])));
+
+ return 0; 
+}
+
+
+
+int
+main(argc, argv)
+int argc;
+char *argv[];
+{
+  int i;
+  int mmm = 2000;
+  int nnn =2;
+  double slope;
+  double offset;
+
+
+#ifdef HAVE_LIBSLANG
+  if (!init_SLang()		       /* basic interpreter functions */
+      || !init_SLmath() 	       /* sin, cos, etc... */
+#ifdef unix
+      || !init_SLunix()	       /* unix system calls */
+#endif
+      || !init_SLfiles())	       /* file i/o */
+      
+    {
+      fprintf(stderr, "Unable to initialize S-Lang.\n");
+      exit(-1);
+    }
+
+  if (!SLang_add_table(Maq, "Marquardt")) 
+      
+    {
+      fprintf(stderr, "Unable to initialize S-Lang.\n");
+      exit(-1);
+    }
+#endif
+
+  maqverb=1; /* Be Verbose */
+  
+#ifdef HAVE_LIBSLANG
+ fprintf(stderr,"Fitting 2000 points using S-lang function\n");
+ SLang_load_file ("fit.sl");
+ SLang_load_file ("fitf.sl");
+#endif
+
+  mydat=m_matr(mmm+1,nnn+1);
+
+  for (i=1;i<=mmm;i++){
+   mydat[i][1] = (double)i;
+   mydat[i][2] = (double)i;
+  }
+  slope = 4.0;
+  offset = 4000.5;
+
+  /* assing our function to func, which will be evaluated in func.c*/
+  /* now run Marquardt */
+  if (maqinit(&mmm,&nnn))
+	fprintf(stderr,"To few points for fitting"); 
+  allfunc=ttf;
+  par[1] = slope;
+  par[2] = offset;
+  inp[3] = 0.00001 ;
+  inp[4] =  0.00001;
+  fprintf(stderr,"Fitting 2000 points using C function\n");
+  prhead();
+  /*Marquardt((long)mmm, (long)nnn, par,rv, jjinv, inp, out);*/
+  maqrun();
+  prtail();
+
+  /*  The fitting is now done and the results are stored in par[].
+      It is wise to check the out[] array to check how the fit went */
+
+  maqend(&mmm); /* this will destroy par[], so store your results first!*/
+  m_free_matr(mydat,mmm+1);
+
+  return 0;
+}
+@
+
+
+1.6
+log
+@Version: 0.99g
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99e/src/maq.lib/RCS/mex.c,v 1.5 1997/11/08 18:51:20 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1997/11/08 18:51:20 $
+@
+
+
+1.5
+log
+@cleaned up a bit
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99e/src/maq.lib/RCS/mex.c,v 1.4 1997/09/09 08:42:42 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1997/09/09 08:42:42 $
+@
+
+
+1.4
+log
+@0.99e version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99b/src/maq/RCS/mex.c,v 1.3 1996/11/05 15:07:59 schj Alpha $ */
+d4 1
+a4 1
+ *  $Date: 1996/11/05 15:07:59 $
+a40 14
+  /*
+if (maqinit(fitpoints,nrparm))
+	Perror(progname,1,RCSid,"To few points for fitting",""); 
+allfunc = mainfit;
+maqverb = 2;
+prhead();
+Marquardt((long)fitpoints, (long)nrparm,par,rv, jjinv, inp, out);
+prtail();
+	Initialize and allocate memory
+	mmm = number of data points
+	nnn = number parameters
+  */
+
+  
+@
+
+
+1.3
+log
+@Updated to Alpha version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.99/src/maq/RCS/mex.c,v 1.2 1995/11/14 20:37:35 schj Exp $ */
+d4 1
+a4 1
+ *  $Date: 1995/11/14 20:37:35 $
+d8 1
+d11 7
+a17 3
+double ttf(i,par)
+int i;
+double **par;
+d19 6
+a24 1
+  return (double)(maqdata[i][2]- ((maqdata[i][1]* (*par[1]))+(*par[2])));
+d27 1
+a27 6
+double ttf2(i,par)
+int i;
+double **par;
+{
+  return (double)(maqdata[i][2]- ((maqdata[i][1]*(*par[1]))+(*par[2])));
+}
+a33 2
+  double ttf();
+  double ttf2();
+d35 1
+a35 1
+  int mmm =12;
+a36 1
+  double **mydat;
+d40 9
+a48 1
+  /* 
+d53 23
+a76 1
+  maqinit(mmm,nnn);
+d78 7
+a84 2
+  /*allocate memory for data. Note that these are 1 based arrays */
+  mydat=matr(mmm,nnn);
+a85 3
+  /* let **data point to our data matrix*/
+  maqdata=mydat;
+  /* Fill the data matrix with something usefull */
+d87 2
+a88 2
+   maqdata[i][1] = (double)i;
+   maqdata[i][2] = (double)i;
+d90 2
+a91 13
+  slope = 1.0;
+  offset = 0.5;
+  par[1] = &slope;
+  par[2] = &offset;
+
+/*
+    once a parser is added this should work, in fact, it did
+    using system() and bc!
+    if (argv[1] != NULL)
+    	strcpy (funcstr,argv[1]);
+    else
+    	strcpy(funcstr,"maqdata[2]- ((maqdata[1]*(*par[1]))+(*par[2]))");
+*/
+d93 1
+a93 1
+  func=ttf; /* assing our function to func, which will be evaluated in func.c*/
+d95 12
+a106 1
+  Marquardt((long)mmm, (long)nnn, par,rv, jjinv, inp, out);
+d111 2
+a112 2
+  maqend(mmm); /* this will destroy par[], so store your results first!*/
+  free_matr(maqdata,mmm);
+@
+
+
+1.2
+log
+@added RCS header
+@
+text
+@d1 2
+a2 2
+/* $Header: /homes/schj/src/vamps_0.91/RCS/vamps.c,v 0.20 1995/10/30 13:59:49 schj Exp $ */
+/*- $RCSfile: vamps.c,v $
+d4 1
+a4 2
+ *  $Date: 1995/10/30 13:59:49 $
+ *  $Log: vamps.c,v $
+d12 1
+a12 1
+double *par;
+d14 1
+a14 1
+  return (double)(maqdata[i][2]- ((maqdata[i][1]*par[1])+par[2]));
+d19 1
+a19 1
+double *par;
+d21 1
+a21 1
+  return (double)(maqdata[i][2]- ((maqdata[i][1]*par[1])+par[2]));
+d35 2
+d56 4
+a59 2
+  par[1] =1.0;
+  par[2] = 0.5;
+d67 1
+a67 1
+    	strcpy(funcstr,"maqdata[2]- ((maqdata[1]*par[1])+par[2])");
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 6
+@

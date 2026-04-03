@@ -1,0 +1,436 @@
+head	1.9;
+access;
+symbols;
+locks;
+comment	@ * @;
+
+
+1.9
+date	99.01.06.12.13.01;	author schj;	state Alpha;
+branches;
+next	1.8;
+
+1.8
+date	99.01.06.12.07.49;	author schj;	state Alpha;
+branches;
+next	1.7;
+
+1.7
+date	97.09.09.08.39.39;	author schj;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	97.01.16.15.02.37;	author schj;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	96.12.09.13.33.37;	author schj;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	96.11.05.15.00.48;	author schj;	state Alpha;
+branches;
+next	1.3;
+
+1.3
+date	96.10.22.17.52.25;	author schj;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	96.04.09.12.07.21;	author schj;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	96.03.18.18.13.08;	author schj;	state alpha;
+branches;
+next	;
+
+
+desc
+@allocates stuff needed in swatsoil.c, soilparm stuff and all layers
+@
+
+
+1.9
+log
+@Version: 0.99g
+@
+text
+@/* $Header: /home/schj/src/vamps_0.99g/src/soil/RCS/alloc.c,v 1.8 1999/01/06 12:07:49 schj Alpha $ */
+/*  
+ *  $RCSfile: alloc.c,v $
+ *  $Author: schj $
+ *  $Date: 1999/01/06 12:07:49 $
+ */
+
+#ifdef DDEBUG
+static  char RCSid[] =
+"$Id: alloc.c,v 1.8 1999/01/06 12:07:49 schj Alpha $";
+#endif
+
+#include "swatsoil.h"
+#include "nrutil.h"
+#include "marquard.h"
+
+
+/*Callocall
+ *@@ void allocall (int layers)
+ * Description: allocate arrays and data-sets needed in swatsoil.c
+ * Returns: nothing
+ * Remarks: Should be cleaned
+ */
+
+void
+allocall (layers)
+     int layers;
+{
+	int i;
+
+
+	/* allocate memory for the layers */
+	node = (node_t *) ts_memory ((void *) NULL, 
+			layers * sizeof (node_t), progname);
+
+	/* Allocate data sets for output */
+	if ((id.qbo = getsetbyname("qbo")) == -1){
+		add_set (NULL,"qbo","qbo",steps,0,0);
+		id.qbo = getsetbyname("qbo");
+	}
+
+	id.vol = add_set (NULL,"vol","vol",steps,0,0);
+	id.avt = add_set (NULL,"avt","avt",steps,0,0);
+		
+	theta = dvector(0, layers -1);
+	nr_descr("theta at each dt",(void *)theta);
+	howsat = dvector(0, layers -1);
+	nr_descr("perc saturation",(void *)howsat); 
+	diffmoist = dvector(0, layers -1);
+	thetm1 = dvector(0, layers -1);
+ 	dzc = dvector(0, layers -1); 
+ 	dzf = dvector(0, layers -1); 
+ 	dz = dvector(0, layers -1); 
+	z = dvector(0, layers -1);
+	hm1 = dvector(0, layers -1);
+	h = dvector(0, layers -1);
+	qrot = dvector(0, layers -1);
+	depth = dvector(0, layers);
+	k = dvector(0, layers -1);
+	kgeom = dvector(0, layers);
+	q = dvector(0, layers);
+	inq = dvector(0, layers);
+
+	qdra = dmatrix (0,layers, 0, 3);
+	nr_descr("qdra, lateral drainage",(void *)qdra);
+	basegw = dvector(0,1);
+
+	error = ivector (0, steps + 1);
+	itter = ivector (0, steps + 1);
+	gwl = dvector (0, steps + 1);
+	allowdrain = ivector (0, layers -1);
+
+	/* Filling with initial values */
+	for (i = 0; i < layers; i++){
+		depth[i] = 0.0;
+		allowdrain[i] = 1;
+		qdra[0][i] = 0.0;
+		qdra[1][i] = 0.0;
+		qdra[2][i] = 0.0;
+		qdra[3][i] = 0.0;
+	}
+	/* These arrays cover the entire time domain */  
+	for (i = 0; i < steps + 2; i++){
+		error[i] = 0;
+		itter[i] = 0;
+	}
+}
+@
+
+
+1.8
+log
+@Version: 0.99g
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/schj/src/vamps_0.99e/src/soil/RCS/alloc.c,v 1.7 1997/09/09 08:39:39 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1997/09/09 08:39:39 $
+d10 1
+a10 1
+"$Id: alloc.c,v 1.7 1997/09/09 08:39:39 schj Exp $";
+@
+
+
+1.7
+log
+@0.99e version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99c/src/soil/RCS/alloc.c,v 1.6 1997/01/16 15:02:37 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1997/01/16 15:02:37 $
+d10 1
+a10 1
+"$Id: alloc.c,v 1.6 1997/01/16 15:02:37 schj Exp $";
+d51 3
+a53 1
+	dz = dvector(0, layers -1);
+@
+
+
+1.6
+log
+@set depth array to 0
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schjpriv/src/vamps_0.99b/src/soil/RCS/alloc.c,v 1.5 1996/12/09 13:33:37 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1996/12/09 13:33:37 $
+d10 1
+a10 1
+"$Id: alloc.c,v 1.5 1996/12/09 13:33:37 schj Exp $";
+d14 1
+d18 2
+a19 2
+/*+Name:allocall
+ * Prototype: void allocall (int layers)
+d23 1
+a23 1
++*/
+d29 1
+a29 2
+  int i;
+  XY *tmpxy;
+d32 53
+a84 63
+  /* allocate memory for the layers */
+  node = (node_t *) ts_memory ((void *) NULL, layers * sizeof (node_t), progname);
+ 
+  /* Allocate data sets for output */
+  tmpxy = (XY *) ts_memory ((void *) NULL,steps * sizeof (XY),progname);
+  add_set (tmpxy,"qbot","qbot",steps,0,0);
+  qbotset = getsetbyname("qbot");
+  tmpxy = NULL;
+  tmpxy = (XY *) ts_memory ((void *) NULL,steps * sizeof (XY),progname);
+  add_set (tmpxy,"volact","volact",steps,0,0);
+  volactset = getsetbyname("volact");
+  tmpxy = NULL;
+  tmpxy = (XY *) ts_memory ((void *) NULL,steps * sizeof (XY),progname);
+  add_set (tmpxy,"avgtheta","avgtheta",steps,0,0);
+  avgthetaset = getsetbyname("avgtheta");
+  tmpxy = NULL;
+  
+  theta = (double *) ts_memory ((void *) NULL, layers * sizeof (double), progname);
+  howsat = (double *) ts_memory ((void *) NULL, layers * sizeof (double), progname);
+  diffmoist = (double *) ts_memory ((void *) NULL, layers * sizeof (double), progname);
+  thetm1 = (double *) ts_memory ((void *) NULL, layers * sizeof (double), progname);
+  dz = (double *) ts_memory ((void *) NULL, layers * sizeof (double), progname);
+  z = (double *) ts_memory ((void *) NULL, layers * sizeof (double), progname);
+  hm1 = (double *) ts_memory ((void *) NULL, layers * sizeof (double), progname);
+  h = (double *) ts_memory ((void *) NULL, layers * sizeof (double), progname);
+  qrot = (double *) ts_memory ((void *) NULL, layers * sizeof (double), progname);
+  layer = (double *) ts_memory ((void *) NULL, layers * sizeof (double), progname);
+  depth = (double *) ts_memory ((void *) NULL, (layers +1) * sizeof (double), progname);
+  k = (double *) ts_memory ((void *) NULL, (layers + 1) * sizeof (double), progname);
+  kgeom = (double *) ts_memory ((void *) NULL, (layers + 1) * sizeof (double), progname);
+  q = (double *) ts_memory ((void *) NULL, (layers + 1) * sizeof (double), progname);
+  inq = (double *) ts_memory ((void *) NULL, (layers + 1) * sizeof (double), progname);
+  cml = (double *) ts_memory ((void *) NULL, (layers) * sizeof (double), progname);
+
+  qdra = matr (4, layers);
+  basegw = (double *) ts_memory ((void *) NULL, 2 * sizeof (double), progname);
+
+  error = (int *) ts_memory ((void *) NULL, (steps + 2) * sizeof (int), progname);
+  itter = (int *) ts_memory ((void *) NULL, (steps + 2) * sizeof (int), progname);
+  
+  if (lbc == 4)
+    hgiven = (double *) ts_memory ((void *) NULL, (steps + 2) * sizeof (double), progname);
+
+   gwl = (double *) ts_memory ((void *) NULL, (steps +2) * sizeof (double), progname);
+
+   allowdrain = (int *) ts_memory ((void *) NULL, (layers) * sizeof (int), progname);
+  /* Filling with initial values */
+  for (i = 0; i < layers; i++)
+    {
+      layer[i] = i;
+      depth[i] = 0.0;
+      allowdrain[i] = 1;
+      qdra[0][i] = 0.0;
+      qdra[1][i] = 0.0;
+      qdra[2][i] = 0.0;
+      qdra[3][i] = 0.0;
+    }
+  /* These arrays cover the entire time domain */  
+  for (i = 0; i < steps + 2; i++)
+    {
+      error[i] = 0;
+      itter[i] = 0;
+    }
+a85 1
+
+@
+
+
+1.5
+log
+@*** empty log message ***
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/soil/RCS/alloc.c,v 1.4 1996/11/05 15:00:48 schj Alpha $ */
+d5 1
+a5 1
+ *  $Date: 1996/11/05 15:00:48 $
+d10 1
+a10 1
+"$Id: alloc.c,v 1.4 1996/11/05 15:00:48 schj Alpha $";
+d17 6
+a22 10
+/*- Name: allocall
+ *
+ *  Prototype: void allocall (int layers)
+ *
+ *  Description: allocate arrays and data-sets needed in swatsoil.c
+ *
+ *  Returns: nothing
+ *
+ *  Remarks: Should be cleaned
+ */
+d34 1
+a34 6
+  /*for (i = 0; i < layers; i++)
+    {
+      soilparm[i].pf = NULL;
+      soilparm[i].theta = NULL;
+    }*/
+
+d82 1
+@
+
+
+1.4
+log
+@Updated to Alpha version
+@
+text
+@d1 1
+a1 1
+/* $Header: /home/schj/src/vamps_0.99/src/soil/RCS/alloc.c,v 1.3 1996/10/22 17:52:25 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1996/10/22 17:52:25 $
+d10 1
+a10 1
+"$Id: alloc.c,v 1.3 1996/10/22 17:52:25 schj Exp $";
+d17 1
+a17 2
+/*-  
+ *  void allocall (int layers)
+d19 7
+a25 1
+ * allocate arrays and data-sets needed in swatsoil.c
+d37 2
+a38 2
+  soilparm = (soilparmt *) ts_memory ((void *) NULL, layers * sizeof (soilparmt), progname);
+  for (i = 0; i < layers; i++)
+d42 1
+a42 1
+    }
+d86 1
+d91 1
+@
+
+
+1.3
+log
+@added xtra sets
+fixed bugs in length of gwl and depth
+@
+text
+@d1 1
+a1 1
+/* $Header: /homes/schj/src/vamps_0.98/src/soil/RCS/alloc.c,v 1.2 1996/04/09 12:07:21 schj Exp $ */
+d5 1
+a5 1
+ *  $Date: 1996/04/09 12:07:21 $
+d10 1
+a10 1
+"$Id: alloc.c,v 1.2 1996/04/09 12:07:21 schj Exp $";
+@
+
+
+1.2
+log
+@added drootz
+@
+text
+@d1 3
+a3 2
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.98/src/soil/RCS/alloc.c,v 1.1 1996/03/18 18:13:08 schj alpha $ */
+/*- $RCSfile: alloc.c,v $
+d5 1
+a5 8
+ *  $Date: 1996/03/18 18:13:08 $
+ *  $Log: alloc.c,v $
+ *  Revision 1.1  1996/03/18 18:13:08  schj
+ *  Initial revision
+ *
+ * Revision 1.1  1996/02/15  10:23:07  schj
+ * Initial revision
+ *
+d10 1
+a10 1
+"$Id: alloc.c,v 1.1 1996/03/18 18:13:08 schj alpha $";
+d20 1
+a20 1
+ * allocate arrays needed in swatsoil.c
+d28 2
+d39 14
+d63 1
+a63 1
+  depth = (double *) ts_memory ((void *) NULL, layers * sizeof (double), progname);
+a70 1
+  gwl = (double *) ts_memory ((void *) NULL, 2 * sizeof (double), progname);
+d79 1
+a79 2
+  if (initprof == 2)
+    gwl = (double *) ts_memory ((void *) NULL, steps * sizeof (double), progname);
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 2
+a2 2
+/* $Header: /home/hkl/hydro/promo/schj/nhome/src/vamps_0.97/src/soil/RCS/howsat.c,v 1.1 1996/02/15 10:23:07 schj Exp $ */
+/*- $RCSfile: howsat.c,v $
+d4 5
+a8 2
+ *  $Date: 1996/02/15 10:23:07 $
+ *  $Log: howsat.c,v $
+d16 1
+a16 1
+"$Id: howsat.c,v 1.1 1996/02/15 10:23:07 schj Exp $";
+d20 1
+d66 1
+a68 1
+  drootz = (double *) ts_memory ((void *) NULL, steps * sizeof (double), progname);
+d82 1
+@
