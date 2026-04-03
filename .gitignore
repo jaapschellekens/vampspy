@@ -41,6 +41,10 @@ example1.out
 # Stray output files in root
 example1.out
 
+# RCS revision control artefacts
+RCS/
+*,v
+
 # Editor temporaries
 *~
 .DS_Store
