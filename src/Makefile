@@ -33,12 +33,12 @@ RANLIB	= ranlib
 INSTALL	= /usr/bin/install -c
 INSTALL_PROGRAM	= $(INSTALL) -c
 PYLIBS	= -L/Users/jaap/miniforge3/lib -Wl,-rpath,/Users/jaap/miniforge3/lib -L/Users/jaap/miniforge3/lib/python3.13/config-3.13-darwin -lpython3.13 -ldl -framework CoreFoundation
-LIBS	= -lmaq -lmet -lts -ldef  -lnru -ltermcap $(PYLIBS) -L/Users/jaap/miniforge3/lib -Wl,-rpath,/Users/jaap/miniforge3/lib -L/Users/jaap/miniforge3/lib/python3.13/config-3.13-darwin -lpython3.13 -ldl -framework CoreFoundation  -lm
+LIBS	= -lmet -lts -ldef  -lnru -ltermcap $(PYLIBS) -L/Users/jaap/miniforge3/lib -Wl,-rpath,/Users/jaap/miniforge3/lib -L/Users/jaap/miniforge3/lib/python3.13/config-3.13-darwin -lpython3.13 -ldl -framework CoreFoundation  -lm
 
-SUBDIR = util main soil topsys 
-#THELIBS = ts.lib/libts.a deffile.lib/libdef.a maq.lib/libmaq.a\
+SUBDIR = util main soil topsys
+#THELIBS = ts.lib/libts.a deffile.lib/libdef.a\
 #	  nr_ut.lib/libnru.a met.lib/libmet.a slang.0.99/src/objs/libslang.a
-THELIBS = ts.lib/libts.a deffile.lib/libdef.a maq.lib/libmaq.a\
+THELIBS = ts.lib/libts.a deffile.lib/libdef.a\
 	  nr_ut.lib/libnru.a met.lib/libmet.a
 
 TRASH 	= *~ vamps vsel *.o lib*.a *.log TAGS
@@ -94,10 +94,6 @@ nr_ut.lib/libnru.a: dummy
 	$(INSTALL_PROGRAM) $@ ${BUILDLIBDIR}
 	$(INSTALL_PROGRAM) nr_ut.lib/nrutil.h include
 
-maq.lib/libmaq.a: dummy
-	(cd $(srcdir)/maq.lib; $(MAKE))
-	$(INSTALL_PROGRAM) $@ ${BUILDLIBDIR}
-	$(INSTALL_PROGRAM) maq.lib/marquard.h include
 
 ts.lib/libts.a: dummy
 	(cd $(srcdir)/ts.lib;$(MAKE))
@@ -191,7 +187,6 @@ distclean: clean
 	(cd nr_ut.lib; ${MAKE} RM='${RM}' TRASH='${TRASH}' clean)
 	(cd ts.lib; ${MAKE} RM='${RM}' TRASH='${TRASH}' clean)
 	(cd met.lib; ${MAKE} RM='${RM}' TRASH='${TRASH}' clean)
-	(cd maq.lib; ${MAKE} RM='${RM}' TRASH='${TRASH}' clean)
 	(cd ../share; ${MAKE} RM='${RM}' TRASH='${TRASH}' clean)
 	(cd util; ${RM} ${TRASH})
 	(cd main; ${RM} ${TRASH})
@@ -213,7 +208,6 @@ doc:
 	(cd nr_ut.lib; ${MAKE} RM='${RM}' TRASH='${TRASH}' doc)
 	(cd ts.lib; ${MAKE} RM='${RM}' TRASH='${TRASH}' doc)
 	(cd met.lib; ${MAKE} RM='${RM}' TRASH='${TRASH}' doc)
-	(cd maq.lib; ${MAKE} RM='${RM}' TRASH='${TRASH}' doc)
 	(cd util; ${MAKE} RM='${RM}' TRASH='${TRASH}' doc)
 	(cd main; ${MAKE} RM='${RM}' TRASH='${TRASH}' doc)
 	(cd soil; ${MAKE} RM='${RM}' TRASH='${TRASH}' doc)
@@ -242,6 +236,6 @@ dist:
 	(cd ../../; tar cvf - `find vamps_${SHORTPROGVERSION} -type f | grep -v RCS` | gzip -9 >  vamps_${SHORTPROGVERSION}.tgz)
 
 mkid:
-	mkid `find soil/ topsys/ agl/ plot/ util/ nr_ut.lib/ deffile.lib/ main/ ts.lib/ met.lib/ maq.lib/ include/ -name "*.[ch]"`
+	mkid `find soil/ topsys/ agl/ plot/ util/ nr_ut.lib/ deffile.lib/ main/ ts.lib/ met.lib/ include/ -name "*.[ch]"`
 
 dummy:

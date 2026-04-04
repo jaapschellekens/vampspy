@@ -47,7 +47,7 @@ ${OBJDIR}/filltab.o: filltab.c
 	${CC} $(CFLAGS) $(INC) -c ${DEFS} -o $@ filltab.c
 
 ${OBJDIR}/vangenu.o: vangenu.c
-	${CC} $(CFLAGS) $(INC) -c -I../maq ${DEFS} -o $@ vangenu.c
+	${CC} $(CFLAGS) $(INC) -c ${DEFS} -o $@ vangenu.c
 
 ${OBJDIR}/det_hatm.o: det_hatm.c
 	${CC} $(CFLAGS) $(INC) -c ${DEFS} -o $@ det_hatm.c
@@ -93,10 +93,10 @@ ${OBJDIR}/soilut.o: soilut.c
 	${CC} $(CFLAGS) $(INC) -c ${DEFS} -o $@ soilut.c
 
 ${OBJDIR}/stdvangenu: vangenu.c
-	${CC} $(CFLAGS) $(INC) -c ${DEFS} -DSTANDALONE vangenu.c -o stdvgn.o -I../maq -I../deffile -I../include
+	${CC} $(CFLAGS) $(INC) -c ${DEFS} -DSTANDALONE vangenu.c -o stdvgn.o -I../deffile -I../include
 
 ${OBJDIR}/vangenu: stdvangenu
-	${CC} ${DEFS}  -DSTANDALONE stdvgn.o ../util/getopt.o -L../../lib -o ../vangenu -ldeffile -lmaq -lts -lm
+	${CC} ${DEFS}  -DSTANDALONE stdvgn.o ../util/getopt.o -L../../lib -o ../vangenu -ldeffile -lts -lm
 
 doc: 0soil.tex
 0soil.tex: *.c

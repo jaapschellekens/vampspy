@@ -16,7 +16,6 @@ static char RCSid[] = "$Id: plot.c,v 1.8 1999/01/06 12:13:01 schj Alpha $";
 #include "vamps.h"
 #include "swatsoil.h"
 #include "soils.h"
-#include "marquard.h"
 #include "deffile.h"
 
 char *scan_gp_cmd(char *cmd);

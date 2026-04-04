@@ -96,7 +96,7 @@ AC_TYPE_SIGNAL
 AC_CHECK_FUNCS(popen strdup strftime strstr strtod strtol memcpy snprintf)
 
 
-AC_OUTPUT(../doc/Makefile agl/Makefile deffile.lib/Makefile maq.lib/Makefile main/Makefile ../share/Makefile soil/Makefile met.lib/Makefile ts.lib/Makefile nr_ut.lib/Makefile util/Makefile plot/Makefile Makefile topsys/Makefile ../examples/vamps_demo/Makefile)
+AC_OUTPUT(../doc/Makefile agl/Makefile deffile.lib/Makefile main/Makefile ../share/Makefile soil/Makefile met.lib/Makefile ts.lib/Makefile nr_ut.lib/Makefile util/Makefile plot/Makefile Makefile topsys/Makefile ../examples/vamps_demo/Makefile)
 
 #echo "Running configure in slang.0.99/..."
 #(cd slang.0.99/; ./configure)
