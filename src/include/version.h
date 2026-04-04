@@ -24,28 +24,28 @@
 #endif
 
 #ifndef VERS_CHAR
-#define VERS_CHAR 'i'
+#define VERS_CHAR ' '
 #endif
 #ifndef VERSIONNR
-#define VERSIONNR 99
+#define VERSIONNR 100
 #endif
 #ifndef PROVERSION
-#define PROVERSION "0.99i -- Nov 2001"
+#define PROVERSION "1.0 -- April 2026"
 #endif
 #ifndef WHO
-#define WHO "schj"
+#define WHO "jaap"
 #endif
 #ifndef WHERE
-#define WHERE "flow.geo.vu.nl"
+#define WHERE "ws-fitzcarraldo.nl"
 #endif
 #ifndef STATUS
-#define STATUS "beta version"
+#define STATUS "stable"
 #endif
 #ifndef AUTHOR
 #define AUTHOR "J. Schellekens"
 #endif
 #ifndef DATE
-#define DATE "Nov 2001"
+#define DATE "April 2026"
 #endif
 
 #ifndef EMAIL
@@ -68,7 +68,7 @@ For commercial use written permission must be obtained from\n \
 ITF and FUA (see the 0readne file) and the author."
 
 #define GNUL " \
-       Copyright (C) 1996-2001 Jaap Schellekens.\n \
+       Copyright (C) 1996-2026 Jaap Schellekens.\n \
 \n \
  This program is free software; you can redistribute it and/or modify\n \
  it under the terms of the GNU General Public License as published by\n \
