@@ -131,8 +131,10 @@ typedef struct {
 typedef struct {
 	double	*x;
 	double	*y;
+	double	*slope;		/* precomputed (y[i+1]-y[i])/(x[i+1]-x[i]) */
 	unsigned int	points;
 	unsigned int	lasthit;
+	int		ascnd;		/* 1 if x is ascending, 0 if descending */
 	double  accu;
 	char	des[512];
 } TBL;
@@ -156,6 +158,7 @@ extern int save_tmplist(char *histfname);
 extern void del_tmplist(int files);
 
 extern  TBL *mktable (int points,char *des,int verbose);
+extern  void tbl_finalise (TBL *tab);
 extern double getval (TBL *tab,double xval);
 extern double _getval (dataset *ds,double xval);
 extern char xtraoutfn[];

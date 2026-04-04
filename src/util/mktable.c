@@ -19,17 +19,39 @@ TBL
 	TBL *tt;
 
 	if (verb)
-		fprintf (stderr, 
+		fprintf (stderr,
 		"mktable.c: creating table %s with %d points\n", des, items);
-	
+
 	tt = (TBL *) ts_memory (NULL, sizeof (TBL), progname);
 	tt->x = (double *) ts_memory (NULL, items * sizeof (double), progname);
 	tt->y = (double *) ts_memory (NULL, items * sizeof (double), progname);
+	tt->slope = (double *) ts_memory (NULL, items * sizeof (double), progname);
 	tt->points = items;
 	tt->lasthit = 0.5 * items;
+	tt->ascnd = 1;
 	strcpy (tt->des, des);
 
 	return tt;
+}
+
+/*C:tbl_finalise
+ *@ void tbl_finalise(TBL *tab)
+ *
+ * Called once after x[] and y[] have been filled.
+ * Precomputes per-interval slopes and the ascending flag so getval()
+ * does not recompute them on every lookup.
+ */
+void
+tbl_finalise (TBL *tab)
+{
+	unsigned int i, n = tab->points;
+	tab->ascnd = (tab->x[n - 1] >= tab->x[0]) ? 1 : 0;
+	for (i = 0; i < n - 1; i++) {
+		double dx = tab->x[i + 1] - tab->x[i];
+		tab->slope[i] = (dx == 0.0) ? 0.0 :
+		                (tab->y[i + 1] - tab->y[i]) / dx;
+	}
+	tab->slope[n - 1] = 0.0; /* unused sentinel */
 }
 
 
@@ -46,10 +68,9 @@ double getval(TBL *tab, double x)
 {
 	register unsigned int jhi,jm,inc,index,n;
 	register int ascnd;
-	double top,bott,rico;
 
 	n = tab->points; /* number of points in the table */
-	ascnd = (tab->x[n -1] >= tab->x[0]); /* are we ascending? */
+	ascnd = tab->ascnd; /* precomputed ascending flag */
 
 	if (tab->lasthit < 0 || tab->lasthit >= n){ /* hint seems _not_valid */
 		tab->lasthit = -1;
@@ -105,11 +126,8 @@ double getval(TBL *tab, double x)
 	else if (x == tab->x[n - 1]) /* at last point and match */
 		tab->lasthit = n - 2;
 
-	/* linear interpolation */
-	top = (tab->y[tab->lasthit + 1] - tab->y[tab->lasthit]);
-	bott = (tab->x[tab->lasthit + 1] - tab->x[tab->lasthit]);
-	rico =  top/bott;
-	return (rico * (x - tab->x[tab->lasthit]))
+	/* linear interpolation using precomputed slope */
+	return tab->slope[tab->lasthit] * (x - tab->x[tab->lasthit])
 		+ tab->y[tab->lasthit];
 }
 
@@ -331,6 +349,9 @@ readtablefile(FILE *stream,int nr,int type)
 		free(tmpxy);
 		free(dmc);
 	}
+
+	for (i = 0; i < MAXTBL; i++)
+		tbl_finalise(&sp[nr].tab[i]);
 
 	if (dumptables)
 		for (i=0;i<4;i++){

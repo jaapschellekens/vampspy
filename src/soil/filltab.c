@@ -153,6 +153,9 @@ filltables (int spnr,int layer,int estdmc)
 
 
   
+	for (i = 0; i < MAXTBL; i++)
+		tbl_finalise(&sp[spnr].tab[i]);
+
 	if (dumptables)
 		for (i=0;i<MAXTBL;i++){
 			printcom(RCSid);
