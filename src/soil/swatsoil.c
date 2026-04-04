@@ -170,12 +170,12 @@ initial ()
 			for (i = 0; i < layers; i++){
 				node[i].theta_initial = tmparray[i];
 				theta[i] = node[i].theta_initial;
-				h[i] = node[i].sp->t2h (node[i].soiltype, theta[i], depth[i]);
+				h[i] = node[i].sp->t2h (node[i].soiltype, theta[i], depth[i], i);
 			}
 			free(tmparray);
 			if (lbc == 4)	/* Change h for last layer */
 				h[layers - 1] = _getval(&data[id.hea],t);
-			theta[layers - 1] = node[layers-1].sp->h2t (node[layers - 1].soiltype, h[layers - 1]);
+			theta[layers - 1] = node[layers-1].sp->h2t (node[layers - 1].soiltype, h[layers - 1], layers-1);
 
 			break;
 		case 1:	/* pressure head profile */
@@ -187,7 +187,7 @@ initial ()
 			for (i = 0; i < layers; i++){
 				node[i].h_initial = tmparray[i];
 				h[i] = node[i].h_initial;
-				theta[i] = node[i].sp->h2t (node[i].soiltype, h[i]);
+				theta[i] = node[i].sp->h2t (node[i].soiltype, h[i], i);
 			}
 			free(tmparray);
 			break;
@@ -199,16 +199,16 @@ initial ()
 
 			for (i = 0; i < layers; i++){
 				h[i] = gwl[0] - z[i];
-				theta[i] = node[i].sp->h2t (node[i].soiltype, h[i]);
+				theta[i] = node[i].sp->h2t (node[i].soiltype, h[i], i);
 			}
 			break;
-		case 3: /* uniform head */	
+		case 3: /* uniform head */
 			tt = getdefdoub ("soil", "h_initial", 0.0, infilename, TRUE);
 			fprintf(stderr,"%f\n",tt);
 			for (i = 0; i < layers; i++){
 				node[i].h_initial = tt;
 				h[i] = tt;
-				theta[i] = node[i].sp->h2t (node[i].soiltype, h[i]);
+				theta[i] = node[i].sp->h2t (node[i].soiltype, h[i], i);
 			}
 			break;
 		default:
@@ -230,12 +230,12 @@ initial ()
 
 	/* hydraulic conductivities, diffrential moisture capacities
 	   and geometrical mean hydraulic conductivities for each layer */
-	diffmoist[0] = node[0].sp->h2dmc (node[0].soiltype, h[0]);
-	k[0] = node[0].sp->t2k (node[0].soiltype, theta[0]);
+	diffmoist[0] = node[0].sp->h2dmc (node[0].soiltype, h[0], 0);
+	k[0] = node[0].sp->t2k (node[0].soiltype, theta[0], 0);
 	kgeom[0] = 0.5 * (node[0].sp->ksat + k[0]);
 	for (i = 1; i < layers; i++){
-		diffmoist[i] = node[i].sp->h2dmc (node[i].soiltype, h[i]);
-		k[i] = node[i].sp->t2k (node[i].soiltype, theta[i]);
+		diffmoist[i] = node[i].sp->h2dmc (node[i].soiltype, h[i], i);
+		k[i] = node[i].sp->t2k (node[i].soiltype, theta[i], i);
 		kgeom[i] = MKKGEOM(i);
 	}
 	kgeom[layers] = k[layers - 1];

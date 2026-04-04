@@ -67,7 +67,7 @@ reduceva (int swreduc)
 		case 3:
 			/* Adapted Boesten and Stroosnijder */
 			if (daynr == 1){
-				thepf2 = node[1].sp->h2t (node[1].soiltype, -100.0);
+				thepf2 = node[1].sp->h2t (node[1].soiltype, -100.0, 1);
 				spev1 = thepf2 - theta[0] * fabs (dz[0]);
 				if (spev1 > 0.0)
 					saev1 = cofred * sqrt (spev1);

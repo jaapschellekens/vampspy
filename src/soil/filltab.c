@@ -40,7 +40,7 @@ double *mktblinter(int spnr,int nrpoints,double min, double max)
 
 	for (i= 0 ; i< nrpoints; i++){
 		Ktmpxy[i].x = i * inter + min;
-		Ktmpxy[i].y = sp[spnr].t2k (spnr,Ktmpxy[i].x);
+		Ktmpxy[i].y = sp[spnr].t2k (spnr, Ktmpxy[i].x, 0);
 	}
 	Slopes = ts_slopes(Ktmpxy,nrpoints);
 
@@ -112,12 +112,12 @@ filltables (int spnr,int layer,int estdmc)
 	{
 		sp[spnr].tab[T2KTAB].x[i] = thetaint[i];
 		sp[spnr].tab[T2KTAB].y[i] =
-			sp[spnr].t2k (spnr,sp[spnr].tab[THETA2K].x[i]);
+			sp[spnr].t2k (spnr, sp[spnr].tab[THETA2K].x[i], layer);
 
 		sp[spnr].tab[T2HTAB].x[i] = sp[spnr].tab[T2KTAB].x[i];
-		sp[spnr].tab[T2HTAB].y[i] = sp[spnr].t2h(spnr,sp[spnr].tab[T2HTAB].x[i],depth[layer]);
+		sp[spnr].tab[T2HTAB].y[i] = sp[spnr].t2h(spnr, sp[spnr].tab[T2HTAB].x[i], depth[layer], layer);
 
-		inter =sp[spnr].t2h(spnr,sp[spnr].residual_water, depth[layer])/(double)sp[spnr].tab[T2KTAB].points;
+		inter =sp[spnr].t2h(spnr, sp[spnr].residual_water, depth[layer], layer)/(double)sp[spnr].tab[T2KTAB].points;
 		sp[spnr].tab[H2TTAB].y[i] = sp[spnr].tab[T2KTAB].x[i];
 		sp[spnr].tab[H2TTAB].x[i]= sp[spnr].tab[T2HTAB].y[i];
 
@@ -125,7 +125,7 @@ filltables (int spnr,int layer,int estdmc)
 			sp[spnr].tab[H2DMCTAB].x[i]=
 				sp[spnr].tab[H2TTAB].x[i];
 			sp[spnr].tab[H2DMCTAB].y[i]=
-			     sp[spnr].h2dmc(spnr,sp[spnr].tab[H2DMCTAB].x[i]);
+			     sp[spnr].h2dmc(spnr, sp[spnr].tab[H2DMCTAB].x[i], layer);
 		}
 		sp[spnr].tab[H2KTAB].y[i] = sp[spnr].tab[T2KTAB].y[i];
 		sp[spnr].tab[H2KTAB].x[i]= sp[spnr].tab[T2HTAB].y[i];

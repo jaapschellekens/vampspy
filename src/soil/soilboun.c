@@ -52,7 +52,7 @@ bocotop (double *kgeo0,int *ftoph)
 	if (_qtop >= 0.0){/* determine max evaporation flux */
 		ksurf = node[0].sp->
 			t2k(node[0].soiltype, node[0].sp->
-					h2t (node[0].soiltype, hatm));
+					h2t (node[0].soiltype, hatm, 0), 0);
 		*kgeo0 = 0.5 * (ksurf + k[0]);
 		qmax = kgeom[0] * (hatm - h[0]) / depth[0] - kgeom[0];
 		_qtop = _qtop < fabs (qmax) ? _qtop : fabs (qmax);
@@ -112,9 +112,9 @@ bocobot (int daynr)
 				gwl[0] = data[id.gwt].xy[daynr].y + tfrac * (data[id.gwt].xy[daynr + 1].y - data[id.gwt].xy[daynr].y); */
 			qbot = _getval(&data[id.gwt], t);
 			h[lastl] = gwl[0] - z[lastl];
-			theta[lastl] = node[lastl].sp->h2t (node[lastl].soiltype, h[lastl]);
-			diffmoist[lastl] = node[lastl].sp->h2dmc (node[lastl].soiltype, h[lastl]);
-			k[lastl] = node[lastl].sp->t2k (node[lastl].soiltype, theta[lastl]);
+			theta[lastl] = node[lastl].sp->h2t (node[lastl].soiltype, h[lastl], lastl);
+			diffmoist[lastl] = node[lastl].sp->h2dmc (node[lastl].soiltype, h[lastl], lastl);
+			k[lastl] = node[lastl].sp->t2k (node[lastl].soiltype, theta[lastl], lastl);
 			kgeom[lastl] = MKKGEOM(lastl); /*sqrt ((k[lastl] * k[lastl - 1]));*/
 			showit ("swatsoil",ERR,"NOT YET IMPLEMENTED LBC = 0 ",0,soilverb);
 			exit (1);
@@ -150,9 +150,9 @@ bocobot (int daynr)
 			}
 			*/
 			h[layers - 1]  = _getval(&data[id.hea], t);
-			theta[lastl] = node[lastl].sp->h2t (node[lastl].soiltype, h[lastl]);
-			diffmoist[lastl] = node[lastl].sp->h2dmc (node[lastl].soiltype, h[lastl]);
-			k[lastl] = node[lastl].sp->t2k (node[lastl].soiltype, theta[lastl]);
+			theta[lastl] = node[lastl].sp->h2t (node[lastl].soiltype, h[lastl], lastl);
+			diffmoist[lastl] = node[lastl].sp->h2dmc (node[lastl].soiltype, h[lastl], lastl);
+			k[lastl] = node[lastl].sp->t2k (node[lastl].soiltype, theta[lastl], lastl);
 			kgeom[lastl] = MKKGEOM(lastl);/*0.5 * (k[lastl] + k[lastl - 1]);*/
 			break;
 		case 5:			/* Zero flux at bottom */
@@ -294,7 +294,7 @@ begin
   XY(6,2,'           -jt         -jt        ');
   XY(6,3,'h  = h   .e    + (1 - e    ).R .W ');
   XY(6,4,' t    t-1                     t   ');
-  XY(5,6,'ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ');
+  XY(5,6,'ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½');
   repeat
     XY(6, 7,'Initiele stijghoogte [m]                  : '); X:= whereX; Y:= whereY; write(h0:8:3,' ? ');
     GetReal(WhereX,WhereY,h0); gotoXY(X,Y); clreol; write(h0:8:3);

@@ -61,7 +61,7 @@ smd(double drz, double fieldh)
 	double thetadf=0;
 
 	while (i < layers && fabs(z[i]) < fabs(drz)){
-		thetadf = node[i].sp->h2t(node[i].soiltype,fieldh) - theta[i];
+		thetadf = node[i].sp->h2t(node[i].soiltype, fieldh, i) - theta[i];
 		if (thetadf > 0.0)
 			ttsmd -= thetadf * dz[i];
 		i++;

@@ -133,7 +133,7 @@ typedef struct {
 	double	*y;
 	double	*slope;		/* precomputed (y[i+1]-y[i])/(x[i+1]-x[i]) */
 	unsigned int	points;
-	unsigned int	lasthit;
+	unsigned int	*lasthit;
 	int		ascnd;		/* 1 if x is ascending, 0 if descending */
 	double  accu;
 	char	des[512];
@@ -159,7 +159,7 @@ extern void del_tmplist(int files);
 
 extern  TBL *mktable (int points,char *des,int verbose);
 extern  void tbl_finalise (TBL *tab);
-extern double getval (TBL *tab,double xval);
+extern double getval (TBL *tab, double xval, int layer);
 extern double _getval (dataset *ds,double xval);
 extern char xtraoutfn[];
 extern char outfilename[];

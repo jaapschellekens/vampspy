@@ -27,7 +27,7 @@ TBL
 	tt->y = (double *) ts_memory (NULL, items * sizeof (double), progname);
 	tt->slope = (double *) ts_memory (NULL, items * sizeof (double), progname);
 	tt->points = items;
-	tt->lasthit = 0.5 * items;
+	tt->lasthit = NULL;
 	tt->ascnd = 1;
 	strcpy (tt->des, des);
 
@@ -52,6 +52,10 @@ tbl_finalise (TBL *tab)
 		                (tab->y[i + 1] - tab->y[i]) / dx;
 	}
 	tab->slope[n - 1] = 0.0; /* unused sentinel */
+	/* Allocate per-layer lasthit hint array */
+	tab->lasthit = (unsigned int *) calloc(layers, sizeof(unsigned int));
+	for (i = 0; i < (unsigned int)layers; i++)
+		tab->lasthit[i] = tab->points / 2;
 }
 
 
@@ -64,7 +68,7 @@ tbl_finalise (TBL *tab)
  * In speed.inp this method is about 18% faster than the one without the
  * hunt fase.
  */ 
-double getval(TBL *tab, double x)
+double getval(TBL *tab, double x, int layer)
 {
 	register unsigned int jhi,jm,inc,index,n;
 	register int ascnd;
@@ -72,21 +76,21 @@ double getval(TBL *tab, double x)
 	n = tab->points; /* number of points in the table */
 	ascnd = tab->ascnd; /* precomputed ascending flag */
 
-	if (tab->lasthit < 0 || tab->lasthit >= n){ /* hint seems _not_valid */
-		tab->lasthit = -1;
+	if (tab->lasthit[layer] < 0 || tab->lasthit[layer] >= n){ /* hint seems _not_valid */
+		tab->lasthit[layer] = -1;
 		jhi = n;
 	}else{					/* we have a valid hint... */
 		inc = 1;
-		if (x >= tab->x[tab->lasthit] == ascnd){
-			if (tab->lasthit == n - 1) 
+		if (x >= tab->x[tab->lasthit[layer]] == ascnd){
+			if (tab->lasthit[layer] == n - 1)
 				return tab->y[n-1]; /* last point */
-			jhi = tab->lasthit + 1;
+			jhi = tab->lasthit[layer] + 1;
 			while ( x >= tab->x[jhi] == ascnd) {
-				tab->lasthit = jhi;
+				tab->lasthit[layer] = jhi;
 				inc += inc;
-				/*jhi = tab->lasthit + inc;
-				 * because lasthit == jhi rewtite to:
-				 */ 
+				/*jhi = tab->lasthit[layer] + inc;
+				 * because lasthit[layer] == jhi rewtite to:
+				 */
 				jhi += inc;
 				if (jhi >= n){
 					jhi = n;
@@ -94,41 +98,41 @@ double getval(TBL *tab, double x)
 				}
 			}
 		} else {
-			if (tab->lasthit == 0){
-				tab->lasthit = -1;
+			if (tab->lasthit[layer] == 0){
+				tab->lasthit[layer] = -1;
 				return tab->y[0];
 			}
-			jhi = tab->lasthit--;
-			while(x < tab->x[tab->lasthit] == ascnd) {
-				jhi = tab->lasthit;
+			jhi = tab->lasthit[layer]--;
+			while(x < tab->x[tab->lasthit[layer]] == ascnd) {
+				jhi = tab->lasthit[layer];
 				inc <<= 1;
 				if (inc >= jhi){
-					tab->lasthit = -1;
+					tab->lasthit[layer] = -1;
 					break;
-				}else 
-					/* tab->lasthit = jhi - inc; 
-					 * becuase jhi == lastit rewrite 
+				}else
+					/* tab->lasthit[layer] = jhi - inc;
+					 * becuase jhi == lastit rewrite
 					 * (this might save use sime time)
 					 * to: */
-					tab->lasthit -= inc;
+					tab->lasthit[layer] -= inc;
 			}
 		}
 	} /* hunting stopped, do bin search...*/
-	while ((jhi - tab->lasthit) != 1){
-		jm = (jhi + tab->lasthit) >> 1;
+	while ((jhi - tab->lasthit[layer]) != 1){
+		jm = (jhi + tab->lasthit[layer]) >> 1;
 		if (x >= tab->x[jm] == ascnd)
-			tab->lasthit = jm;
+			tab->lasthit[layer] = jm;
 		else
 			jhi = jm;
 	}
 	if ( x == tab->x[0]) /* at first point and match */
-		tab->lasthit = 0;
+		tab->lasthit[layer] = 0;
 	else if (x == tab->x[n - 1]) /* at last point and match */
-		tab->lasthit = n - 2;
+		tab->lasthit[layer] = n - 2;
 
 	/* linear interpolation using precomputed slope */
-	return tab->slope[tab->lasthit] * (x - tab->x[tab->lasthit])
-		+ tab->y[tab->lasthit];
+	return tab->slope[tab->lasthit[layer]] * (x - tab->x[tab->lasthit[layer]])
+		+ tab->y[tab->lasthit[layer]];
 }
 
 

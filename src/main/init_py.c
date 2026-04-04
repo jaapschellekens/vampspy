@@ -549,13 +549,13 @@ _py_soil_2(const char *fname, int nr, double a, double b)
     return ret;
 }
 
-double py_h2dmc(int nr, double head)        { return _py_soil_1("h2dmc", nr, head);        }
-double py_t2k  (int nr, double wcon)        { return _py_soil_1("t2k",   nr, wcon);        }
-double py_t2h  (int nr, double wcon, double depth) { return _py_soil_2("t2h", nr, wcon, depth); }
-double py_h2t  (int nr, double head)        { return _py_soil_1("h2t",   nr, head);        }
-double py_h2k  (int nr, double head)        { return _py_soil_1("h2k",   nr, head);        }
-double py_h2u  (int nr, double head)        { return _py_soil_1("h2u",   nr, head);        }
-double py_h2dkdp(int nr, double head)       { return _py_soil_1("h2dkdp",nr, head);        }
+double py_h2dmc(int nr, double head, int layer)        { return _py_soil_1("h2dmc", nr, head);        }
+double py_t2k  (int nr, double wcon, int layer)        { return _py_soil_1("t2k",   nr, wcon);        }
+double py_t2h  (int nr, double wcon, double depth, int layer) { return _py_soil_2("t2h", nr, wcon, depth); }
+double py_h2t  (int nr, double head, int layer)        { return _py_soil_1("h2t",   nr, head);        }
+double py_h2k  (int nr, double head, int layer)        { return _py_soil_1("h2k",   nr, head);        }
+double py_h2u  (int nr, double head, int layer)        { return _py_soil_1("h2u",   nr, head);        }
+double py_h2dkdp(int nr, double head, int layer)       { return _py_soil_1("h2dkdp",nr, head);        }
 
 /* Call Python getspars(secname, spnr) to read soil params from .inp file */
 void

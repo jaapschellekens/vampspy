@@ -206,13 +206,13 @@ headcalc (int pt, double *t)
 
 		/* calculate rest from new head */
 		theta[numeq] = node[numeq].sp->
-			h2t (node[numeq].soiltype, h[numeq]);
+			h2t (node[numeq].soiltype, h[numeq], numeq);
 		diffmoist[numeq] = node[numeq].sp->
-			h2dmc (node[numeq].soiltype, h[numeq]);
+			h2dmc (node[numeq].soiltype, h[numeq], numeq);
 		for (i = numeq - 1; i >= 0; i--){
-			theta[i] = node[i].sp->h2t (node[i].soiltype, h[i]);
+			theta[i] = node[i].sp->h2t (node[i].soiltype, h[i], i);
 			diffmoist[i] = node[i].sp->
-				h2dmc (node[i].soiltype, h[i]);
+				h2dmc (node[i].soiltype, h[i], i);
 		}
 
 		if (nonoit == 1)
@@ -235,7 +235,7 @@ headcalc (int pt, double *t)
 				else{
 					if (solvemet == BAN)
 						h_by_banddiag();
-					else	
+					else
 						if (h_by_tridiag())
 							h_by_banddiag();
 				}
@@ -243,14 +243,14 @@ headcalc (int pt, double *t)
 
 			/* calculate rest from new head */
 			theta[numeq] = node[numeq].sp->
-				h2t (node[numeq].soiltype, h[numeq]);
+				h2t (node[numeq].soiltype, h[numeq], numeq);
 			diffmoist[numeq] = node[numeq].sp->
-				h2dmc (node[numeq].soiltype, h[numeq]);
+				h2dmc (node[numeq].soiltype, h[numeq], numeq);
 			for (i = numeq - 1; i >= 0; i--){
 				theta[i] = node[i].sp->
-					h2t(node[i].soiltype, h[i]);
+					h2t(node[i].soiltype, h[i], i);
 				diffmoist[i] = node[i].sp->
-					h2dmc (node[i].soiltype, h[i]);
+					h2dmc (node[i].soiltype, h[i], i);
 			}
 			numbit++;
 		} 
@@ -310,9 +310,9 @@ headcalc (int pt, double *t)
 		qbot = _getval(&data[id.qbo],*t);
 
 	/* Adjust conductivities  */
-	k[0] = node[0].sp->t2k (node[0].soiltype, theta[0]);
+	k[0] = node[0].sp->t2k (node[0].soiltype, theta[0], 0);
 	for (i = 1; i < layers; i++){
-		k[i] = node[i].sp->t2k (node[i].soiltype, theta[i]);
+		k[i] = node[i].sp->t2k (node[i].soiltype, theta[i], i);
 		kgeom[i] = MKKGEOM(i);
 	}
 	kgeom[layers] = k[layers - 1];

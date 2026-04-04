@@ -27,13 +27,13 @@ typedef struct {
 	double b; /*clapp & hornberger */
 	double psisat; /*clapp & hornberger */
 	double clayfrac;
-	double  (*h2dmc) (int nr, double head);  
-	double  (*t2k) (int nr, double wcon);  
-	double  (*t2h) (int nr, double wcon, double depth);  
-	double  (*h2t) (int nr, double head);
-	double  (*h2k) (int nr, double head);  
-	double  (*h2u) (int nr, double head);  
-	double  (*h2dkdp) (int nr, double head);  
+	double  (*h2dmc) (int nr, double head, int layer);
+	double  (*t2k) (int nr, double wcon, int layer);
+	double  (*t2h) (int nr, double wcon, double depth, int layer);
+	double  (*h2t) (int nr, double head, int layer);
+	double  (*h2k) (int nr, double head, int layer);
+	double  (*h2u) (int nr, double head, int layer);
+	double  (*h2dkdp) (int nr, double head, int layer);
 } soilparmt;
 
 

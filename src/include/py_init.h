@@ -10,13 +10,13 @@ extern int    py_at_end_f(void);
 extern double py_estrs_f(void);
 
 /* Soil method 5 — Python user-defined theta/h/k functions */
-extern double py_h2dmc  (int nr, double head);
-extern double py_t2k    (int nr, double wcon);
-extern double py_t2h    (int nr, double wcon, double depth);
-extern double py_h2t    (int nr, double head);
-extern double py_h2k    (int nr, double head);
-extern double py_h2u    (int nr, double head);
-extern double py_h2dkdp (int nr, double head);
+extern double py_h2dmc  (int nr, double head, int layer);
+extern double py_t2k    (int nr, double wcon, int layer);
+extern double py_t2h    (int nr, double wcon, double depth, int layer);
+extern double py_h2t    (int nr, double head, int layer);
+extern double py_h2k    (int nr, double head, int layer);
+extern double py_h2u    (int nr, double head, int layer);
+extern double py_h2dkdp (int nr, double head, int layer);
 extern void   py_getspars_f(const char *secname, int spnr);
 
 /* Scripted topsystem */

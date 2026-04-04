@@ -17,20 +17,20 @@ static char RCSid[] =
 double volm1;
 extern double volsat,volact;
 
-double  noop(int nr, double head)
+double  noop(int nr, double head, int layer)
 {
 	perror("oops");
 	exit(1);
 	return MISSVAL;
 }
-double  (*h2dmc) (int nr, double head) = NULL;  
-double  (*t2k) (int nr, double wcon) = NULL;  
-double  (*t2h) (int nr, double wcon, double depth) = NULL;  
-double  (*h2t) (int nr, double head) = NULL;  
+double  (*h2dmc) (int nr, double head, int layer) = NULL;
+double  (*t2k) (int nr, double wcon, int layer) = NULL;
+double  (*t2h) (int nr, double wcon, double depth, int layer) = NULL;
+double  (*h2t) (int nr, double head, int layer) = NULL;
 /* in work */
-double  (*h2k) (int nr, double head) = noop;  
-double  (*h2u) (int nr, double head) = noop;  
-double  (*h2dkdp) (int nr, double head) = noop;  
+double  (*h2k) (int nr, double head, int layer) = noop;
+double  (*h2u) (int nr, double head, int layer) = noop;
+double  (*h2dkdp) (int nr, double head, int layer) = noop;
 
 /* this is were the Clapp Horberger (Campbel 1994) functions start */
 
@@ -42,7 +42,7 @@ double  (*h2dkdp) (int nr, double head) = noop;
  *
  * Returns: differential moisture content*/
 double
-h2dmc_0 (int nr, double head)
+h2dmc_0 (int nr, double head, int layer)
 {
 	if (head >= -1.0E-1) {
 		return 0.0;
@@ -61,7 +61,7 @@ h2dmc_0 (int nr, double head)
  *
  * Returns: k_unsat*/
 double
-t2k_0 (int nr, double wcon)
+t2k_0 (int nr, double wcon, int layer)
 {
 	double relsat;
 
@@ -87,7 +87,7 @@ t2k_0 (int nr, double wcon)
 
 #define MAXSUCKHEAD -1.0E20
 double
-t2h_0 (int nr, double wcon, double depth)
+t2h_0 (int nr, double wcon, double depth, int layer)
 {
 	double ans;
 
@@ -112,7 +112,7 @@ t2h_0 (int nr, double wcon, double depth)
  * Returns: theta
  */
 double
-h2t_0 (int nr, double head)
+h2t_0 (int nr, double head, int layer)
 {
 	if (head > sp[nr].psisat)
 		return sp[nr].thetas;
@@ -122,7 +122,7 @@ h2t_0 (int nr, double head)
 }
 
 double
-h2k_0( int nr, double head)
+h2k_0( int nr, double head, int layer)
 {
 	if (head >= sp[nr].psisat)
 		return sp[nr].ksat;
@@ -131,15 +131,15 @@ h2k_0( int nr, double head)
 }
 
 double
-h2u_0 (int nr, double head)
+h2u_0 (int nr, double head, int layer)
 {
 	if (head >= sp[nr].psisat)
 		return sp[nr].ksat * (-sp[nr].psisat/(sp[nr].n-1) + head - sp[nr].psisat);
 	else
-		return -(h2k_0(nr,head) * head)/(sp[nr].n-1);
+		return -(h2k_0(nr,head,layer) * head)/(sp[nr].n-1);
 }
 
-double h2dkdp_0(int nr, double head)
+double h2dkdp_0(int nr, double head, int layer)
 {
 	if (head >= sp[nr].psisat)
 		return 0.0;
@@ -157,7 +157,7 @@ double h2dkdp_0(int nr, double head)
  *
  * Returns: differential moisture capacity*/
 double
-h2dmc_1 (int nr, double head)
+h2dmc_1 (int nr, double head, int layer)
 {
 	double term1, term2;
 	double alphah;
@@ -193,7 +193,7 @@ h2dmc_1 (int nr, double head)
  *
  * Returns: k_unsat */
 double
-t2k_1 (int nr, double wcon)
+t2k_1 (int nr, double wcon, int layer)
 {
   double relsat, term1, expon1;
 
@@ -222,7 +222,7 @@ t2k_1 (int nr, double wcon)
  * Returns: pressure head */
 
 double
-t2h_1 (int nr, double wcon, double depth)
+t2h_1 (int nr, double wcon, double depth, int layer)
 {
   double help;
 
@@ -259,7 +259,7 @@ t2h_1 (int nr, double wcon, double depth)
  *
  * Returns: water content theta */
 double
-h2t_1 (int nr, double head)
+h2t_1 (int nr, double head, int layer)
 {
   double help;
 
@@ -277,18 +277,18 @@ h2t_1 (int nr, double head)
 
 
 double
-h2k_1( int nr, double head)
+h2k_1( int nr, double head, int layer)
 {
 	return 0.0;
 }
 
 double
-h2u_1 (int nr, double head)
+h2u_1 (int nr, double head, int layer)
 {
 	return 0.0;
 }
 
-double h2dkdp_1(int nr, double head)
+double h2dkdp_1(int nr, double head, int layer)
 {
 	return 0.0;
 }
@@ -301,12 +301,12 @@ double h2dkdp_1(int nr, double head)
  *
  * Returns: differential moisture capacity */
 double
-h2dmc_2 (int nr, double head)
+h2dmc_2 (int nr, double head, int layer)
 {
   if (head >= -1.0E-1)
       return 0.0;
   else
-     return getval (&sp[nr].tab[H2DMCTAB], head);
+     return getval (&sp[nr].tab[H2DMCTAB], head, layer);
 }
 
 /*+Name: t2k_2
@@ -318,17 +318,17 @@ h2dmc_2 (int nr, double head)
  *
  * Returns: k_unsat+*/
 double
-t2k_2 (int nr, double wcon)
+t2k_2 (int nr, double wcon, int layer)
 {
    double relsat;
-   
+
    relsat = (wcon - sp[nr].residual_water) / (sp[nr].thetas -
 						  sp[nr].residual_water);
-   relsat = relsat > 1.0 ? 1.0 : relsat; 
+   relsat = relsat > 1.0 ? 1.0 : relsat;
    if (relsat < 0.001)
      return 1.0E-10;
    else
-     return getval (&sp[nr].tab[T2KTAB], wcon);
+     return getval (&sp[nr].tab[T2KTAB], wcon, layer);
 }
 
 /*+Name: t2h
@@ -338,7 +338,7 @@ t2k_2 (int nr, double wcon)
  +*/
 
 double
-t2h_2 (int nr, double wcon, double depth)
+t2h_2 (int nr, double wcon, double depth, int layer)
 {
   if ((sp[nr].thetas - wcon) < 1.0E-6)
 	return fabs (depth);
@@ -347,7 +347,7 @@ t2h_2 (int nr, double wcon, double depth)
 	if ((wcon - sp[nr].residual_water) < 1.0E-6)
 	  return -1.0E16;
 	else
-	  return getval (&sp[nr].tab[T2HTAB], wcon);
+	  return getval (&sp[nr].tab[T2HTAB], wcon, layer);
      }
 }
 
@@ -358,37 +358,37 @@ t2h_2 (int nr, double wcon, double depth)
  *Returns: water content (theta)
  +*/
 double
-h2t_2 (int nr, double head)
+h2t_2 (int nr, double head, int layer)
 {
 	if (head >= -1.0E-6)
 		return sp[nr].thetas;
 	else
-		return getval (&sp[nr].tab[H2TTAB], head);
+		return getval (&sp[nr].tab[H2TTAB], head, layer);
 }
 
 double
-h2k_2 (int nr, double head)
+h2k_2 (int nr, double head, int layer)
 {
 	if (head >= 0.0)
 		return sp[nr].ksat;
 	else
-		return getval (&sp[nr].tab[H2KTAB], head);
+		return getval (&sp[nr].tab[H2KTAB], head, layer);
 }
 
 double
-h2u_2 (int nr, double head)
+h2u_2 (int nr, double head, int layer)
 {
-	return getval (&sp[nr].tab[H2UTAB], head);
+	return getval (&sp[nr].tab[H2UTAB], head, layer);
 }
 
 
-double 
-h2dkdp_2 (int nr, double head)
+double
+h2dkdp_2 (int nr, double head, int layer)
 {
 	if (head >= 0.0)
 		return 0.0;
 	else
-		return getval (&sp[nr].tab[H2DKDPTAB], head);
+		return getval (&sp[nr].tab[H2DKDPTAB], head, layer);
 }
 
 
