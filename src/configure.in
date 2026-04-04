@@ -10,6 +10,9 @@ VERSION=`cat ../0version | awk '{print $1}'`
 AC_SUBST(VERSION)
 dnl Checks for programs.
 AC_PROG_CC
+dnl Append performance flags; user can override the base flags via CFLAGS
+dnl but these are always added on top.
+CFLAGS="$CFLAGS -ffast-math -march=native"
 AC_PROG_MAKE_SET
 AC_PROG_RANLIB
 AC_PROG_INSTALL
