@@ -32,8 +32,8 @@ LDFLAGS	=  -L${BUILDLIBDIR}
 RANLIB	= ranlib
 INSTALL	= /usr/bin/install -c
 INSTALL_PROGRAM	= $(INSTALL) -c
-PYLIBS	= -L/opt/homebrew/opt/python@3.14/Frameworks/Python.framework/Versions/3.14/lib -Wl,-rpath,/opt/homebrew/opt/python@3.14/Frameworks/Python.framework/Versions/3.14/lib -L/opt/homebrew/opt/python@3.14/Frameworks/Python.framework/Versions/3.14/lib/python3.14/config-3.14-darwin -lpython3.14 -ldl -framework CoreFoundation
-LIBS	= -lmet -lts -ldef  -lnru -ltermcap $(PYLIBS) -L/opt/homebrew/opt/python@3.14/Frameworks/Python.framework/Versions/3.14/lib -Wl,-rpath,/opt/homebrew/opt/python@3.14/Frameworks/Python.framework/Versions/3.14/lib -L/opt/homebrew/opt/python@3.14/Frameworks/Python.framework/Versions/3.14/lib/python3.14/config-3.14-darwin -lpython3.14 -ldl -framework CoreFoundation  -lm
+PYLIBS	= -L/Users/jaap/miniforge3/lib -Wl,-rpath,/Users/jaap/miniforge3/lib -L/Users/jaap/miniforge3/lib/python3.13/config-3.13-darwin -lpython3.13 -ldl -framework CoreFoundation
+LIBS	= -lmet -lts -ldef  -lnru -ltermcap $(PYLIBS) -L/Users/jaap/miniforge3/lib -Wl,-rpath,/Users/jaap/miniforge3/lib -L/Users/jaap/miniforge3/lib/python3.13/config-3.13-darwin -lpython3.13 -ldl -framework CoreFoundation  -lm
 
 SUBDIR = util main soil topsys 
 #THELIBS = ts.lib/libts.a deffile.lib/libdef.a\

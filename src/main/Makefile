@@ -1,7 +1,7 @@
 SHELL = /bin/sh
 
 CC	= gcc
-CFLAGS	= -g -O2
+CFLAGS	= -g -O2 -ffast-math -march=native
 MOBJ	= ${OBJDIR}/vamps.o ${OBJDIR}/sigs.o ${OBJDIR}/init_py.o ${OBJDIR}/plot.o
 top_srcdir 	= ..
 srcdir 		= .
@@ -12,9 +12,9 @@ LIBDIR 		= ${exec_prefix}/lib
 
 OBJDIR 		= ../objsDarwin_arm64
 RM 	= rm -f
-VAMPSLIBDIR	= ${prefix}/share/vamps1.0
+VAMPSLIBDIR	= ${prefix}/share/vamps
 INC	= -I$(top_srcdir)/include -I$(top_srcdir)
-PYINC	= -I/opt/homebrew/opt/python@3.14/Frameworks/Python.framework/Versions/3.14/include/python3.14 -I/opt/homebrew/opt/python@3.14/Frameworks/Python.framework/Versions/3.14/include/python3.14
+PYINC	= -I/Users/jaap/miniforge3/include/python3.13 -I/Users/jaap/miniforge3/include/python3.13
 GNUPLOT	= 
 DEFS	= -DHAVE_CONFIG_H -DHAVE_LIBPYTHON -DVAMPSLIB=\"${VAMPSLIBDIR}\" -DGNUPLOT=\"${GNUPLOT}\"
 

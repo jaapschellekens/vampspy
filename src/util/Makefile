@@ -2,7 +2,7 @@ SHELL = /bin/sh
 
 
 CC = gcc
-CFLAGS = -g -O2
+CFLAGS = -g -O2 -ffast-math -march=native
 UOBJ	= ${OBJDIR}/dataset.o ${OBJDIR}/output.o ${OBJDIR}/getopt.o ${OBJDIR}/progress.o ${OBJDIR}/mktable.o ${OBJDIR}/utout.o ${OBJDIR}/perror.o ${OBJDIR}/pro_mesg.o ${OBJDIR}/xtraout.o ${OBJDIR}/resamp.o ${OBJDIR}/memory.o ${OBJDIR}/smoothar.o
 OBJDIR	= ../objsDarwin_arm64
 INC	= -I../include -I..

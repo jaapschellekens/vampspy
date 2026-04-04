@@ -3,7 +3,7 @@ SHELL = /bin/sh
 TSOBJ = ts_com.o ts_input.o ts_mem.o ts_readf.o ts_spl.o ts_time.o
 SLDOC = vamps -I sldoc
 CC	= gcc
-CFLAGS	= -g -O2
+CFLAGS	= -g -O2 -ffast-math -march=native
 
 AR = ar
 RANLIB = ranlib

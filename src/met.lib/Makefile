@@ -4,7 +4,7 @@ METOBJ =  e0.o eaes.o earo.o gamma.o lambda.o makkink.o\
 	ra.o vslope.o penmon.o int.o rn_open.o
 
 CC	= gcc
-CFLAGS	= -g -O2
+CFLAGS	= -g -O2 -ffast-math -march=native
 
 SLDOC = vamps -I sldoc
 AR = ar

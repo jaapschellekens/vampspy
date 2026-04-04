@@ -1,4 +1,4 @@
-# Makefile for vamps 1.0
+# Makefile for vamps 
 #
 #       Copyright (C) 1995 Jaap Schellekens.
 #
@@ -16,7 +16,7 @@
 # along with this program; see the file COPYING.  If not, write to
 # the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
-VERSION = 1.0
+VERSION = 
 DVIPS = dvips
 INSTALL = /usr/bin/install -c
 MANDIR =  /usr/local/man

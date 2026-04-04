@@ -69,6 +69,7 @@ dtmin = 0.6E-3
 dtmax = 1.0E-2
 mbck = 1
 swredu=0
+smooth=5
 cofred= 0.35
 gwlevel = 1.0
 outdir = output

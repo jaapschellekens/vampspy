@@ -3,7 +3,7 @@ SHELL = /bin/sh
 DEFOBJ = deffile.o fgets.o strcmp.o index.o memlist.o
 SLDOC = vamps -I sldoc
 
-CFLAGS	= -g -O2
+CFLAGS	= -g -O2 -ffast-math -march=native
 CC = gcc
 RANLIB = ranlib
 AR = ar
