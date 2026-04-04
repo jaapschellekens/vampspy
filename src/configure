@@ -4306,7 +4306,7 @@ done
 
 
 
-ac_config_files="$ac_config_files ../doc/Makefile agl/Makefile deffile.lib/Makefile maq.lib/Makefile main/Makefile ../share/Makefile soil/Makefile met.lib/Makefile ts.lib/Makefile nr_ut.lib/Makefile util/Makefile plot/Makefile Makefile topsys/Makefile ../examples/vamps_demo/Makefile"
+ac_config_files="$ac_config_files ../doc/Makefile agl/Makefile deffile.lib/Makefile main/Makefile ../share/Makefile soil/Makefile met.lib/Makefile ts.lib/Makefile nr_ut.lib/Makefile util/Makefile plot/Makefile Makefile topsys/Makefile ../examples/vamps_demo/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -5002,7 +5002,6 @@ do
     "../doc/Makefile") CONFIG_FILES="$CONFIG_FILES ../doc/Makefile" ;;
     "agl/Makefile") CONFIG_FILES="$CONFIG_FILES agl/Makefile" ;;
     "deffile.lib/Makefile") CONFIG_FILES="$CONFIG_FILES deffile.lib/Makefile" ;;
-    "maq.lib/Makefile") CONFIG_FILES="$CONFIG_FILES maq.lib/Makefile" ;;
     "main/Makefile") CONFIG_FILES="$CONFIG_FILES main/Makefile" ;;
     "../share/Makefile") CONFIG_FILES="$CONFIG_FILES ../share/Makefile" ;;
     "soil/Makefile") CONFIG_FILES="$CONFIG_FILES soil/Makefile" ;;

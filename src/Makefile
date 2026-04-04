@@ -1,5 +1,5 @@
 SHELL = /bin/sh
-# Makefile for Vamps 1.0
+# Makefile for Vamps 
 
 # You should not need to change anything below this if configure worked the
 # way it should... This only happens on Linux en FreeBSD at the moment....
@@ -19,7 +19,7 @@ LIBDIR 		= ${exec_prefix}/lib
 BUILDLIBDIR 	= ./../libDarwin_arm64
 
 OBJDIR 		= ./objsDarwin_arm64
-VAMPSLIBDIR	= ${prefix}/share/vamps1.0
+VAMPSLIBDIR	= ${prefix}/share/vamps
 mandir		= ${prefix}/share/man
 
 CFLAGS 	= -g -O2 -ffast-math -march=native
@@ -32,10 +32,10 @@ LDFLAGS	=  -L${BUILDLIBDIR}
 RANLIB	= ranlib
 INSTALL	= /usr/bin/install -c
 INSTALL_PROGRAM	= $(INSTALL) -c
-PYLIBS	= -L/Users/jaap/miniforge3/lib -Wl,-rpath,/Users/jaap/miniforge3/lib -L/Users/jaap/miniforge3/lib/python3.13/config-3.13-darwin -lpython3.13 -ldl -framework CoreFoundation
-LIBS	= -lmet -lts -ldef  -lnru -ltermcap $(PYLIBS) -L/Users/jaap/miniforge3/lib -Wl,-rpath,/Users/jaap/miniforge3/lib -L/Users/jaap/miniforge3/lib/python3.13/config-3.13-darwin -lpython3.13 -ldl -framework CoreFoundation  -lm
+PYLIBS	= -L/opt/homebrew/opt/python@3.14/Frameworks/Python.framework/Versions/3.14/lib -Wl,-rpath,/opt/homebrew/opt/python@3.14/Frameworks/Python.framework/Versions/3.14/lib -L/opt/homebrew/opt/python@3.14/Frameworks/Python.framework/Versions/3.14/lib/python3.14/config-3.14-darwin -lpython3.14 -ldl -framework CoreFoundation
+LIBS	= -lmet -lts -ldef  -lnru -ltermcap $(PYLIBS) -L/opt/homebrew/opt/python@3.14/Frameworks/Python.framework/Versions/3.14/lib -Wl,-rpath,/opt/homebrew/opt/python@3.14/Frameworks/Python.framework/Versions/3.14/lib -L/opt/homebrew/opt/python@3.14/Frameworks/Python.framework/Versions/3.14/lib/python3.14/config-3.14-darwin -lpython3.14 -ldl -framework CoreFoundation  -lm
 
-SUBDIR = util main soil topsys
+SUBDIR = util main soil topsys 
 #THELIBS = ts.lib/libts.a deffile.lib/libdef.a\
 #	  nr_ut.lib/libnru.a met.lib/libmet.a slang.0.99/src/objs/libslang.a
 THELIBS = ts.lib/libts.a deffile.lib/libdef.a\
@@ -53,8 +53,8 @@ TOBJ = ${OBJDIR}/intopsys.o  ${OBJDIR}/notree.o ${OBJDIR}/topout.o ${OBJDIR}/pre
 SOBJ = ${OBJDIR}/soilout.o ${OBJDIR}/swatsoil.o ${OBJDIR}/integral.o ${OBJDIR}/timestep.o ${OBJDIR}/soilboun.o ${OBJDIR}/headcalc.o ${OBJDIR}/soilut.o ${OBJDIR}/band.o ${OBJDIR}/calcgwl.o ${OBJDIR}/fluxes.o ${OBJDIR}/setzero.o ${OBJDIR}/rootex.o ${OBJDIR}/det_hatm.o ${OBJDIR}/reduceva.o ${OBJDIR}/filltab.o ${OBJDIR}/misc_p.o ${OBJDIR}/smooth.o ${OBJDIR}/alloc.o ${OBJDIR}/array.o ${OBJDIR}/getparm.o
 
 AGLRT	= ./agl/noagl
-PROGVERSION = 1.0
-SHORTPROGVERSION = 1.0
+PROGVERSION = 
+SHORTPROGVERSION = 
 
 #----------------------------------------------------------------------------
 #              Targets start here
@@ -150,7 +150,7 @@ demo: dummy
 	(cd  ../examples/demo; $(MAKE) BINDIR="$(BINDIR)")
 
 ckall: dummy
-	ci -u -f -sAlpha -m"Version: 1.0" `find -name \*.[ch]`
+	ci -u -f -sAlpha -m"Version: " `find -name \*.[ch]`
 
 #man-install: installdirs
 #	${INSTALL_PROGRAM} $(srcdir)/../doc/vamps.1 $(mandir)/man1
