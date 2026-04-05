@@ -46,6 +46,8 @@
 #Vamps version 0.99i -- Nov 2001 [Jun  4 2003] (CYGWIN_NT-5.1_i686)
 1,	ASUS,	Athlon XP,	1800,	AMD,		CYGWIN_NT-5.1_i686,	1.859000,	161377.08
 #Vamps version 0.99i -- Nov 2001 [Nov 13 2017] (Linux_x86_64)
-1,	tf7600,	Xeon,	2.5,	Intel,		Linux_x86_64,	0.503202,	596182.05
+1,	tf7600,	Xeon,	2500,	Intel,		Linux_x86_64,	0.503202,	596182.05
 #Vamps 1.0 (Python) [macOS-26.3.1-arm64-arm-64bit-Mach-O]
-1,	MacBook-Air-van-Jaap.local,	arm,	M5,	Apple,		Darwin_arm64,	0.076196,	3937214.55
+1,	MacBook-Air-van-Jaap.local,	arm,	4000,	Apple,		Darwin_arm64,	0.076196,	3937214.55
+#Vamps 1.0 (Python) [Linux-6.17.0-14-generic-x86_64-with-glibc2.42]
+1,	jaap-XPS13-9333,	x86_64,	3100,	i7-4510U		Linux_x86_64,	0.323418,	927592.16

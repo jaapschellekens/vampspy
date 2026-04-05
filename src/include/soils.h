@@ -47,5 +47,10 @@ typedef struct {
 	double h_initial;
 	int as_above; /* same as above layer */
 	int rlay; /* Physical -- real -- layer */
+	/* Direct table pointers — set once after filltables(), avoids
+	 * function-pointer dispatch in the Newton iteration hot path. */
+	TBL *h2t_tab;   /* sp->tab[H2TTAB]   */
+	TBL *h2dmc_tab; /* sp->tab[H2DMCTAB] */
+	TBL *t2k_tab;   /* sp->tab[T2KTAB]   */
 } node_t;
 #endif /* SOILS_H */

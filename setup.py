@@ -95,8 +95,8 @@ ext = Extension(
     sources=sources,
     include_dirs=inc_dirs,
     define_macros=macros,
-    extra_compile_args=["-g", "-O2", "-ffast-math", "-march=native", "-w"],  # -w silences old-code warnings
-    extra_link_args=["-lm"],
+    extra_compile_args=["-O3", "-ffast-math", "-march=native", "-flto", "-w"],
+    extra_link_args=["-lm", "-flto"],
 )
 
 setup(ext_modules=[ext])

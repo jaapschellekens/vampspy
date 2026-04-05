@@ -476,8 +476,12 @@ presoil (void)
 	}
 	/* Make link to soil pointer. This must be done now and not before
 	   because of mem reallocation! */
-	for (i = 0; i < layers; i++)
-		node[i].sp = &sp[node[i].soiltype];
+	for (i = 0; i < layers; i++){
+		node[i].sp      = &sp[node[i].soiltype];
+		node[i].h2t_tab   = &sp[node[i].soiltype].tab[H2TTAB];
+		node[i].h2dmc_tab = &sp[node[i].soiltype].tab[H2DMCTAB];
+		node[i].t2k_tab   = &sp[node[i].soiltype].tab[T2KTAB];
+	}
 
 	initial ();			/* This was (about) initial.f */
 	setzero ();

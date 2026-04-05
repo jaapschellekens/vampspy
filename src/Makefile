@@ -22,7 +22,7 @@ OBJDIR 		= ./objsLinux_x86_64
 VAMPSLIBDIR	= ${prefix}/share/vamps
 mandir		= ${prefix}/share/man
 
-CFLAGS 	= -g -O2 -ffast-math -march=native
+CFLAGS 	= -g -O2 -O3 -ffast-math -march=native -flto
 CC 	= gcc
 OS	= Linux_x86_64
 RM	= rm -f
@@ -44,7 +44,6 @@ THELIBS = ts.lib/libts.a deffile.lib/libdef.a\
 TRASH 	= *~ vamps vsel *.o lib*.a *.log TAGS
 
 # List of object files
-AGLOBJ = 
 PLOTOBJ = 
 TOBJ = ${OBJDIR}/intopsys.o  ${OBJDIR}/notree.o ${OBJDIR}/topout.o ${OBJDIR}/pre_can.o ${OBJDIR}/canopy.o
 UOBJ = ${OBJDIR}/dataset.o ${OBJDIR}/output.o ${OBJDIR}/getopt.o ${OBJDIR}/progress.o ${OBJDIR}/mktable.o ${OBJDIR}/utout.o ${OBJDIR}/perror.o ${OBJDIR}/pro_mesg.o ${OBJDIR}/xtraout.o ${OBJDIR}/resamp.o ${OBJDIR}/memory.o ${OBJDIR}/smoothar.o
@@ -52,7 +51,6 @@ MOBJ = ${OBJDIR}/vamps.o ${OBJDIR}/sigs.o ${OBJDIR}/init_py.o ${OBJDIR}/plot.o
 TOBJ = ${OBJDIR}/intopsys.o  ${OBJDIR}/notree.o ${OBJDIR}/topout.o ${OBJDIR}/pre_can.o ${OBJDIR}/canopy.o
 SOBJ = ${OBJDIR}/soilout.o ${OBJDIR}/swatsoil.o ${OBJDIR}/integral.o ${OBJDIR}/timestep.o ${OBJDIR}/soilboun.o ${OBJDIR}/headcalc.o ${OBJDIR}/soilut.o ${OBJDIR}/band.o ${OBJDIR}/calcgwl.o ${OBJDIR}/fluxes.o ${OBJDIR}/setzero.o ${OBJDIR}/rootex.o ${OBJDIR}/det_hatm.o ${OBJDIR}/reduceva.o ${OBJDIR}/filltab.o ${OBJDIR}/misc_p.o ${OBJDIR}/smooth.o ${OBJDIR}/alloc.o ${OBJDIR}/array.o ${OBJDIR}/getparm.o
 
-AGLRT	= ./agl/noagl
 PROGVERSION = 
 SHORTPROGVERSION = 
 
@@ -106,7 +104,7 @@ met.lib/libmet.a: dummy
 	$(INSTALL_PROGRAM) met.lib/met.h include
 
 ${PROGRAM}:  ${SUBDIR} 
-	${CC} ${CFLAGS} -o ${PROGRAM}  ${LDFLAGS} ${MOBJ} ${GROBJ} ${UOBJ} ${TOBJ} ${SOBJ} ${AGLOBJ} ${PLOTOBJ} ${LDDIRS} ${LIBS}
+	${CC} ${CFLAGS} -o ${PROGRAM}  ${LDFLAGS} ${MOBJ} ${GROBJ} ${UOBJ} ${TOBJ} ${SOBJ} ${PLOTOBJ} ${LDDIRS} ${LIBS}
 
 vsel: 
 	${CC} ${CFLAGS} -o vsel ${LDDIRS} ${LDFLAGS} ${OBJDIR}/vsel.o ${OBJDIR}/getopt.o -lm -ldef -lts
@@ -132,8 +130,6 @@ soil: dummy
 plot: dummy
 	(cd $(srcdir)/plot; $(MAKE))
 
-agl: dummy
-	(cd $(srcdir)/agl; $(MAKE))
 
 bin: all share
 	@echo Making a binary distribution...
@@ -161,7 +157,6 @@ man-install: installdirs
 	(cd ../doc; make man-install)
 
 install: share  man-install
-	for i in $(AGLRT); do ${INSTALL_PROGRAM} $$i  ../share/; done
 	${INSTALL_PROGRAM} ${PROGRAM} ${BINDIR}
 	${INSTALL_PROGRAM} vsel ${BINDIR}
 	${INSTALL_PROGRAM} ../share/vamps.rc ${VAMPSLIBDIR}/.vampsrc
@@ -192,7 +187,6 @@ distclean: clean
 	(cd main; ${RM} ${TRASH})
 	(cd soil; ${RM} ${TRASH})
 	(cd plot; ${RM} ${TRASH})
-	(cd agl; ${RM} ${TRASH})
 	(cd topsys; ${RM} ${TRASH})
 	(cd ../examples/fiji; ${MAKE} clean)
 	(cd ../examples/1; ${MAKE} clean)
@@ -236,6 +230,6 @@ dist:
 	(cd ../../; tar cvf - `find vamps_${SHORTPROGVERSION} -type f | grep -v RCS` | gzip -9 >  vamps_${SHORTPROGVERSION}.tgz)
 
 mkid:
-	mkid `find soil/ topsys/ agl/ plot/ util/ nr_ut.lib/ deffile.lib/ main/ ts.lib/ met.lib/ include/ -name "*.[ch]"`
+	mkid `find soil/ topsys/ plot/ util/ nr_ut.lib/ deffile.lib/ main/ ts.lib/ met.lib/ include/ -name "*.[ch]"`
 
 dummy:

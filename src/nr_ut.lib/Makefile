@@ -8,7 +8,7 @@ NR_TRASH 	= *.o libnru.a *~ *.log *.idx *.ind nr_test test? *.aux ${TRASH}
 NRDEFS 	= ${DEFS} -DNR_LIST #-DNR_DEBUG
 
 CC	= gcc
-CFLAGS	= -g -O2 -ffast-math -march=native
+CFLAGS	= -g -O2 -O3 -ffast-math -march=native -flto
 
 SLDOC 	= ../@PROGRAM@ -I sldoc
 NR_CC 	= $(CC)

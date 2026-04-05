@@ -1,7 +1,7 @@
 SHELL = /bin/sh
 
 CC	= gcc
-CFLAGS	= -g -O2 -ffast-math -march=native
+CFLAGS	= -g -O2 -O3 -ffast-math -march=native -flto
 MOBJ	= ${OBJDIR}/vamps.o ${OBJDIR}/sigs.o ${OBJDIR}/init_py.o ${OBJDIR}/plot.o
 top_srcdir 	= ..
 srcdir 		= .

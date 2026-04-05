@@ -632,7 +632,6 @@ TOBJ
 MOBJ
 SOBJ
 PLOTOBJ
-AGLOBJ
 CPP
 XMKMF
 OS
@@ -652,7 +651,6 @@ LDFLAGS
 CFLAGS
 CC
 VERSION
-AGLRT
 SUBDIR
 target_alias
 host_alias
@@ -2179,8 +2177,6 @@ SUBDIR=
 ISSLANG="no"
 OS=Unknown
 
-AGLRT="$srcdir/agl/noagl"
-
 VERSION=`cat ../0version | awk '{print $1}'`
 
 ac_ext=c
@@ -2876,7 +2872,7 @@ else
     CFLAGS=
   fi
 fi
-CFLAGS="$CFLAGS -ffast-math -march=native"
+CFLAGS="$CFLAGS -O3 -ffast-math -march=native -flto"
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $CC option to accept ISO C89" >&5
 $as_echo_n "checking for $CC option to accept ISO C89... " >&6; }
 if ${ac_cv_prog_cc_c89+:} false; then :
@@ -3748,7 +3744,6 @@ ac_config_headers="$ac_config_headers vconfig.h:vconfig.hin"
 
 
 
-AGLOBJ=
 UOBJ='${OBJDIR}/dataset.o ${OBJDIR}/output.o ${OBJDIR}/getopt.o ${OBJDIR}/progress.o ${OBJDIR}/mktable.o ${OBJDIR}/utout.o ${OBJDIR}/perror.o ${OBJDIR}/pro_mesg.o ${OBJDIR}/xtraout.o ${OBJDIR}/resamp.o ${OBJDIR}/memory.o ${OBJDIR}/smoothar.o'
 SOBJ='${OBJDIR}/soilout.o ${OBJDIR}/swatsoil.o ${OBJDIR}/integral.o ${OBJDIR}/timestep.o ${OBJDIR}/soilboun.o ${OBJDIR}/headcalc.o ${OBJDIR}/soilut.o ${OBJDIR}/band.o ${OBJDIR}/calcgwl.o ${OBJDIR}/fluxes.o ${OBJDIR}/setzero.o ${OBJDIR}/rootex.o ${OBJDIR}/det_hatm.o ${OBJDIR}/reduceva.o ${OBJDIR}/filltab.o ${OBJDIR}/misc_p.o ${OBJDIR}/smooth.o ${OBJDIR}/alloc.o ${OBJDIR}/array.o ${OBJDIR}/getparm.o'
 MOBJ='${OBJDIR}/vamps.o ${OBJDIR}/sigs.o ${OBJDIR}/init_py.o ${OBJDIR}/plot.o'
@@ -3825,50 +3820,6 @@ SUBDIR="$SUBDIR plot"
 
 else
   PLOTOBJ=
-fi
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lagl" >&5
-$as_echo_n "checking for main in -lagl... " >&6; }
-if ${ac_cv_lib_agl_main+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lagl  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-
-int
-main ()
-{
-return main ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_agl_main=yes
-else
-  ac_cv_lib_agl_main=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_agl_main" >&5
-$as_echo "$ac_cv_lib_agl_main" >&6; }
-if test "x$ac_cv_lib_agl_main" = xyes; then :
-  LIBS="-lagl $LIBS";\
-cat >> confdefs.h <<EOF
-#define HAVE_LIBAGL 1
-EOF
-SUBDIR="$SUBDIR agl"
-LIBS="$LIBS -lX11"
-AGLRT="$srcdir/agl/*.cap $srcdir/agl/*.dat $srcdir/agl/*.nfn"
-
-else
-  AGLOBJ=
-
 fi
 
 
@@ -4319,7 +4270,7 @@ done
 
 
 
-ac_config_files="$ac_config_files ../doc/Makefile agl/Makefile deffile.lib/Makefile main/Makefile ../share/Makefile soil/Makefile met.lib/Makefile ts.lib/Makefile nr_ut.lib/Makefile util/Makefile plot/Makefile Makefile topsys/Makefile ../examples/vamps_demo/Makefile"
+ac_config_files="$ac_config_files ../doc/Makefile deffile.lib/Makefile main/Makefile ../share/Makefile soil/Makefile met.lib/Makefile ts.lib/Makefile nr_ut.lib/Makefile util/Makefile plot/Makefile Makefile topsys/Makefile ../examples/vamps_demo/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -5013,7 +4964,6 @@ do
   case $ac_config_target in
     "vconfig.h") CONFIG_HEADERS="$CONFIG_HEADERS vconfig.h:vconfig.hin" ;;
     "../doc/Makefile") CONFIG_FILES="$CONFIG_FILES ../doc/Makefile" ;;
-    "agl/Makefile") CONFIG_FILES="$CONFIG_FILES agl/Makefile" ;;
     "deffile.lib/Makefile") CONFIG_FILES="$CONFIG_FILES deffile.lib/Makefile" ;;
     "main/Makefile") CONFIG_FILES="$CONFIG_FILES main/Makefile" ;;
     "../share/Makefile") CONFIG_FILES="$CONFIG_FILES ../share/Makefile" ;;

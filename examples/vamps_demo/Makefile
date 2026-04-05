@@ -2,7 +2,7 @@
 SHELL = /bin/sh
 
 CC	= gcc
-CFLAGS	= -g -O2 -ffast-math -march=native
+CFLAGS	= -g -O2 -O3 -ffast-math -march=native -flto
 
 all: demo
 

@@ -91,24 +91,20 @@ int th_ckcnv()
 	register int i,j;
 	register double  t1,t2,t3,t4;
 
+	if (h[0] > (pond - depth[0]))
+		return 1;
 	j = layers % 4;
 	for (i = 0; i < j; i++){
 		t1 = fabs (theold[i] - theta[i]);
-		if (t1 > (thetol)||(h[0] > (pond - depth[0])))
+		if (t1 > thetol)
 			return 1;
 	}
 	for (i = j; i < layers; i+=4){
-		t1 = fabs (theold[i] - theta[i]);
+		t1 = fabs (theold[i]   - theta[i]);
 		t2 = fabs (theold[i+1] - theta[i+1]);
 		t3 = fabs (theold[i+2] - theta[i+2]);
 		t4 = fabs (theold[i+3] - theta[i+3]);
-		if (t1 > (thetol)||(h[0] > (pond - depth[0])))
-			return 1;
-		else if (t2 > (thetol)||(h[0] > (pond - depth[0])))
-			return 1;
-		else if (t3 > (thetol)||(h[0] > (pond - depth[0])))
-			return 1;
-		else if (t4 > (thetol)||(h[0] > (pond - depth[0])))
+		if (t1 > thetol || t2 > thetol || t3 > thetol || t4 > thetol)
 			return 1;
 	}
 	return 0;
@@ -116,9 +112,11 @@ int th_ckcnv()
 	register int i;
 	register double  t1;
 
+	if (h[0] > (pond - depth[0]))
+		return 1;
 	for (i = 0; i < layers; i++){
 		t1 = fabs (theold[i] - theta[i]);
-		if (t1 > (thetol)||(h[0] > (pond - depth[0])))
+		if (t1 > thetol)
 			return 1;
 	}
 	return 0;
@@ -205,14 +203,11 @@ headcalc (int pt, double *t)
 		}
 
 		/* calculate rest from new head */
-		theta[numeq] = node[numeq].sp->
-			h2t (node[numeq].soiltype, h[numeq], numeq);
-		diffmoist[numeq] = node[numeq].sp->
-			h2dmc (node[numeq].soiltype, h[numeq], numeq);
+		theta[numeq]     = getval(node[numeq].h2t_tab,   h[numeq], numeq);
+		diffmoist[numeq] = getval(node[numeq].h2dmc_tab, h[numeq], numeq);
 		for (i = numeq - 1; i >= 0; i--){
-			theta[i] = node[i].sp->h2t (node[i].soiltype, h[i], i);
-			diffmoist[i] = node[i].sp->
-				h2dmc (node[i].soiltype, h[i], i);
+			theta[i]     = getval(node[i].h2t_tab,   h[i], i);
+			diffmoist[i] = getval(node[i].h2dmc_tab, h[i], i);
 		}
 
 		if (nonoit == 1)
@@ -242,15 +237,11 @@ headcalc (int pt, double *t)
 			}
 
 			/* calculate rest from new head */
-			theta[numeq] = node[numeq].sp->
-				h2t (node[numeq].soiltype, h[numeq], numeq);
-			diffmoist[numeq] = node[numeq].sp->
-				h2dmc (node[numeq].soiltype, h[numeq], numeq);
+			theta[numeq]     = getval(node[numeq].h2t_tab,   h[numeq], numeq);
+			diffmoist[numeq] = getval(node[numeq].h2dmc_tab, h[numeq], numeq);
 			for (i = numeq - 1; i >= 0; i--){
-				theta[i] = node[i].sp->
-					h2t(node[i].soiltype, h[i], i);
-				diffmoist[i] = node[i].sp->
-					h2dmc (node[i].soiltype, h[i], i);
+				theta[i]     = getval(node[i].h2t_tab,   h[i], i);
+				diffmoist[i] = getval(node[i].h2dmc_tab, h[i], i);
 			}
 			numbit++;
 		} 
@@ -310,9 +301,9 @@ headcalc (int pt, double *t)
 		qbot = _getval(&data[id.qbo],*t);
 
 	/* Adjust conductivities  */
-	k[0] = node[0].sp->t2k (node[0].soiltype, theta[0], 0);
+	k[0] = getval(node[0].t2k_tab, theta[0], 0);
 	for (i = 1; i < layers; i++){
-		k[i] = node[i].sp->t2k (node[i].soiltype, theta[i], i);
+		k[i] = getval(node[i].t2k_tab, theta[i], i);
 		kgeom[i] = MKKGEOM(i);
 	}
 	kgeom[layers] = k[layers - 1];

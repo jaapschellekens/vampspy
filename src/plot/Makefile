@@ -1,7 +1,7 @@
 SHELL = /bin/sh
 
 CC	= gcc
-CFLAGS	= -g -O2 -ffast-math -march=native
+CFLAGS	= -g -O2 -O3 -ffast-math -march=native -flto
 PLOTOBJ	= 
 OBJDIR	= ../objsLinux_x86_64
 INC	= -I../include -I..
