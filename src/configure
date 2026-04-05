@@ -624,6 +624,7 @@ LIBOBJS
 EGREP
 GREP
 x_libraries
+TERMCAP_LIB
 PYLIBS
 PYINC
 UOBJ
@@ -3767,6 +3768,17 @@ $as_echo "$as_me: error: python3-config not found; install Python 3 development 
 fi
 
 
+
+# Detect termcap library (termcap on macOS, tinfo on Linux)
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for termcap library" >&5
+$as_echo_n "checking for termcap library... " >&6; }
+if test "$(uname)" = "Darwin"; then
+  TERMCAP_LIB=-ltermcap
+else
+  TERMCAP_LIB=-ltinfo
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $TERMCAP_LIB" >&5
+$as_echo "$TERMCAP_LIB" >&6; }
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for fbox in -lplot" >&5
 $as_echo_n "checking for fbox in -lplot... " >&6; }

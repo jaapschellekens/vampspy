@@ -39,7 +39,7 @@ long int nr_sat = 0; /* number of calls to h_sat*/
 long int nr_itter = 0; /* total number of ittereations  */
 int	minitr = 0;
 extern double thetol;
-extern int *error;
+extern int *sol_error;
 extern int *itter;
 double **mat;
 double **a1;

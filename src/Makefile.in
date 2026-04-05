@@ -33,7 +33,7 @@ RANLIB	= @RANLIB@
 INSTALL	= @INSTALL@
 INSTALL_PROGRAM	= $(INSTALL) -c
 PYLIBS	= @PYLIBS@
-LIBS	= -lmet -lts -ldef  -lnru -ltermcap $(PYLIBS) @LIBS@ -lm
+LIBS	= -lmet -lts -ldef  -lnru @TERMCAP_LIB@ $(PYLIBS) @LIBS@ -lm
 
 SUBDIR = util main soil topsys @SUBDIR@
 #THELIBS = ts.lib/libts.a deffile.lib/libdef.a\

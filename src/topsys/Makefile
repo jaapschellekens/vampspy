@@ -3,7 +3,7 @@ SHELL = /bin/sh
 CC	= gcc
 CFLAGS	= -g -O2 -ffast-math -march=native
 TOBJ	= ${OBJDIR}/intopsys.o  ${OBJDIR}/notree.o ${OBJDIR}/topout.o ${OBJDIR}/pre_can.o ${OBJDIR}/canopy.o
-OBJDIR	= ../objsDarwin_arm64
+OBJDIR	= ../objsLinux_x86_64
 INC	= -I../include -I..
 DEFS	= -DHAVE_CONFIG_H -DHAVE_LIBPYTHON
 SLDOC	= vamps -I sldoc

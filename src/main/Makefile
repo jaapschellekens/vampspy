@@ -10,11 +10,11 @@ exec_prefix 	= ${prefix}
 BINDIR 		= ${exec_prefix}/bin
 LIBDIR 		= ${exec_prefix}/lib
 
-OBJDIR 		= ../objsDarwin_arm64
+OBJDIR 		= ../objsLinux_x86_64
 RM 	= rm -f
 VAMPSLIBDIR	= ${prefix}/share/vamps
 INC	= -I$(top_srcdir)/include -I$(top_srcdir)
-PYINC	= -I/Users/jaap/miniforge3/include/python3.13 -I/Users/jaap/miniforge3/include/python3.13
+PYINC	= -I/home/jaap/miniforge3/include/python3.12 -I/home/jaap/miniforge3/include/python3.12
 GNUPLOT	= 
 DEFS	= -DHAVE_CONFIG_H -DHAVE_LIBPYTHON -DVAMPSLIB=\"${VAMPSLIBDIR}\" -DGNUPLOT=\"${GNUPLOT}\"
 

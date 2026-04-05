@@ -54,7 +54,7 @@ extern int tablesize; /* see filltab.c */
 extern double cofred;		/* soil evap reduce stuff */
 
 /* These are set in headcalc.c */
-extern int   *error;
+extern int   *sol_error;
 extern int   *itter;
 extern int solvemet;
 
@@ -203,6 +203,6 @@ extern double  h2t_2 (int nr, double head, int layer);
 extern double  h2u_2 (int nr, double head, int layer);
 extern double  h2k_2 (int nr, double head, int layer);
 extern double  h2dkdp_2 (int nr, double head, int layer);
-extern void allocall ();
+extern void allocall (int layers);
 extern void initnode (int layer);
 #endif /* SWATSOIL_H*/

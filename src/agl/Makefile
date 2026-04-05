@@ -5,7 +5,7 @@ CC	= gcc
 CFLAGS	= -g -O2 -ffast-math -march=native
 INC	= ..
 AGLOBJ	= 
-OBJDIR	= ../objsDarwin_arm64
+OBJDIR	= ../objsLinux_x86_64
 INC	= -I../include -I..
 DEFS	= -DHAVE_CONFIG_H
 

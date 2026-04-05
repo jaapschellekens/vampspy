@@ -47,23 +47,5 @@
 1,	ASUS,	Athlon XP,	1800,	AMD,		CYGWIN_NT-5.1_i686,	1.859000,	161377.08
 #Vamps version 0.99i -- Nov 2001 [Nov 13 2017] (Linux_x86_64)
 1,	tf7600,	Xeon,	2.5,	Intel,		Linux_x86_64,	0.503202,	596182.05
-# Python run on MacBook-Air-van-Jaap.local
-Darwin	arm	0.076	3951163.62
-# Python run on MacBook-Air-van-Jaap.local
-Darwin	arm	0.080	3764351.59
 #Vamps 1.0 (Python) [macOS-26.3.1-arm64-arm-64bit-Mach-O]
-1,	MacBook-Air-van-Jaap.local,	arm,	?,	Apple,		Darwin_arm64,	0.076196,	3937214.55
-#Vamps 1.0 (Python) [macOS-26.3.1-arm64-arm-64bit-Mach-O]
-1,	MacBook-Air-van-Jaap.local,	arm,	?,	Apple,		Darwin_arm64,	0.071843,	4175772.17
-#Vamps 1.0 (Python) [macOS-26.3.1-arm64-arm-64bit-Mach-O]
-1,	MacBook-Air-van-Jaap.local,	arm,	4,	Apple,		Darwin_arm64,	0.098655,	3040900.11
-#Vamps 1.0 (Python) [macOS-26.4-arm64-arm-64bit-Mach-O]
-1,	edr-a-81.deltares.nl.88.231.136.in-addr.arpa,	arm,	?,	Apple,		Darwin_arm64,	0.071501,	4195745.51
-#Vamps 1.0 (Python) [macOS-26.4-arm64-arm-64bit-Mach-O]
-1,	edr-a-81.deltares.nl.88.231.136.in-addr.arpa,	arm,	?,	Apple,		Darwin_arm64,	0.070542,	4252785.57
-#Vamps 1.0 (Python) [macOS-26.4-arm64-arm-64bit-Mach-O]
-1,	edr-a-81.deltares.nl.88.231.136.in-addr.arpa,	arm,	?,	Apple,		Darwin_arm64,	0.071168,	4215377.70
-#Vamps 1.0 (Python) [macOS-26.4-arm64-arm-64bit-Mach-O]
-1,	edr-a-81.deltares.nl.88.231.136.in-addr.arpa,	arm,	?,	Apple,		Darwin_arm64,	0.075933,	3950851.41
-#Vamps 1.0 (Python) [macOS-26.4-arm64-arm-64bit-Mach-O]
-1,	edr-a-81.deltares.nl.88.231.136.in-addr.arpa,	arm,	?,	Apple,		Darwin_arm64,	0.072224,	4153743.91
+1,	MacBook-Air-van-Jaap.local,	arm,	M5,	Apple,		Darwin_arm64,	0.076196,	3937214.55

@@ -104,7 +104,6 @@ main (int argc, char *argv[])
   int layers = 0;
   int i, k, pts;
   int what=0;
-  void disclaim ();
   void showinfo (int verb);
   void printit (int varnr);
 

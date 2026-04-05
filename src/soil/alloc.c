@@ -22,8 +22,7 @@ static  char RCSid[] =
  */
 
 void
-allocall (layers)
-     int layers;
+allocall (int layers)
 {
 	int i;
 
@@ -64,7 +63,7 @@ allocall (layers)
 	nr_descr("qdra, lateral drainage",(void *)qdra);
 	basegw = dvector(0,1);
 
-	error = ivector (0, steps + 1);
+	sol_error = ivector (0, steps + 1);
 	itter = ivector (0, steps + 1);
 	gwl = dvector (0, steps + 1);
 	allowdrain = ivector (0, layers -1);
@@ -80,7 +79,7 @@ allocall (layers)
 	}
 	/* These arrays cover the entire time domain */  
 	for (i = 0; i < steps + 2; i++){
-		error[i] = 0;
+		sol_error[i] = 0;
 		itter[i] = 0;
 	}
 }

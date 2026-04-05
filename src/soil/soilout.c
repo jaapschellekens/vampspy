@@ -62,6 +62,6 @@ soilout (int tstep)
 	  printfl("cumdra",cumdra);
 	  printar("drainage",mqdra,layers);
   }
-  printint("converror",error[tstep]);
+  printint("converror",sol_error[tstep]);
   printint("itter",itter[tstep]);
 }

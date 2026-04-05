@@ -48,7 +48,7 @@ int daynr;
 double *gwl;			/* length 2 */
 double *basegw;			/* length 2 */
 double *gw;			/* length a year 366, must be same as input */
-int *error;			/* length a year 366, must be same as input */
+int *sol_error;			/* length a year 366, must be same as input */
 int *itter;			/* steps long */
 double *q;			/* length layers +1  flow for each layer */
 double *inq;			/* length layers +1 in inflow for each layer */
@@ -551,7 +551,7 @@ tstep_soil (int i, double e_t,double t_prec, double t_intc, double t_ptra, doubl
 		nheadcalc(n,&t,&dt);
 #else
 		rootex (i,data[id.rdp].xy[i].y);/* root extraction */
-		error[i] += headcalc (i, &t);
+		sol_error[i] += headcalc (i, &t);
 #endif
 		watcon ();
 		fluxes ();
@@ -644,7 +644,7 @@ postsoil ()
 	free_dmatrix (qdra, 0,layers,0,3);
 	free_dvector (gwl,0,steps + 1);
 	free_dvector (basegw,0,1);
-	free_ivector (error,0,steps+1);
+	free_ivector (sol_error,0,steps+1);
 	free_ivector (itter,0,steps+1);
 
 	sp = NULL;

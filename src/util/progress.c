@@ -137,11 +137,11 @@ showprogress (int step)
 		
 		sprintf(tmstr,"%17.6f",t);
 		if (diff > 3600 || togo > 3600)
-		  fprintf (stderr, "|%s  |%5.2f hrs.|%5.2f  |   [%6.3f,%3d,%5d,%8.6f,%5.3f] |\r", tmstr, diff / 3600, (togo) / 3600, masbal, itter[step - 1], error[step - 1], dt, volact);
+		  fprintf (stderr, "|%s  |%5.2f hrs.|%5.2f  |   [%6.3f,%3d,%5d,%8.6f,%5.3f] |\r", tmstr, diff / 3600, (togo) / 3600, masbal, itter[step - 1], sol_error[step - 1], dt, volact);
 		else if (diff > 60 || togo > 60)
-		  fprintf (stderr, "|%s  |%5.2f min.|%5.2f  |   [%6.3f,%3d,%5d,%8.6f,%5.3f] |\r", tmstr, diff / 60, (togo) / 60, masbal, itter[step - 1], error[step - 1], dt, volact);
+		  fprintf (stderr, "|%s  |%5.2f min.|%5.2f  |   [%6.3f,%3d,%5d,%8.6f,%5.3f] |\r", tmstr, diff / 60, (togo) / 60, masbal, itter[step - 1], sol_error[step - 1], dt, volact);
 		else
-		  fprintf (stderr, "|%s  |%5.0f sec.|%5.0f  |   [%6.3f,%3d,%5d,%8.6f,%5.3f] |\r", tmstr, diff, (togo), masbal, itter[step - 1], error[step - 1], dt, volact);
+		  fprintf (stderr, "|%s  |%5.0f sec.|%5.0f  |   [%6.3f,%3d,%5d,%8.6f,%5.3f] |\r", tmstr, diff, (togo), masbal, itter[step - 1], sol_error[step - 1], dt, volact);
 		
 		if (steps == t)
 		  fprintf (stderr, "\n");

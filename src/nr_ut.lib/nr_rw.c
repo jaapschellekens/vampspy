@@ -84,7 +84,6 @@ double **nr_dmread(char *name,int *nr, int *nc)
 	char	*sp, *rp;
 	double	**pp, *p, val;
 	FILE	*fp;
-	extern double	strtod();	/* to avoid confusion */
 
 	n = m = 0;
 	all = 32;
@@ -167,7 +166,6 @@ float **nr_fmread(char *name,int *nr, int *nc)
 	char	*sp, *rp;
 	float	**pp, *p, val;
 	FILE	*fp;
-	extern double	strtod();	/* to avoid confusion */
 
 	n = m = 0;
 	all = 32;
