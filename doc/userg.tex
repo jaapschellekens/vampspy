@@ -232,9 +232,9 @@ caseid = Interception test file. Bisley catchment.\
 Summer of 1995
 \end{verbatim}
 
-The \verb \ character may be use to break up long strings over more
+The \verb|\| character may be use to break up long strings over more
 than one line\footnote{The character itself is converted to a
-space}. The \verb # sign at the start of a line is used to denote a comment
+space}. The \verb|#| sign at the start of a line is used to denote a comment
 Only the first '=' sign is significant. Spaces within the names are
 copied verbatim, and thus become part of the name. This makes the
 following construction legal:
@@ -797,14 +797,15 @@ Method for k vs theta relation:\\
 \centerline{
 \begin{tabular}{ll}
 Value & Description \\ \hline
-0 & clapp/hornberger\\
+0 & Clapp/Hornberger\\
 1 & van Genuchten\\
 2 & not yet implemented\\
 3 & van Genuchten parameters are determined from theta vs pf
 pairs\\
 4 & read TOPOG \_soil soil tables\\
-5 & user defined S-Lang functions\\
-\end{tabular} 
+5 & user defined Python functions\\
+6 & Brooks and Corey (1964)\\
+\end{tabular}
 }
 
 \begin{description}
@@ -887,6 +888,14 @@ have this information.
 \item[n]
 n in van Genuchten.
 
+\item[lambda]
+Pore-size distribution index $\lambda$ in Brooks and Corey (method~6).
+A starting approximation from van Genuchten parameters is $\lambda \approx n - 1$.
+
+\item[hb]
+Air-entry (bubbling) pressure head $h_b$ in Brooks and Corey (method~6),
+in cm.  Must be negative (e.g.\ \inivar{hb = -16.4}).
+A starting approximation from van Genuchten parameters is $h_b \approx -1/\alpha$.
 
 \item[tablefile]
 File from which the soil table should be read. Use this if method = 4.
