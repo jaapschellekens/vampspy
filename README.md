@@ -19,6 +19,7 @@ removed.
 
 ---
 
+
 ## vampspy — Python API
 
 The `vampspy` package lets you drive VAMPS entirely from Python with no
