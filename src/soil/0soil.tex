@@ -667,6 +667,96 @@ from: {\tt soilut.c}
 from file: {\tt doc}
 
 
+\paragraph{\index{h2dmc\_bc}h2dmc\_bc}
+\begin{verbatim}
+double h2dmc_bc (int nr, double head, int layer)
+\end{verbatim}
+Calculates the differential moisture capacity as a function of pressure head
+using the Brooks and Corey (1964) retention model:
+$d\theta/dh = (\theta_s - \theta_r)\,\lambda\,(h_b/h)^\lambda / (-h)$
+for $h < h_b$, zero otherwise.
+
+Returns: differential moisture capacity
+
+from: {\tt soilut.c}
+
+
+\paragraph{\index{h2t\_bc}h2t\_bc}
+\begin{verbatim}
+double h2t_bc (int nr, double head, int layer)
+\end{verbatim}
+Calculates the volumetric water content from pressure head using Brooks and
+Corey: $\theta = \theta_r + (\theta_s - \theta_r)(h_b/h)^\lambda$ for
+$h < h_b$, $\theta_s$ otherwise.
+
+Returns: theta
+
+from: {\tt soilut.c}
+
+
+\paragraph{\index{t2h\_bc}t2h\_bc}
+\begin{verbatim}
+double t2h_bc (int nr, double wcon, double depth, int layer)
+\end{verbatim}
+Calculates the pressure head from water content using Brooks and Corey:
+$h = h_b \, S_e^{-1/\lambda}$ where $S_e = (\theta - \theta_r)/(\theta_s - \theta_r)$.
+
+Returns: pressure head
+
+from: {\tt soilut.c}
+
+
+\paragraph{\index{t2k\_bc}t2k\_bc}
+\begin{verbatim}
+double t2k_bc (int nr, double wcon, int layer)
+\end{verbatim}
+Calculates the unsaturated hydraulic conductivity from water content using
+Brooks and Corey: $K = K_s \, S_e^{2/\lambda + 3}$.
+
+Returns: $k_{unsat}$
+
+from: {\tt soilut.c}
+
+
+\paragraph{\index{h2k\_bc}h2k\_bc}
+\begin{verbatim}
+double h2k_bc (int nr, double head, int layer)
+\end{verbatim}
+Calculates the unsaturated hydraulic conductivity from pressure head using
+Brooks and Corey: $K = K_s (h_b/h)^n$, $n = 2 + 3\lambda$,
+for $h < h_b$; $K_s$ otherwise.
+
+Returns: $k_{unsat}$
+
+from: {\tt soilut.c}
+
+
+\paragraph{\index{h2u\_bc}h2u\_bc}
+\begin{verbatim}
+double h2u_bc (int nr, double head, int layer)
+\end{verbatim}
+Calculates the matric flux potential (integral of $K$ from $-\infty$ to $h$)
+for the Brooks and Corey model:
+$u = -K(h)\,h\,/\,(n-1)$ for $h < h_b$;
+$u = K_s(-h_b/(n-1) + h - h_b)$ for $h \geq h_b$.
+
+Returns: matric flux potential
+
+from: {\tt soilut.c}
+
+
+\paragraph{\index{h2dkdp\_bc}h2dkdp\_bc}
+\begin{verbatim}
+double h2dkdp_bc (int nr, double head, int layer)
+\end{verbatim}
+Calculates the derivative $dK/dh$ for the Brooks and Corey model:
+$dK/dh = n\,K(h)/(-h)$ for $h < h_b$, zero otherwise.
+
+Returns: $dK/dh$
+
+from: {\tt soilut.c}
+
+
 \paragraph{\index{t}t}
 \begin{verbatim}
 int th_ckcnv()

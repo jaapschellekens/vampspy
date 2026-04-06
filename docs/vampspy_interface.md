@@ -247,6 +247,73 @@ print(f"Final volact: {result['volact'][-1]:.3f} cm")
 print(f"Theta shape:  {result['theta'].shape}")
 ```
 
+### Soil hydraulic methods
+
+The `method` key in each `[st_N]` section selects the water-retention and
+conductivity relationship for that soil type.
+
+#### Method 1 — Van Genuchten (default)
+
+```ini
+[st_0]
+method         = 1
+thetas         = 0.6
+theta_residual = 0.08
+alpha          = 0.061   ; 1/cm
+n              = 1.098
+l              = 0.5     ; optional, default 0.5
+ksat           = 1800    ; cm/day
+```
+
+#### Method 6 — Brooks and Corey (1964)
+
+```ini
+[st_0]
+method         = 6
+thetas         = 0.6
+theta_residual = 0.08
+lambda         = 0.098   ; pore-size distribution index
+hb             = -16.4   ; air-entry pressure head [cm, negative]
+ksat           = 1800    ; cm/day
+```
+
+Governing equations:
+
+- S_e(h) = (h_b / h)^λ  for h < h_b,  otherwise S_e = 1
+- θ = θ_r + (θ_s − θ_r) · S_e
+- K(S_e) = K_sat · S_e^(2/λ + 3)
+
+**Converting from Van Genuchten parameters:** λ ≈ n_vg − 1,  h_b ≈ −1/α.
+The two curves agree closely for S_e ≤ 0.80; BC has a discrete air-entry
+while VG desaturates smoothly near zero suction.
+
+See `examples/fiji/fiji_bandC.inp` for a complete example with equivalent
+parameters derived from the Van Genuchten fiji example.
+
+#### Method 0 — Clapp–Hornberger
+
+```ini
+[st_0]
+method  = 0
+thetas  = 0.45
+b       = 7.12
+psisat  = -12.0   ; cm, negative
+ksat    = 100.0
+```
+
+#### Method 5 — User-defined Python functions
+
+Requires `HAVE_LIBPYTHON`.  Set `xtrapy = yourscript.py` in `[vamps]` and
+define `getspars`, `h2t`, `t2k`, `t2h`, `h2dmc`, `h2k`, `h2u`, `h2dkdp` in
+the script.  See `share/soilf.py` (Clapp–Hornberger) and `share/soilf_bc.py`
+(Brooks–Corey) for reference implementations.
+
+All methods support lookup-table acceleration (`mktable = 1` in `[soil]`),
+which pre-computes θ(h), K(h) and dθ/dh over the full suction range at
+initialisation time.
+
+---
+
 ### `Model.run_stepwise()`
 
 ```python

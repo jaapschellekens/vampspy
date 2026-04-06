@@ -655,6 +655,53 @@ After Clapp (1978).}
 An input file containing all the soil-types mentioned in table~\ref{tab:clapp}
 can be found in the src/sllib directory. It is called \fname{soillib.inp}.
 
+\paragraph{Brooks and Corey}
+\citeasnoun{brookscorey1964} proposed a power-law description of the
+soil moisture characteristic that uses an explicit air-entry (bubbling)
+pressure head $h_b$ below which the soil begins to desaturate.  The
+effective saturation $S_e$ is defined as:
+
+\begin{equation}
+S_e = \frac{\theta - \theta_r}{\theta_s - \theta_r}
+\end{equation}
+
+\begin{where}
+$\theta_s$ & saturated water content \\
+$\theta_r$ & residual water content \\
+$\theta$   & actual soil water content \\
+\end{where}
+
+The retention curve and unsaturated conductivity are then given by:
+
+%\begin{equation}
+%S_e(h) = \left\{ \begin{array}{ll}
+%    \left(\dfrac{h_b}{h}\right)^{\lambda} & h < h_b \\[6pt]
+%    1 & h \geq h_b
+%    \end{array} \right.
+%\end{equation}
+
+\begin{equation}
+K = K_s \, S_e^{\,2/\lambda + 3}
+\end{equation}
+
+\begin{where}
+$h$         & pressure head (negative for unsaturated conditions) \\
+$h_b$       & air-entry (bubbling) pressure head ($h_b < 0$) \\
+$\lambda$   & pore-size distribution index \\
+$K_s$       & saturated hydraulic conductivity \\
+\end{where}
+
+The conductivity can equivalently be written as a function of pressure head:
+\begin{equation}
+K(h) = K_s \left(\frac{h_b}{h}\right)^{n}, \quad n = 2 + 3\lambda
+\end{equation}
+
+Starting approximations for converting van Genuchten parameters to
+Brooks-Corey are $\lambda \approx n_\mathrm{vG} - 1$ and
+$h_b \approx -1/\alpha$.  The two retention curves agree closely for
+$S_e \leq 0.80$; the main difference is near saturation where Brooks-Corey
+has a discrete air-entry while van Genuchten desaturates smoothly.
+
 \subsection{Bottom boundary conditions}
 \vamps\ can  handle several boundary conditions at the bottom of  the
 profile.  Below is a lists of those available in the model. Not all

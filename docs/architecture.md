@@ -356,19 +356,62 @@ flowchart TD
 
 ## 10. Soil hydraulic model variants
 
-The C soil module supports three water-retention / conductivity relationships,
-selected per soil type via the `method` key in each `[st_N]` config section.
+The C soil module supports four built-in water-retention / conductivity
+relationships, selected per soil type via the `method` key in each `[st_N]`
+config section.
 
 ```mermaid
 flowchart LR
     M["method in [st_N]"]
     M --> M0["0 · Clapp–Hornberger\nb, ψ_sat, θ_sat, K_sat"]
     M --> M1["1 · Van Genuchten  ★ most common\nα, n, l, θ_sat, θ_res, K_sat"]
+    M --> M6["6 · Brooks–Corey\nλ, h_b, θ_sat, θ_res, K_sat"]
     M --> M5["5 · User Python callbacks\n(HAVE_LIBPYTHON)\nh2t, t2k, h2dmc …"]
 
     M1 --> LUT["Look-up tables\n(mktable=1 in [soil])\nfilltab.c pre-computes\nθ(h), K(h), dθ/dh\nfor speed"]
     M0 --> LUT
+    M6 --> LUT
+    M5 --> LUT
 ```
+
+### Method 6 — Brooks and Corey (1964)
+
+Governing equations (h is the pressure head, negative for unsaturated):
+
+| Quantity | Formula | Domain |
+|----------|---------|--------|
+| Effective saturation | S_e = (h_b / h)^λ | h < h_b |
+| Water content | θ = θ_r + (θ_s − θ_r) · S_e | h < h_b |
+| Conductivity (θ) | K = K_sat · S_e^(2/λ + 3) | — |
+| Conductivity (h) | K = K_sat · (h_b / h)^n,  n = 2 + 3λ | h < h_b |
+
+θ = θ_s and K = K_sat for h ≥ h_b.
+
+Config parameters for a `[st_N]` section:
+
+| Key | Description |
+|-----|-------------|
+| `lambda` | Pore-size distribution index λ (dimensionless) |
+| `hb` | Air-entry (bubbling) pressure head h_b (cm, **negative**) |
+| `thetas` | Saturated water content θ_s |
+| `theta_residual` | Residual water content θ_r |
+| `ksat` | Saturated hydraulic conductivity (cm/day) |
+
+Implementation: parameters are stored in the `soilparmt` struct using the
+existing `b` field (λ), `psisat` field (h_b), and a pre-computed `n = 2 + 3λ`
+in the `n` field.  All seven function pointers (`h2t`, `t2k`, `t2h`, `h2dmc`,
+`h2k`, `h2u`, `h2dkdp`) are implemented analytically in `soil/soilut.c`.
+
+#### Converting from Van Genuchten parameters
+
+| BC parameter | Approximation | Notes |
+|-------------|--------------|-------|
+| λ | n_vg − 1 | Matches Mualem pore-size distribution |
+| h_b | −1/α | VG α has units of 1/length, analogous to 1/\|h_b\| |
+
+The two retention curves agree closely for S_e ≤ 0.80.  The main difference is
+near saturation: BC has a discrete air-entry at h_b while VG desaturates
+smoothly from zero suction.
 
 ---
 

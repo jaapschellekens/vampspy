@@ -394,11 +394,104 @@ h2dkdp_2 (int nr, double head, int layer)
 
 
 
+/* Brooks and Corey (1964) soil water retention and conductivity functions.
+ *
+ * Parameters stored in the soilparmt struct (reusing existing fields):
+ *   sp[nr].b      = lambda  (pore-size distribution index)
+ *   sp[nr].psisat = hb      (air-entry / bubbling pressure head, cm, negative)
+ *   sp[nr].n      = 2 + 3*lambda  (conductivity exponent, pre-computed)
+ *
+ * Governing equations (head h is negative suction head):
+ *   Se(h)  = (hb/h)^lambda            for h < hb,  1 otherwise
+ *   theta  = theta_r + (theta_s - theta_r) * Se
+ *   K(Se)  = Ksat * Se^(2/lambda + 3)
+ *   K(h)   = Ksat * (hb/h)^n          n = 2 + 3*lambda
+ */
+
+double
+h2dmc_bc (int nr, double head, int layer)
+{
+	double Se;
+
+	if (head >= sp[nr].psisat)
+		return 0.0;
+	/* dtheta/dh = (thetas - thetar) * lambda * (hb/h)^lambda / (-h) */
+	Se = pow(sp[nr].psisat / head, sp[nr].b);
+	return (sp[nr].thetas - sp[nr].residual_water) * sp[nr].b * Se / (-head);
+}
+
+double
+t2k_bc (int nr, double wcon, int layer)
+{
+	double relsat;
+
+	relsat = (wcon - sp[nr].residual_water) / (sp[nr].thetas - sp[nr].residual_water);
+	if (relsat > 1.0)
+		relsat = 1.0;
+	if (relsat < 0.001)
+		return 1.0e-10;
+	/* K = Ksat * Se^(2/lambda + 3) */
+	return sp[nr].ksat * pow(relsat, 2.0 / sp[nr].b + 3.0);
+}
+
+double
+t2h_bc (int nr, double wcon, double depth, int layer)
+{
+	double Se;
+
+	if ((sp[nr].thetas - wcon) < 1.0e-6)
+		return fabs(depth);
+	if ((wcon - sp[nr].residual_water) < 1.0e-6)
+		return -1.0e16;
+	Se = (wcon - sp[nr].residual_water) / (sp[nr].thetas - sp[nr].residual_water);
+	/* h = hb * Se^(-1/lambda) */
+	return sp[nr].psisat * pow(Se, -1.0 / sp[nr].b);
+}
+
+double
+h2t_bc (int nr, double head, int layer)
+{
+	if (head >= sp[nr].psisat)
+		return sp[nr].thetas;
+	return sp[nr].residual_water + (sp[nr].thetas - sp[nr].residual_water) *
+	       pow(sp[nr].psisat / head, sp[nr].b);
+}
+
+double
+h2k_bc (int nr, double head, int layer)
+{
+	if (head >= sp[nr].psisat)
+		return sp[nr].ksat;
+	return sp[nr].ksat * pow(sp[nr].psisat / head, sp[nr].n);
+}
+
+double
+h2u_bc (int nr, double head, int layer)
+{
+	double hb = sp[nr].psisat;
+	double n  = sp[nr].n;
+
+	if (head >= hb)
+		return sp[nr].ksat * (-hb / (n - 1.0) + head - hb);
+	else
+		return -(h2k_bc(nr, head, layer) * head) / (n - 1.0);
+}
+
+double
+h2dkdp_bc (int nr, double head, int layer)
+{
+	if (head >= sp[nr].psisat)
+		return 0.0;
+	/* dK/dh = -n * K(h) / h  →  n * K(h) / (-h)  (positive) */
+	return h2k_bc(nr, head, layer) * sp[nr].n / (-head);
+}
+
+
 /*C:watcon
  *@void watcon(void)
  *
  * Determines the actual water content of the profile
- */ 
+ */
 void
 watcon ()
 {

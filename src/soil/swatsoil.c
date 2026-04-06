@@ -95,6 +95,7 @@ double *mqdra;
 /* These are local to swatsoil.c */
 void readvangenu (char *secname, int spnr, int layer);
 void readclapp (char *secname, int spnr, int layer);
+void readbrookscorey (char *secname, int spnr, int layer);
 #ifdef HAVE_LIBPYTHON
 void readuserfpy (char *secname, int spnr, int layer);
 #endif
@@ -403,6 +404,59 @@ readuserfpy (char *secname, int spnr, int layer)
 }
 #endif
 
+/*C:readbrookscorey
+ *@void readbrookscorey(char *secname, int spnr, int layer)
+ *
+ * Reads Brooks and Corey (1964) parameters and sets function pointers.
+ *
+ * Parameters read from the soil section:
+ *   lambda  — pore-size distribution index (stored in sp.b)
+ *   hb      — air-entry (bubbling) pressure head [cm, negative] (stored in sp.psisat)
+ *   thetas  — saturated water content [-]
+ *   ksat    — saturated hydraulic conductivity [cm/day]
+ *   theta_residual — residual water content [-]
+ *
+ * Returns: nothing */
+void
+readbrookscorey (char *secname, int spnr, int layer)
+{
+	int exitonerror = 1;
+	extern void filltables (int, int, int);
+	/* BC functions defined in soilut.c */
+	extern double h2dmc_bc (int, double, int);
+	extern double t2k_bc   (int, double, int);
+	extern double t2h_bc   (int, double, double, int);
+	extern double h2t_bc   (int, double, int);
+	extern double h2k_bc   (int, double, int);
+	extern double h2u_bc   (int, double, int);
+	extern double h2dkdp_bc(int, double, int);
+
+	sp[spnr].thetas = getdefdoub (secname, "thetas", 0.0, infilename, exitonerror);
+	sp[spnr].ksat   = getdefdoub (secname, "ksat",   0.0, infilename, exitonerror);
+	sp[spnr].b      = getdefdoub (secname, "lambda", 0.0, infilename, exitonerror);
+	sp[spnr].n      = 2.0 + 3.0 * sp[spnr].b;  /* conductivity exponent */
+	sp[spnr].psisat = getdefdoub (secname, "hb",     0.0, infilename, exitonerror);
+
+	sp[spnr].h2dmc  = h2dmc_bc;
+	sp[spnr].t2k    = t2k_bc;
+	sp[spnr].t2h    = t2h_bc;
+	sp[spnr].h2t    = h2t_bc;
+	sp[spnr].h2k    = h2k_bc;
+	sp[spnr].h2dkdp = h2dkdp_bc;
+	sp[spnr].h2u    = h2u_bc;
+
+	if ((sp[spnr].mktable = mktab)) {
+		filltables (spnr, layer, estdmc);
+		sp[spnr].t2k    = t2k_2;
+		sp[spnr].h2dmc  = h2dmc_2;
+		sp[spnr].t2h    = t2h_2;
+		sp[spnr].h2t    = h2t_2;
+		sp[spnr].h2k    = h2k_2;
+		sp[spnr].h2dkdp = h2dkdp_2;
+		sp[spnr].h2u    = h2u_2;
+	}
+}
+
 static double ttl;
 
 
@@ -710,6 +764,9 @@ readstype (char *secname, char *fname, int layer)
 			readuserfpy (secname, spnr -1, layer);
 			break;
 #endif
+		case 6:	/* Brooks and Corey (1964) */
+			readbrookscorey (secname, spnr -1, layer);
+			break;
 		default:
 			Perror (progname, 1,0, RCSid, "Method not known:", "k vs h method");
 			break;
