@@ -101,7 +101,7 @@ The ``\`` character may be used to break long strings over more than one line
 comment.  Only the first ``=`` sign is significant.  Spaces within variable
 names are preserved verbatim, making the following legal:
 
-.. code-block:: ini
+.. code-block:: text
 
    [vamps]
    output mode = This is ('=') a nonsense example.

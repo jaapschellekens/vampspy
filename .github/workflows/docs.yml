@@ -1,0 +1,57 @@
+name: Build and deploy docs
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'sphinx/**'
+      - 'docs/**'
+      - '*.md'
+      - '.github/workflows/docs.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Only one deployment at a time; don't cancel in-progress runs.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: sphinx/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r sphinx/requirements.txt
+
+      - name: Build HTML
+        run: sphinx-build -b html sphinx/source sphinx/build/html
+        env:
+          SPHINXOPTS: -W --keep-going   # treat warnings as errors
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: sphinx/build/html
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v4
