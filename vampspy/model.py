@@ -191,6 +191,7 @@ class Model:
         nworkers: "int | None" = None,
         chunk_size: "int | None" = None,
         firststep: float = 1.0,
+        save_steps=None,
     ) -> dict:
         """Run the simulation for multiple soil columns in parallel.
 
@@ -213,14 +214,25 @@ class Model:
             reduce overhead.  Default: ``ncols // (nworkers * 4)``.
         firststep : float
             x-value of the first forcing timestep (default 1.0).
+        save_steps : None | int | sequence of int, optional
+            Which timesteps to retain in the output arrays.
+            ``None``  — keep all steps (default; backwards-compatible).
+            ``int N`` — keep every N-th step (0-based: N-1, 2N-1, …).
+            sequence  — keep these specific 0-based step indices.
+            The last step is always kept regardless of this setting.
+            Output arrays have shape ``(*spatial, n_save)`` or
+            ``(*spatial, n_save, profile_len)`` where ``n_save`` is the
+            number of retained steps.  ``result['_save_steps']`` holds the
+            corresponding 0-based step indices.
 
         Returns
         -------
         dict
-            Scalar keys → ndarray of shape ``(*spatial, steps)``.
+            Scalar keys → ndarray of shape ``(*spatial, n_save)``.
             Profile keys (theta, h, …) → ndarray of shape
-            ``(*spatial, steps, profile_len)``.
-            Special keys: ``'_steps'``, ``'_nlayers'``.
+            ``(*spatial, n_save, profile_len)``.
+            Special keys: ``'_steps'`` (total steps run), ``'_nlayers'``,
+            ``'_save_steps'`` (0-based indices of retained timesteps).
         """
         if not _HAS_CORE:
             raise RuntimeError(
@@ -253,17 +265,20 @@ class Model:
             firststep=firststep,
             nworkers=nworkers,
             chunk_size=chunk_size,
+            save_steps=save_steps,
         )
 
-        # Reshape results back to original spatial dimensions
+        # Reshape results back to original spatial dimensions.
+        # Output time axis is n_save (may differ from steps when save_steps is set).
+        n_save = len(result_flat['_save_steps'])
         result: dict = {}
         for key, arr in result_flat.items():
             if key.startswith("_"):
                 result[key] = arr
                 continue
-            if arr.ndim == 2:                      # (ncols, steps)
-                result[key] = arr.reshape(spatial + (steps,))
-            elif arr.ndim == 3:                    # (ncols, steps, profile_len)
+            if arr.ndim == 2:                      # (ncols, n_save)
+                result[key] = arr.reshape(spatial + (n_save,))
+            elif arr.ndim == 3:                    # (ncols, n_save, profile_len)
                 result[key] = arr.reshape(spatial + arr.shape[1:])
             else:
                 result[key] = arr

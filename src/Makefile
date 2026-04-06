@@ -16,15 +16,15 @@ prefix 		= /usr/local
 exec_prefix 	= ${prefix}
 BINDIR 		= ${exec_prefix}/bin
 LIBDIR 		= ${exec_prefix}/lib
-BUILDLIBDIR 	= ./../libLinux_x86_64
+BUILDLIBDIR 	= ./../libDarwin_arm64
 
-OBJDIR 		= ./objsLinux_x86_64
+OBJDIR 		= ./objsDarwin_arm64
 VAMPSLIBDIR	= ${prefix}/share/vamps
 mandir		= ${prefix}/share/man
 
 CFLAGS 	= -g -O2 -O3 -ffast-math -march=native -flto
 CC 	= gcc
-OS	= Linux_x86_64
+OS	= Darwin_arm64
 RM	= rm -f
 INC	= -I./include -I.
 LDFLAGS	=  -L${BUILDLIBDIR}
@@ -32,8 +32,8 @@ LDFLAGS	=  -L${BUILDLIBDIR}
 RANLIB	= ranlib
 INSTALL	= /usr/bin/install -c
 INSTALL_PROGRAM	= $(INSTALL) -c
-PYLIBS	= -L/home/jaap/miniforge3/lib -Wl,-rpath,/home/jaap/miniforge3/lib -L/home/jaap/miniforge3/lib/python3.12/config-3.12-x86_64-linux-gnu -L/home/jaap/miniforge3/lib -lpython3.12 -lpthread -ldl  -lutil -lm 
-LIBS	= -lmet -lts -ldef  -lnru -ltinfo $(PYLIBS) -L/home/jaap/miniforge3/lib -Wl,-rpath,/home/jaap/miniforge3/lib -L/home/jaap/miniforge3/lib/python3.12/config-3.12-x86_64-linux-gnu -L/home/jaap/miniforge3/lib -lpython3.12 -lpthread -ldl  -lutil -lm   -lm
+PYLIBS	= -L/Users/jaap/miniforge3/lib -Wl,-rpath,/Users/jaap/miniforge3/lib -L/Users/jaap/miniforge3/lib/python3.13/config-3.13-darwin -lpython3.13 -ldl -framework CoreFoundation
+LIBS	= -lmet -lts -ldef  -lnru -ltermcap $(PYLIBS) -L/Users/jaap/miniforge3/lib -Wl,-rpath,/Users/jaap/miniforge3/lib -L/Users/jaap/miniforge3/lib/python3.13/config-3.13-darwin -lpython3.13 -ldl -framework CoreFoundation  -lm
 
 SUBDIR = util main soil topsys 
 #THELIBS = ts.lib/libts.a deffile.lib/libdef.a\

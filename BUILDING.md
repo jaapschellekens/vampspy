@@ -39,13 +39,12 @@ cd src
 make all
 ```
 
-`make all` automatically builds the five static libraries first (into `libDarwin_arm64/` or the OS-appropriate sibling directory), then compiles and links the binaries:
+`make all` automatically builds the four static libraries first (into `libDarwin_arm64/` or the OS-appropriate sibling directory), then compiles and links the binaries:
 
 | Library | Source directory |
 |---|---|
 | `libdef.a` | `deffile.lib/` |
 | `libnru.a` | `nr_ut.lib/` |
-| `libmaq.a` | `maq.lib/` |
 | `libts.a` | `ts.lib/` |
 | `libmet.a` | `met.lib/` |
 

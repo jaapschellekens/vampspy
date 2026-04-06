@@ -41,14 +41,13 @@ export CFLAGS="-O3 -ffast-math"
 make all
 ```
 
-Builds five static libraries into `libDarwin_arm64/` (or the OS-appropriate
+Builds four static libraries into `libDarwin_arm64/` (or the OS-appropriate
 sibling directory):
 
 | Library | Source |
 |---------|--------|
 | `libdef.a` | `deffile.lib/` |
 | `libnru.a` | `nr_ut.lib/` |
-| `libmaq.a` | `maq.lib/` |
 | `libts.a` | `ts.lib/` |
 | `libmet.a` | `met.lib/` |
 
