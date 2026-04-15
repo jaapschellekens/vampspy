@@ -64,7 +64,7 @@ and [notebooks/](notebooks/) for worked examples including a 1000-cell grid run.
 
 Vamps is distributed with full source code.  Tested on:
 
-- macOS (arm64, x86_64) with Apple clang
+- macOS (arm64, x86_64) with gcc
 - Linux (x86_64, arm64) with gcc
 
 Source: <https://github.com/jaapschellekens/vampspy>
@@ -73,12 +73,10 @@ Source: <https://github.com/jaapschellekens/vampspy>
 
 ## System requirements
 
-- C compiler: gcc or clang (C99)
+- C compiler: gcc (others may work))
 - GNU make
 - Python 3.9 or later (with development headers; `python3-config` on PATH)
 - NumPy
-
-termcap or ncurses is required only for the interactive binary mode.
 
 ---
 

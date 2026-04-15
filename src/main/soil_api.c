@@ -314,3 +314,28 @@ vamps_get_state_current(vamps_state_t *out)
 {
     vamps_get_state(out, sw_last_step_i);
 }
+
+/* -------------------------------------------------------------------------
+ * vamps_patch_ts
+ *
+ * Overwrite one value in the named dataset at (startpos + step).
+ * Call this for each forcing variable before vamps_do_step() so that
+ * Python can supply forcing one timestep at a time without pre-loading
+ * the full series at soil_init() time.
+ *
+ * Returns  0 on success,
+ *         -1 if the dataset name is not found,
+ *         -2 if startpos + step is out of range.
+ * ---------------------------------------------------------------------- */
+int
+vamps_patch_ts(const char *name, int step, double value)
+{
+    int nr = getsetbyname((char *)name);
+    if (nr < 0)
+        return 0;  /* variable not used by this configuration — skip */
+    int i = startpos + step;
+    if (i < 0 || i >= data[nr].points)
+        return -2;
+    data[nr].xy[i].y = value;
+    return 0;
+}

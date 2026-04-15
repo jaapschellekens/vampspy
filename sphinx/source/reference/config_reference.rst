@@ -646,4 +646,115 @@ Output file sections
     Cumulative flux through the top [cm].
 
 ``qtop``
-    Flux through the top this timestep [cm].
+    Flux through the top this timestep [cm/d].
+
+``qbot``
+    Flux through the bottom boundary this timestep [cm/d].  Positive values
+    indicate downward flow out of the profile.
+
+``cumbot``
+    Cumulative flux through the bottom boundary [cm].
+
+``cqbotts``
+    Cumulative flux through the bottom within the current daily timestep [cm].
+    Reset to zero at the start of each timestep; useful for diagnosing
+    sub-daily bottom outflow.
+
+``runots``
+    Cumulative surface runoff within the current daily timestep [cm].
+    Reset to zero at the start of each timestep.
+
+``soilevaporation``
+    Actual (reduced) soil evaporation this timestep [cm/d].  May be less than
+    ``pot_soilevaporation`` when the near-surface layers are dry (``swredu=1``).
+
+``pot_soilevaporation``
+    Potential soil evaporation this timestep [cm/d], as supplied by the
+    top-system module.
+
+``prec``
+    Gross precipitation for this timestep [cm/d].
+
+``intc``
+    Canopy interception for this timestep [cm/d].  See also ``interception``.
+
+``ptra``
+    Potential transpiration for this timestep [cm/d], as supplied by the
+    top-system module.
+
+``rootextract``
+    Cumulative actual root water extraction since the start of the run [cm].
+    Derived from the integral of ``qrot`` over all sub-timesteps and layers.
+    Used in the mass balance equation.
+
+``rootts``
+    Actual root water extraction rate for this daily timestep [cm/d], obtained
+    by integrating ``qrot`` over all sub-timesteps within the day and dividing
+    by the timestep length.  This is the true extracted transpiration; compare
+    with ``ptra`` (potential) and ``cumtra`` (cumulative potential).
+
+``masbal``
+    Mass balance residual [cm] at the end of the timestep::
+
+        masbal = volini + cumbot − cumdra − cumtop − rootextract − volact
+
+    A non-zero value indicates a solver error.  Values smaller than ~0.01 cm
+    are generally acceptable.
+
+``volact``
+    Actual water volume in the entire soil profile [cm] at the end of the
+    timestep.
+
+``theta``
+    Array of volumetric water content per layer (length ``layers``).
+    Also written in the ``[initial]`` section for the initial state.
+
+``h``
+    Array of pressure heads per layer [cm] (length ``layers``).
+    Also written in the ``[initial]`` section.
+
+``k``
+    Array of unsaturated hydraulic conductivity per layer [cm/d]
+    (length ``layers``).  Also written in the ``[initial]`` section.
+
+``gwl``
+    Array of length 2 containing the groundwater levels [cm].
+
+``q``
+    Array of fluxes at each node boundary [cm/d] (length ``layers + 1``).
+    ``q[0]`` is the top boundary flux, ``q[layers]`` is the bottom boundary flux.
+
+``inq``
+    Array of cumulative inflow at each node boundary within the current
+    timestep [cm] (length ``layers + 1``).
+
+``qrot``
+    Array of root water extraction rates per layer [cm/d] (length ``layers``).
+    Each element is the total extraction from that layer in the current
+    sub-timestep, not per unit depth.  Summing over all layers gives the
+    instantaneous actual transpiration rate (after Feddes stress reduction).
+
+``howsat``
+    Array of relative saturation per layer (length ``layers``), defined as
+    ``1 − (theta_s − theta)``.  A value of 1 means the layer is at saturation.
+
+Drainage variables (only present when lateral drainage is active, ``dodrain > 0``)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+``cqdra``
+    Cumulative lateral drainage for the current timestep [cm].
+
+``cumdra``
+    Total cumulative lateral drainage since the start of the run [cm].
+
+``drainage``
+    Array of lateral drainage rates per layer [cm/d] (length ``layers``).
+
+Iteration diagnostics
+^^^^^^^^^^^^^^^^^^^^^
+
+``converror``
+    Number of convergence failures for this timestep.
+
+``itter``
+    Average number of matrix solver iterations per sub-timestep.

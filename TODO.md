@@ -2,16 +2,6 @@
 
 ## Near term
 
-- Move C solver globals into a per-column context struct (`vamps_col_t`) so
-  that multiple independent columns can run in the same process without
-  multiprocessing overhead.  This is the main blocker for a vectorised
-  Python loop over grid cells.
-
-- Investigate `vamps_do_step_direct` canopy divergence: determine whether
-  capturing `tstep_top` outputs and replaying via `soil_step_direct`
-  is sufficient for full canopy bypass, or whether `tstep_top` internal
-  state (canopy storage) also needs to be saved/restored.
-
 - Add `soil_init` / `soil_step` / `soil_state` to `Model.run_stepwise`
   docstring with a note about which state persists between steps.
 

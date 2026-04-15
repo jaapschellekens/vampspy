@@ -495,6 +495,30 @@ py_soil_state_current(PyObject *self, PyObject *args)
 }
 
 /* -------------------------------------------------------------------------
+ * vampspy._vampscore.soil_patch_ts(name, step, value)
+ *
+ * Overwrite data[id.X].xy[startpos+step].y for the named ts variable.
+ * Must be called after soil_init() and before soil_step(step) to supply
+ * per-step forcing without pre-loading the full series at init time.
+ * ---------------------------------------------------------------------- */
+static PyObject *
+py_soil_patch_ts(PyObject *self, PyObject *args)
+{
+    const char *name;
+    int         step;
+    double      value;
+    if (!PyArg_ParseTuple(args, "sid", &name, &step, &value)) return NULL;
+    int rc = vamps_patch_ts(name, step, value);
+    /* rc == 0: success or variable not used by this config (silently skip) */
+    if (rc == -2) {
+        PyErr_Format(PyExc_IndexError,
+                     "soil_patch_ts: step %d out of range for '%s'", step, name);
+        return NULL;
+    }
+    Py_RETURN_NONE;
+}
+
+/* -------------------------------------------------------------------------
  * Module definition
  * ---------------------------------------------------------------------- */
 static PyMethodDef vampscore_methods[] = {
@@ -525,6 +549,11 @@ static PyMethodDef vampscore_methods[] = {
      "soil_state_current() -> dict\n\n"
      "Return scalar state + per-layer profile arrays after the most recently\n"
      "completed soil_step_direct() call.  No step index needed.\n"},
+    {"soil_patch_ts", py_soil_patch_ts, METH_VARARGS,
+     "soil_patch_ts(name, step, value)\n\n"
+     "Overwrite one forcing value in the named ts dataset at (startpos+step).\n"
+     "Call for each forcing variable before soil_step(step) to supply\n"
+     "per-step forcing without pre-loading the full series at init time.\n"},
     {NULL, NULL, 0, NULL}
 };
 

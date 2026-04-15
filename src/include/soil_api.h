@@ -147,4 +147,15 @@ int  vamps_do_step_direct(double pre, double intc, double ptra, double peva, dou
  */
 void vamps_get_state_current(vamps_state_t *out);
 
+/*
+ * vamps_patch_ts(name, step, value)
+ *
+ * Overwrite data[id.X].xy[startpos+step].y for the named ts variable.
+ * Call before vamps_do_step() to supply per-step forcing without
+ * pre-loading the full series at init time.
+ *
+ * Returns 0 on success, -1 if name not found, -2 if step out of range.
+ */
+int vamps_patch_ts(const char *name, int step, double value);
+
 #endif /* SOIL_API_H */

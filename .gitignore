@@ -45,6 +45,9 @@ example1.out
 RCS/
 *,v
 
+# Sphinx build output
+sphinx/_build/
+
 # Editor temporaries
 *~
 .DS_Store
