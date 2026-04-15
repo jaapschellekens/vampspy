@@ -26,9 +26,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4.2.2
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5.6.0
         with:
           python-version: '3.12'
           cache: pip
@@ -41,7 +41,7 @@ jobs:
         run: pip install -r sphinx/requirements.txt
 
       - name: Run Doxygen
-        run: doxygen Doxyfile
+        run: mkdir -p sphinx/_build/doxygen && doxygen Doxyfile
 
       - name: Build HTML
         run: sphinx-build -b html sphinx/source sphinx/build/html
