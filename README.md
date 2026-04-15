@@ -17,6 +17,8 @@ binary).  Users can hook custom functions into a run via `[vamps] xtrapy`
 in the configuration file.  S-Lang, used in versions prior to 1.0, has been
 removed.
 
+Documentation:  https://jaapschellekens.github.io/vampspy/ 
+
 ---
 
 
