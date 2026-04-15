@@ -1,6 +1,6 @@
 # VAMPS — Vegetation-AtMosPhere-Soil water model
 
-**Version 1.0** — J. Schellekens &lt;jaap@ws-fitzcarraldo.nl&gt;
+**Version 1.0**
 
 VAMPS is a one-dimensional model for the flow of water through a forested
 or agricultural ecosystem.  The core is a Richards-equation solver for
