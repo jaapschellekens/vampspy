@@ -987,9 +987,13 @@ Cumulative interception
 .TP
 .B cqbot
 Cumulative flow through bottom of the profile, calculated from change in
-pore volume. This does 
+pore volume. This does
 .I not
 work if the profile is saturated!
+.TP
+.B cqbotts
+Cumulative flux through the bottom boundary within the current daily
+timestep [cm].  Reset to zero at the start of each timestep.
 .TP
 .B cumtop
 Cumulative flow through the top of the profile
@@ -1004,10 +1008,30 @@ Flow through the bottom of the profile
 Cumulative flow through bottom of the profile
 .TP
 .B rootextract
-Water extracted by roots (cumulative)
+Cumulative actual root water extraction since the start of the run [cm].
+Derived from the integral of
+.B qrot
+over all sub-timesteps and layers.  Used in the mass balance equation.
+.TP
+.B rootts
+Actual root water extraction rate for this daily timestep [cm/d], obtained
+by integrating
+.B qrot
+over all sub-timesteps within the day and dividing by the timestep length.
+This is the true extracted transpiration; compare with
+.B ptra
+(potential) and
+.B cumtra
+(cumulative potential).
 .TP
 .B soilevaporation
-Actual soilevaporation [cm]
+Actual (reduced) soil evaporation this timestep [cm/d].  May be less than
+.B pot_soilevaporation
+when near-surface layers are dry (swredu=1).
+.TP
+.B pot_soilevaporation
+Potential soil evaporation this timestep [cm/d], as supplied by the
+top-system module.
 .TP
 .B precipitation
 Precipitation [cm]
@@ -1033,6 +1057,9 @@ Unsaturated conductivity for each layer in the profile [cm/d]
 .B h
 (suction)head for each layer in the profile [cm]
 .TP
+.B gwl
+Array of length 2 containing the groundwater levels [cm].
+.TP
 .B q
 flux of water through each layer in the profile for the last dt of
 this timestep
@@ -1041,7 +1068,29 @@ this timestep
 Total flux of water through each layer of the profile for this timestep
 .TP
 .B qrot
-Water extracted by root in this timestep for each layer of the profile
+Root water extraction rate per layer [cm/d] (length
+.BR layers ).
+Each element is the total extraction from that layer in the current
+sub-timestep (not per unit depth).  Summing over all layers gives the
+instantaneous actual transpiration rate after Feddes stress reduction.
+.TP
+.B howsat
+Relative saturation per layer (length
+.BR layers ),
+defined as 1 \- (theta_s \- theta).  A value of 1 indicates saturation.
+.TP
+.B cqdra
+Cumulative lateral drainage for the current timestep [cm].
+Only present when lateral drainage is active (dodrain > 0).
+.TP
+.B cumdra
+Total cumulative lateral drainage since the start of the run [cm].
+Only present when lateral drainage is active.
+.TP
+.B drainage
+Lateral drainage rate per layer [cm/d] (length
+.BR layers ).
+Only present when lateral drainage is active.
 .TP
 .B converror
 If set to 1 no convergence was reached during this timestep

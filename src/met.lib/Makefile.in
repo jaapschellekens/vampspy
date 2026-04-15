@@ -6,10 +6,8 @@ METOBJ =  e0.o eaes.o earo.o gamma.o lambda.o makkink.o\
 CC	= @CC@
 CFLAGS	= @CFLAGS@
 
-SLDOC = vamps -I sldoc
 AR = ar
 RANLIB = @RANLIB@
-SLINC 	= ../../../slang/src
 INC	= -I@top_srcdir@/include -I@top_srcdir@
 DEFS	= @DEFS@
 RM 	= rm -f
@@ -55,17 +53,6 @@ vslope.o: vslope.c
 	${CC} ${CFLAGS} $(INC) -c ${DEFS} vslope.c
 	
 
-doc: 0met.tex
-0met.tex: *.c
-	${SLDOC} -KC -c *.c > doc
-	${SLDOC} -i doc | sort > sldoc.idx
-	${SLDOC} doc > 0met.txt
-	echo "\\documentclass{article}\\usepackage{makeidx}\\makeindex\\begin{document}\\printindex" > 0met.tex
-	echo "\\section{libmet.a}" >> 0met.tex
-	${SLDOC} -l doc >> 0met.tex
-	echo "\\end{document}" >> 0met.tex
-	${SLDOC} -t doc > 0met.trf
-	rm doc sldoc.idx
 
 clean:
 	${RM} ${TRASH} 0met.???

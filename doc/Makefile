@@ -19,7 +19,9 @@
 VERSION = 
 DVIPS = dvips
 INSTALL = /usr/bin/install -c
-MANDIR =  /usr/local/man
+# Modern systems install man pages under share/man; fall back to /usr/local/man
+# if MANDIR is overridden on the make command line.
+MANDIR = /usr/local/share/man
 MKIDX = makeindex
 LATEX = pdflatex
 ROFF = nroff -man
@@ -27,44 +29,55 @@ BIBTEX = bibtex
 BIB = /home/schjpriv/bibtex/puerto-rico  /home/schjpriv/bibtex/artall.bib /home/shjpriv/bibtex/watm
 
 def:
-	@echo Targets are:
-	@echo man-install -- install manual pages in ${MANDIR}
-	@echo doc -- make documentation from LaTeX source
-	@echo clean -- clean
+	@echo "Targets:"
+	@echo "  man-install  -- install man pages into \$\${MANDIR} (default: ${MANDIR})"
+	@echo "  catman       -- format man pages to catman directory"
+	@echo "  doc          -- build LaTeX documentation (requires pdflatex)"
+	@echo "  clean        -- remove generated files"
 
-man/vamps.1: man/vamps.1.top man/vamps.1.tail
-	(cd ../share; rm sldoc.idx; cat *.sl intrin.doc > man/vampsdoc.tmp)
-	(cd ../share; vamps -I sldoc.slx -i man/vampsdoc.tmp | sort > sldoc.idx )
-	(cd ../share; vamps -I sldoc.slx -t man/vampsdoc.tmp ) > man/vamps.1.int
-	(cd ../share; rm man/vampsdoc.tmp sldoc.idx)
-	cat man/vamps.1.top man/vamps.1.int man/vamps.1.tail > man/vamps.1
+# ---------------------------------------------------------------------------
+# man/vamps.1 is kept as a pre-built file.  The old generation rule (which
+# depended on the S-Lang sldoc system) is preserved below as a comment for
+# reference but is no longer used.
+#
+# Old rule (requires S-Lang / sldoc — no longer available):
+#   man/vamps.1: man/vamps.1.top man/vamps.1.tail
+#       (cd ../share; rm sldoc.idx; cat *.sl intrin.doc > man/vampsdoc.tmp)
+#       (cd ../share; vamps -I sldoc.slx -i man/vampsdoc.tmp | sort > sldoc.idx)
+#       (cd ../share; vamps -I sldoc.slx -t man/vampsdoc.tmp) > man/vamps.1.int
+#       (cd ../share; rm man/vampsdoc.tmp sldoc.idx)
+#       cat man/vamps.1.top man/vamps.1.int man/vamps.1.tail > man/vamps.1
+# ---------------------------------------------------------------------------
 
 bibfile:
 	makebib ${BIB} `cat *.aux | grep \\citation`
 
-intrin.tex: ../share/intrin.doc
-	(cd ../share; vamps -I sldoc.slx -l intrin.doc) > intrin.tex
+# intrin.tex / intrinsl.tex also depended on S-Lang; pre-built copies remain.
+# intrin.tex: ../share/intrin.doc
+#       (cd ../share; vamps -I sldoc.slx -l intrin.doc) > intrin.tex
+# intrinsl.tex: ../share/*.sl
+#       (cd ../share; vamps -I sldoc.slx -l *.sl) > intrinsl.tex
 
-intrinsl.tex: ../share/*.sl
-	(cd ../share; vamps -I sldoc.slx -l *.sl) > intrinsl.tex
-
-man-install: man/vamps.1
-	sed "s/VERSION/`cat ../0version`/g" < man/vamps.1 > ${MANDIR}/man1/vamps.1
-	sed "s/VERSION/`cat ../0version`/g" < man/vsel.1 > ${MANDIR}/man1/vsel.1
-	sed "s/VERSION/`cat ../0version`/g" <man/getstr.1 > ${MANDIR}/man1/getstr.1
-	sed "s/VERSION/`cat ../0version`/g" < man/issec.1 > ${MANDIR}/man1/issec.1
-	sed "s/VERSION/`cat ../0version`/g" < man/vangenu.1 > ${MANDIR}/man1/vangenu.1
-	sed "s/VERSION/`cat ../0version`/g" < man/sldoc.1 > ${MANDIR}/man1/sldoc.1
-	sed "s/VERSION/`cat ../0version`/g" < man/vamps.5 > ${MANDIR}/man5/vamps.5
+# Install pre-built man pages.  VERSION is substituted from the Makefile
+# variable set by configure; no external 0version file is needed.
+man-install:
+	mkdir -p ${MANDIR}/man1 ${MANDIR}/man5
+	sed "s/VERSION/${VERSION}/g" < man/vamps.1   > ${MANDIR}/man1/vamps.1
+	sed "s/VERSION/${VERSION}/g" < man/vsel.1    > ${MANDIR}/man1/vsel.1
+	sed "s/VERSION/${VERSION}/g" < man/getstr.1  > ${MANDIR}/man1/getstr.1
+	sed "s/VERSION/${VERSION}/g" < man/issec.1   > ${MANDIR}/man1/issec.1
+	sed "s/VERSION/${VERSION}/g" < man/vangenu.1 > ${MANDIR}/man1/vangenu.1
+	sed "s/VERSION/${VERSION}/g" < man/sldoc.1   > ${MANDIR}/man1/sldoc.1
+	sed "s/VERSION/${VERSION}/g" < man/vamps.5   > ${MANDIR}/man5/vamps.5
 
 catman: dummy
-	sed "s/VERSION/`cat ../0version`/g" < man/vamps.1 | ${ROFF} > ./catman/vamps.p1
-	sed "s/VERSION/`cat ../0version`/g" < man/vsel.1 | ${ROFF} > ./catman/vsel.p1
-	sed "s/VERSION/`cat ../0version`/g" < man/getstr.1 | ${ROFF} > ./catman/getstr.p1
-	sed "s/VERSION/`cat ../0version`/g" < man/issec.1 | ${ROFF} > ./catman/issec.p1
-	sed "s/VERSION/`cat ../0version`/g" < man/vangenu.1 | ${ROFF} > catman/vangenu.p1
-	sed "s/VERSION/`cat ../0version`/g" < man/sldoc.1 | ${ROFF} > catman/sldoc.p1
-	sed "s/VERSION/`cat ../0version`/g" < man/vamps.5 | ${ROFF} > catman/vamps.p5
+	sed "s/VERSION/${VERSION}/g" < man/vamps.1   | ${ROFF} > ./catman/vamps.p1
+	sed "s/VERSION/${VERSION}/g" < man/vsel.1    | ${ROFF} > ./catman/vsel.p1
+	sed "s/VERSION/${VERSION}/g" < man/getstr.1  | ${ROFF} > ./catman/getstr.p1
+	sed "s/VERSION/${VERSION}/g" < man/issec.1   | ${ROFF} > ./catman/issec.p1
+	sed "s/VERSION/${VERSION}/g" < man/vangenu.1 | ${ROFF} > catman/vangenu.p1
+	sed "s/VERSION/${VERSION}/g" < man/sldoc.1   | ${ROFF} > catman/sldoc.p1
+	sed "s/VERSION/${VERSION}/g" < man/vamps.5   | ${ROFF} > catman/vamps.p5
 
 doc: intrin.tex intrinsl.tex
 	${LATEX} vamps
