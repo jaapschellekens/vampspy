@@ -5,4 +5,7 @@ vampspy — Python Package
    :maxdepth: 2
 
    api
+   bmi
+   cextension
+   internals
    architecture

@@ -1,0 +1,24 @@
+PROJECT_NAME           = "VAMPS"
+PROJECT_BRIEF          = "Variable Adaptable Model for Potential and actual Soil water"
+OUTPUT_DIRECTORY       = sphinx/_build/doxygen
+CREATE_SUBDIRS         = NO
+JAVADOC_AUTOBRIEF      = NO
+OPTIMIZE_OUTPUT_FOR_C  = YES
+EXTRACT_ALL            = YES
+EXTRACT_STATIC         = YES
+
+INPUT                  = src
+RECURSIVE              = YES
+FILE_PATTERNS          = *.c *.h
+
+INPUT_FILTER           = "python3 sphinx/vamps_filter.py"
+
+GENERATE_HTML          = NO
+GENERATE_LATEX         = NO
+GENERATE_XML           = YES
+XML_OUTPUT             = xml
+XML_PROGRAMLISTING     = NO
+
+QUIET                  = YES
+WARNINGS               = YES
+WARN_IF_UNDOCUMENTED   = NO

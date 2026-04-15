@@ -19,7 +19,11 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinxcontrib.mermaid',
     'sphinxcontrib.bibtex',
+    'breathe',
 ]
+
+breathe_projects = {'VAMPS': '../_build/doxygen/xml'}
+breathe_default_project = 'VAMPS'
 
 bibtex_bibfiles = ['refs.bib']
 bibtex_default_style = 'unsrt'

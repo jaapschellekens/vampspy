@@ -3,3 +3,4 @@ sphinx-rtd-theme
 myst-parser>=2.0
 sphinxcontrib-mermaid
 sphinxcontrib-bibtex
+breathe

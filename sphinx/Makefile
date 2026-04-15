@@ -3,8 +3,9 @@
 SPHINXBUILD   = sphinx-build
 SOURCEDIR     = source
 BUILDDIR      = build
+DOXYFILE      = ../Doxyfile
 
-.PHONY: help clean html latexpdf
+.PHONY: help clean doxygen html latexpdf
 
 help:
 	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
@@ -12,7 +13,10 @@ help:
 clean:
 	rm -rf $(BUILDDIR)
 
-html:
+doxygen:
+	cd .. && doxygen $(notdir $(DOXYFILE))
+
+html: doxygen
 	@$(SPHINXBUILD) -M html "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
 latexpdf:

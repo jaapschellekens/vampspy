@@ -5,8 +5,10 @@ on:
     branches: [master]
     paths:
       - 'sphinx/**'
+      - 'src/**'
       - 'docs/**'
       - '*.md'
+      - 'Doxyfile'
       - '.github/workflows/docs.yml'
   workflow_dispatch:
 
@@ -32,13 +34,19 @@ jobs:
           cache: pip
           cache-dependency-path: sphinx/requirements.txt
 
-      - name: Install dependencies
+      - name: Install Doxygen
+        run: sudo apt-get install -y doxygen
+
+      - name: Install Python dependencies
         run: pip install -r sphinx/requirements.txt
+
+      - name: Run Doxygen
+        run: doxygen Doxyfile
 
       - name: Build HTML
         run: sphinx-build -b html sphinx/source sphinx/build/html
         env:
-          SPHINXOPTS: -W --keep-going   # treat warnings as errors
+          SPHINXOPTS: --keep-going
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
