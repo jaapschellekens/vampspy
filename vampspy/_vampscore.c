@@ -519,6 +519,27 @@ py_soil_patch_ts(PyObject *self, PyObject *args)
 }
 
 /* -------------------------------------------------------------------------
+ * vampspy._vampscore.soil_set_theta(layer, value)
+ *
+ * Set theta[layer] = value and recompute h[layer] from the retention curve.
+ * Used for Newtonian nudging / data assimilation after each soil_step().
+ * ---------------------------------------------------------------------- */
+static PyObject *
+py_soil_set_theta(PyObject *self, PyObject *args)
+{
+    int    layer;
+    double value;
+    if (!PyArg_ParseTuple(args, "id", &layer, &value)) return NULL;
+    int rc = vamps_set_theta_layer(layer, value);
+    if (rc != 0) {
+        PyErr_Format(PyExc_IndexError,
+                     "soil_set_theta: layer %d out of range", layer);
+        return NULL;
+    }
+    Py_RETURN_NONE;
+}
+
+/* -------------------------------------------------------------------------
  * Module definition
  * ---------------------------------------------------------------------- */
 static PyMethodDef vampscore_methods[] = {
@@ -554,6 +575,10 @@ static PyMethodDef vampscore_methods[] = {
      "Overwrite one forcing value in the named ts dataset at (startpos+step).\n"
      "Call for each forcing variable before soil_step(step) to supply\n"
      "per-step forcing without pre-loading the full series at init time.\n"},
+    {"soil_set_theta", py_soil_set_theta, METH_VARARGS,
+     "soil_set_theta(layer, value)\n\n"
+     "Set theta[layer] = value and recompute h[layer] from the soil retention\n"
+     "curve.  Used for Newtonian nudging / data assimilation after soil_step().\n"},
     {NULL, NULL, 0, NULL}
 };
 

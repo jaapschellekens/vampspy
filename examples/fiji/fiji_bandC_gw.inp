@@ -1,0 +1,90 @@
+[vamps]
+iniinmem=1
+
+[run]
+outputfile = fiji_bandC_gw.out
+
+[determine]
+soilmoisture = 1
+
+[top]
+system = 4
+
+[time]
+steps = 180
+
+[ts]
+pre = precip_tiled.prn
+ptr = ptr.prn
+spe = spe.prn
+inr = inr.prn
+hea = hea_gw.prn
+
+[roots]
+swsink = 1
+swhypr = 0
+swupfu = 0
+depth  = 120.0
+hlim1  = -5.0
+hlim2u = -50.0
+hlim2l = -50.0
+hlim3h = -800.0
+hlim3l = -1000.0
+hlim3  = -1800.0
+hlim4  = -12000.0
+
+[soil]
+dtmin   = 0.1E-3
+dtmax   = 0.5E-2
+mbck    = 0
+swredu  = 1
+smooth  = 5
+cofred  = 0.35
+outdir  = output
+pondmx  = 0.0
+verbose = 1
+layers  = 77
+bottom  = 4
+initprof = 2
+gw_initial = 100.00
+mktable  = 1
+dumptables = 1
+
+[layer_0]
+description  = Tulasewa top layer
+thickness    = 2.000000
+soilsection  = st_0
+
+[st_0]
+method         = 6
+thetas         = 0.6
+theta_residual = 0.08
+lambda         = 0.098
+hb             = -16.4
+ksat           = 1800
+
+[layer_14]
+description  = Tulasewa 30-75 cm layer
+thickness    = 2.000000
+soilsection  = st_1
+
+[st_1]
+method         = 6
+thetas         = 0.64
+theta_residual = 0.08
+lambda         = 0.094
+hb             = -23.8
+ksat           = 380.0
+
+[layer_36]
+description  = Tulsewa deep layer > 75 cm
+thickness    = 2.000000
+soilsection  = st_2
+
+[st_2]
+method         = 6
+thetas         = 0.6
+theta_residual = 0.08
+lambda         = 0.094
+hb             = -23.8
+ksat           = 3.0

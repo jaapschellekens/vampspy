@@ -42,6 +42,13 @@ extern void    reset_timestep(void);
 extern double pond;
 extern int    spnr;
 
+/* For vamps_set_theta_layer */
+#include "soils.h"
+extern double *theta;
+extern double *h;
+extern double *depth;
+extern node_t *node;
+
 /* -------------------------------------------------------------------------
  * Module-level flags.
  * sw_first_call : tracks whether step-0 time initialisation has been done.
@@ -326,6 +333,22 @@ vamps_get_state_current(vamps_state_t *out)
  * Returns  0 on success,
  *         -1 if the dataset name is not found,
  *         -2 if startpos + step is out of range.
+ * ---------------------------------------------------------------------- */
+/* -------------------------------------------------------------------------
+ * vamps_set_theta_layer
+ * ---------------------------------------------------------------------- */
+int
+vamps_set_theta_layer(int layer, double value)
+{
+    if (layer < 0 || layer >= layers)
+        return -1;
+    theta[layer] = value;
+    h[layer] = node[layer].sp->t2h(node[layer].soiltype, value, depth[layer], layer);
+    return 0;
+}
+
+/* -------------------------------------------------------------------------
+ * vamps_patch_ts
  * ---------------------------------------------------------------------- */
 int
 vamps_patch_ts(const char *name, int step, double value)

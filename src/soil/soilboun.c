@@ -180,7 +180,7 @@ bocobot (int daynr)
 	}
 
 	/* qbot up and larger than qsat, print error and continue */
-	if (qbot > 0.0 && qbot > qsat && lbc != 0){
+	if (verbose && qbot > 0.0 && qbot > qsat && lbc != 0){
 		Perror (progname, 0,0, RCSid, "Bottom bound flux large", "");
 	}
 }

@@ -17,7 +17,7 @@ soilmoisture = 1
 system = 4
 
 [time]
-steps = 365
+steps = 180
 
 [ts]
 pre = precip_tiled.prn

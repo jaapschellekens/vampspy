@@ -158,4 +158,13 @@ void vamps_get_state_current(vamps_state_t *out);
  */
 int vamps_patch_ts(const char *name, int step, double value);
 
+/*
+ * vamps_set_theta_layer(layer, value)
+ *
+ * Overwrite theta[layer] with value and recompute h[layer] from the
+ * soil retention curve.  Used for data assimilation / Newtonian nudging.
+ * layer must be in [0, nlayers).  Returns 0 on success, -1 on error.
+ */
+int vamps_set_theta_layer(int layer, double value);
+
 #endif /* SOIL_API_H */
